@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Generador de escenas</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Barlow+Semi+Condensed:wght@500;600;700&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --fondo:   #171614;
+    --panel:   #201F1C;
+    --borde:   #3A362F;
+    --texto:   #F2EFE9;
+    --tenue:   #8C867C;
+    --amarillo:#FFD400;
+    --verde:   #16A06A;
+    --rojo:    #E03A2F;
+    --mesa:    #0F0E0D;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body { height: 100%; }
+
+  body {
+    margin: 0;
+    background: var(--fondo);
+    color: var(--texto);
+    font-family: 'Barlow Semi Condensed', system-ui, sans-serif;
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  #root { min-height: 100%; display: flex; }
+
+  .app {
+    flex: 1;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    min-height: 100vh;
+    gap: 1px;
+    background: var(--borde);
+  }
+
+  /* ---------- cabecera ---------- */
+
+  .cabecera {
+    background: var(--panel);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 20px;
+    flex-wrap: wrap;
+  }
+
+  .marca {
+    font-weight: 700;
+    font-size: 19px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    margin-right: auto;
+  }
+
+  .campo { display: flex; align-items: center; gap: 8px; }
+
+  .campo > label {
+    color: var(--tenue);
+    font-size: 13px;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+
+  input[type="text"], input[type="password"], input[type="number"],
+  select, textarea {
+    background: var(--fondo);
+    color: var(--texto);
+    border: 1px solid var(--borde);
+    border-radius: 9px;
+    padding: 9px 11px;
+    font-family: inherit;
+    font-size: 15px;
+    outline: none;
+  }
+
+  input:focus, select:focus, textarea:focus { border-color: var(--tenue); }
+
+  input[type="number"] { width: 78px; }
+  .llave { width: 190px; font-family: 'Courier Prime', monospace; font-size: 13px; }
+
+  textarea { resize: vertical; line-height: 1.35; }
+
+  /* ---------- cuerpo ---------- */
+
+  .cuerpo {
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    gap: 1px;
+    background: var(--borde);
+    min-height: 0;
+  }
+
+  .lateral {
+    background: var(--panel);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    overflow-y: auto;
+  }
+
+  .rotulo {
+    color: var(--tenue);
+    font-size: 13px;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+
+  .grupo { display: flex; flex-direction: column; gap: 8px; }
+
+  .separador { height: 1px; background: var(--borde); }
+
+  button {
+    font-family: inherit;
+    font-weight: 700;
+    letter-spacing: 1.6px;
+    text-transform: uppercase;
+    font-size: 15px;
+    border: 0;
+    border-radius: 9px;
+    padding: 13px 16px;
+    cursor: pointer;
+  }
+
+  button:disabled { opacity: 0.45; cursor: default; }
+
+  .primario { background: var(--amarillo); color: #14110F; }
+  .ajuste   { background: var(--verde);    color: #ffffff; }
+  .plano {
+    background: transparent;
+    color: var(--tenue);
+    border: 1px solid var(--borde);
+    padding: 10px 14px;
+  }
+  .plano:hover:not(:disabled) { color: var(--texto); }
+
+  /* ---------- escenario ---------- */
+
+  .escenario {
+    background: var(--mesa);
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0;
+  }
+
+  .motor-mesa { width: 100%; max-width: 1180px; margin: 0 auto; }
+
+  .motor-marco {
+    box-shadow: 0 26px 60px rgba(0, 0, 0, 0.72);
+  }
+
+  .motor-controles {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding-top: 14px;
+  }
+
+  .motor-play {
+    background: var(--panel);
+    color: var(--texto);
+    border: 1px solid var(--borde);
+    border-radius: 9px;
+    width: 52px;
+    padding: 11px 0;
+    font-size: 14px;
+    letter-spacing: 0;
+  }
+
+  .motor-scrub {
+    flex: 1;
+    appearance: none;
+    -webkit-appearance: none;
+    height: 6px;
+    border-radius: 9px;
+    background: var(--borde);
+    outline: none;
+  }
+  .motor-scrub::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--amarillo);
+    cursor: grab;
+    border: 0;
+  }
+  .motor-scrub::-moz-range-thumb {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--amarillo);
+    cursor: grab;
+    border: 0;
+  }
+
+  .motor-tiempo {
+    font-family: 'Courier Prime', monospace;
+    font-size: 14px;
+    color: var(--tenue);
+    min-width: 116px;
+    text-align: right;
+  }
+
+  /* ---------- estados ---------- */
+
+  .vacio {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #8C867C;
+    font-size: 26px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 600;
+    pointer-events: none;
+  }
+
+  .banda {
+    position: absolute;
+    left: 0; right: 0; top: 0;
+    background: var(--rojo);
+    color: #fff;
+    font-family: 'Courier Prime', monospace;
+    font-size: 13px;
+    line-height: 1.4;
+    padding: 10px 14px;
+    max-height: 40%;
+    overflow: auto;
+    z-index: 5;
+  }
+
+  /* ---------- pie: codigo ---------- */
+
+  .pie { background: var(--panel); }
+
+  .pie-barra {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+  }
+
+  .pie-barra .rotulo { margin-right: auto; }
+
+  .codigo {
+    width: 100%;
+    min-height: 260px;
+    border: 0;
+    border-top: 1px solid var(--borde);
+    border-radius: 0;
+    background: var(--fondo);
+    font-family: 'Courier Prime', monospace;
+    font-size: 13px;
+    padding: 16px 20px;
+  }
+
+  /* aviso de file:// — Babel trae los .jsx por XHR y el navegador
+     bloquea esas peticiones cuando la pagina se abre con doble clic */
+  .aviso {
+    margin: auto;
+    max-width: 620px;
+    padding: 28px;
+    background: var(--panel);
+    border: 1px solid var(--borde);
+    border-radius: 9px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    line-height: 1.5;
+  }
+  .aviso h1 {
+    margin: 0;
+    font-size: 19px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+  }
+  .aviso p { margin: 0; color: var(--tenue); }
+  .aviso code {
+    display: block;
+    background: var(--fondo);
+    border: 1px solid var(--borde);
+    border-radius: 9px;
+    padding: 12px 14px;
+    font-family: 'Courier Prime', monospace;
+    font-size: 14px;
+    color: var(--texto);
+  }
+
+  @media (max-width: 900px) {
+    .cuerpo { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <script src="motor.js"></script>
+  <script type="text/babel" src="primitivas.jsx"></script>
+  <script type="text/babel" src="app.jsx"></script>
+
+  <script>
+    // Los .jsx se cargan con type="text/babel", y Babel los pide por XHR.
+    // Bajo file:// el navegador bloquea esas peticiones, asi que la app
+    // nunca se monta. En vez de dejar la pantalla en negro, explicamos que hacer.
+    setTimeout(function () {
+      var root = document.getElementById('root');
+      if (root && root.children.length === 0) {
+        var esArchivo = location.protocol === 'file:';
+        root.innerHTML =
+          '<div class="aviso">' +
+            '<h1>Hay que servir la carpeta</h1>' +
+            '<p>' + (esArchivo
+              ? 'Abriste el archivo con doble clic. El navegador bloquea la carga de ' +
+                'primitivas.jsx y app.jsx cuando la direccion empieza con file://.'
+              : 'La app no llego a montarse. Revisa que motor.js, primitivas.jsx y ' +
+                'app.jsx esten junto a index.html, y que haya conexion para React y Babel.') +
+            '</p>' +
+            '<p>Abri una terminal en esta carpeta y corre una de estas:</p>' +
+            '<code>npx --yes http-server -p 8080</code>' +
+            '<code>python3 -m http.server 8080</code>' +
+            '<p>Despues entra a <b>http://localhost:8080</b></p>' +
+          '</div>';
+      }
+    }, 2500);
+  </script>
+</body>
+</html>

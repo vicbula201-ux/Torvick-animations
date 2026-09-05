@@ -1,0 +1,120 @@
+<meta charset="utf-8">
+<title>Prueba de piezas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Barlow+Semi+Condensed:wght@500;600;700&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  body { margin:0; background:#171614; color:#F2EFE9;
+         font-family:'Barlow Semi Condensed',sans-serif; }
+  h2 { padding:24px 24px 0; font-size:20px; letter-spacing:2px; text-transform:uppercase; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+          gap:18px; padding:24px; }
+  .celda { background:#fff; border:1px solid #3A362F; border-radius:9px;
+           display:flex; flex-direction:column; align-items:center;
+           justify-content:center; gap:8px; padding:14px; min-height:250px;
+           position:relative; overflow:hidden; }
+  .nombre { font-size:15px; font-weight:700; letter-spacing:1.5px;
+            text-transform:uppercase; color:#14110F; }
+  .motor-mesa { padding:24px; }
+  .motor-marco { border:1px solid #3A362F; }
+  .motor-controles { display:flex; align-items:center; gap:12px; padding-top:10px; }
+  .motor-scrub { flex:1; }
+  .motor-tiempo { font-family:'Courier Prime',monospace; font-size:14px; }
+  .motor-play { background:#FFD400; border:0; border-radius:9px; padding:8px 14px;
+                font-weight:700; cursor:pointer; }
+</style>
+<div id="root"></div>
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="motor.js"></script>
+<script type="text/babel" src="primitivas.jsx"></script>
+<script type="text/babel">
+const { useState, useEffect } = React;
+
+function Celda({ nombre, children }) {
+  return <div className="celda">{children}<div className="nombre">{nombre}</div></div>;
+}
+
+// reloj propio para las piezas que respiran en la grilla
+function useT() {
+  const [T, setT] = useState(0);
+  useEffect(() => {
+    let raf, t0 = performance.now();
+    const step = (n) => { setT((n - t0) / 1000); raf = requestAnimationFrame(step); };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, []);
+  return T;
+}
+
+function CuadradoDePrueba() {
+  const { T, authoredTotal } = useComposition();
+  const x = animate({ from: 120, to: 1600, start: 0, end: authoredTotal,
+                      ease: Easing.easeInOutCubic })(T);
+  const y = 440 + M.life(T, 2, 90);
+  return <div style={{ position:'absolute', left:x, top:y, width:200, height:200,
+                       background:'#14110F', borderRadius:12 }} />;
+}
+
+function App() {
+  const T = useT();
+  return (
+    <div>
+      <h2>Hito 1 — motor: el cuadrado cruza el lienzo en loop</h2>
+      <Stage scenes={[{ name:'prueba', dur:4 }]}>
+        <CuadradoDePrueba />
+      </Stage>
+      <h2>Hito 3 — las 21 piezas</h2>
+      <div className="grid">
+        <Celda nombre="Cerebro on=0"><P.Cerebro s={0.34} on={0} T={T} /></Celda>
+        <Celda nombre="Cerebro on=0.5"><P.Cerebro s={0.34} on={0.5} T={T} /></Celda>
+        <Celda nombre="Cerebro on=1"><P.Cerebro s={0.34} on={1} T={T} /></Celda>
+        <Celda nombre="Cerebro shortcut"><P.Cerebro s={0.34} on={0.15} T={T} shortcut /></Celda>
+        <Celda nombre="Cerebro mirror"><P.Cerebro s={0.34} on={1} T={T} mirror /></Celda>
+        <Celda nombre="Figura"><P.Figura s={0.5} /></Celda>
+        <Celda nombre="Figura slump=1"><P.Figura s={0.5} slump={1} /></Celda>
+        <Celda nombre="Figura posture=up"><P.Figura s={0.5} posture="up" /></Celda>
+        <Celda nombre="Escritorio"><P.Escritorio s={0.4} /></Celda>
+        <Celda nombre="Corazon"><P.Corazon s={1.4} beat={1 + 0.12 * Math.sin(T * 6)} /></Celda>
+        <Celda nombre="Pesa"><P.Pesa s={0.5} tilt={M.life(T, 3, 8)} /></Celda>
+        <Celda nombre="Basurita scroll"><P.Basurita kind="scroll" s={1.2} /></Celda>
+        <Celda nombre="Basurita like"><P.Basurita kind="like" s={1.2} /></Celda>
+        <Celda nombre="Basurita bell"><P.Basurita kind="bell" s={1.2} /></Celda>
+        <Celda nombre="Basurita fast"><P.Basurita kind="fast" s={1.2} /></Celda>
+        <Celda nombre="Rotulo right"><P.Rotulo text="no es magia" dir="right" s={0.42} /></Celda>
+        <Celda nombre="Rotulo left"><P.Rotulo text="asi si" dir="left" s={0.42} /></Celda>
+        <Celda nombre="Nube"><P.Nube s={0.34}><P.Tacha s={0.4} /></P.Nube></Celda>
+        <Celda nombre="Parlante"><P.Parlante s={0.7} wob={M.life(T, 2.4, 5)} /></Celda>
+        <Celda nombre="Tacha"><P.Tacha s={0.7} /></Celda>
+        <Celda nombre="Visto p=1"><P.Visto s={0.7} p={1} /></Celda>
+        <Celda nombre="Visto p=0.5"><P.Visto s={0.7} p={0.5} /></Celda>
+        <Celda nombre="Telefono"><P.Telefono s={0.32}><P.Caballo s={0.6} /></P.Telefono></Celda>
+        <Celda nombre="Caballo"><P.Caballo s={0.8} /></Celda>
+        <Celda nombre="Gallina"><P.Gallina s={0.8} /></Celda>
+        <Celda nombre="Risa"><P.Risa s={0.8} /></Celda>
+        <Celda nombre="Flecha right"><P.Flecha s={0.6} /></Celda>
+        <Celda nombre="Flecha left"><P.Flecha s={0.6} dir="left" color={P.C.RED} /></Celda>
+        <Celda nombre="Flecha down"><P.Flecha s={0.6} dir="down" color={P.C.GRN} /></Celda>
+        <Celda nombre="Medidor p=0.9"><P.Medidor s={0.6} p={0.9} /></Celda>
+        <Celda nombre="Medidor p=0.4"><P.Medidor s={0.6} p={0.4} /></Celda>
+        <Celda nombre="Medidor p=0.1"><P.Medidor s={0.6} p={0.1} shake={M.vibra(T, 44, 4)} /></Celda>
+        <Celda nombre="Meta"><P.Meta s={0.6} float={M.life(T, 3, 10)} /></Celda>
+        <Celda nombre="Meta dim"><P.Meta s={0.6} dim /></Celda>
+        <Celda nombre="Reloj"><P.Reloj s={0.7} T={T} /></Celda>
+        <Celda nombre="Bombillo on=0"><P.Bombillo s={0.7} on={0} /></Celda>
+        <Celda nombre="Bombillo on=1"><P.Bombillo s={0.7} on={1} /></Celda>
+        <Celda nombre="Trazo (p=0.6)">
+          <div style={{ position:'relative', width:230, height:130, overflow:'hidden' }}>
+            <div style={{ position:'absolute', transform:'scale(0.12)',
+                          transformOrigin:'0 0', width:1920, height:1080 }}>
+              <P.Trazo p={0.6} x0={100} x1={1800} y={540} />
+            </div>
+          </div>
+        </Celda>
+      </div>
+    </div>
+  );
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
