@@ -1,21 +1,11 @@
 # Generador de escenas animadas — estilo pizarra
 
-App web de archivos sueltos. Sin build, sin bundler, sin dependencias más
-allá de React UMD y Babel standalone desde CDN.
+App web de archivos sueltos que genera escenas animadas para video a partir
+de una frase de guion. Sin bundler, sin npm, sin TypeScript; solo React UMD
+y Babel standalone desde CDN.
 
-**Cómo se abre.** Hay que servir la carpeta; el doble clic no alcanza:
-
-```
-npx --yes http-server -p 8080     # o:  python3 -m http.server 8080
-```
-
-y entrar a `http://localhost:8080`. No es una decisión de diseño sino un
-límite del navegador: `primitivas.jsx` y `app.jsx` se cargan con
-`type="text/babel"`, y Babel los pide por XHR, petición que todos los
-navegadores bloquean cuando la página se abrió con `file://`. `index.html`
-detecta ese caso y muestra las instrucciones en pantalla en vez de quedarse
-en negro. La única forma de que el doble clic funcionara sería meter todo el
-JSX dentro de `index.html`, lo que rompe la separación en cuatro archivos.
+**Cómo se abre.** Doble clic en `index.html`. Nada más. Hace falta internet
+la primera vez, para que bajen React y Babel del CDN.
 
 ```
 index.html        estructura, fuentes, React UMD, Babel standalone
@@ -23,8 +13,29 @@ motor.js          reloj de autor, Easing, animate, interpolate, clamp,
                   useComposition, Shot, Stage
 primitivas.jsx    window.M (helpers de movimiento) + window.P (piezas SVG)
 app.jsx           UI, llamada al modelo, transpilación, montaje, ajuste
-prueba-piezas.html  página de verificación: motor + las 21 piezas en cuadrícula
+compilar.js       regenera primitivas.js y app.js desde los .jsx
+prueba-piezas.html  verificación: motor + las 21 piezas en cuadrícula
 ```
+
+**Los .jsx son la fuente; los .js son generados.** `index.html` carga
+`primitivas.js` y `app.js`, no los `.jsx`. Si editás un `.jsx`, corré:
+
+```
+node compilar.js
+```
+
+y commiteá los dos archivos juntos. **No edites los `.js` a mano**: llevan
+una cabecera que lo dice y el próximo `node compilar.js` los pisa.
+
+El rodeo existe por un límite del navegador, no por gusto: un
+`<script type="text/babel" src="algo.jsx">` se pide por XHR, y todos los
+navegadores bloquean esa petición cuando la página se abrió con `file://`.
+Un `<script src="algo.js">` normal sí carga. Por eso tampoco hay que
+ponerle `crossorigin` a los tags de React: ese atributo vuelve la petición
+CORS y la rompe bajo `file://`.
+
+Babel igual se carga en runtime, porque transpila la escena que devuelve
+el modelo en cada generación.
 
 ---
 

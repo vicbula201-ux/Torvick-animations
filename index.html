@@ -312,13 +312,19 @@
 <body>
   <div id="root"></div>
 
-  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <!-- sin crossorigin: ese atributo hace que el navegador bloquee estos
+       scripts cuando la pagina se abrio con doble clic (file://) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+  <!-- Babel sigue haciendo falta en runtime: transpila la escena que devuelve el modelo -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.26.4/babel.min.js"></script>
 
+  <!-- primitivas.js y app.js los genera compilar.js desde los .jsx.
+       Van como scripts normales para que el doble clic funcione: un
+       type="text/babel" src=... se pide por XHR y file:// lo bloquea. -->
   <script src="motor.js"></script>
-  <script type="text/babel" src="primitivas.jsx"></script>
-  <script type="text/babel" src="app.jsx"></script>
+  <script src="primitivas.js"></script>
+  <script src="app.js"></script>
 
   <script>
     // Los .jsx se cargan con type="text/babel", y Babel los pide por XHR.
@@ -327,20 +333,19 @@
     setTimeout(function () {
       var root = document.getElementById('root');
       if (root && root.children.length === 0) {
-        var esArchivo = location.protocol === 'file:';
+        var faltaReact = typeof React === 'undefined';
         root.innerHTML =
           '<div class="aviso">' +
-            '<h1>Hay que servir la carpeta</h1>' +
-            '<p>' + (esArchivo
-              ? 'Abriste el archivo con doble clic. El navegador bloquea la carga de ' +
-                'primitivas.jsx y app.jsx cuando la direccion empieza con file://.'
-              : 'La app no llego a montarse. Revisa que motor.js, primitivas.jsx y ' +
-                'app.jsx esten junto a index.html, y que haya conexion para React y Babel.') +
+            '<h1>La app no arranco</h1>' +
+            '<p>' + (faltaReact
+              ? 'No se pudieron cargar React y Babel. Revisa que haya conexion a ' +
+                'internet: se bajan de un CDN la primera vez.'
+              : 'Falta algun archivo. Revisa que motor.js, primitivas.js y app.js ' +
+                'esten en la misma carpeta que index.html.') +
             '</p>' +
-            '<p>Abri una terminal en esta carpeta y corre una de estas:</p>' +
+            '<p>Si el problema sigue, servi la carpeta y entra por http://localhost:8080</p>' +
             '<code>npx --yes http-server -p 8080</code>' +
             '<code>python3 -m http.server 8080</code>' +
-            '<p>Despues entra a <b>http://localhost:8080</b></p>' +
           '</div>';
       }
     }, 2500);
