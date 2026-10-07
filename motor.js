@@ -175,9 +175,9 @@
     };
   }
 
-  /* ---------- escalado del lienzo 1920x1080 ---------- */
+  /* ---------- escalado del lienzo (1920x1080 salvo que se pida otro) ---------- */
 
-  function useEscala(ref) {
+  function useEscala(ref, ancho) {
     var st = useState(1);
     var escala = st[0], setEscala = st[1];
     useEffect(function () {
@@ -185,7 +185,7 @@
       if (!el) return;
       var medir = function () {
         var w = el.clientWidth;
-        if (w > 0) setEscala(w / 1920);
+        if (w > 0) setEscala(w / ancho);
       };
       medir();
       if (typeof ResizeObserver === 'undefined') {
@@ -195,7 +195,7 @@
       var ro = new ResizeObserver(medir);
       ro.observe(el);
       return function () { ro.disconnect(); };
-    }, [ref]);
+    }, [ref, ancho]);
     return escala;
   }
 
@@ -214,9 +214,15 @@
 
   function fmt(v) { return (Math.round(v * 10) / 10).toFixed(1) + 's'; }
 
-  /* ---------- Stage: lienzo + controles ---------- */
+  /* ---------- Stage: lienzo + controles ----------
+     ancho / alto  tamano del lienzo en px de autor (1920x1080 por defecto;
+                   1080x1920 para video vertical)
+     debajo        funcion opcional ({ T, total, seek, playing, setPlaying })
+                   que se dibuja debajo de los controles, fuera del lienzo */
 
   function Stage(props) {
+    var ancho = props.ancho || 1920;
+    var alto = props.alto || 1080;
     var scenes = props.scenes || [];
     var derivado = useMemo(function () { return derivarCues(scenes); },
       [JSON.stringify(scenes)]);
@@ -225,7 +231,7 @@
 
     var reloj = useClock(authoredTotal);
     var marcoRef = useRef(null);
-    var escala = useEscala(marcoRef);
+    var escala = useEscala(marcoRef, ancho);
 
     var ctx = useMemo(function () {
       return { T: reloj.T, authoredTotal: authoredTotal, CUES: derivado.CUES };
@@ -234,7 +240,7 @@
     var lienzo = h('div', {
       style: {
         position: 'absolute', left: 0, top: 0,
-        width: 1920, height: 1080,
+        width: ancho, height: alto,
         transformOrigin: '0 0',
         transform: 'scale(' + escala + ')',
         background: '#ffffff',
@@ -247,7 +253,7 @@
       className: 'motor-marco',
       style: {
         position: 'relative',      // confina lo absoluto: no se monta sobre la UI
-        aspectRatio: '16 / 9',
+        aspectRatio: ancho + ' / ' + alto,
         width: '100%',
         background: '#ffffff',
         overflow: 'hidden',
@@ -280,7 +286,12 @@
 
     var controles = h('div', { className: 'motor-controles' }, boton, barra, tiempo);
 
-    return h('div', { className: 'motor-mesa' }, marco, controles);
+    var debajo = props.debajo ? props.debajo({
+      T: reloj.T, total: authoredTotal, seek: reloj.seek,
+      playing: reloj.playing, setPlaying: reloj.setPlaying
+    }) : null;
+
+    return h('div', { className: 'motor-mesa' }, marco, controles, debajo);
   }
 
   /* ---------- exports ---------- */

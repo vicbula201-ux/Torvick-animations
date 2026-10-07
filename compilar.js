@@ -18,7 +18,7 @@ const os = require('os');
 const path = require('path');
 
 const URL_BABEL = 'https://cdn.jsdelivr.net/npm/@babel/standalone@7.26.4/babel.min.js';
-const FUENTES = ['primitivas.jsx', 'app.jsx'];
+const FUENTES = ['primitivas.jsx', 'app.jsx', 'cuerpo.jsx', 'face-pull.jsx'];
 
 async function traerBabel() {
   const cache = path.join(os.tmpdir(), 'babel-standalone-7.26.4.js');

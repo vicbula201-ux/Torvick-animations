@@ -13,18 +13,22 @@ motor.js          reloj de autor, Easing, animate, interpolate, clamp,
                   useComposition, Shot, Stage
 primitivas.jsx    window.M (helpers de movimiento) + window.P (piezas SVG)
 app.jsx           UI, llamada al modelo, transpilación, montaje, ajuste
-compilar.js       regenera primitivas.js y app.js desde los .jsx
-prueba-piezas.html  verificación: motor + las 21 piezas en cuadrícula
+cuerpo.jsx        window.B: cuerpo y máquina para videos de ejercicios
+face-pull.jsx     el reel vertical del Face Pull (escenas + guion)
+face-pull.html    abre el reel: lienzo 9:16 + guion para grabar la voz
+compilar.js       regenera los .js desde los .jsx
+prueba-piezas.html  verificación: motor + las 21 piezas + las piezas de B
 ```
 
 **Los .jsx son la fuente; los .js son generados.** `index.html` carga
-`primitivas.js` y `app.js`, no los `.jsx`. Si editás un `.jsx`, corré:
+`primitivas.js` y `app.js`, no los `.jsx` (y `face-pull.html` carga además
+`cuerpo.js` y `face-pull.js`). Si editás un `.jsx`, corré:
 
 ```
 node compilar.js
 ```
 
-y commiteá los dos archivos juntos. **No edites los `.js` a mano**: llevan
+y commiteá el `.jsx` y su `.js` juntos. **No edites los `.js` a mano**: llevan
 una cabecera que lo dice y el próximo `node compilar.js` los pisa.
 
 El rodeo existe por un límite del navegador, no por gusto: un
@@ -144,9 +148,14 @@ una al inicio y otra al cierre como auto-revisión. **No suavizarla.**
 ## Confinamiento del lienzo
 
 El contenedor del escenario (`.motor-marco`) lleva `position: relative` y
-`aspect-ratio: 16/9`. Si se le saca el `position: relative`, el contenido
-en `position: absolute` escapa y se monta sobre la UI, dejando los botones
-sin poder clickear.
+un `aspect-ratio` igual al del lienzo (16/9 por defecto). Si se le saca el
+`position: relative`, el contenido en `position: absolute` escapa y se
+monta sobre la UI, dejando los botones sin poder clickear.
+
+`Stage` acepta `ancho` y `alto` (1920x1080 si no se pasan; 1080x1920 para
+video vertical) y `debajo`, una función `({ T, total, seek, playing,
+setPlaying }) => elemento` que se dibuja debajo de los controles, fuera del
+lienzo. El reel la usa para el guion y para exponer `window.REEL`.
 
 ---
 
@@ -158,9 +167,11 @@ sin poder clickear.
   ni anime.js.
 - No inventar colores fuera de la paleta de cinco.
 - No poner la frase del guion como texto en pantalla.
-- No apilar los elementos verticalmente: el formato es 16:9 horizontal
-  (sujeto a la izquierda x 100-620, transición al centro x 800-1200,
-  resultado a la derecha x 1300-1800).
+- No apilar los elementos verticalmente en las escenas del generador: ese
+  formato es 16:9 horizontal (sujeto a la izquierda x 100-620, transición
+  al centro x 800-1200, resultado a la derecha x 1300-1800). Los reels de
+  ejercicios son la excepción: van en 1080x1920 y ahí la comparación
+  mal/bien se apila arriba/abajo.
 - No usar degradados, sombras internas, glassmorphism ni estética futurista.
 - No usar emoji en el lienzo.
 - No tapar piezas con rectángulos opacos para "recortarlas": eso borra el
@@ -177,6 +188,44 @@ del asistente**, y el ajuste como último turno. Mandar el código como turno
 del asistente es lo que hace que el modelo corrija en vez de rehacer.
 No reemplazarlo por "acá está el código: ..." dentro del mensaje del usuario.
 
+## Videos de ejercicios — reels verticales
+
+`face-pull.html` es el primero. Se abre con doble clic como `index.html`.
+A la izquierda corre el reel; a la derecha está el guion: la línea de la
+escena actual en grande (para leerla mientras se graba la voz), la lista
+de escenas (clic para saltar) y la duración de cada una, editable. Las
+duraciones se guardan en el navegador; "Restablecer tiempos" vuelve a las
+de `ESCENAS`.
+
+**Calzar el video con la voz grabada:** cambiá la duración de cada escena
+hasta que coincida con lo que dura esa frase en tu grabación. Como todas
+las escenas usan `f(fracción)`, la coreografía se estira sola. Para que
+el cambio quede fijo, pasá los números a `ESCENAS` en `face-pull.jsx`.
+
+**Exportar:** `face-pull.html#render` muestra solo el lienzo a 1080x1920,
+sin controles, y deja `window.REEL` (`seek`, `setPlaying`, `total`) para
+grabar cuadro por cuadro con un navegador automatizado. Sin eso, grabá
+la pantalla con el reel en reproducción.
+
+Código de color en estos videos (misma paleta de cinco):
+`YEL` músculo principal, trayectoria, guía · `GRY` músculo secundario,
+cable flojo, short · `RED` error (y el trapecio cuando se encogen los
+hombros) · `GRN` lo correcto: visto, flechas de corrección.
+
+`cuerpo.jsx` (`window.B`) es reutilizable para otros ejercicios:
+
+```js
+B.Espalda   // vista posterior: codo, rot, enc, ret, musc{dp,inf,rm,tra,rom,trapRojo}, piernas
+B.Estacion  // vista lateral con polea: p, rot, paso, tension, poleaY, carga, cable, suelta
+B.Cuenta    // anillo que se vacía con un número adentro (n, p)
+B.FlechaS B.Arco B.Puntos B.Anillo   // overlays SVG que van dentro de children
+B.geoEspalda(props) B.geoEstacion(props)  // las mismas coordenadas, sin dibujar
+```
+
+`B.Espalda` y `B.Estacion` reciben `children` como función `(g) => <g>…</g>`:
+`g` trae las articulaciones (`g.izq.E`, `g.der.H`, `g.Sj`, `g.rueda`…) en
+coordenadas del viewBox, así las flechas y guías siguen al brazo.
+
 ## Verificación
 
 `prueba-piezas.html` renderiza el motor (un cuadrado que cruza el lienzo en
@@ -184,4 +233,7 @@ loop) y las 21 piezas en cuadrícula, cada una con su nombre. Revisar a ojo:
 ningún trazo cortado en el borde de su `viewBox`, ninguna forma cerrada con
 interior transparente, el caballo se lee como caballo y la gallina como
 gallina, `P.Cerebro` con `on` en 0, 0.5 y 1 da tres estados distintos, y
-`P.Medidor` cambia de color solo al variar `p`.
+`P.Medidor` cambia de color solo al variar `p`. Abajo están las piezas de
+`B`: la espalda en sus estados (codos, rotación, hombros encogidos,
+músculos), la estación lateral (cuerda suelta, cable flojo, tenso, tirón
+completo) y la cuenta.

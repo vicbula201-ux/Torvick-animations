@@ -29,6 +29,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.26.4/babel.min.js"></script>
 <script src="motor.js"></script>
 <script src="primitivas.js"></script>
+<script src="cuerpo.js"></script>
 <script type="text/babel">
 const { useState, useEffect } = React;
 
@@ -112,6 +113,20 @@ function App() {
             </div>
           </div>
         </Celda>
+      </div>
+      <h2>Cuerpo — piezas de B para videos de ejercicios</h2>
+      <div className="grid">
+        <Celda nombre="Espalda codo=0"><B.Espalda s={0.22} /></Celda>
+        <Celda nombre="Espalda codo=1 rot=0"><B.Espalda s={0.22} codo={1} rot={0} /></Celda>
+        <Celda nombre="Espalda codo=1 rot=1"><B.Espalda s={0.22} codo={1} rot={1} /></Celda>
+        <Celda nombre="Espalda enc=1 (mal)"><B.Espalda s={0.22} enc={1} musc={{ trapRojo: 1 }} /></Celda>
+        <Celda nombre="Espalda musculos"><B.Espalda s={0.22} codo={1} rot={1} ret={1}
+          musc={{ dp: 1, inf: 1, rm: 1, tra: 1, rom: 1 }} /></Celda>
+        <Celda nombre="Estacion suelta"><B.Estacion s={0.19} paso={0} suelta tension={0} /></Celda>
+        <Celda nombre="Estacion cable flojo"><B.Estacion s={0.19} paso={0} tension={0} /></Celda>
+        <Celda nombre="Estacion tenso (yel)"><B.Estacion s={0.19} cable="yel" /></Celda>
+        <Celda nombre="Estacion p=1 rot=1"><B.Estacion s={0.19} p={1} rot={1} musc={{ dp: 1 }} /></Celda>
+        <Celda nombre="Cuenta n=3 p=0.6"><B.Cuenta s={0.8} n={3} p={0.6} /></Celda>
       </div>
     </div>
   );
