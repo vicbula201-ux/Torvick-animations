@@ -13,19 +13,28 @@ motor.js          reloj de autor, Easing, animate, interpolate, clamp,
                   useComposition, Shot, Stage
 primitivas.jsx    window.M (helpers de movimiento) + window.P (piezas SVG)
 app.jsx           UI, llamada al modelo, transpilación, montaje, ajuste
-cuerpo.jsx        window.B: cuerpo y máquina para videos de ejercicios
-face-pull.jsx     el reel vertical del Face Pull (escenas + guion)
-face-pull.html    abre el reel: lienzo 9:16 + guion para grabar la voz
+cuerpo.jsx        window.B: espalda, estación de polea, overlays SVG
+perfil.jsx        B.Perfil: figura de perfil articulada + poses
+frente.jsx        B.Frente: figura de frente + poses
+equipo.jsx        mancuerna, banco, barra, colchoneta, sombra
+marca.jsx         window.MARCA: firma de Torvick (nombre, redes, sello, cierre)
+reel.jsx          window.REELS: armazón común de los reels verticales
+reels.html        abre los reels: lienzo 9:16 + guion + selector de video
+face-pull.jsx, sentadilla-sumo.jsx, elevacion-piernas.jsx,
+press-banca.jsx, dominadas.jsx   un archivo por video (solo escenas)
+face-pull.html    redirige a reels.html#face-pull
 compilar.js       regenera los .js desde los .jsx
 prueba-piezas.html  verificación: motor + las 21 piezas + las piezas de B
 ```
 
 **Los .jsx son la fuente; los .js son generados.** `index.html` carga
-`primitivas.js` y `app.js`, no los `.jsx` (y `face-pull.html` carga además
-`cuerpo.js` y `face-pull.js`). Si editás un `.jsx`, corré:
+`primitivas.js` y `app.js`, no los `.jsx` (y `reels.html` carga además
+las piezas de `B`, `marca.js`, `reel.js` y un `.js` por video). Si editás
+un `.jsx`, corré:
 
 ```
-node compilar.js
+node compilar.js                 # todos
+node compilar.js dominadas.jsx   # uno solo
 ```
 
 y commiteá el `.jsx` y su `.js` juntos. **No edites los `.js` a mano**: llevan
@@ -190,19 +199,55 @@ No reemplazarlo por "acá está el código: ..." dentro del mensaje del usuario.
 
 ## Videos de ejercicios — reels verticales
 
-`face-pull.html` es el primero. Se abre con doble clic como `index.html`.
-A la izquierda corre el reel; a la derecha está el guion: la línea de la
-escena actual en grande (para leerla mientras se graba la voz), la lista
-de escenas (clic para saltar) y la duración de cada una, editable. Las
-duraciones se guardan en el navegador; "Restablecer tiempos" vuelve a las
-de `ESCENAS`.
+Todos viven en `reels.html` (doble clic, como `index.html`); arriba hay un
+botón por video. A la izquierda corre el reel; a la derecha está el guion:
+la línea de la escena actual en grande (para leerla mientras se graba la
+voz), la lista de escenas (clic para saltar) y la duración de cada una,
+editable. Las duraciones se guardan en el navegador, por video;
+"Restablecer tiempos" vuelve a las del archivo.
+
+**Un video = un archivo** que define sus escenas y se registra:
+
+```js
+global.REELS.registrar({ id: 'dominadas', titulo: 'Dominadas', escenas: ESCENAS })
+// ESCENAS = [{ nombre, dur, C: EscX, vo: 'línea de locución' }, ...]
+```
+
+Las ayudas para escribir escenas están en `REELS.ayudas` (`Pos`, `Rot`,
+`Camara`, `Recorte`, `sale`, `junta`, `reps`). `face-pull.jsx` es la
+implementación de referencia. Para sumar un video: crear `nuevo.jsx`,
+agregarlo a `FUENTES` en `compilar.js` y un `<script src="nuevo.js">` en
+`reels.html`.
+
+**La firma de Torvick va en TODOS los videos, siempre** (pedido del autor):
+`reel.jsx` la agrega sola, no hay que hacer nada en cada video y no se
+puede apagar. Son dos cosas:
+
+- el **sello** de la esquina superior izquierda (nombre + YouTube,
+  Instagram y TikTok) durante todo el video, que se retira al llegar al
+  cierre;
+- la **escena de cierre** de 3 s: "TORVICK" con resaltador, los tres
+  logos animados, `@eltorvick` y "SÍGUEME PARA MÁS".
+
+Los logos están dibujados con la paleta de cinco (YouTube rojo, Instagram
+amarillo, TikTok negro con eco rojo). El nombre, la arroba y el número de
+`B.Cuenta` son el único texto del lienzo además de `P.Rotulo`.
+
+**Duración:** cada video dura como máximo 60 s *con* el cierre, o sea
+57 s de escenas propias. Entre escena y escena `reel.jsx` hace un empuje
+corto (0,36 s); no hace falta hacer transiciones a mano.
+
+**Zonas que tapan las apps:** el sello ocupa arriba a la izquierda
+(y 140-215), así que los rótulos van de y 230 para abajo. Abajo de y 1560
+y el borde derecho entre y 1000-1700 los tapan el texto y los botones de
+Instagram/TikTok: ahí no va nada importante.
 
 **Calzar el video con la voz grabada:** cambiá la duración de cada escena
 hasta que coincida con lo que dura esa frase en tu grabación. Como todas
 las escenas usan `f(fracción)`, la coreografía se estira sola. Para que
-el cambio quede fijo, pasá los números a `ESCENAS` en `face-pull.jsx`.
+el cambio quede fijo, pasá los números a `ESCENAS` en el `.jsx` del video.
 
-**Exportar:** `face-pull.html#render` muestra solo el lienzo a 1080x1920,
+**Exportar:** `reels.html#<id>/render` muestra solo el lienzo a 1080x1920,
 sin controles, y deja `window.REEL` (`seek`, `setPlaying`, `total`) para
 grabar cuadro por cuadro con un navegador automatizado. Sin eso, grabá
 la pantalla con el reel en reproducción.
