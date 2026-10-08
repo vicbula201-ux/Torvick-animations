@@ -5,7 +5,8 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
    Mismo estilo que P: trazo #14110F grueso, relleno blanco,
    puntas redondas, viewBox fijo, prop s de escala.
 
-   B.Espalda   1100x1000  vista posterior: hombros, escapulas, brazos
+   B.Espalda   1100x1000  vista posterior: hombros, escapulas, brazos (face pull
+                          o colgado de una barra), y cuerpo entero opcional
    B.Estacion  1300x1300  vista lateral: persona + polea + cable
    B.Cuenta    220x220    anillo que se vacia con un numero adentro
 
@@ -262,59 +263,218 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
   }
 
   /* =========================================================
-     B.Espalda — vista posterior, de la cintura para arriba
-     codo 0..1  brazos adelante (inicio)  ->  codos altos y abiertos (final)
-     rot  0..1  sin rotacion externa (manos adelante) -> manos junto a la cabeza
-     enc  0..1  hombros encogidos hacia las orejas
-     ret  0..1  escapulas juntas (retraccion)
-     musc { dp, inf, rm, tra, rom, trapRojo }  0..1 cuanto se pinta cada musculo
-     piernas    alarga el pantalon hacia abajo para que salga del lienzo
+     B.Espalda — vista posterior. viewBox 1100x1000 (el dibujo se sale
+     con overflow visible: brazos arriba hasta y ~ -60, piernas hasta ~1620)
+      Modo face pull (por defecto, brazos detras del torso):
+       codo 0..1  brazos adelante (inicio)  ->  codos altos y abiertos (final)
+       rot  0..1  sin rotacion externa (manos adelante) -> manos junto a la cabeza
+       enc  0..1  hombros encogidos hacia las orejas
+       ret  0..1  escapulas juntas (retraccion)
+     Modo dominadas: brazos='arriba' (brazos delante del torso, manos en una barra)
+       sube 0..1  colgado con brazos extendidos -> pecho a la altura de la barra
+       depr 0..1  escapulas elevadas y abiertas -> deprimidas y juntas
+                  (si no se pasa sigue a sube, adelantada: suave01(sube / 0.5))
+       agarre     de la columna a cada mano (300: un poco mas ancho que los hombros)
+       anclaManos y del viewBox donde quedan las manos: traslada todo el dibujo
+       barra      true o { x0, x1 }: barra a la altura de las manos, detras del cuerpo
+     Comunes:
+       musc { dp, inf, rm, rM, dor, tra, rom, trapRojo } 0..1 (numero o [izq, der])
+         dp inf rm rM dor -> amarillo; tra rom -> gris; trapRojo -> trapecio rojo
+       muscAmarillo / muscGris / muscRojo { clave: 0..1 } fuerzan el color
+       piernas       pantalon largo que sale por abajo del lienzo
+       cuerpoEntero  (o piernas='enteras') short gris + piernas de espaldas
+       rodillas 0..1 piernas rectas -> rodillas dobladas con tobillos cruzados
+                     (para poses quietas usar 0 o 1; en el medio se cruzan)
+     children(g): g en coordenadas del viewBox, ya trasladadas por anclaManos
+       g.izq / g.der  J hombro, E codo, H mano, A acromion, angSup angInf espinaMed
+                      espinaLat bordeLat bordeMed (escapula), rMC y dorC (centros
+                      del redondo mayor y del dorsal), X axila (solo brazos arriba),
+                      cad rod tob (solo cuerpo entero)
+       g.cabeza g.cintura  g.manoY = g.barraY  g.dy (traslado de anclaManos)
+       g.piso (borde de abajo de las zapatillas)  g.sube g.depr g.el (elevacion)
+     Manos fijas en la barra mientras el cuerpo sube: pasar siempre el mismo
+     anclaManos; B.geoEspalda(props) devuelve la misma g sin dibujar.
      ========================================================= */
 
   var EW = 1100,
     EH = 1000;
-  function geoEspalda(o) {
+  var BRAZO_ARR = 200,
+    ANTE_ARR = 210; // brazo y antebrazo con los brazos arriba
+  var AGARRE = 300; // de la columna a cada mano sobre la barra
+  var COLOR_MUSC = {
+    dp: YEL,
+    inf: YEL,
+    rm: YEL,
+    rM: YEL,
+    dor: YEL,
+    tra: GRY,
+    rom: GRY
+  };
+  function rotar(v, ang) {
+    var co = Math.cos(ang * GRAD),
+      si = Math.sin(ang * GRAD);
+    return [v[0] * co - v[1] * si, v[0] * si + v[1] * co];
+  }
+
+  // codo por cinematica inversa (lado izquierdo de la imagen): se abre hacia afuera
+  function codoIK(J, H, l1, l2) {
+    var d = resta(H, J);
+    var dist = clamp(largo(d), Math.abs(l1 - l2) + 1, l1 + l2 - 0.5);
+    var u = unidad(d);
+    var a = (l1 * l1 - l2 * l2 + dist * dist) / (2 * dist);
+    var h = Math.sqrt(Math.max(0, l1 * l1 - a * a));
+    return suma(suma(J, por(u, a)), por([u[1], -u[0]], h));
+  }
+
+  // elevacion del brazo izquierdo en grados: 0 colgando, 90 horizontal, 180 arriba
+  function elevacion(J, E) {
+    var v = resta(E, J);
+    return Math.atan2(-v[0], v[1]) / GRAD;
+  }
+
+  // piernas de espaldas: k = rodillas (0 rectas, 1 dobladas con los tobillos cruzados)
+  // los tobillos se cruzan recien con las rodillas bien dobladas
+  function cruce(k) {
+    return suave01((k - 0.4) / 0.6);
+  }
+  function geoPiernas(k) {
+    var kx = cruce(k);
+    return {
+      izq: {
+        cad: [488, 912],
+        rod: [lerp(494, 516, k), lerp(1238, 1196, k)],
+        tob: [lerp(498, 580, kx), lerp(1546, 1352, k)]
+      },
+      der: {
+        cad: [612, 912],
+        rod: [lerp(606, 586, k), lerp(1238, 1204, k)],
+        tob: [lerp(602, 518, kx), lerp(1546, 1372, k)]
+      }
+    };
+  }
+  function geoBase(o) {
+    var arriba = o.brazos === 'arriba';
     var codo = clamp(o.codo || 0, 0, 1);
     var rot = clamp(o.rot || 0, 0, 1);
     var enc = clamp(o.enc || 0, 0, 1);
     var ret = clamp(o.ret || 0, 0, 1);
-    var gx = 22 * ret,
+    var sube = clamp(o.sube || 0, 0, 1);
+    var depr = o.depr == null ? suave01(sube / 0.5) : clamp(o.depr, 0, 1);
+    var gx,
+      gy,
+      giro = 0;
+    if (arriba) {
+      // colgado: escapulas arriba, abiertas y giradas hacia arriba; arriba: abajo y juntas
+      gx = lerp(-14, 22, depr) + 22 * ret * (1 - depr);
+      gy = Math.max(-48, lerp(-40, 10, depr) - 40 * enc);
+      giro = lerp(16, 0, depr);
+      enc = clamp(-gy / 40, 0, 1);
+      ret = clamp(gx / 22, 0, 1);
+    } else {
+      gx = 22 * ret;
       gy = -40 * enc;
+    }
     var c = function (x, y) {
       return [x + gx, y + gy];
     };
+    // con brazos arriba la escapula gira (rotacion superior) alrededor de PIV
+    var PIV = [440, 480];
+    var esc = function (x, y) {
+      var q = suma(PIV, rotar(resta([x, y], PIV), giro));
+      return c(q[0], q[1]);
+    };
+    var qInf = suma(PIV, rotar(resta([496, 602], PIV), giro));
     var J = c(352, 392); // articulacion del hombro
-    var EA = c(322, 418),
-      HA = c(430, 430); // inicio: brazos hacia la polea (tapados)
-    var EB = c(175, 372); // final: codo alto y abierto
-    // sin rotacion las manos se juntan delante de la cara (quedan tapadas
-    // por la cabeza); al rotar el antebrazo sube y las manos salen a los lados
-    var ang = lerp(-10, -42, rot);
-    var HB = suma(EB, polar(ang, lerp(290, 235, rot)));
-    var ce = suave01(codo);
-    var E = lerpP(EA, EB, ce);
-    var H = lerpP(HA, HB, codo);
-    // el deltoides cae hacia afuera con el brazo adelante y sigue al codo al abrir
-    var dirDelt = lerpP(suma(J, [-50, 130]), E, ce);
+    var E,
+      H,
+      dirDelt,
+      el = 0,
+      X = null,
+      rmA,
+      rmB,
+      K;
+    if (arriba) {
+      var Hx = 550 - (o.agarre == null ? AGARRE : o.agarre);
+      var dx = Hx - J[0];
+      var lleno = 0.985 * (BRAZO_ARR + ANTE_ARR);
+      var R0 = Math.sqrt(Math.max(0, lleno * lleno - dx * dx));
+      H = [Hx, J[1] - lerp(R0, -10, sube)];
+      E = codoIK(J, H, BRAZO_ARR, ANTE_ARR);
+      dirDelt = E;
+      el = elevacion(J, E);
+      // marco del brazo: u a lo largo del humero, n2 hacia el lado del torso/axila
+      var u = unidad(resta(E, J)),
+        n2 = [u[1], -u[0]];
+      var enBrazo = function (a, b) {
+        return suma(J, suma(por(u, a), por(n2, b)));
+      };
+      var fe = clamp(el / 165, 0, 1);
+      // axila: donde el borde del dorsal sale de abajo del brazo
+      var aX = BRAZO_ARR * lerp(0.62, 0.0, fe);
+      X = enBrazo(aX, lerp(52, 41, aX / BRAZO_ARR) - 14);
+      // inserciones de los redondos y del dorsal. Con el codo abajo quedan tapadas por
+      // el brazo; colgado, el redondo mayor sale por el contorno justo bajo la axila
+      // (pliegue posterior de la axila) y el dorsal queda debajo
+      var wc = suave01((fe - 0.12) / 0.8);
+      rmA = lerpP(enBrazo(-10, -14), suma(J, [20, 30]), wc);
+      rmB = lerpP(enBrazo(20, 10), suma(J, [-22, 44]), wc);
+      K = lerpP(enBrazo(70, 30), suma(J, [-70, 100]), wc);
+    } else {
+      var EA = c(322, 418),
+        HA = c(430, 430); // inicio: brazos hacia la polea (tapados)
+      var EB = c(175, 372); // final: codo alto y abierto
+      // sin rotacion las manos se juntan delante de la cara (quedan tapadas
+      // por la cabeza); al rotar el antebrazo sube y las manos salen a los lados
+      var ang = lerp(-10, -42, rot);
+      var HB = suma(EB, polar(ang, lerp(290, 235, rot)));
+      var ce = suave01(codo);
+      E = lerpP(EA, EB, ce);
+      H = lerpP(HA, HB, codo);
+      // el deltoides cae hacia afuera con el brazo adelante y sigue al codo al abrir
+      dirDelt = lerpP(suma(J, [-50, 130]), E, ce);
+      rmA = suma(J, [-12, 34]);
+      rmB = suma(J, [8, 70]);
+      K = [330 + gx * 0.5, 548 + gy * 0.4];
+    }
+    var angInf = [qInf[0] + gx * 1.1, qInf[1] + gy * 0.9];
+    var bordeMed = esc(448, 542);
     var izq = {
       J: J,
       E: E,
       H: H,
       A: c(368, 352),
       dirDelt: dirDelt,
-      espinaMed: c(488, 430),
-      espinaLat: c(392, 392),
-      angSup: c(484, 398),
-      angInf: [496 + gx * 1.1, 602 + gy * 0.9],
-      bordeLat: c(406, 454),
-      bordeMed: c(448, 542)
+      espinaMed: esc(488, 430),
+      espinaLat: esc(392, 392),
+      angSup: esc(484, 398),
+      angInf: angInf,
+      bordeLat: esc(406, 454),
+      bordeMed: bordeMed,
+      rmA: rmA,
+      rmB: rmB,
+      K: K,
+      // centros de musculo, para flechas y rotulos
+      rMC: lerpP(lerpP(arriba ? bordeMed : suma(bordeMed, [24, 40]), angInf, 0.5), lerpP(rmB, K, 0.5), 0.45),
+      dorC: [442 + gx * 0.3, 690]
     };
+    if (X) izq.X = X;
     var m = function (p) {
       return [EW - p[0], p[1]];
     };
+    var entero = !!(o.cuerpoEntero || o.piernas === 'enteras');
+    var rodillas = clamp(o.rodillas || 0, 0, 1);
+    if (entero) {
+      var pi = geoPiernas(rodillas);
+      ['cad', 'rod', 'tob'].forEach(function (k) {
+        izq[k] = pi.izq[k];
+      });
+    }
     var der = {};
     Object.keys(izq).forEach(function (k) {
       der[k] = m(izq[k]);
+    });
+    if (entero) ['cad', 'rod', 'tob'].forEach(function (k) {
+      der[k] = pi.der[k];
     });
     return {
       izq: izq,
@@ -325,16 +485,70 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
       ret: ret,
       codo: codo,
       rot: rot,
+      arriba: arriba,
+      sube: sube,
+      depr: depr,
+      giro: giro,
+      el: el,
+      entero: entero,
+      rodillas: rodillas,
       cabeza: [550, 205],
+      cintura: [550, 838],
+      piso: entero ? Math.max(bajoPie(izq, 1, rodillas), bajoPie(der, -1, rodillas)) : null,
+      manoY: H[1],
+      barraY: H[1],
+      dy: 0,
       espejo: m
     };
+  }
+  function trasladar(g, dy) {
+    if (!dy) return g;
+    var t = function (p) {
+      return [p[0], p[1] + dy];
+    };
+    var lado = function (L) {
+      var r = {};
+      Object.keys(L).forEach(function (k) {
+        r[k] = t(L[k]);
+      });
+      return r;
+    };
+    var out = Object.assign({}, g, {
+      izq: lado(g.izq),
+      der: lado(g.der),
+      cabeza: t(g.cabeza),
+      cintura: t(g.cintura),
+      manoY: g.manoY + dy,
+      barraY: g.barraY + dy,
+      dy: dy
+    });
+    if (g.piso != null) out.piso = g.piso + dy;
+    return out;
+  }
+
+  // geometria publica: en coordenadas del viewBox, ya trasladada por anclaManos
+  function geoEspalda(o) {
+    var g = geoBase(o);
+    return trasladar(g, o.anclaManos == null ? 0 : o.anclaManos - g.manoY);
   }
   function siluetaEspalda(g) {
     var gx = g.gx,
       gy = g.gy,
       enc = g.enc;
     var A = g.izq.A;
-    return simetrica(EW, [500, 262], [[[500, 280], [498, 296 + gy * 0.15], [496, 304 + gy * 0.2]], [[468, 318 + gy * 0.9 - 10 * enc], [412, 326 + gy - 18 * enc], A], [[348 + gx, 358 + gy], [334 + gx, 378 + gy], [338 + gx, 402 + gy]], [[344 + gx, 440 + gy * 0.6], [380, 462 + gy * 0.4], [398, 480 + gy * 0.3]], [[392, 520], [370, 548], [372, 592]], [[376, 690], [420, 770], [432, 842]]]);
+    var ini = [500, 262];
+    var cuello = [[500, 280], [498, 296 + gy * 0.15], [496, 304 + gy * 0.2]];
+    var trapecio = [[468, 318 + gy * 0.9 - 10 * enc], [412, 326 + gy - 18 * enc], A];
+    if (!g.arriba) {
+      return simetrica(EW, ini, [cuello, trapecio, [[348 + gx, 358 + gy], [334 + gx, 378 + gy], [338 + gx, 402 + gy]], [[344 + gx, 440 + gy * 0.6], [380, 462 + gy * 0.4], [398, 480 + gy * 0.3]], [[392, 520], [370, 548], [372, 592]], [[376, 690], [420, 770], [432, 842]]]);
+    }
+    // brazos arriba: del acromion a la axila por debajo del brazo (tapado),
+    // y de ahi el dorsal en V hasta la cintura
+    var J = g.izq.J,
+      X = g.izq.X;
+    var fe = clamp(g.el / 165, 0, 1);
+    var Lb = [lerp(344, 362, fe), lerp(652, 600, fe)];
+    return simetrica(EW, ini, [cuello, trapecio, [lerpP(A, J, 0.6), lerpP(J, X, 0.6), X], [suma(X, [-4, 70]), suma(Lb, [-2, -80]), Lb], [[Lb[0] + 6, 724], [420, 776], [432, 842]]]);
   }
   function deltoide(J, E, lp) {
     if (lp == null) lp = 128;
@@ -351,17 +565,57 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
     };
   }
 
+  // color de un musculo: rojo > amarillo forzado > musc (color propio) > gris
+  function valorLado(v, lado) {
+    if (v == null) return 0;
+    return Array.isArray(v) ? v[lado] || 0 : v;
+  }
+  function tonoMusc(props, k, lado) {
+    var r = valorLado((props.muscRojo || {})[k], lado);
+    if (k === 'tra') r = Math.max(r, valorLado((props.musc || {}).trapRojo, lado));
+    if (r > 0.01) return tinte(r, RED);
+    var a = valorLado((props.muscAmarillo || {})[k], lado);
+    if (a > 0.01) return tinte(a, YEL);
+    var v = valorLado((props.musc || {})[k], lado);
+    if (v > 0.01) return tinte(v, COLOR_MUSC[k] || YEL);
+    return tinte(valorLado((props.muscGris || {})[k], lado), GRY);
+  }
+  function Zona(props) {
+    var t = props.t;
+    return /*#__PURE__*/React.createElement("g", null, /*#__PURE__*/React.createElement("path", {
+      d: props.d,
+      fill: BLANCO,
+      stroke: "none"
+    }), t ? /*#__PURE__*/React.createElement("path", {
+      d: props.d,
+      fill: t.fill,
+      opacity: t.opacity
+    }) : null);
+  }
+
   // musculos de un lado (el izquierdo; el derecho se dibuja espejado)
   function MusculosLado(props) {
     var L = props.L,
       g = props.g,
-      mu = props.mu;
+      tono = props.tono;
     var gy = g.gy;
     var bajoTrap = [550, 500 + gy * 0.3];
+    var columnaRom = [550, 612 + gy * 0.5];
     var trap = [[550, 150], [300, 150], [300 + g.gx, 345 + gy], L.espinaLat, L.espinaMed, bajoTrap];
-    var rom = [[550, 360 + gy * 0.5], L.angSup, L.espinaMed, L.angInf, [550, 612 + gy * 0.5]];
+    var rom = [[550, 360 + gy * 0.5], L.angSup, L.espinaMed, L.angInf, columnaRom];
     var infra = [L.espinaMed, L.angInf, L.bordeMed, L.bordeLat, L.espinaLat];
-    var red = [L.bordeMed, suma(L.bordeMed, [24, 40]), suma(L.J, [8, 70]), suma(L.J, [-12, 34])];
+    var bajoRm = suma(L.bordeMed, [24, 40]);
+    // con brazos arriba los redondos salen del borde lateral de la escapula, uno al lado del otro
+    var oRm = g.arriba ? [L.bordeLat, L.bordeMed] : [L.bordeMed, bajoRm];
+    var oRM = [oRm[1], suma(L.angInf, [2, 4])];
+    var red = [oRm[0], oRm[1], L.rmB, L.rmA];
+    var redM = [oRM[0], oRM[1], L.K, L.rmB];
+    // dorsal: de la axila al angulo inferior, la columna y la fascia lumbar
+    var lumbar = [550, 694 + gy * 0.3],
+      finDor = [470, 830];
+    var bordeDor = 'M ' + pt(lumbar) + ' Q ' + pt([536, 770]) + ' ' + pt(finDor);
+    var dor = 'M ' + pt(L.K) + ' L ' + pt(suma(L.angInf, [2, 4])) + ' L ' + pt(columnaRom) + ' L ' + pt(lumbar) + ' Q ' + pt([536, 770]) + ' ' + pt(finDor) + ' L 440 900 L 260 900 L 200 560 L ' + pt(suma(L.K, [-60, 0])) + ' Z';
+    var fibDor = g.arriba ? curva([[494, 784], [446, 694], suma(lerpP(L.K, L.angInf, 0.5), [4, 48])]) : curva([[494, 776], [446, 680], [404, 606]]);
     var linea = {
       fill: 'none',
       stroke: INK,
@@ -375,84 +629,65 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
       strokeWidth: 11,
       strokeLinecap: 'round'
     };
-    var tRom = tinte(mu.rom, GRY);
-    var tTra = mu.trapRojo > 0.01 ? tinte(mu.trapRojo, RED) : tinte(mu.tra, GRY);
-    var tInf = tinte(mu.inf, YEL);
-    var tRed = tinte(mu.rm, YEL);
-    return /*#__PURE__*/React.createElement("g", null, /*#__PURE__*/React.createElement("path", {
+    return /*#__PURE__*/React.createElement("g", null, /*#__PURE__*/React.createElement(Zona, {
+      d: dor,
+      t: tono('dor')
+    }), /*#__PURE__*/React.createElement("path", _extends({
+      d: fibDor
+    }, fibra)), /*#__PURE__*/React.createElement("path", _extends({
+      d: bordeDor
+    }, linea)), /*#__PURE__*/React.createElement(Zona, {
       d: 'M ' + rom.map(pt).join(' L ') + ' Z',
-      fill: BLANCO,
-      stroke: "none"
-    }), tRom ? /*#__PURE__*/React.createElement("path", {
-      d: 'M ' + rom.map(pt).join(' L ') + ' Z',
-      fill: tRom.fill,
-      opacity: tRom.opacity
-    }) : null, /*#__PURE__*/React.createElement("path", _extends({
+      t: tono('rom')
+    }), /*#__PURE__*/React.createElement("path", _extends({
       d: 'M ' + pt([550, 452 + gy * 0.4]) + ' L ' + pt(suma(L.angSup, [8, 96]))
     }, fibra)), /*#__PURE__*/React.createElement("path", _extends({
       d: 'M ' + pt([550, 520 + gy * 0.4]) + ' L ' + pt(suma(L.angInf, [-4, -40]))
     }, fibra)), /*#__PURE__*/React.createElement("path", _extends({
-      d: 'M ' + pt(L.angInf) + ' L ' + pt([550, 612 + gy * 0.5])
-    }, linea)), /*#__PURE__*/React.createElement("path", {
+      d: 'M ' + pt(L.angInf) + ' L ' + pt(columnaRom)
+    }, linea)), /*#__PURE__*/React.createElement(Zona, {
       d: 'M ' + trap.map(pt).join(' L ') + ' Z',
-      fill: BLANCO,
-      stroke: "none"
-    }), tTra ? /*#__PURE__*/React.createElement("path", {
-      d: 'M ' + trap.map(pt).join(' L ') + ' Z',
-      fill: tTra.fill,
-      opacity: tTra.opacity
-    }) : null, /*#__PURE__*/React.createElement("path", _extends({
+      t: tono('tra')
+    }), /*#__PURE__*/React.createElement("path", _extends({
       d: curva([L.espinaLat, lerpP(L.espinaLat, L.espinaMed, 0.55), L.espinaMed, bajoTrap])
-    }, linea)), /*#__PURE__*/React.createElement("path", {
+    }, linea)), /*#__PURE__*/React.createElement(Zona, {
       d: blando(infra),
-      fill: BLANCO,
-      stroke: "none"
-    }), tInf ? /*#__PURE__*/React.createElement("path", {
-      d: blando(infra),
-      fill: tInf.fill,
-      opacity: tInf.opacity
-    }) : null, /*#__PURE__*/React.createElement("path", _extends({
+      t: tono('inf')
+    }), /*#__PURE__*/React.createElement("path", _extends({
       d: 'M ' + pt(suma(L.bordeLat, [22, 14])) + ' L ' + pt(suma(L.angInf, [-14, -50]))
     }, fibra)), /*#__PURE__*/React.createElement("path", _extends({
       d: 'M ' + pt(suma(L.bordeLat, [30, 6])) + ' L ' + pt(suma(L.espinaMed, [-6, 40]))
     }, fibra)), /*#__PURE__*/React.createElement("path", _extends({
       d: blando(infra)
-    }, linea)), /*#__PURE__*/React.createElement("path", {
+    }, linea)), /*#__PURE__*/React.createElement(Zona, {
+      d: blando(redM, 0.2),
+      t: tono('rM')
+    }), /*#__PURE__*/React.createElement("path", _extends({
+      d: 'M ' + pt(lerpP(lerpP(oRM[0], oRM[1], 0.5), lerpP(L.rmB, L.K, 0.5), 0.12)) + ' L ' + pt(lerpP(lerpP(oRM[0], oRM[1], 0.5), lerpP(L.rmB, L.K, 0.5), 0.62))
+    }, fibra)), /*#__PURE__*/React.createElement("path", _extends({
+      d: blando(redM, 0.2)
+    }, linea)), /*#__PURE__*/React.createElement(Zona, {
       d: blando(red),
-      fill: BLANCO,
-      stroke: "none"
-    }), tRed ? /*#__PURE__*/React.createElement("path", {
-      d: blando(red),
-      fill: tRed.fill,
-      opacity: tRed.opacity
-    }) : null, /*#__PURE__*/React.createElement("path", _extends({
+      t: tono('rm')
+    }), /*#__PURE__*/React.createElement("path", _extends({
       d: blando(red)
     }, linea)));
   }
+
+  // brazo de la vista posterior. atras=true: detras del torso (face pull);
+  // si no, delante del torso (dominadas), con la gorra del deltoides encima
   function BrazoAtras(props) {
     var L = props.L,
       paso = props.paso;
-    if (paso === 'trazo') {
-      return /*#__PURE__*/React.createElement("g", {
-        fill: BLANCO,
-        stroke: INK,
-        strokeWidth: 30,
-        strokeLinejoin: "round"
-      }, /*#__PURE__*/React.createElement("path", {
-        d: capsula(L.J, L.E, 52, 41)
-      }), /*#__PURE__*/React.createElement("path", {
-        d: capsula(L.E, L.H, 39, 31)
-      }), /*#__PURE__*/React.createElement("circle", {
-        cx: L.H[0],
-        cy: L.H[1],
-        r: 38
-      }));
-    }
+    var t = paso === 'trazo';
+    var ini = props.adelante ? suma(L.J, por(unidad(resta(L.E, L.J)), 14)) : L.J;
     return /*#__PURE__*/React.createElement("g", {
       fill: BLANCO,
-      stroke: "none"
+      stroke: t ? INK : 'none',
+      strokeWidth: t ? 30 : 0,
+      strokeLinejoin: "round"
     }, /*#__PURE__*/React.createElement("path", {
-      d: capsula(L.J, L.E, 52, 41)
+      d: capsula(ini, L.E, 52, 41)
     }), /*#__PURE__*/React.createElement("path", {
       d: capsula(L.E, L.H, 39, 31)
     }), /*#__PURE__*/React.createElement("circle", {
@@ -461,10 +696,229 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
       r: 38
     }));
   }
+
+  // detalle del brazo arriba: herradura del triceps y nudillos de la mano en la barra
+  function DetalleBrazo(props) {
+    var L = props.L;
+    var u = unidad(resta(L.E, L.J)),
+      n = [-u[1], u[0]];
+    var lb = largo(resta(L.E, L.J));
+    var b = function (t, k) {
+      return suma(L.J, suma(por(u, lb * t), por(n, k)));
+    };
+    var w = unidad(resta(L.H, L.E));
+    var nw = [-w[1], w[0]];
+    var nud = function (a, k) {
+      return suma(L.H, suma(por(w, a), por(nw, k)));
+    };
+    return /*#__PURE__*/React.createElement("g", {
+      fill: "none",
+      strokeLinecap: "round",
+      strokeLinejoin: "round"
+    }, /*#__PURE__*/React.createElement("path", {
+      d: curva([b(0.95, -22), b(0.74, 0), b(0.95, 22)]),
+      stroke: INK,
+      strokeWidth: 11,
+      opacity: suave01((elevacion(L.J, L.E) - 112) / 6)
+    }), /*#__PURE__*/React.createElement("path", {
+      d: curva([nud(6, -26), nud(26, 0), nud(6, 26)]),
+      stroke: INK,
+      strokeWidth: 11
+    }));
+  }
+
+  // pantorrilla de espaldas: gemelo ancho arriba (la cabeza interna baja mas), tobillo fino
+  var PERFIL_PANT = [[0, 48, 48], [0.14, 56, 58], [0.3, 60, 66], [0.46, 52, 58], [0.62, 40, 42], [0.82, 30, 31], [1, 28, 28]];
+  function pantorrilla(rod, tob, haciaAdentro) {
+    var u = unidad(resta(tob, rod)),
+      l = largo(resta(tob, rod));
+    var n = [-u[1], u[0]];
+    // n apunta hacia adentro (la linea media) con el signo que corresponda
+    var sg = n[0] * haciaAdentro >= 0 ? 1 : -1;
+    var f = function (t, a) {
+      return suma(suma(rod, por(u, l * t)), por(n, a * sg));
+    };
+    var afuera = PERFIL_PANT.map(function (q) {
+      return f(q[0], -q[1]);
+    });
+    var adentro = PERFIL_PANT.map(function (q) {
+      return f(q[0], q[2]);
+    }).reverse();
+    var pts = afuera.concat([f(1.08, 0)]).concat(adentro).concat([f(-0.08, 0)]);
+    return {
+      d: blando(pts, 0.5),
+      f: f
+    };
+  }
+
+  // direccion del pie (del talon a la punta) vista de atras; adentro = 1 pierna izquierda
+  function dirPie(L, adentro, k) {
+    return k < 0.01 ? [0, 1] : rotar(unidad(resta(L.tob, L.rod)), -adentro * 26 * cruce(k));
+  }
+  // y del borde inferior de la zapatilla (para apoyar la figura en un piso)
+  function bajoPie(L, adentro, k) {
+    var u = unidad(dirPie(L, adentro, k)),
+      n = [-u[1], u[0]];
+    var a = 74 + lerp(0, 120, k);
+    return Math.max(L.tob[1] + u[1] * a + Math.abs(n[1]) * 46, L.tob[1] + 48) + 7;
+  }
+
+  // zapatilla vista de atras: talon + suela; con k > 0 se ve la planta (pie colgando)
+  function zapatoAtras(tob, dir, k) {
+    var u = unidad(dir),
+      n = [-u[1], u[0]];
+    var q = function (a, b) {
+      return suma(tob, suma(por(u, a), por(n, b)));
+    };
+    var largoSuela = lerp(0, 120, k);
+    var talon = blando([q(-10, -36), q(-10, 36), q(30, 48), q(48, 44), q(48, -44), q(30, -48)], 0.4);
+    var suela = blando([q(36, -50), q(36, 50), q(74 + largoSuela, 46), q(74 + largoSuela, -46)], 0.4);
+    return {
+      talon: talon,
+      suela: suela,
+      linea: 'M ' + pt(q(14, -22)) + ' L ' + pt(q(14, 22))
+    };
+  }
+  function PiernaAtras(props) {
+    var L = props.L,
+      adentro = props.adentro,
+      k = props.k;
+    var pa = pantorrilla(L.rod, L.tob, adentro);
+    var muslo = capsula(L.cad, L.rod, 76, 52);
+    var z = zapatoAtras(L.tob, dirPie(L, adentro, k), k);
+    var f = pa.f;
+    var um = unidad(resta(L.rod, L.cad)),
+      nm = [-um[1], um[0]];
+    var sgm = nm[0] * adentro >= 0 ? 1 : -1;
+    var ft = function (t, a) {
+      return suma(lerpP(L.cad, L.rod, t), por(nm, a * sgm));
+    };
+    var linea = {
+      fill: 'none',
+      stroke: INK,
+      strokeWidth: 11,
+      strokeLinecap: 'round',
+      strokeLinejoin: 'round'
+    };
+    var fibra = {
+      fill: 'none',
+      stroke: GRY,
+      strokeWidth: 11,
+      strokeLinecap: 'round'
+    };
+    return /*#__PURE__*/React.createElement("g", null, /*#__PURE__*/React.createElement("g", {
+      fill: BLANCO,
+      stroke: INK,
+      strokeWidth: 30,
+      strokeLinejoin: "round"
+    }, /*#__PURE__*/React.createElement("path", {
+      d: muslo
+    }), /*#__PURE__*/React.createElement("path", {
+      d: pa.d
+    })), /*#__PURE__*/React.createElement("g", {
+      fill: BLANCO,
+      stroke: "none"
+    }, /*#__PURE__*/React.createElement("path", {
+      d: muslo
+    }), /*#__PURE__*/React.createElement("path", {
+      d: pa.d
+    })), /*#__PURE__*/React.createElement("path", _extends({
+      d: curva([ft(0.6, 2), ft(0.76, 0), ft(0.9, -2)])
+    }, linea)), /*#__PURE__*/React.createElement("path", _extends({
+      d: curva([ft(0.97, -24), ft(1.03, 0), ft(0.97, 24)])
+    }, fibra)), /*#__PURE__*/React.createElement("g", {
+      opacity: 1 - suave01((k - 0.42) / 0.1)
+    }, /*#__PURE__*/React.createElement("path", _extends({
+      d: curva([f(0.1, 0), f(0.24, 2), f(0.34, 4)])
+    }, linea)), /*#__PURE__*/React.createElement("path", _extends({
+      d: curva([f(0.44, -42), f(0.54, -14), f(0.6, 10), f(0.54, 42)])
+    }, linea))), /*#__PURE__*/React.createElement("path", _extends({
+      d: curva([f(0.66, 0), f(0.8, 0), f(0.94, 0)])
+    }, fibra)), /*#__PURE__*/React.createElement("path", {
+      d: z.suela,
+      fill: GRY,
+      stroke: INK,
+      strokeWidth: 13,
+      strokeLinejoin: "round"
+    }), /*#__PURE__*/React.createElement("path", {
+      d: z.talon,
+      fill: BLANCO,
+      stroke: INK,
+      strokeWidth: 14,
+      strokeLinejoin: "round"
+    }), /*#__PURE__*/React.createElement("path", {
+      d: z.linea,
+      fill: "none",
+      stroke: GRY,
+      strokeWidth: 11,
+      strokeLinecap: "round"
+    }));
+  }
+  function ShortAtras(props) {
+    var g = props.g,
+      L = g.izq,
+      R = g.der;
+    var cadera = blando([[424, 826], [676, 826], [698, 906], [652, 968], [448, 968], [402, 906]], 0.3);
+    var ruedo = 0.42;
+    var hemL = lerpP(L.cad, L.rod, ruedo),
+      hemR = lerpP(R.cad, R.rod, ruedo);
+    var entrep = [550, Math.min(hemL[1], hemR[1]) - 4];
+    return /*#__PURE__*/React.createElement("g", null, ['trazo', 'relleno'].map(function (paso) {
+      var t = paso === 'trazo';
+      return /*#__PURE__*/React.createElement("g", {
+        key: paso,
+        fill: GRY,
+        stroke: t ? INK : 'none',
+        strokeWidth: t ? 28 : 0,
+        strokeLinejoin: "round"
+      }, /*#__PURE__*/React.createElement("path", {
+        d: cadera
+      }), /*#__PURE__*/React.createElement("path", {
+        d: manga(L.cad, L.rod, ruedo, 84, 78)
+      }), /*#__PURE__*/React.createElement("path", {
+        d: manga(R.cad, R.rod, ruedo, 84, 78)
+      }));
+    }), /*#__PURE__*/React.createElement("path", {
+      d: 'M 550 862 L ' + pt(entrep),
+      stroke: INK,
+      strokeWidth: 11,
+      strokeLinecap: "round",
+      fill: "none"
+    }), /*#__PURE__*/React.createElement("path", {
+      d: curva([[466, 986], [502, 1000], [536, 992]]),
+      stroke: INK,
+      strokeWidth: 11,
+      strokeLinecap: "round",
+      fill: "none"
+    }), /*#__PURE__*/React.createElement("path", {
+      d: curva([[634, 986], [598, 1000], [564, 992]]),
+      stroke: INK,
+      strokeWidth: 11,
+      strokeLinecap: "round",
+      fill: "none"
+    }));
+  }
+  function Barra(props) {
+    var b = props.barra === true ? {} : props.barra;
+    var x0 = b.x0 == null ? 40 : b.x0,
+      x1 = b.x1 == null ? EW - 40 : b.x1;
+    var y = props.y;
+    return /*#__PURE__*/React.createElement("rect", {
+      x: x0,
+      y: y - 19,
+      width: x1 - x0,
+      height: 38,
+      rx: 19,
+      fill: BLANCO,
+      stroke: INK,
+      strokeWidth: 13
+    });
+  }
   function Espalda(props) {
     var s = props.s == null ? 1 : props.s;
-    var g = geoEspalda(props);
-    var mu = props.musc || {};
+    var g = geoBase(props);
+    var dy = props.anclaManos == null ? 0 : props.anclaManos - g.manoY;
+    var gv = trasladar(g, dy);
     var id = useIdLocal('esp');
     var sil = siluetaEspalda(g);
     var espejo = 'translate(' + EW + ',0) scale(-1,1)';
@@ -472,13 +926,49 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
       R = g.der;
     var dL = deltoide(L.J, L.dirDelt),
       dR = deltoide(R.J, R.dirDelt);
-    var tDp = tinte(mu.dp, YEL);
     var bajo = props.piernas ? 1560 : EH;
+    var tono = function (lado) {
+      return function (k) {
+        return tonoMusc(props, k, lado);
+      };
+    };
+    var adelante = g.arriba;
 
     // cuerda: de mano a mano, pasa por delante de la cara (detras de la cabeza)
     var medioCuerda = [550, Math.max(L.H[1], R.H[1]) + 56];
     var cuerda = 'M ' + pt(L.H) + ' Q ' + pt(medioCuerda) + ' ' + pt(R.H);
-    var hijos = typeof props.children === 'function' ? props.children(g) : props.children;
+    var brazos = function (pasoExtra) {
+      return /*#__PURE__*/React.createElement("g", {
+        key: pasoExtra
+      }, /*#__PURE__*/React.createElement(BrazoAtras, {
+        L: L,
+        paso: "trazo",
+        adelante: adelante
+      }), /*#__PURE__*/React.createElement("g", {
+        transform: espejo
+      }, /*#__PURE__*/React.createElement(BrazoAtras, {
+        L: L,
+        paso: "trazo",
+        adelante: adelante
+      })), /*#__PURE__*/React.createElement(BrazoAtras, {
+        L: L,
+        paso: "relleno",
+        adelante: adelante
+      }), /*#__PURE__*/React.createElement("g", {
+        transform: espejo
+      }, /*#__PURE__*/React.createElement(BrazoAtras, {
+        L: L,
+        paso: "relleno",
+        adelante: adelante
+      })), adelante ? /*#__PURE__*/React.createElement(DetalleBrazo, {
+        L: L
+      }) : null, adelante ? /*#__PURE__*/React.createElement("g", {
+        transform: espejo
+      }, /*#__PURE__*/React.createElement(DetalleBrazo, {
+        L: L
+      })) : null);
+    };
+    var hijos = typeof props.children === 'function' ? props.children(gv) : props.children;
     return /*#__PURE__*/React.createElement("svg", {
       width: EW * s,
       height: EH * s,
@@ -491,7 +981,12 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
       id: id
     }, /*#__PURE__*/React.createElement("path", {
       d: sil
-    }))), /*#__PURE__*/React.createElement("path", {
+    }))), props.barra ? /*#__PURE__*/React.createElement(Barra, {
+      barra: props.barra,
+      y: gv.barraY
+    }) : null, /*#__PURE__*/React.createElement("g", {
+      transform: dy ? 'translate(0 ' + dy.toFixed(1) + ')' : undefined
+    }, g.arriba ? null : /*#__PURE__*/React.createElement("g", null, /*#__PURE__*/React.createElement("path", {
       d: cuerda,
       fill: "none",
       stroke: INK,
@@ -503,23 +998,17 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
       stroke: GRY,
       strokeWidth: 8,
       strokeLinecap: "round"
-    }), /*#__PURE__*/React.createElement(BrazoAtras, {
+    })), adelante ? null : brazos('atras'), g.entero ? /*#__PURE__*/React.createElement("g", null, /*#__PURE__*/React.createElement(PiernaAtras, {
+      L: R,
+      adentro: -1,
+      k: g.rodillas
+    }), /*#__PURE__*/React.createElement(PiernaAtras, {
       L: L,
-      paso: "trazo"
-    }), /*#__PURE__*/React.createElement("g", {
-      transform: espejo
-    }, /*#__PURE__*/React.createElement(BrazoAtras, {
-      L: L,
-      paso: "trazo"
-    })), /*#__PURE__*/React.createElement(BrazoAtras, {
-      L: L,
-      paso: "relleno"
-    }), /*#__PURE__*/React.createElement("g", {
-      transform: espejo
-    }, /*#__PURE__*/React.createElement(BrazoAtras, {
-      L: L,
-      paso: "relleno"
-    })), /*#__PURE__*/React.createElement("path", {
+      adentro: 1,
+      k: g.rodillas
+    }), /*#__PURE__*/React.createElement(ShortAtras, {
+      g: g
+    })) : /*#__PURE__*/React.createElement("g", null, /*#__PURE__*/React.createElement("path", {
       d: 'M 426 830 L 414 ' + bajo + ' L 686 ' + bajo + ' L 674 830 Z',
       fill: GRY,
       stroke: "none"
@@ -529,7 +1018,7 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
       strokeWidth: 15,
       strokeLinecap: "round",
       fill: "none"
-    }), /*#__PURE__*/React.createElement("path", {
+    })), /*#__PURE__*/React.createElement("path", {
       d: sil,
       fill: BLANCO,
       stroke: "none"
@@ -538,13 +1027,13 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
     }, /*#__PURE__*/React.createElement(MusculosLado, {
       L: L,
       g: g,
-      mu: mu
+      tono: tono(0)
     }), /*#__PURE__*/React.createElement("g", {
       transform: espejo
     }, /*#__PURE__*/React.createElement(MusculosLado, {
       L: L,
       g: g,
-      mu: mu
+      tono: tono(1)
     })), /*#__PURE__*/React.createElement("path", {
       d: "M 550 300 L 550 830",
       stroke: INK,
@@ -565,7 +1054,8 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
       fill: GRY,
       stroke: INK,
       strokeWidth: 13
-    }), [dL, dR].map(function (d, i) {
+    }), adelante ? brazos('adelante') : null, [dL, dR].map(function (d, i) {
+      var tDp = tonoMusc(props, 'dp', i);
       return /*#__PURE__*/React.createElement("g", {
         key: 'd' + i
       }, /*#__PURE__*/React.createElement("path", {
@@ -613,7 +1103,7 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
       fill: BLANCO,
       stroke: INK,
       strokeWidth: 15
-    }), hijos);
+    })), hijos);
   }
 
   /* =========================================================
@@ -1104,6 +1594,13 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
     Cuenta: Cuenta,
     Espalda: Espalda,
     geoEspalda: geoEspalda,
+    ESPALDA: {
+      ancho: EW,
+      alto: EH,
+      agarre: AGARRE,
+      brazo: BRAZO_ARR,
+      antebrazo: ANTE_ARR
+    },
     util: {
       lerp: lerp,
       lerpP: lerpP,

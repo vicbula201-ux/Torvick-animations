@@ -5,13 +5,29 @@
    mismo truco de union en los miembros) pero armada sobre puntos:
    sirve parada, inclinada, acostada o colgada.
 
-   Mira hacia la IZQUIERDA: -x es el frente. viewBox 1400x1400.
+   Mira hacia la IZQUIERDA: -x es el frente. viewBox 1400x1400, piso y=1300.
 
-   B.Perfil({ s, pose, musc, muscGris, muscRojo, fondo, medio, children })
-   B.posePerfil.depie / sentadilla / acostado / banco / colgado
-   B.geoPerfil(props)   la misma geometria que recibe children(g)
+   <B.Perfil s pose musc muscGris muscRojo fondo medio agarre children style />
+     pose      puntos de la pose (ver abajo); sin pose = posePerfil.depie({})
+     musc      { clave: 0..1 } amarillo (principal). 0 = no se dibuja
+     muscGris  { clave: 0..1 } gris (secundario)
+     muscRojo  { clave: 0..1 } rojo (error / tension mala). Prioridad rojo > amarillo > gris
+       claves: cuad recto psoas tfl sart glu isq gem abd obl erec dor pec delt delto tri bic ante
+     fondo(g)  SVG antes del cuerpo (piso, colchoneta, banco, barra)
+     medio(g)  SVG entre la pierna lejana y la cercana
+     agarre(g) SVG entre el tronco y el brazo cercano (lo que se tiene en la mano:
+               la mano cercana lo tapa). Alias: enMano
+     children(g) SVG encima de todo (flechas, guias, rotulos)
+   Orden: fondo, brazo lejano, pierna lejana, medio, pierna cercana, short,
+   torso (+ musculos), cabeza, agarre, brazo cercano, deltoides, children.
+
+   pose = { cadera, cuello, curva (-1..1), cabeza (grados), hombro?, codo, mano,
+            hombro2?, codo2?, mano2?, rodilla, tobillo, punta, rodilla2?, tobillo2?,
+            punta2?, piso?, pegado?, brazosDentro?, cabezaEncima? }
+   B.posePerfil.depie / sentadilla / acostado / banco / colgado / mezclar / mover / girar
+   B.geoPerfil(props)   la misma geometria g que reciben fondo/agarre/children
    B.ik(a, b, l1, l2, lado)
-   B.PERFIL             medidas (largos de segmentos, viewBox, piso)
+   B.PERFIL             { W, H, PISO, medidas }
    ============================================================ */
 (function (global) {
   'use strict';
@@ -571,16 +587,17 @@
     abd: function (g) {
       var F = g.anchoFrente,
         T = g.torso;
-      var ts = [0.12, 0.24, 0.38, 0.5, 0.6, 0.66];
-      var ins = [[0.12, 46], [0.24, 36], [0.38, 36], [0.5, 38], [0.6, 40], [0.66, 70]];
+      // banda de la pared frontal, del pubis al borde de las costillas (bajo el
+      // pectoral), con las puntas redondeadas hacia el contorno
+      var ins = [[0.1, 2], [0.14, 30], [0.22, 40], [0.36, 40], [0.5, 40], [0.57, 32], [0.61, 2]];
       var pts = ins.map(function (q) {
         return T(q[0], F(q[0]) - q[1]);
       });
-      var fuera = [T(0.68, F(0.68) + 60), T(0.1, F(0.1) + 60)];
-      var lineas = [0.27, 0.38, 0.49].map(function (t) {
-        return poli([T(t, F(t) - 37), T(t + 0.01, F(t) + 20)]);
+      var fuera = [T(0.63, F(0.63) + 60), T(0.08, F(0.08) + 60)];
+      // las tres intersecciones tendinosas (los "cuadritos")
+      var lineas = [0.26, 0.36, 0.46].map(function (t) {
+        return poli([T(t, F(t) - 40), T(t, F(t) + 20)]);
       });
-      void ts;
       return {
         capa: 'torso',
         clip: 't',
@@ -714,10 +731,13 @@
       };
     },
     psoas: function (g) {
+      // banda esquematica: de las vertebras lumbares (mitad de atras del tronco)
+      // baja por dentro de la pelvis, pasa por delante de la articulacion de la
+      // cadera y se mete en la cara interna del muslo, cerca de la raiz
       var T = g.torso,
         Bk = g.anchoEspalda,
         m = g.ejes.muslo;
-      var pts = [T(0.5, -Bk(0.5) * 0.4), T(0.3, -14), T(0.12, 12), g.pelvis(-14, 36), m.en(0.12, 0.2 * 66), m.en(0.2, -0.05 * m.r(0.2))];
+      var pts = [T(0.5, -Bk(0.5) * 0.45), T(0.3, -10), T(0.14, 16), g.pelvis(-20, 34), m.en(0.24, 0.55 * m.r(0.24))];
       return {
         capa: 'pierna',
         clip: null,
@@ -1180,7 +1200,7 @@
     return mx;
   }
   var posePerfil = {
-    // 1. parado, brazos colgando. x = cadera
+    // 1. parado, brazos colgando. x = cadera, brazo = grados (+ adelante)
     depie: function (o) {
       o = o || {};
       var x = o.x == null ? 700 : o.x,
@@ -1191,8 +1211,10 @@
       var hom = hombroDe(cad, cue, 0);
       // brazo colgando apenas por detras del eje: deja ver el frente del
       // tronco y del muslo (abdominales, cuadriceps) sin parecer forzado
-      var codo = suma(hom, polar(87, MED.brazo));
-      var mano = suma(codo, polar(92, MED.ante));
+      // brazo: grados respecto de la vertical (+ adelante, - atras)
+      var br = o.brazo == null ? -3 : o.brazo;
+      var codo = suma(hom, polar(90 + br, MED.brazo));
+      var mano = suma(codo, polar(95 + br + Math.max(0, br) * 0.15, MED.ante));
       var tob2 = [x + 48, piso - MED.tobillo];
       return {
         cadera: cad,
@@ -1435,7 +1457,9 @@
       // tronco: abajo casi vertical; arriba se echa atras (cadera adelante)
       var fi = lerp(2, 5, e);
       var dn = polar(90 + fi, 1);
-      var cue = suma(hom, por(dn, -(MED.cuelloHombro - 22 * (1 - e))));
+      // colgado abajo los hombros suben hasta las orejas: el cuello queda un poco
+      // por delante del hombro y el brazo sube por detras de la cabeza
+      var cue = suma(suma(hom, por(dn, -(MED.cuelloHombro - 22 * (1 - e)))), por(rotar(dn, 90), 30 * (1 - e)));
       var cad = suma(cue, por(dn, MED.columna));
       var thA = 90 + fi + 6 + rd * 34;
       var rod = suma(cad, polar(thA, MED.muslo));
@@ -1448,7 +1472,7 @@
         cadera: cad,
         cuello: cue,
         curva: -0.1 * e,
-        cabeza: lerp(-6, -14, e),
+        cabeza: lerp(-16, -14, e),
         hombro: hom,
         codo: codo,
         mano: mano,

@@ -4,10 +4,12 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
    FRENTE — B.Frente: figura humana de frente, cuerpo entero
    Misma familia que B.Espalda y B.Estacion: trazo #14110F grueso,
    relleno blanco, puntas redondas, viewBox fijo, prop s de escala.
+   Mismas medidas que la persona de B.Estacion (~1170 de alto).
 
    B.Frente       1200x1600  persona de frente (o vista cenital acostada)
-   B.geoFrente    la misma geometria, sin dibujar
+   B.geoFrente    la misma geometria, sin dibujar: geoFrente({ pose })
    B.poseFrente   constructores de pose: depie, sumo, bancaArriba, mezclar
+   B.FRENTE       medidas: W, H, L_TORSO, HOMBRO, CADERA_X
 
    La pose son puntos explicitos (centro de la pelvis, base del cuello,
    y por lado codo, mano, rodilla, tobillo, pieAng). Los constructores
@@ -29,9 +31,10 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
      pose       objeto de pose (ver abajo); por defecto depie({})
      musc       { clave: 0..1 | [izq, der] }  amarillo (lo que trabaja)
      muscGris   { ... }  gris (secundario)     muscRojo { ... } rojo (error)
+                prioridad si una clave esta en varios: rojo > amarillo > gris
                 claves: pec delt bic ante abd obl serr trap cuad aduct sart tfl
                 con 0 el musculo no se dibuja; el tinte entra con opacidad = valor
-     short      fraccion del muslo que tapa la manga (0.36; < 0.2 deja ver el tfl)
+     short      fraccion del muslo que tapa la manga (0.34; < 0.2 deja ver el tfl)
      boca       true dibuja una linea de boca (por defecto: ojos y nariz)
      sinPiso    sin la linea gris del piso (vista de frente)
      sinBanco   sin el banco (vista cenital)
@@ -41,6 +44,8 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
            izq: { codo, mano, rodilla, tobillo, pieAng, hombro?, cadera?,
                   kCodo?, kMano?, kPie? }, der: { ... },
            mancuerna?, banco? }
+   Si se mueve el cuello (inclinar el torso) hay que mover tambien codo y
+   mano: los brazos son puntos absolutos, no siguen solos al hombro.
    ============================================================ */
 (function (global) {
   'use strict';
@@ -78,7 +83,7 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
   var TOBILLO = 32; // alto del tobillo sobre el piso
   var R_PUNO = 36;
   var CABEZA_D = 162; // base del cuello -> centro de la cabeza
-  var FAJA = [-96, -58]; // elastico del short (y del torso)
+  var FAJA = [-82, -46]; // elastico del short, en coordenadas del torso
 
   /* ---------------- geometria ---------------- */
 
@@ -231,7 +236,7 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
 
   // zapatilla de frente: perfil lateral [a lo largo desde el tobillo, alto, medio ancho]
   // girado pieAng hacia afuera y proyectado sobre el plano de la camara
-  var PERFIL_ZAP = [[-46, 2, 34], [-50, 46, 34], [-22, 76, 36], [30, 72, 40], [96, 52, 46], [158, 34, 46], [192, 20, 40], [200, 6, 36], [184, 0, 40], [0, 0, 42]];
+  var PERFIL_ZAP = [[-46, 2, 34], [-50, 46, 34], [-22, 76, 36], [30, 72, 40], [96, 56, 46], [156, 44, 46], [190, 32, 40], [204, 14, 34], [190, 0, 40], [0, 0, 42]];
   function zapatoFrente(tob, piso, ang, lado) {
     var a = ang * GRAD,
       sa = Math.sin(a),
@@ -291,8 +296,9 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
       var S = [x + l * HOMBRO[0], yH + HOMBRO[1]];
       var cad = [x + l * CADERA_X, yH],
         tob = [x + l * pies, tobY];
-      var E = suma(S, [l * 26, 196]),
-        H = suma(E, [l * 8, 194]);
+      // brazos un poco separados: se ve el hueco entre el brazo y la cintura
+      var E = suma(S, [l * 38, 194]),
+        H = suma(E, [l * 18, 192]);
       pose[k] = {
         codo: E,
         mano: H,
@@ -341,7 +347,7 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
       var rod = ik(cad, tob, lt, ls, [l, -1]);
       if (valgo > 0) {
         var v = valgo * prof;
-        rod = [rod[0] - l * v * 140, rod[1] + v * 10];
+        rod = [rod[0] - l * v * 115, rod[1] + v * 12];
       }
       var S = fr.a([l * HOMBRO[0], HOMBRO[1]]);
       var hx = x + l * 30;
@@ -406,11 +412,11 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
       var a = abd * GRAD;
       var dirH = [l * Math.sin(a), Math.cos(a)];
       // abajo: codo bajo el banco a abd grados del torso, antebrazo vertical (hacia camara)
-      var th0 = -36 * GRAD;
+      var th0 = -24 * GRAD;
       var E0 = [S[0] + dirH[0] * Math.cos(th0) * L_BRAZO, S[1] + dirH[1] * Math.cos(th0) * L_BRAZO, Math.sin(th0) * L_BRAZO];
       var H0 = [E0[0], E0[1], E0[2] + L_ANTE];
       // arriba: brazos casi rectos, mancuernas sobre los hombros y un poco hacia adentro
-      var H1 = [S[0] - l * 36, S[1] + 6, 0.97 * (L_BRAZO + L_ANTE)];
+      var H1 = [S[0] - l * 16, S[1] + 6, 0.97 * (L_BRAZO + L_ANTE)];
       // la mancuerna sube casi vertical (el antebrazo sigue sobre el codo) y se cierra al final
       var ph2 = p * p;
       var H3 = [lerp(H0[0], H1[0], ph2), lerp(H0[1], H1[1], ph2), lerp(H0[2], H1[2], p)];
@@ -484,8 +490,8 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
       local: fr.a,
       marco: fr,
       pecho: fr.a([0, -280]),
-      ombligo: fr.a([0, -124]),
-      cintura: fr.a([0, -78]),
+      ombligo: fr.a([0, -100]),
+      cintura: fr.a([0, (FAJA[0] + FAJA[1]) / 2]),
       mancuerna: pose.mancuerna || null,
       banco: pose.banco || null
     };
@@ -493,8 +499,8 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
       var q = pose[k] || {};
       var S = q.hombro || fr.a([l * HOMBRO[0], HOMBRO[1]]);
       var cad = q.cadera || fr.a([l * CADERA_X, 0]);
-      var E = q.codo || suma(S, [l * 26, 196]);
-      var H = q.mano || suma(E, [l * 8, 194]);
+      var E = q.codo || suma(S, [l * 38, 194]);
+      var H = q.mano || suma(E, [l * 18, 192]);
       var tob = q.tobillo || suma(cad, [l * 10, L_MUSLO + L_PIERNA]);
       var rod = q.rodilla || lerpP(cad, tob, 0.5);
       var pieAng = q.pieAng == null ? 12 : q.pieAng;
@@ -654,19 +660,19 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
   function formasTorso(S) {
     var sx = S[0],
       sy = S[1];
-    var axila = [sx + 30, sy + 36];
-    var bajoPec = [['C', [-128, -236], [-102, -212], [-68, -212]], ['C', [-42, -212], [-24, -216], [-12, -228]]];
-    var filas = [[-204, -172, 58, 56], [-166, -136, 56, 54], [-130, -104, 54, 52]];
+    var axila = [sx + 28, sy + 38];
+    var bajoPec = [['C', [-128, -232], [-100, -206], [-66, -207]], ['C', [-38, -208], [-18, -216], [-10, -234]]];
     return {
       bordePec: [['M', axila]].concat(bajoPec),
-      pec: [['M', [-12, -346]], ['C', [-52, -354], [sx + 76, sy - 40], [sx + 36, sy - 26]], ['C', [sx + 20, sy - 12], [sx + 18, sy + 20], axila]].concat(bajoPec, [['C', [-10, -262], [-10, -318], [-12, -346]], 'Z']),
+      pec: [['M', [-10, -334]], ['C', [-40, -342], [-92, -352], [sx + 44, sy - 38]], ['C', [sx + 20, sy - 26], [sx + 14, sy + 10], axila]].concat(bajoPec, [['C', [-8, -268], [-8, -306], [-10, -334]], 'Z']),
       pecFibras: [[['M', [-26, -244]], ['Q', [-84, -246], [sx + 36, sy + 26]]], [['M', [-26, -310]], ['Q', [-80, -306], [sx + 34, sy - 4]]]],
       trap: [['M', [-44, -470]], ['L', [sx - 40, sy - 130]], ['L', [sx + 14, sy - 40]], ['C', [sx + 60, sy - 40], [-78, -362], [-50, -374]], 'Z'],
       trapLinea: [['M', [sx + 14, sy - 40]], ['C', [sx + 60, sy - 40], [-78, -362], [-50, -374]]],
       trapFibra: [['M', [-58, -404]], ['Q', [-92, -388], [sx + 30, sy - 56]]],
-      abd: filas.map(function (f) {
-        return [[-9, f[0]], [-f[2], f[0] + 3], [-f[3], f[1]], [-9, f[1]]];
-      }),
+      // recto abdominal: una banda por lado (la linea alba queda entre las dos) y
+      // las intersecciones tendinosas que arman los cuadritos
+      abd: [['M', [-8, -228]], ['C', [-18, -214], [-40, -204], [-66, -200]], ['C', [-74, -160], [-70, -110], [-58, -60]], ['C', [-50, -40], [-24, -36], [-8, -36]], 'Z'],
+      abdLineas: [[['M', [-10, -162]], ['Q', [-40, -156], [-70, -164]]], [['M', [-10, -120]], ['Q', [-40, -114], [-68, -122]]]],
       obl: [['M', [-66, -200]], ['C', [-100, -212], [-150, -224], [-200, -214]], ['L', [-200, -40]], ['L', [-62, -40]], ['C', [-56, -90], [-58, -150], [-66, -200]], 'Z'],
       oblLinea: [['M', [-66, -200]], ['C', [-58, -150], [-56, -90], [-62, -40]]],
       oblFibras: [[['M', [-150, -186]], ['L', [-100, -140]]], [['M', [-146, -142]], ['L', [-102, -104]]]],
@@ -720,12 +726,10 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
         m: mPec,
         d: R(F.pec),
         fibras: F.pecFibras.map(R)
-      }), F.abd.map(function (q, j) {
-        return /*#__PURE__*/React.createElement(Musculo, {
-          key: 'a' + j,
-          m: mAbd,
-          d: blando(q.map(f), 0.34)
-        });
+      }), /*#__PURE__*/React.createElement(Musculo, {
+        m: mAbd,
+        d: R(F.abd),
+        lineas: F.abdLineas.map(R)
       }), mPec ? null : /*#__PURE__*/React.createElement("path", _extends({
         d: R(F.bordePec)
       }, LINEA))));
@@ -741,14 +745,41 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
   var PF_MUSLO = [[0, 70, 62], [0.2, 73, 60], [0.45, 68, 52], [0.68, 58, 45], [0.84, 50, 49], [0.94, 45, 46], [1, 43, 43], [1.06, 43, 43]];
   // pierna de frente: gemelos que asoman a los dos lados (mas adentro), tobillo fino
   var PF_PIERNA = [[-0.06, 43, 43], [0, 43, 43], [0.13, 46, 49], [0.32, 48, 54], [0.55, 40, 43], [0.8, 31, 31], [1, 27, 27]];
-  var SART = [[0.02, 60], [0.26, 24], [0.5, -14], [0.74, -40], [0.97, -46]];
+
+  // puntos de una curva suave (Catmull-Rom abierta) que pasa por pts, k por tramo:
+  // asi dos musculos vecinos comparten exactamente el mismo borde
+  function muestras(pts, k) {
+    var out = [pts[0]],
+      n = pts.length;
+    for (var i = 0; i < n - 1; i++) {
+      var p0 = pts[Math.max(0, i - 1)],
+        p1 = pts[i],
+        p2 = pts[i + 1],
+        p3 = pts[Math.min(n - 1, i + 2)];
+      for (var j = 1; j <= k; j++) {
+        var t = j / k,
+          t2 = t * t,
+          t3 = t2 * t;
+        out.push([0, 1].map(function (c) {
+          return 0.5 * (2 * p1[c] + (-p0[c] + p2[c]) * t + (2 * p0[c] - 5 * p1[c] + 4 * p2[c] - p3[c]) * t2 + (-p0[c] + 3 * p1[c] - 3 * p2[c] + p3[c]) * t3);
+        }));
+      }
+    }
+    return out;
+  }
+
+  // sartorio: de la cadera (afuera) a la cara interna de la rodilla; es el borde
+  // entre el cuadriceps (adelante y afuera) y los aductores (arriba y adentro)
+  var SART = [[0.02, 62], [0.26, 24], [0.5, -14], [0.74, -40], [0.97, -46]];
+  var BORDE = muestras(SART.slice(0, 4), 6);
+  // borde de abajo del cuadriceps: la gota del vasto interno y el contorno sobre la rotula
+  var RODILLA_CUAD = muestras([[0.74, -40], [0.86, -52], [0.95, -32], [0.98, 0], [0.95, 40], [0.88, 90]], 5);
   var FORMAS_MUSLO = {
-    cuad: [[0.1, 92], [0.5, 92], [0.8, 64], [0.88, 40], [0.92, 14], [0.94, -12], [0.92, -34], [0.84, -46], [0.7, -36], [0.5, -6], [0.28, 32], [0.1, 70]],
-    cuadLineas: [[[0.6, -8], [0.78, -18], [0.9, -14]]],
-    cuadFibras: [[[0.4, 32], [0.62, 28], [0.82, 18]]],
-    aduct: [[0.0, 48], [0.26, 12], [0.5, -26], [0.72, -52], [0.72, -130], [0.0, -130]],
-    aductLinea: [[0.0, 48], [0.26, 12], [0.5, -26], [0.72, -52]],
-    aductFibra: [[0.14, -22], [0.46, -50]],
+    // cuadriceps: todo el frente del muslo hasta la rodilla, con la gota del vasto interno
+    cuad: BORDE.concat(RODILLA_CUAD.slice(1), [[0.4, 130], [0.0, 130]]),
+    cuadFibras: [[[0.36, 36], [0.6, 30], [0.84, 16]]],
+    aduct: BORDE.concat([[0.74, -140], [0.0, -140]]),
+    aductFibra: [[0.16, -20], [0.46, -48]],
     tfl: [[0.0, 44], [0.04, 82], [0.26, 82], [0.36, 68], [0.2, 52]],
     tflLinea: [[0.36, 70], [0.66, 64], [0.95, 52]]
   };
@@ -762,6 +793,12 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
     var A = function (pts) {
       return abierta(pts.map(f));
     };
+    var Pl = function (pts) {
+      return 'M ' + pts.map(f).map(pt).join(' L ') + ' Z';
+    };
+    var Ab = function (pts) {
+      return 'M ' + pts.map(f).map(pt).join(' L ');
+    };
     var F = FORMAS_MUSLO;
     var sart = SART.map(function (q) {
       return [q[0], q[1] + 11];
@@ -769,20 +806,21 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
       return [q[0], q[1] - 11];
     }));
     return /*#__PURE__*/React.createElement("g", null, /*#__PURE__*/React.createElement(Musculo, {
-      m: nivel(pr, 'aduct', i),
-      d: 'M ' + F.aduct.map(f).map(pt).join(' L ') + ' Z',
+      m: nivel(pr, 'cuad', i),
+      d: Pl(F.cuad),
       sinContorno: true,
-      lineas: [A(F.aductLinea)],
+      lineas: [Ab(BORDE), Ab(RODILLA_CUAD)],
+      fibras: F.cuadFibras.map(A)
+    }), /*#__PURE__*/React.createElement(Musculo, {
+      m: nivel(pr, 'aduct', i),
+      d: Pl(F.aduct),
+      sinContorno: true,
+      lineas: [Ab(BORDE)],
       fibras: [A(F.aductFibra)]
     }), /*#__PURE__*/React.createElement(Musculo, {
       m: nivel(pr, 'tfl', i),
       d: C(F.tfl),
       lineas: [A(F.tflLinea)]
-    }), /*#__PURE__*/React.createElement(Musculo, {
-      m: nivel(pr, 'cuad', i),
-      d: C(F.cuad),
-      lineas: F.cuadLineas.map(A),
-      fibras: F.cuadFibras.map(A)
     }), /*#__PURE__*/React.createElement(Musculo, {
       m: nivel(pr, 'sart', i),
       d: C(sart)
@@ -847,10 +885,10 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
       stroke: INK,
       strokeWidth: 13
     }), /*#__PURE__*/React.createElement("rect", {
-      x: b.x - 176,
-      y: b.y1 - 120,
-      width: 352,
-      height: 46,
+      x: b.x - 140,
+      y: b.y1 - 76,
+      width: 280,
+      height: 42,
       rx: 16,
       fill: BLANCO,
       stroke: INK,
@@ -1022,10 +1060,25 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
     });
 
     // short: elastico + cadera + dos mangas cortas con ruedo recto (se ven los muslos)
-    var cortoFrac = props.short == null ? 0.36 : props.short;
-    var bloque = blando([[-140, -74], [140, -74], [166, -4], [0, 30], [-166, -4]].map(fr.a), 0.3);
+    var cortoFrac = props.short == null ? 0.34 : props.short;
     var faja = blando([[-146, FAJA[0]], [146, FAJA[0]], [149, FAJA[1]], [-149, FAJA[1]]].map(fr.a), 0.2);
-    var ruedos = [];
+    // cada manga va de la cadera al ruedo (recto, perpendicular al muslo) y su borde
+    // interno sube hasta la entrepierna: entre las piernas queda la V del short
+    // con los muslos horizontales (sentadilla profunda) la entrepierna baja hasta la
+    // linea interna de los muslos: el short queda tirante entre las piernas
+    var horiz = function () {
+      var t = 0;
+      lad.forEach(function (q) {
+        var v = unidad(resta(q.rodilla, q.cadera));
+        var ang = Math.acos(clamp(-dot(v, fr.u), -1, 1)) / GRAD;
+        t += U.suave01((ang - 45) / 40) / 2;
+      });
+      return t;
+    }();
+    var entrepierna = fr.a([0, lerp(30, 72, horiz)]);
+    // cadera del short; con los muslos horizontales se angosta para que se vean las mangas
+    var bx = lerp(166, 140, horiz);
+    var bloque = blando([[-134, FAJA[0] + 22], [134, FAJA[0] + 22], [bx, -4], [0, 36], [-bx, -4]].map(fr.a), 0.3);
     var manga = function (q) {
       var f = segF(q.cadera, q.rodilla, q.lado);
       var lr = f.l || 1;
@@ -1034,19 +1087,10 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
       var hw = lr < 140 ? 76 : 72;
       var a = suma(arriba, por(f.n, 74)),
         b = suma(ruedo, por(f.n, hw));
-      var c = suma(ruedo, por(f.n, -hw)),
-        d = suma(arriba, por(f.n, -74));
-      ruedos.push([b, c]);
-      return blando([a, b, c, d], 0.12);
+      var c = suma(ruedo, por(f.n, -hw));
+      return blando([a, b, c, entrepierna], 0.12);
     };
     var mangas = [manga(L), manga(R)];
-    // costura de la entrepierna, solo cuando las dos mangas se tocan
-    var costura = null;
-    var ri = ruedos[0][1],
-      rd = ruedos[1][1];
-    if (largo(resta(ri, rd)) < 70) {
-      costura = 'M ' + pt(fr.a([0, 22])) + ' L ' + pt(lerpP(ri, rd, 0.5));
-    }
 
     // brazo superior y antebrazo
     var brazos = function (paso, que) {
@@ -1210,9 +1254,7 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
       }), /*#__PURE__*/React.createElement("path", {
         d: mangas[1]
       }));
-    }), costura ? /*#__PURE__*/React.createElement("path", _extends({
-      d: costura
-    }, LINEA)) : null, /*#__PURE__*/React.createElement("path", {
+    }), /*#__PURE__*/React.createElement("path", {
       d: faja,
       fill: GRY,
       stroke: INK,
