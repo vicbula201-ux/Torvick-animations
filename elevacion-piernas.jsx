@@ -34,6 +34,10 @@
   // figura entera: de la punta del pie (x ~ 8) a la coronilla (x ~ 985), fuera de los botones de la derecha
   var FIG = { x: -8, y: SUELO - PISO * 0.8, s: 0.8 };
   var MAT = [36, 1286];                   // colchoneta fija (x del viewBox), no sigue a los pies
+  // colchoneta vista apenas desde arriba: la cara de arriba es ancha y el cuerpo
+  // se apoya en su mitad de atras; el brazo cercano descansa sobre la mitad de
+  // adelante (sin la cara ancha, el brazo colgaba por debajo de la colchoneta)
+  var MATC = { dy: 22, cara: 120, grosor: 18 };
 
   function enLienzo(base, p) { return [base.x + p[0] * base.s, base.y + p[1] * base.s]; }
 
@@ -45,9 +49,10 @@
     var k = Easing.easeInOutCubic(clamp(o.manos == null ? 1 : o.manos, 0, 1));
     var cx = p.cadera[0];
     // la mano viaja "hacia adentro" (en este dibujo lo que esta mas cerca de la
-    // camara queda mas abajo): del costado, delante del piso, a debajo del gluteo
-    p.mano = U.lerpP([cx + 96, PISO + 40], [cx - 8, PISO - 2], k);
-    p.codo = U.lerpP([cx + 236, PISO + 52], [cx + 168, PISO + 66], k);
+    // camara queda mas abajo): del costado, apoyada en la colchoneta delante del
+    // cuerpo, a debajo del gluteo
+    p.mano = U.lerpP([cx + 60, PISO + 52], [cx - 8, PISO - 2], k);
+    p.codo = U.lerpP([cx + 222, PISO + 48], [cx + 158, PISO + 34], k);
     return p;
   }
 
@@ -98,14 +103,33 @@
     };
   }
 
+  // tensor de la fascia lata: la misma forma que B.Perfil, pero dibujada encima del
+  // iliopsoas (es superficial, en la cara lateral de la cadera). La de B.Perfil queda
+  // gris sobre el short gris y tapada por el iliopsoas, asi que no se ve.
+  function tflForma(g) {
+    var m = g.ejes.muslo;
+    var pts = [m.en(-0.24, 0.62 * 66), m.en(-0.06, 0.98 * 66), m.en(0.2, 0.62 * m.r(0.2)),
+      m.en(0.3, 0.32 * m.r(0.3)), m.en(0.12, 0.26 * m.r(0.12)), m.en(-0.1, 0.36 * 66)];
+    var n = pts.length;
+    var lazo = [pts[n - 1]].concat(pts, [pts[0], pts[1]]);
+    var c = catmull(lazo, 8 * (lazo.length - 1)).slice(8, 8 * (n + 1) + 1);
+    return 'M ' + c.map(U.pt).join(' L ') + ' Z';
+  }
+
   function Musculos(props) {
-    var g = props.g, v = props.psoas || 0;
-    if (v < 0.01) return null;
-    var ps = psoasForma(g);
+    var g = props.g, v = props.psoas || 0, vt = props.tfl || 0;
+    var ps = v < 0.01 ? null : psoasForma(g);
     return (
-      <g opacity={v} strokeLinecap="round" strokeLinejoin="round">
-        <path d={ps.d} fill={props.color || C.YEL} stroke={C.INK} strokeWidth={13} />
-        <path d={ps.fibra} fill="none" stroke={C.GRY} strokeWidth={11} />
+      <g strokeLinecap="round" strokeLinejoin="round">
+        {ps ? (
+          <g opacity={v}>
+            <path d={ps.d} fill={props.color || C.YEL} stroke={C.INK} strokeWidth={13} />
+            <path d={ps.fibra} fill="none" stroke={C.GRY} strokeWidth={11} />
+          </g>
+        ) : null}
+        {vt > 0.01 ? (
+          <path d={tflForma(g)} opacity={vt} fill={C.GRY} stroke={C.INK} strokeWidth={13} />
+        ) : null}
       </g>
     );
   }
@@ -123,12 +147,14 @@
     var gris = props.muscGris;
     var rojo = props.muscRojo;
     var vPsoas = (props.musc || {}).psoas;
+    var vTfl = (props.muscGris || {}).tfl;
     return (
       <Pos x={b.x} y={b.y} e={props.e} dx={props.dx} dy={props.dy}
         origen={oCad[0].toFixed(0) + 'px ' + oCad[1].toFixed(0) + 'px'}>
         <B.Perfil s={b.s} pose={po} musc={musc} muscGris={gris} muscRojo={rojo}
           fondo={function (g) {
-            return <B.ColchonetaG x0={MAT[0]} x1={MAT[1]} y={g.piso} />;
+            return <B.ColchonetaG x0={MAT[0]} x1={MAT[1]} y={g.piso + MATC.dy} cara={MATC.cara}
+              grosor={MATC.grosor} />;
           }}>
           {function (g) {
             return (
@@ -141,7 +167,7 @@
                 <g mask={'url(#' + id + ')'}>
                   <B.Perfil s={1} pose={sinBrazo(po)} musc={musc} muscGris={gris} muscRojo={rojo} />
                 </g>
-                <Musculos g={g} psoas={vPsoas} />
+                <Musculos g={g} psoas={vPsoas} tfl={vTfl} />
                 {props.children ? props.children(g) : null}
               </g>
             );
@@ -281,7 +307,10 @@
     var sube = animate({ from: 0, to: 1, start: f(0.02), end: f(0.26), ease: Easing.easeInOutSine })(T);
     var piernas = 90 * sube - 34 * reps(T, f(0.3), f(0.98), 2);
     var abd = animate({ from: 0, to: 1, start: f(0.24), end: f(0.34) })(T);
-    var cambio = animate({ from: 0, to: 1, start: f(0.62), end: f(0.7) })(T);
+    // el amarillo del abdomen se apaga y despues entra el gris (B.Perfil da prioridad
+    // al amarillo: si se cruzaran, el gris apareceria de golpe al final del fundido)
+    var cambio = animate({ from: 0, to: 1, start: f(0.62), end: f(0.68) })(T);
+    var abdGris = animate({ from: 0, to: 1, start: f(0.68), end: f(0.76) })(T);
     var luz = animate({ from: 0, to: 1, start: f(0.66), end: f(0.76) })(T);
     var anillo = animate({ from: 0, to: 1, start: f(0.64), end: f(0.74) })(T);
     var tiron = M.draw(T, f(0.74), 0.4);
@@ -303,7 +332,7 @@
       <div style={{ position: 'absolute', inset: 0 }}>
         <Camara zoom={zoom} foco={foco} mira={mira}>
           <Acostado e={fig} dy={M.life(T, 3.6, 4)} piernas={piernas}
-            musc={{ abd: abd * (1 - cambio), psoas: luz, recto: luz }} muscGris={{ abd: cambio }}>
+            musc={{ abd: abd * (1 - cambio), psoas: luz, recto: luz }} muscGris={{ abd: abdGris }}>
             {function (gg) {
               return (
                 <g>
@@ -352,7 +381,7 @@
               var cx = gg.cadera[0];
               return (
                 <g>
-                  <B.FlechaS a={[cx + 170, PISO + 150]} b={[cx + 10, PISO + 96]} p={flecha} opacity={oFlecha}
+                  <B.FlechaS a={[cx + 200, PISO + 196]} b={[cx + 60, PISO + 150]} p={flecha} opacity={oFlecha}
                     color={C.YEL} sw={14} cabeza={30} />
                   <B.Anillo c={[cx - 6, PISO - 6]} r={92} p={anillo} color={C.YEL} sw={14} />
                 </g>
@@ -361,7 +390,9 @@
           </Acostado>
         </Camara>
         <svg width={1080} height={1920} style={{ position: 'absolute', left: 0, top: 0, overflow: 'visible' }}>
-          <B.Puntos pts={[[466, 1124], [444, 1196]]} p={hilo} color={C.YEL} sw={14} />
+          {/* el hilo une el anillo (respira con la figura, escalado por la camara) con la lupa */}
+          <B.Puntos pts={[[466, 1124 + zoom * M.life(T, 3.6, 4)], [444, 1196 + M.life(T, 3, 4)]]} p={hilo}
+            color={C.YEL} sw={14} />
         </svg>
         <Pos x={290} y={1196} e={lupa} dy={M.life(T, 3, 4)}>
           <LupaMano s={0.98} />
@@ -427,7 +458,8 @@
     var f = function (v) { return at + dur * v; };
     var t = clamp((T - at) / dur, 0, 1);
 
-    var piernas = 36 + 46 * reps(T, f(0.02), f(0.98), 2.5);
+    // pulsos de 42 a 84 grados: abajo de 42 la punta del pie se salia del cuadro por la izquierda
+    var piernas = 42 + 42 * reps(T, f(0.02), f(0.98), 2.5);
     var arco = M.draw(T, f(0.06), 0.5);
     var psoas = animate({ from: 0, to: 1, start: f(0.36), end: f(0.44) })(T);
     var recto = animate({ from: 0, to: 1, start: f(0.54), end: f(0.62) })(T);
@@ -437,8 +469,8 @@
     var g = geo({});
     var cad = enLienzo(FIG, g.cadera);
     var acerca = animate({ from: 0, to: 1, start: f(0), end: f(0.16), ease: Easing.easeInOutCubic })(T);
-    var zoom = 1 + 0.28 * acerca + 0.03 * t;
-    var mira = U.lerpP(cad, [440, 1050], acerca);
+    var zoom = 1 + 0.23 * acerca + 0.03 * t;
+    var mira = U.lerpP(cad, [490, 1050], acerca);
 
     var fig = M.pop(T, at - 0.6, 0.5);
     var r1 = M.pop(T, f(0.36), 0.45);
@@ -455,7 +487,7 @@
             }}
           </Acostado>
         </Camara>
-        <Rot T={T} text="ILIOPSOAS" y={250} e={r1} s={1.25} />
+        <Rot T={T} text="TIRA EL ILIOPSOAS" y={250} e={r1} s={1.15} />
         <Rot T={T} text="RECTO FEMORAL" y={1290} e={r2} s={1.15} fase={0.4} />
       </div>
     );
@@ -467,7 +499,7 @@
     var f = function (v) { return at + dur * v; };
     var t = clamp((T - at) / dur, 0, 1);
 
-    var piernas = 35 + 40 * reps(T, f(0.02), f(0.98), 1.5);
+    var piernas = 40 + 36 * reps(T, f(0.02), f(0.98), 1.5);
     var gris = animate({ from: 0, to: 1, start: f(0.08), end: f(0.18) })(T);
     var empuja = M.draw(T, f(0.42), 0.4);
     var linea = M.draw(T, f(0.56), 0.5);
@@ -481,7 +513,7 @@
 
     return (
       <div style={{ position: 'absolute', inset: 0 }}>
-        <Camara zoom={1.18 + 0.03 * t} foco={foco} mira={[585, 1010]}>
+        <Camara zoom={1.18 + 0.03 * t} foco={foco} mira={[600, 1010]}>
           <Acostado e={fig} dy={M.life(T, 3.6, 4)} piernas={piernas} muscGris={{ abd: gris, obl: gris }}>
             {function (gg) {
               return (
@@ -544,7 +576,9 @@
   }
 
   /* comparacion arriba (mal) / abajo (bien): dos figuras, una encima de otra */
-  var CMP = { s: 0.76, x: 6, pisoArriba: 800, pisoAbajo: 1340 };
+  // con la colchoneta ancha, las dos figuras van un poco mas separadas: los pies
+  // de la de abajo no tocan la colchoneta de la de arriba
+  var CMP = { s: 0.76, x: 6, pisoArriba: 790, pisoAbajo: 1360 };
   function baseCmp(piso) { return { x: CMP.x, y: piso - PISO * CMP.s, s: CMP.s }; }
   var JUICIO = [800, -330];   // X y visto: x en el lienzo, y relativa al piso de cada figura
 
@@ -594,7 +628,7 @@
           <P.Visto s={0.6} p={M.draw(T, f(0.58), 0.4)} />
         </Pos>
         <Rot T={T} text="LUMBAR ARQUEADA" y={240} e={r1} />
-        <Rot T={T} text="LUMBAR PEGADA" y={1440} e={r2} fase={0.4} />
+        <Rot T={T} text="LUMBAR PEGADA" y={1455} e={r2} fase={0.4} />
       </div>
     );
   }
@@ -604,7 +638,7 @@
     var T = props.T, at = props.at, dur = props.dur;
     var f = function (v) { return at + dur * v; };
 
-    var piernas = 25 + 25 * reps(T, f(0.02), f(0.98), 1.5);
+    var piernas = 22 + 22 * reps(T, f(0.02), f(0.98), 1.5);
     var dobla = animate({ from: 0, to: 1, start: f(0.04), end: f(0.2), ease: Easing.easeInOutCubic })(T);
     var falla = dobla > 0.5 ? M.vibra(T, 44, 2) : 0;
     var anillo = animate({ from: 0, to: 1, start: f(0.16), end: f(0.26) })(T);
@@ -632,7 +666,7 @@
           <P.Visto s={0.6} p={M.draw(T, f(0.55), 0.4)} />
         </Pos>
         <Rot T={T} text="RODILLAS DOBLADAS" y={240} e={r1} />
-        <Rot T={T} text="PIERNAS ESTIRADAS" y={1440} e={r2} fase={0.4} />
+        <Rot T={T} text="PIERNAS ESTIRADAS" y={1455} e={r2} fase={0.4} />
       </div>
     );
   }

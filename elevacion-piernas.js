@@ -48,7 +48,14 @@
     s: 0.8
   };
   var MAT = [36, 1286]; // colchoneta fija (x del viewBox), no sigue a los pies
-
+  // colchoneta vista apenas desde arriba: la cara de arriba es ancha y el cuerpo
+  // se apoya en su mitad de atras; el brazo cercano descansa sobre la mitad de
+  // adelante (sin la cara ancha, el brazo colgaba por debajo de la colchoneta)
+  var MATC = {
+    dy: 22,
+    cara: 120,
+    grosor: 18
+  };
   function enLienzo(base, p) {
     return [base.x + p[0] * base.s, base.y + p[1] * base.s];
   }
@@ -65,9 +72,10 @@
     var k = Easing.easeInOutCubic(clamp(o.manos == null ? 1 : o.manos, 0, 1));
     var cx = p.cadera[0];
     // la mano viaja "hacia adentro" (en este dibujo lo que esta mas cerca de la
-    // camara queda mas abajo): del costado, delante del piso, a debajo del gluteo
-    p.mano = U.lerpP([cx + 96, PISO + 40], [cx - 8, PISO - 2], k);
-    p.codo = U.lerpP([cx + 236, PISO + 52], [cx + 168, PISO + 66], k);
+    // camara queda mas abajo): del costado, apoyada en la colchoneta delante del
+    // cuerpo, a debajo del gluteo
+    p.mano = U.lerpP([cx + 60, PISO + 52], [cx - 8, PISO - 2], k);
+    p.codo = U.lerpP([cx + 222, PISO + 48], [cx + 158, PISO + 34], k);
     return p;
   }
 
@@ -126,15 +134,28 @@
       fibra: 'M ' + eje.slice(5, 24).map(U.pt).join(' L ')
     };
   }
+
+  // tensor de la fascia lata: la misma forma que B.Perfil, pero dibujada encima del
+  // iliopsoas (es superficial, en la cara lateral de la cadera). La de B.Perfil queda
+  // gris sobre el short gris y tapada por el iliopsoas, asi que no se ve.
+  function tflForma(g) {
+    var m = g.ejes.muslo;
+    var pts = [m.en(-0.24, 0.62 * 66), m.en(-0.06, 0.98 * 66), m.en(0.2, 0.62 * m.r(0.2)), m.en(0.3, 0.32 * m.r(0.3)), m.en(0.12, 0.26 * m.r(0.12)), m.en(-0.1, 0.36 * 66)];
+    var n = pts.length;
+    var lazo = [pts[n - 1]].concat(pts, [pts[0], pts[1]]);
+    var c = catmull(lazo, 8 * (lazo.length - 1)).slice(8, 8 * (n + 1) + 1);
+    return 'M ' + c.map(U.pt).join(' L ') + ' Z';
+  }
   function Musculos(props) {
     var g = props.g,
-      v = props.psoas || 0;
-    if (v < 0.01) return null;
-    var ps = psoasForma(g);
+      v = props.psoas || 0,
+      vt = props.tfl || 0;
+    var ps = v < 0.01 ? null : psoasForma(g);
     return /*#__PURE__*/React.createElement("g", {
-      opacity: v,
       strokeLinecap: "round",
       strokeLinejoin: "round"
+    }, ps ? /*#__PURE__*/React.createElement("g", {
+      opacity: v
     }, /*#__PURE__*/React.createElement("path", {
       d: ps.d,
       fill: props.color || C.YEL,
@@ -145,7 +166,13 @@
       fill: "none",
       stroke: C.GRY,
       strokeWidth: 11
-    }));
+    })) : null, vt > 0.01 ? /*#__PURE__*/React.createElement("path", {
+      d: tflForma(g),
+      opacity: vt,
+      fill: C.GRY,
+      stroke: C.INK,
+      strokeWidth: 13
+    }) : null);
   }
   function Acostado(props) {
     var id = U.useIdLocal('elev');
@@ -162,6 +189,7 @@
     var gris = props.muscGris;
     var rojo = props.muscRojo;
     var vPsoas = (props.musc || {}).psoas;
+    var vTfl = (props.muscGris || {}).tfl;
     return /*#__PURE__*/React.createElement(Pos, {
       x: b.x,
       y: b.y,
@@ -179,7 +207,9 @@
         return /*#__PURE__*/React.createElement(B.ColchonetaG, {
           x0: MAT[0],
           x1: MAT[1],
-          y: g.piso
+          y: g.piso + MATC.dy,
+          cara: MATC.cara,
+          grosor: MATC.grosor
         });
       }
     }, function (g) {
@@ -206,7 +236,8 @@
         muscRojo: rojo
       })), /*#__PURE__*/React.createElement(Musculos, {
         g: g,
-        psoas: vPsoas
+        psoas: vPsoas,
+        tfl: vTfl
       }), props.children ? props.children(g) : null);
     }));
   }
@@ -445,11 +476,19 @@
       start: f(0.24),
       end: f(0.34)
     })(T);
+    // el amarillo del abdomen se apaga y despues entra el gris (B.Perfil da prioridad
+    // al amarillo: si se cruzaran, el gris apareceria de golpe al final del fundido)
     var cambio = animate({
       from: 0,
       to: 1,
       start: f(0.62),
-      end: f(0.7)
+      end: f(0.68)
+    })(T);
+    var abdGris = animate({
+      from: 0,
+      to: 1,
+      start: f(0.68),
+      end: f(0.76)
     })(T);
     var luz = animate({
       from: 0,
@@ -500,7 +539,7 @@
         recto: luz
       },
       muscGris: {
-        abd: cambio
+        abd: abdGris
       }
     }, function (gg) {
       return /*#__PURE__*/React.createElement("g", null, /*#__PURE__*/React.createElement(B.Anillo, {
@@ -598,8 +637,8 @@
     }, function (gg) {
       var cx = gg.cadera[0];
       return /*#__PURE__*/React.createElement("g", null, /*#__PURE__*/React.createElement(B.FlechaS, {
-        a: [cx + 170, PISO + 150],
-        b: [cx + 10, PISO + 96],
+        a: [cx + 200, PISO + 196],
+        b: [cx + 60, PISO + 150],
         p: flecha,
         opacity: oFlecha,
         color: C.YEL,
@@ -622,7 +661,7 @@
         overflow: 'visible'
       }
     }, /*#__PURE__*/React.createElement(B.Puntos, {
-      pts: [[466, 1124], [444, 1196]],
+      pts: [[466, 1124 + zoom * M.life(T, 3.6, 4)], [444, 1196 + M.life(T, 3, 4)]],
       p: hilo,
       color: C.YEL,
       sw: 14
@@ -738,7 +777,9 @@
       return at + dur * v;
     };
     var t = clamp((T - at) / dur, 0, 1);
-    var piernas = 36 + 46 * reps(T, f(0.02), f(0.98), 2.5);
+
+    // pulsos de 42 a 84 grados: abajo de 42 la punta del pie se salia del cuadro por la izquierda
+    var piernas = 42 + 42 * reps(T, f(0.02), f(0.98), 2.5);
     var arco = M.draw(T, f(0.06), 0.5);
     var psoas = animate({
       from: 0,
@@ -773,8 +814,8 @@
       end: f(0.16),
       ease: Easing.easeInOutCubic
     })(T);
-    var zoom = 1 + 0.28 * acerca + 0.03 * t;
-    var mira = U.lerpP(cad, [440, 1050], acerca);
+    var zoom = 1 + 0.23 * acerca + 0.03 * t;
+    var mira = U.lerpP(cad, [490, 1050], acerca);
     var fig = M.pop(T, at - 0.6, 0.5);
     var r1 = M.pop(T, f(0.36), 0.45);
     var r2 = M.pop(T, f(0.54), 0.45);
@@ -813,10 +854,10 @@
       });
     })), /*#__PURE__*/React.createElement(Rot, {
       T: T,
-      text: "ILIOPSOAS",
+      text: "TIRA EL ILIOPSOAS",
       y: 250,
       e: r1,
-      s: 1.25
+      s: 1.15
     }), /*#__PURE__*/React.createElement(Rot, {
       T: T,
       text: "RECTO FEMORAL",
@@ -836,7 +877,7 @@
       return at + dur * v;
     };
     var t = clamp((T - at) / dur, 0, 1);
-    var piernas = 35 + 40 * reps(T, f(0.02), f(0.98), 1.5);
+    var piernas = 40 + 36 * reps(T, f(0.02), f(0.98), 1.5);
     var gris = animate({
       from: 0,
       to: 1,
@@ -858,7 +899,7 @@
     }, /*#__PURE__*/React.createElement(Camara, {
       zoom: 1.18 + 0.03 * t,
       foco: foco,
-      mira: [585, 1010]
+      mira: [600, 1010]
     }, /*#__PURE__*/React.createElement(Acostado, {
       e: fig,
       dy: M.life(T, 3.6, 4),
@@ -942,11 +983,13 @@
   }
 
   /* comparacion arriba (mal) / abajo (bien): dos figuras, una encima de otra */
+  // con la colchoneta ancha, las dos figuras van un poco mas separadas: los pies
+  // de la de abajo no tocan la colchoneta de la de arriba
   var CMP = {
     s: 0.76,
     x: 6,
-    pisoArriba: 800,
-    pisoAbajo: 1340
+    pisoArriba: 790,
+    pisoAbajo: 1360
   };
   function baseCmp(piso) {
     return {
@@ -1046,7 +1089,7 @@
     }), /*#__PURE__*/React.createElement(Rot, {
       T: T,
       text: "LUMBAR PEGADA",
-      y: 1440,
+      y: 1455,
       e: r2,
       fase: 0.4
     }));
@@ -1060,7 +1103,7 @@
     var f = function (v) {
       return at + dur * v;
     };
-    var piernas = 25 + 25 * reps(T, f(0.02), f(0.98), 1.5);
+    var piernas = 22 + 22 * reps(T, f(0.02), f(0.98), 1.5);
     var dobla = animate({
       from: 0,
       to: 1,
@@ -1134,7 +1177,7 @@
     }), /*#__PURE__*/React.createElement(Rot, {
       T: T,
       text: "PIERNAS ESTIRADAS",
-      y: 1440,
+      y: 1455,
       e: r2,
       fase: 0.4
     }));

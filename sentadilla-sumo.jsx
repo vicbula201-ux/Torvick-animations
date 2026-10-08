@@ -164,7 +164,7 @@
   }
 
   // franjas de las escenas partidas (arriba / abajo) y donde caen la X y el visto
-  var FRANJA = { arriba: 330, abajo: 905, h: 560 };
+  var FRANJA = { arriba: 330, abajo: 930, h: 530 };
   var JUICIO = [790, 150];
 
   /* =========================================================
@@ -207,8 +207,8 @@
                 return (
                   <g>
                     {anillosRodilla(g, anillos, corrige)}
-                    {flechasRodilla(g, 'adentro', C.RED, pRojas, oRojas)}
-                    {flechasRodilla(g, 'afuera', C.GRN, pVerdes, 1, 215)}
+                    {flechasRodilla(g, 'adentro', C.RED, pRojas, oRojas, 205, 90)}
+                    {flechasRodilla(g, 'afuera', C.GRN, pVerdes, 1, 185, 86)}
                   </g>
                 );
               }}
@@ -314,7 +314,7 @@
 
     return (
       <div style={{ position: 'absolute', inset: 0 }}>
-        <Camara zoom={1.12 + 0.03 * t} foco={foco} mira={[640, 1195]}>
+        <Camara zoom={1.06 + 0.03 * t} foco={foco} mira={[640, 1170]}>
           <Pos x={PF.x} y={PF.y} e={fig} dy={M.life(T, 3.6, 5)}>
             <B.Perfil s={PF.s} pose={pose}
               agarre={function (g) { return <Mancuerna g={g} e={manc} />; }}>
@@ -400,7 +400,7 @@
     var pose = perfil(1 - sube, 0);
     var talon = animate({ from: 0, to: 1, start: f(0.04), end: f(0.12) })(T);
     var empuje = M.draw(T, f(0.08), 0.35);
-    var latido = T < f(0.8) ? Math.abs(M.life(T, 0.8, 16)) : 0;
+    var latido = Math.abs(M.life(T, 0.8, 16)) * (1 - animate({ from: 0, to: 1, start: f(0.78), end: f(0.88) })(T));
     var arcos = animate({ from: 0, to: 1, start: f(0.3), end: f(0.38) })(T);
     var final = animate({ from: 0, to: 1, start: f(0.8), end: f(0.9) })(T);
     var recta = M.draw(T, f(0.8), 0.4);
@@ -424,7 +424,7 @@
                     <B.Anillo c={[g.talon[0] + 14, g.piso - 24]} r={46} p={talon} color={C.YEL} sw={16} />
                     <B.FlechaS a={[x, g.piso - 290 - latido]} b={[x, g.piso - 8]} p={empuje}
                       color={C.GRN} sw={24} cabeza={50} />
-                    {arcoJunta(g.rodilla, g.cadera, g.tobillo, 130, C.GRN, arcos)}
+                    {arcoJunta(g.rodilla, g.cadera, g.tobillo, 100, C.GRN, arcos)}
                     {arcoJunta(g.cadera, g.cuello, g.rodilla, 150, C.GRN, arcos)}
                     {recta > 0.02 ? (
                       <B.Puntos pts={[U.suma(g.cadera, [0, -120]), [g.cadera[0], g.piso - 40]]} p={recta}
@@ -448,8 +448,8 @@
 
   /* 6 y 7 — musculos: de frente (arriba) se ven los muslos por delante y por
      dentro; de perfil (abajo), el gluteo, la parte de atras del muslo y la pantorrilla */
-  var MUS_FR = { s: 0.85, centro: [600, 1185] };
-  var MUS_PF = { s: 0.95, centro: [690, 1004] };
+  var MUS_FR = { s: 0.85, centro: [600, 1210] };
+  var MUS_PF = { s: 0.88, centro: [700, 1022] };  // del gluteo al piso, en media sentadilla
 
   // flecha gris que senala un musculo secundario desde afuera (de 'lejos' a 'cerca')
   function senala(key, lejos, cerca, o) {
@@ -480,8 +480,9 @@
         </Ventana>
         <Ventana y={FRANJA.abajo} h={FRANJA.h} s={MUS_PF.s} centro={MUS_PF.centro} e={props.eAbajo}
           dy={M.life(T, 3.6, 4, 0.5)}>
-          <B.Perfil s={MUS_PF.s} pose={perfil(0.14 + M.life(T, 2.6, 0.04), 0)}
+          <B.Perfil s={MUS_PF.s} pose={perfil(0.45 + M.life(T, 2.6, 0.04), 0)}
             musc={{ glu: props.glu, cuad: props.cuad }} muscGris={{ isq: isq, gem: gem }}
+            fondo={function (g) { return <B.PisoG y={g.piso} x0={380} x1={1020} />; }}
             agarre={conMancuerna}>
             {function (g) {
               var m = g.ejes.muslo, p = g.ejes.pierna;
@@ -524,14 +525,14 @@
     var T = props.T, at = props.at, dur = props.dur;
     var f = function (v) { return at + dur * v; };
 
-    var aduct = animate({ from: 0, to: 1, start: f(0.1), end: f(0.22) })(T);
-    var isq = animate({ from: 0, to: 1, start: f(0.42), end: f(0.54) })(T);
-    var gem = animate({ from: 0, to: 1, start: f(0.6), end: f(0.72) })(T);
+    var aduct = animate({ from: 0, to: 1, start: f(0.18), end: f(0.3) })(T);
+    var isq = animate({ from: 0, to: 1, start: f(0.48), end: f(0.6) })(T);
+    var gem = animate({ from: 0, to: 1, start: f(0.7), end: f(0.82) })(T);
 
     var arriba = M.pop(T, at - 0.6, 0.5);
     var abajo = M.pop(T, at - 0.6, 0.5);
-    var r1 = M.pop(T, f(0.1), 0.45);
-    var r2 = M.pop(T, f(0.44), 0.45);
+    var r1 = M.pop(T, f(0.18), 0.45);
+    var r2 = M.pop(T, f(0.5), 0.45);
 
     return (
       <div style={{ position: 'absolute', inset: 0 }}>
@@ -543,7 +544,13 @@
   }
 
   /* 8 — error 1: espalda curva vs columna neutra (de perfil, del pecho para arriba) */
-  var ERR_PF = { s: 0.74, centro: [700, 625] };
+  var ERR_PF = { s: 0.84 };
+  // centro de la ventana: sigue al torso (de la coronilla a la cadera), asi la
+  // espalda queda entera y centrada en toda la bajada
+  function centroTorso(prof, curva) {
+    var g = B.geoPerfil({ pose: perfil(prof, curva) });
+    return [(g.coronilla[0] + g.gluteo[0]) / 2 + 10, (g.coronilla[1] + g.cadera[1] + 40) / 2];
+  }
 
   function EscError1(props) {
     var T = props.T, at = props.at, dur = props.dur;
@@ -572,13 +579,13 @@
 
     return (
       <div style={{ position: 'absolute', inset: 0 }}>
-        <Ventana y={FRANJA.arriba} h={FRANJA.h} s={ERR_PF.s} centro={ERR_PF.centro} e={arriba}
+        <Ventana y={FRANJA.arriba} h={FRANJA.h} s={ERR_PF.s} centro={centroTorso(prof, 1)} e={arriba}
           dx={falla} dy={M.life(T, 3.6, 4)}>
           <B.Perfil s={ERR_PF.s} pose={perfil(prof, 1)} muscRojo={{ erec: 1 }} agarre={conMancuerna}>
             {function (g) { return <Linea pts={espalda(g, 44)} p={pRoja} color={C.RED} sw={24} />; }}
           </B.Perfil>
         </Ventana>
-        <Ventana y={FRANJA.abajo} h={FRANJA.h} s={ERR_PF.s} centro={ERR_PF.centro} e={abajo}
+        <Ventana y={FRANJA.abajo} h={FRANJA.h} s={ERR_PF.s} centro={centroTorso(prof, 0)} e={abajo}
           dy={M.life(T, 3.6, 4, 0.5)}>
           <B.Perfil s={ERR_PF.s} pose={perfil(prof, 0)} agarre={conMancuerna}>
             {function (g) {

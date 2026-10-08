@@ -197,8 +197,8 @@
       v = props.v;
     if (!v) return null;
     var lp = clamp(b.largo * 0.62, 58, 128) / b.largo;
-    var s0 = lp - 0.06,
-      s1 = 0.94,
+    var s0 = lp - 0.1,
+      s1 = 0.95,
       ext = [],
       int = [];
     for (var i = 0; i <= 6; i++) {
@@ -391,8 +391,8 @@
         inset: 0
       }
     }, /*#__PURE__*/React.createElement(Camara, {
-      zoom: 1 + 0.05 * t,
-      foco: [540, 860]
+      zoom: 0.92 + 0.04 * t,
+      foco: [540, 640]
     }, /*#__PURE__*/React.createElement(Pos, {
       x: CEN.x,
       y: CEN.y,
@@ -446,14 +446,14 @@
     }), /*#__PURE__*/React.createElement(Rot, {
       T: T,
       text: "\xBFY TUS CODOS?",
-      y: 1455,
+      y: 1475,
       e: pregunta,
       fase: 0.4
     }));
   }
 
   /* 2 — posicion: banco plano, mancuernas sobre el pecho; detalle cenital de las palmas */
-  var DET = corteCen(1, 250, 950, 205, 690); // detalle cenital: cabeza, pecho y brazos arriba
+  var DET = corteCen(0.92, 250, 950, 178, 715); // detalle cenital: banco, cabeza, pecho y mancuernas enteras
   function EscPosicion(props) {
     var T = props.T,
       at = props.at,
@@ -464,26 +464,26 @@
     var achica = animate({
       from: 0,
       to: 1,
-      start: f(0.6),
-      end: f(0.72),
+      start: f(0.62),
+      end: f(0.74),
       ease: Easing.easeInOutCubic
     })(T);
-    var esc = U.lerp(1, 0.6, achica);
-    var sube = U.lerp(0, -300, achica);
+    var esc = U.lerp(1, 0.55, achica);
+    var sube = U.lerp(0, -285, achica);
     var banco = M.draw(T, f(0.04), 0.5);
     var anillo = animate({
       from: 0,
       to: 1,
-      start: f(0.27),
-      end: f(0.35)
+      start: f(0.3),
+      end: f(0.38)
     })(T);
-    var plomada = M.draw(T, f(0.44), 0.4);
-    var paralelas = M.draw(T, f(0.76), 0.4);
-    var palmas = M.draw(T, f(0.84), 0.3);
+    var plomada = M.draw(T, f(0.46), 0.4);
+    var paralelas = M.draw(T, f(0.78), 0.4);
+    var palmas = M.draw(T, f(0.86), 0.3);
     var fig = M.pop(T, at - 0.6, 0.5);
-    var detalle = M.pop(T, f(0.66), 0.45);
-    var r1 = M.pop(T, f(0.46), 0.45);
-    var r2 = M.pop(T, f(0.74), 0.45);
+    var detalle = M.pop(T, f(0.68), 0.45);
+    var r1 = M.pop(T, f(0.48), 0.45);
+    var r2 = M.pop(T, f(0.78), 0.45);
     return /*#__PURE__*/React.createElement("div", {
       style: {
         position: 'absolute',
@@ -519,7 +519,7 @@
       }));
     })), /*#__PURE__*/React.createElement(Panel, {
       x: (1080 - DET.w) / 2,
-      y: 955,
+      y: 940,
       c: DET,
       e: detalle,
       my: M.life(T, 3.6, 4, 0.5)
@@ -560,7 +560,7 @@
     }), /*#__PURE__*/React.createElement(Rot, {
       T: T,
       text: "PALMAS ENFRENTADAS",
-      y: 1450,
+      y: 1458,
       e: r2,
       fase: 0.4
     }));
@@ -778,7 +778,8 @@
       start: f(0.58),
       end: f(0.68)
     })(T);
-    var guia = M.draw(T, f(0.62), 0.35);
+    var ejeP = M.draw(T, f(0.6), 0.35);
+    var guia = M.draw(T, f(0.68), 0.35);
     var fig = M.pop(T, at - 0.6, 0.5);
     var visto = M.pop(T, f(0.76), 0.45);
     var rotulo = M.pop(T, f(0.6), 0.45);
@@ -801,31 +802,32 @@
       p: p
     }, function (g) {
       var u = U.unidad(U.resta(g.codo, g.hombro));
-      // recta del brazo "bloqueado" vs el antebrazo real: el arco verde marca la flexion
-      var aRecta = ang(g.hombro, g.codo),
-        aAnte = ang(g.codo, g.mano);
-      if (aAnte - aRecta > 180) aAnte -= 360;
-      if (aRecta - aAnte > 180) aAnte += 360;
+      // eje del brazo real (verde, quebrado en el codo) vs la recta del brazo
+      // "bloqueado" (puntos grises): la diferencia es la leve flexion
+      var uA = U.unidad(U.resta(g.mano, g.codo));
+      var punta = U.suma(g.codo, U.por(uA, MED.ante * 0.74));
+      var eje = 'M ' + g.hombro[0] + ' ' + g.hombro[1] + ' L ' + g.codo[0] + ' ' + g.codo[1] + ' L ' + punta[0] + ' ' + punta[1];
       return /*#__PURE__*/React.createElement("g", null, /*#__PURE__*/React.createElement(B.FlechaS, {
-        a: [645, 830],
-        b: [645, 480],
+        a: [595, 830],
+        b: [595, 480],
         p: flecha,
         color: C.GRN,
         opacity: 1 - acerca
-      }), /*#__PURE__*/React.createElement(B.Puntos, {
-        pts: [g.codo, U.suma(g.codo, U.por(u, MED.ante * 0.72))],
+      }), ejeP > 0.01 ? /*#__PURE__*/React.createElement("path", {
+        d: eje,
+        pathLength: 1,
+        strokeDasharray: "1 1",
+        strokeDashoffset: 1 - ejeP,
+        fill: "none",
+        stroke: C.GRN,
+        strokeWidth: 13,
+        strokeLinecap: "round",
+        strokeLinejoin: "round"
+      }) : null, /*#__PURE__*/React.createElement(B.Puntos, {
+        pts: [g.codo, U.suma(g.codo, U.por(u, MED.ante * 0.78))],
         p: guia,
         color: C.GRY,
-        sw: 14
-      }), /*#__PURE__*/React.createElement(B.Arco, {
-        c: g.codo,
-        r: 118,
-        a0: aRecta,
-        a1: aAnte,
-        p: guia,
-        color: C.GRN,
-        sw: 16,
-        cabeza: 28
+        sw: 15
       }), /*#__PURE__*/React.createElement(B.Anillo, {
         c: g.codo,
         r: 64,
@@ -884,7 +886,7 @@
     var arcoH = baja < 1 ? up1 * (1 - baja) : up2;
     var arriba = M.pop(T, at - 0.6, 0.5);
     var abajo = M.pop(T, f(0.44), 0.45);
-    var r1 = M.pop(T, f(0.08), 0.45);
+    var r1 = M.pop(T, f(0.2), 0.45);
     var r2 = M.pop(T, f(0.52), 0.45);
     return /*#__PURE__*/React.createElement("div", {
       style: {
@@ -959,8 +961,8 @@
   }
 
   /* 7 — musculos: arriba el pectoral (cenital); abajo el triceps (perfil) */
-  var MUS_A = corteCen(0.95, 130, 1070, 200, 830);
-  var MUS_B = cortePF(0.8, 600, 1210, 400, 1060);
+  var MUS_A = corteCen(0.95, 130, 1070, 205, 760);
+  var MUS_B = cortePF(0.95, 640, 1180, 400, 1030);
   function EscMusculos(props) {
     var T = props.T,
       at = props.at,
@@ -971,8 +973,8 @@
     var pec = animate({
       from: 0,
       to: 1,
-      start: f(0.08),
-      end: f(0.18)
+      start: f(0.14),
+      end: f(0.22)
     })(T);
     var delt = animate({
       from: 0,
@@ -996,7 +998,7 @@
     var pB = 0.94 + M.life(T, 3.2, 0.05);
     var arriba = M.pop(T, at - 0.6, 0.5);
     var abajo = M.pop(T, f(0.3), 0.45);
-    var r1 = M.pop(T, f(0.12), 0.45);
+    var r1 = M.pop(T, f(0.16), 0.45);
     var r2 = M.pop(T, f(0.46), 0.45);
     return /*#__PURE__*/React.createElement("div", {
       style: {
@@ -1005,7 +1007,7 @@
       }
     }, /*#__PURE__*/React.createElement(Panel, {
       x: (1080 - MUS_A.w) / 2,
-      y: 320,
+      y: 315,
       c: MUS_A,
       e: arriba,
       my: M.life(T, 3.6, 4)
@@ -1021,7 +1023,7 @@
       serr: serr
     })), /*#__PURE__*/React.createElement(Panel, {
       x: (1080 - MUS_B.w) / 2,
-      y: 935,
+      y: 857,
       c: MUS_B,
       e: abajo,
       my: M.life(T, 3.6, 4, 0.5)
@@ -1047,7 +1049,7 @@
     }), /*#__PURE__*/React.createElement(Rot, {
       T: T,
       text: "+ DELTOIDES Y TR\xCDCEPS",
-      y: 1462,
+      y: 1468,
       e: r2,
       s: 1,
       fase: 0.4
@@ -1268,8 +1270,8 @@
         inset: 0
       }
     }, /*#__PURE__*/React.createElement(Camara, {
-      zoom: 1 + 0.05 * t,
-      foco: [540, 860]
+      zoom: 0.92 + 0.04 * t,
+      foco: [540, 640]
     }, /*#__PURE__*/React.createElement(Pos, {
       x: CEN.x,
       y: CEN.y,
@@ -1301,7 +1303,7 @@
     }), /*#__PURE__*/React.createElement(Rot, {
       T: T,
       text: "T\xC9CNICA > PESO",
-      y: 1455,
+      y: 1475,
       e: r2,
       fase: 0.4
     }));

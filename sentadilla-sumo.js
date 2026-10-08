@@ -274,8 +274,8 @@
   // franjas de las escenas partidas (arriba / abajo) y donde caen la X y el visto
   var FRANJA = {
     arriba: 330,
-    abajo: 905,
-    h: 560
+    abajo: 930,
+    h: 530
   };
   var JUICIO = [790, 150];
 
@@ -366,7 +366,7 @@
       },
       agarre: conMancuerna
     }, function (g) {
-      return /*#__PURE__*/React.createElement("g", null, anillosRodilla(g, anillos, corrige), flechasRodilla(g, 'adentro', C.RED, pRojas, oRojas), flechasRodilla(g, 'afuera', C.GRN, pVerdes, 1, 215));
+      return /*#__PURE__*/React.createElement("g", null, anillosRodilla(g, anillos, corrige), flechasRodilla(g, 'adentro', C.RED, pRojas, oRojas, 205, 90), flechasRodilla(g, 'afuera', C.GRN, pVerdes, 1, 185, 86));
     }))), /*#__PURE__*/React.createElement(Pos, {
       x: 800,
       y: 480,
@@ -556,9 +556,9 @@
         inset: 0
       }
     }, /*#__PURE__*/React.createElement(Camara, {
-      zoom: 1.12 + 0.03 * t,
+      zoom: 1.06 + 0.03 * t,
       foco: foco,
-      mira: [640, 1195]
+      mira: [640, 1170]
     }, /*#__PURE__*/React.createElement(Pos, {
       x: PF.x,
       y: PF.y,
@@ -710,7 +710,12 @@
       end: f(0.12)
     })(T);
     var empuje = M.draw(T, f(0.08), 0.35);
-    var latido = T < f(0.8) ? Math.abs(M.life(T, 0.8, 16)) : 0;
+    var latido = Math.abs(M.life(T, 0.8, 16)) * (1 - animate({
+      from: 0,
+      to: 1,
+      start: f(0.78),
+      end: f(0.88)
+    })(T));
     var arcos = animate({
       from: 0,
       to: 1,
@@ -763,7 +768,7 @@
         color: C.GRN,
         sw: 24,
         cabeza: 50
-      }), arcoJunta(g.rodilla, g.cadera, g.tobillo, 130, C.GRN, arcos), arcoJunta(g.cadera, g.cuello, g.rodilla, 150, C.GRN, arcos), recta > 0.02 ? /*#__PURE__*/React.createElement(B.Puntos, {
+      }), arcoJunta(g.rodilla, g.cadera, g.tobillo, 100, C.GRN, arcos), arcoJunta(g.cadera, g.cuello, g.rodilla, 150, C.GRN, arcos), recta > 0.02 ? /*#__PURE__*/React.createElement(B.Puntos, {
         pts: [U.suma(g.cadera, [0, -120]), [g.cadera[0], g.piso - 40]],
         p: recta,
         color: C.GRN,
@@ -803,12 +808,12 @@
      dentro; de perfil (abajo), el gluteo, la parte de atras del muslo y la pantorrilla */
   var MUS_FR = {
     s: 0.85,
-    centro: [600, 1185]
+    centro: [600, 1210]
   };
   var MUS_PF = {
-    s: 0.95,
-    centro: [690, 1004]
-  };
+    s: 0.88,
+    centro: [700, 1022]
+  }; // del gluteo al piso, en media sentadilla
 
   // flecha gris que senala un musculo secundario desde afuera (de 'lejos' a 'cerca')
   function senala(key, lejos, cerca, o) {
@@ -866,7 +871,7 @@
       dy: M.life(T, 3.6, 4, 0.5)
     }, /*#__PURE__*/React.createElement(B.Perfil, {
       s: MUS_PF.s,
-      pose: perfil(0.14 + M.life(T, 2.6, 0.04), 0),
+      pose: perfil(0.45 + M.life(T, 2.6, 0.04), 0),
       musc: {
         glu: props.glu,
         cuad: props.cuad
@@ -874,6 +879,13 @@
       muscGris: {
         isq: isq,
         gem: gem
+      },
+      fondo: function (g) {
+        return /*#__PURE__*/React.createElement(B.PisoG, {
+          y: g.piso,
+          x0: 380,
+          x1: 1020
+        });
       },
       agarre: conMancuerna
     }, function (g) {
@@ -941,25 +953,25 @@
     var aduct = animate({
       from: 0,
       to: 1,
-      start: f(0.1),
-      end: f(0.22)
+      start: f(0.18),
+      end: f(0.3)
     })(T);
     var isq = animate({
       from: 0,
       to: 1,
-      start: f(0.42),
-      end: f(0.54)
+      start: f(0.48),
+      end: f(0.6)
     })(T);
     var gem = animate({
       from: 0,
       to: 1,
-      start: f(0.6),
-      end: f(0.72)
+      start: f(0.7),
+      end: f(0.82)
     })(T);
     var arriba = M.pop(T, at - 0.6, 0.5);
     var abajo = M.pop(T, at - 0.6, 0.5);
-    var r1 = M.pop(T, f(0.1), 0.45);
-    var r2 = M.pop(T, f(0.44), 0.45);
+    var r1 = M.pop(T, f(0.18), 0.45);
+    var r2 = M.pop(T, f(0.5), 0.45);
     return /*#__PURE__*/React.createElement("div", {
       style: {
         position: 'absolute',
@@ -991,9 +1003,16 @@
 
   /* 8 — error 1: espalda curva vs columna neutra (de perfil, del pecho para arriba) */
   var ERR_PF = {
-    s: 0.74,
-    centro: [700, 625]
+    s: 0.84
   };
+  // centro de la ventana: sigue al torso (de la coronilla a la cadera), asi la
+  // espalda queda entera y centrada en toda la bajada
+  function centroTorso(prof, curva) {
+    var g = B.geoPerfil({
+      pose: perfil(prof, curva)
+    });
+    return [(g.coronilla[0] + g.gluteo[0]) / 2 + 10, (g.coronilla[1] + g.cadera[1] + 40) / 2];
+  }
   function EscError1(props) {
     var T = props.T,
       at = props.at,
@@ -1028,7 +1047,7 @@
       y: FRANJA.arriba,
       h: FRANJA.h,
       s: ERR_PF.s,
-      centro: ERR_PF.centro,
+      centro: centroTorso(prof, 1),
       e: arriba,
       dx: falla,
       dy: M.life(T, 3.6, 4)
@@ -1050,7 +1069,7 @@
       y: FRANJA.abajo,
       h: FRANJA.h,
       s: ERR_PF.s,
-      centro: ERR_PF.centro,
+      centro: centroTorso(prof, 0),
       e: abajo,
       dy: M.life(T, 3.6, 4, 0.5)
     }, /*#__PURE__*/React.createElement(B.Perfil, {
