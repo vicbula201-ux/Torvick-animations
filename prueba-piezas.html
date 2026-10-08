@@ -30,6 +30,9 @@
 <script src="motor.js"></script>
 <script src="primitivas.js"></script>
 <script src="cuerpo.js"></script>
+<script src="perfil.js"></script>
+<script src="frente.js"></script>
+<script src="equipo.js"></script>
 <script type="text/babel">
 const { useState, useEffect } = React;
 
@@ -127,6 +130,25 @@ function App() {
         <Celda nombre="Estacion tenso (yel)"><B.Estacion s={0.19} cable="yel" /></Celda>
         <Celda nombre="Estacion p=1 rot=1"><B.Estacion s={0.19} p={1} rot={1} musc={{ dp: 1 }} /></Celda>
         <Celda nombre="Cuenta n=3 p=0.6"><B.Cuenta s={0.8} n={3} p={0.6} /></Celda>
+        <Celda nombre="Espalda dominadas sube=0">
+          <div style={{ marginBottom: 80 }}><B.Espalda s={0.11} brazos="arriba" sube={0} cuerpoEntero rodillas={1} musc={{ dor: 1 }} /></div>
+        </Celda>
+        <Celda nombre="Espalda dominadas sube=1">
+          <div style={{ marginBottom: 80 }}><B.Espalda s={0.11} brazos="arriba" sube={1} cuerpoEntero rodillas={1} musc={{ dor: 1, rM: 1 }} /></div>
+        </Celda>
+        <Celda nombre="Perfil sentadilla prof=1"><B.Perfil s={0.17} pose={B.posePerfil.sentadilla({ prof: 1 })}
+          musc={{ cuad: 1, glu: 1 }} /></Celda>
+        <Celda nombre="Perfil acostado piernas=90"><B.Perfil s={0.17} pose={B.posePerfil.acostado({ piernas: 90 })}
+          musc={{ psoas: 1, recto: 1 }} /></Celda>
+        <Celda nombre="Perfil banco p=1"><B.Perfil s={0.17} pose={B.posePerfil.banco({ p: 1 })} /></Celda>
+        <Celda nombre="Perfil colgado sube=1"><B.Perfil s={0.17} pose={B.posePerfil.colgado({ sube: 1 })} /></Celda>
+        <Celda nombre="Frente sumo prof=1"><B.Frente s={0.15} pose={B.poseFrente.sumo({ prof: 1 })}
+          musc={{ cuad: 1 }} muscGris={{ aduct: 1 }} /></Celda>
+        <Celda nombre="Frente banca arriba p=0"><B.Frente s={0.15} pose={B.poseFrente.bancaArriba({ p: 0, abd: 45 })}
+          musc={{ pec: 1 }} /></Celda>
+        <Celda nombre="Mancuerna"><B.Mancuerna s={0.6} /></Celda>
+        <Celda nombre="Banco lado"><B.Banco vista="lado" s={0.3} /></Celda>
+        <Celda nombre="Barra frente"><B.Barra vista="frente" s={0.15} /></Celda>
       </div>
     </div>
   );
