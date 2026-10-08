@@ -33,7 +33,7 @@
   // largos de cada segmento (iguales a B.Estacion)
   var MED = {
     muslo: 272, pierna: 268, brazo: 232, ante: 214, columna: 404,
-    cuelloHombro: 66, hombroAtras: -2, tobillo: 32, pie: 116.5
+    cuelloHombro: 66, hombroAtras: 6, tobillo: 32, pie: 116.5
   };
   // radios de las capsulas: [en la articulacion de arriba, en la de abajo]
   var R_MUSLO = [66, 46], R_PIERNA = [46, 30], R_BRAZO = [50, 40], R_ANTE = [38, 30], R_PUNO = 36;
@@ -83,16 +83,18 @@
     return T[T.length - 1][1];
   }
 
-  // anchos del torso respecto del eje de la columna (t: 0 cadera -> 1 cuello)
-  var ANCHO_FRENTE = [[0.1, 62], [0.2, 62], [0.3, 63], [0.42, 67], [0.52, 78], [0.62, 95],
-    [0.72, 104], [0.8, 101], [0.88, 86], [0.95, 62], [1.0, 38]];
-  var ANCHO_ESPALDA = [[0.1, 70], [0.2, 63], [0.3, 53], [0.42, 55], [0.55, 66], [0.68, 82],
-    [0.78, 89], [0.86, 83], [0.93, 62], [1.0, 30]];
-  var T_TORSO = [0.135, 0.2, 0.3, 0.42, 0.52, 0.62, 0.72, 0.8, 0.88, 0.95, 1.0];
+  // anchos del torso respecto del eje de la columna (t: 0 cadera -> 1 cuello),
+  // medidos sobre la silueta de B.Estacion: pecho que sale bien adelante,
+  // cintura, escapula atras y la bajada del trapecio hacia la nuca
+  var ANCHO_FRENTE = [[0.1, 61], [0.2, 60], [0.3, 62], [0.4, 66], [0.5, 77], [0.58, 97],
+    [0.66, 112], [0.74, 116], [0.82, 108], [0.9, 92], [0.95, 70], [1.0, 40]];
+  var ANCHO_ESPALDA = [[0.1, 68], [0.2, 54], [0.3, 48], [0.4, 48], [0.5, 55], [0.6, 70],
+    [0.7, 84], [0.8, 87], [0.88, 80], [0.95, 66], [1.0, 54]];
+  var T_TORSO = [0.135, 0.2, 0.3, 0.4, 0.5, 0.58, 0.66, 0.74, 0.82, 0.9, 0.95, 1.0];
   var T_FAJA = 0.165;
 
   // short: bloque de cadera en el marco de la pelvis [a lo largo, hacia el frente]
-  var SHORT = [[76, 56], [-58, 62], [-86, 22], [-86, -40], [-68, -84], [-6, -94], [76, -66]];
+  var SHORT = [[76, 64], [40, 66], [-58, 66], [-86, 24], [-86, -40], [-68, -84], [-6, -94], [76, -66]];
 
   // cabeza de perfil: el mismo path que B.Estacion, con origen en la base del cuello
   var CAB = {
@@ -107,9 +109,9 @@
       ['C', [-70, -146], [-48, -186], [4, -188]]
     ],
     ojo: [-36, -122],
-    oreja: [[20, -118], [44, -116], [40, -98], [38, -82], [22, -84]],
+    oreja: [[20, -118], [44, -116], [40, -98], [38, -82], [22, -84]], orejaC: [31, -100],
     centro: [2, -108], nuca: [72, -112], menton: [-46, -40], nariz: [-86, -90], coronilla: [4, -188],
-    cuelloFrente: [-28, -58], cuelloAtras: [32, -58], pivote: [0, -62]
+    cuelloFrente: [-28, -58], cuelloAtras: [32, -36], pivote: [0, -62]
   };
 
   // zapatilla de B.Estacion, relativa al tobillo, con la punta en ZAP_PUNTA
@@ -140,8 +142,10 @@
   function columna(cad, cue, k) {
     var c = resta(cue, cad), L = largo(c) || 1, uc = unidad(c), nc = frenteDe(uc);
     k = clamp(k || 0, -1, 1);
-    var b1 = k >= 0 ? -k * 72 : -k * 96;
-    var b2 = k >= 0 ? -k * 94 : -k * 24;
+    // k < 0: la zona lumbar va al frente y la dorsal apenas atras (S de la
+    // hiperlordosis): acostado, las escapulas siguen en el piso y la lumbar se despega
+    var b1 = k >= 0 ? -k * 72 : -k * 110;
+    var b2 = k >= 0 ? -k * 94 : k * 36;
     var P0 = cad, P3 = cue;
     var P1 = suma(suma(cad, por(c, 1 / 3)), por(nc, b1));
     var P2 = suma(suma(cad, por(c, 2 / 3)), por(nc, b2));
@@ -198,7 +202,9 @@
     var tobillo = o.tobillo || suma(cad, por(abajo, MED.muslo + MED.pierna - 4));
     var rodilla = o.rodilla || ik(cad, tobillo, MED.muslo, MED.pierna, -1);
     var punta = o.punta || suma(tobillo, rotar(ZAP_PUNTA, angulo(abajo) - 90));
-    var lejosP = suma(por(nTop, -18), por(uTop, 6));
+    // la pierna lejana asoma ~32 por detras: se ve una franja blanca entre los
+    // dos contornos (con menos, los dos trazos se funden en una banda negra)
+    var lejosP = suma(por(nTop, -32), por(uTop, 4));
     var tobillo2 = o.tobillo2 || suma(tobillo, lejosP);
     var rodilla2 = o.rodilla2 || suma(rodilla, lejosP);
     var punta2 = o.punta2 || suma(punta, lejosP);
@@ -214,7 +220,22 @@
 
     function pelvis(al, w) { return suma(suma(cad, por(u0, al)), por(n0, w)); }
     function anchoFrente(t) { return tabla(ANCHO_FRENTE, t); }
-    function anchoEspalda(t) { return tabla(ANCHO_ESPALDA, t); }
+    // pegado { y, lumbar, alto }: la espalda se aplasta contra un plano
+    // horizontal (piso, banco). lumbar/alto 0..1 = cuanto se pega la zona lumbar
+    // y la dorsal (1 = sin hueco). Solo actua con la espalda mirando hacia abajo.
+    var pg = o.pegado;
+    function anchoEspalda(t) {
+      var b = tabla(ANCHO_ESPALDA, t);
+      if (!pg || t < 0.1 || t > 0.99) return b;
+      var nn = col.nrm(t);
+      if (nn[1] > -0.5) return b;
+      var q = col.en(t, -b);
+      var gap = (pg.y - q[1]) / (-nn[1]);
+      if (gap <= 0) return b;
+      var fz = lerp(pg.lumbar == null ? 1 : pg.lumbar, pg.alto == null ? 1 : pg.alto, suave((t - 0.55) / 0.25));
+      var vent = suave((t - 0.1) / 0.07) * suave((0.99 - t) / 0.12);
+      return b + gap * fz * vent;
+    }
     function torso(t, w) { return col.en(t, w); }
 
     function zapato(tob, pun) {
@@ -244,6 +265,21 @@
     var sube = clamp((1 + dot(dirBrazo, uTop)) / 2, 0, 1);
     var axila = lerpP(torso(1 - (MED.cuelloHombro + 70) / L, 6), suma(hombro, por(dirBrazo, 36)), suave(sube));
 
+    // contornos muestreados (para guias: linea de la espalda, del pecho, de la columna)
+    var TS = [0.14, 0.22, 0.3, 0.38, 0.46, 0.54, 0.62, 0.7, 0.78, 0.86, 0.94, 1];
+    var espaldaPts = TS.map(function (t) { return torso(t, -anchoEspalda(t)); });
+    var frentePts = TS.map(function (t) { return torso(t, anchoFrente(t)); });
+    var columnaPts = [0, 0.2, 0.4, 0.6, 0.8, 1].map(col.punto);
+    // hueco lumbar: donde la espalda queda mas lejos del plano de apoyo
+    var hueco = null;
+    if (pg) {
+      for (var ti = 0.22; ti <= 0.7001; ti += 0.01) {
+        var qh = torso(ti, -anchoEspalda(ti)), alto = pg.y - qh[1];
+        if (!hueco || alto > hueco.alto) hueco = { t: ti, arriba: qh, abajo: [qh[0], pg.y], alto: alto };
+      }
+      if (hueco.alto < 0) hueco.alto = 0;
+    }
+
     var g = Object.assign({}, o, {
       W: PW, H: PH,
       cadera: cad, cuello: cue, curva: k, cabeza: cabeza,
@@ -256,7 +292,8 @@
       menton: cab(CAB.menton), nariz: cab(CAB.nariz), ojo: cab(CAB.ojo),
       frentePecho: torso(0.72, anchoFrente(0.72)),
       espaldaAlta: torso(0.78, -anchoEspalda(0.78)),
-      lumbar: torso(0.3, -anchoEspalda(0.3)),
+      lumbar: torso(0.32, -anchoEspalda(0.32)),
+      hueco: hueco, espaldaPts: espaldaPts, frentePts: frentePts, columnaPts: columnaPts,
       panza: torso(0.32, anchoFrente(0.32)),
       gluteo: pelvis(-6, -94),
       axila: axila,
@@ -273,7 +310,7 @@
     var u = unidad(resta(rod, cad));
     var n = [-u[1], u[0]];
     var ruedo = lerpP(cad, rod, frac);
-    var arriba = suma(cad, por(u, -30));
+    var arriba = suma(cad, por(u, -12));
     return 'M ' + [suma(arriba, por(n, ra)), suma(ruedo, por(n, rb)), suma(ruedo, por(n, -rb)),
       suma(arriba, por(n, -ra))].map(pt).join(' L ') + ' Z';
   }
@@ -301,8 +338,11 @@
     var F = g.anchoFrente, Bk = g.anchoEspalda;
     var frente = T_TORSO.map(function (t) { return col.en(t, F(t)); });
     var espalda = T_TORSO.slice().reverse().map(function (t) { return col.en(t, -Bk(t)); });
+    // garganta recta hasta la base del cuello (como B.Estacion); la nuca baja
+    // suave por el trapecio hasta la espalda
+    espalda.unshift(cab(CAB.cuelloAtras));
     var torso = 'M ' + pt(frente[0]) + tramo(frente, false) +
-      ' L ' + pt(cab(CAB.cuelloFrente)) + ' L ' + pt(cab(CAB.cuelloAtras)) +
+      ' L ' + pt(cab(CAB.cuelloFrente)) +
       ' L ' + pt(espalda[0]) + tramo(espalda, false) + ' Z';
 
     var shortBloque = blando(SHORT.map(function (q) { return g.pelvis(q[0], q[1]); }), 0.32);
@@ -320,7 +360,16 @@
       else cabeza += ' L ' + pt(cab(s[1]));
     });
     cabeza += ' Z';
-    var oj = CAB.oreja.map(cab);
+    // oreja: la C se abre hacia la cara. Con la cara mirando al techo (acostado)
+    // esa C quedaria como una sonrisa debajo del ojo; ahi se gira para abrirse
+    // hacia el menton, como en la figura parada.
+    var cc = cab(CAB.orejaC);
+    var F = unidad(resta(cab([-100, CAB.orejaC[1]]), cc));
+    var Dm = unidad(resta(cab([CAB.orejaC[0], 0]), cc));
+    var tA = clamp((-F[1] - 0.45) / 0.4, 0, 1);
+    var O = unidad(lerpP(F, Dm, tA));
+    var giroO = angulo(O) - 180;
+    var oj = CAB.oreja.map(function (q) { return suma(cc, rotar(resta(q, CAB.orejaC), giroO)); });
     var oreja = 'M ' + pt(oj[0]) + ' Q ' + pt(oj[1]) + ' ' + pt(oj[2]) + ' Q ' + pt(oj[3]) + ' ' + pt(oj[4]);
 
     var lp = clamp(largo(resta(g.codo, g.hombro)) * 0.62, 58, 128);
@@ -603,11 +652,13 @@
     var g = geoPerfil(props);
     var f = formas(g);
     var id = U.useIdLocal('perf');
-    var ids = { t: id + 't', c: id + 'c', m: id + 'm', p: id + 'p', b: id + 'b', a: id + 'a', d: id + 'd' };
+    var ids = { t: id + 't', c: id + 'c', m: id + 'm', p: id + 'p', b: id + 'b', a: id + 'a', d: id + 'd', s: id + 's' };
+    var hayPierna = ORDEN_MUSC.pierna.some(function (k) { return !!colorDe(props, k); });
 
     var fondo = typeof props.fondo === 'function' ? props.fondo(g) : props.fondo;
     var medio = typeof props.medio === 'function' ? props.medio(g) : props.medio;
-    var enMano = typeof props.enMano === 'function' ? props.enMano(g) : props.enMano;
+    var agarreF = props.agarre || props.enMano;
+    var enMano = typeof agarreF === 'function' ? agarreF(g) : agarreF;
     var hijos = typeof props.children === 'function' ? props.children(g) : props.children;
 
     var brazoLejos = <Brazo S={g.hombro2} E={g.codo2} H={g.mano2} />;
@@ -625,6 +676,14 @@
       pt(suma(J, suma(por(dl.u, dl.lp * 0.4), por(dl.n, 10)))) + ' ' + pt(suma(J, por(dl.u, dl.lp * 0.92)));
 
     var fa = f.faja;
+    var encima = !!g.cabezaEncima;
+    var cabeza = (
+      <g>
+        <path d={f.cabeza} fill={BLANCO} stroke={INK} strokeWidth={15} strokeLinejoin="round" />
+        <circle cx={f.ojo[0]} cy={f.ojo[1]} r={8} fill={INK} />
+        <path d={f.oreja} fill="none" stroke={INK} strokeWidth={11} strokeLinecap="round" strokeLinejoin="round" />
+      </g>
+    );
 
     return (
       <svg width={PW * s} height={PH * s} viewBox={'0 0 ' + PW + ' ' + PH}
@@ -637,6 +696,12 @@
           <clipPath id={ids.b}><path d={f.brazo} /></clipPath>
           <clipPath id={ids.a}><path d={f.ante} /></clipPath>
           <clipPath id={ids.d}><path d={semi} /></clipPath>
+          {hayPierna ? (
+            <mask id={ids.s} maskUnits="userSpaceOnUse" x={-PW} y={-PH} width={PW * 3} height={PH * 3}>
+              <rect x={-PW} y={-PH} width={PW * 3} height={PH * 3} fill="#fff" />
+              <g fill="#000"><path d={f.short} /><path d={f.manga2} /><path d={f.manga} /></g>
+            </mask>
+          ) : null}
         </defs>
 
         {fondo}
@@ -668,11 +733,18 @@
           transform={'rotate(' + fa.ang.toFixed(2) + ' ' + pt(fa.c) + ')'} />
 
         {capaMusculos(props, g, 'pierna', ids)}
+        {/* musculos que pasan por debajo del short: se ven "a traves" de la tela,
+            pero el borde del short se vuelve a trazar encima para no perderlo */}
+        {hayPierna ? (
+          <g mask={'url(#' + ids.s + ')'} fill="none" stroke={INK} strokeWidth={28} strokeLinejoin="round">
+            <path d={f.short} />
+            <path d={f.manga2} />
+            <path d={f.manga} />
+          </g>
+        ) : null}
 
-        {/* cabeza de perfil */}
-        <path d={f.cabeza} fill={BLANCO} stroke={INK} strokeWidth={15} strokeLinejoin="round" />
-        <circle cx={f.ojo[0]} cy={f.ojo[1]} r={8} fill={INK} />
-        <path d={f.oreja} fill="none" stroke={INK} strokeWidth={11} strokeLinecap="round" />
+        {/* cabeza de perfil (colgado la pone encima del brazo: la cara se ve) */}
+        {encima ? null : cabeza}
 
         {enMano}
 
@@ -692,6 +764,7 @@
         <path d={dl.fibra} fill="none" stroke={GRY} strokeWidth={11} strokeLinecap="round" />
         <path d={dl.d} fill="none" stroke={INK} strokeWidth={13} strokeLinejoin="round" />
 
+        {encima ? cabeza : null}
         {hijos}
       </svg>
     );
@@ -709,21 +782,28 @@
     // angulo de la punta = el de la pierna (tobillo <- rodilla) + 74 en neutro
     return suma(tob, polar(angPierna + (extra == null ? 74 : extra), MED.pie));
   }
+  function esPunto(v) { return Array.isArray(v) && v.length === 2 && typeof v[0] === 'number'; }
+  function mapaPuntos(pose, f) {
+    if (esPunto(pose)) return f(pose);
+    if (Array.isArray(pose)) return pose.map(function (v) { return mapaPuntos(v, f); });
+    if (pose && typeof pose === 'object') {
+      var r = {};
+      Object.keys(pose).forEach(function (k) { r[k] = mapaPuntos(pose[k], f); });
+      return r;
+    }
+    return pose;
+  }
+  // traslada una pose (todos los puntos, tambien los de mancuerna, banco, barra, pegado)
   function mover(pose, d) {
-    var r = {};
-    Object.keys(pose).forEach(function (k) {
-      var v = pose[k];
-      r[k] = Array.isArray(v) && v.length === 2 && typeof v[0] === 'number' ? suma(v, d) : v;
-    });
+    var r = mapaPuntos(pose, function (p) { return suma(p, d); });
+    if (pose.piso != null) r.piso = pose.piso + d[1];
+    if (pose.banco) r.banco = { y: pose.banco.y + d[1], x0: pose.banco.x0 + d[0], x1: pose.banco.x1 + d[0] };
+    if (pose.pegado) r.pegado = Object.assign({}, pose.pegado, { y: pose.pegado.y + d[1] });
     return r;
   }
+  // gira todos los puntos alrededor de c (grados, + horario en pantalla)
   function girar(pose, c, deg) {
-    var r = {};
-    Object.keys(pose).forEach(function (k) {
-      var v = pose[k];
-      r[k] = Array.isArray(v) && v.length === 2 && typeof v[0] === 'number' ? suma(c, rotar(resta(v, c), deg)) : v;
-    });
-    return r;
+    return mapaPuntos(pose, function (p) { return suma(c, rotar(resta(p, c), deg)); });
   }
   // punto mas bajo de la espalda + short + cabeza en la direccion dir (para apoyar el cuerpo)
   function apoyo(cad, cue, k, cabeza, dir) {
@@ -749,9 +829,11 @@
       var cad = [x, tob[1] - 538];
       var cue = [x - 6, cad[1] - MED.columna];
       var hom = hombroDe(cad, cue, 0);
-      var codo = suma(hom, polar(93, MED.brazo));
-      var mano = suma(codo, polar(98, MED.ante));
-      var tob2 = [x + 40, piso - MED.tobillo];
+      // brazo colgando apenas por detras del eje: deja ver el frente del
+      // tronco y del muslo (abdominales, cuadriceps) sin parecer forzado
+      var codo = suma(hom, polar(87, MED.brazo));
+      var mano = suma(codo, polar(92, MED.ante));
+      var tob2 = [x + 48, piso - MED.tobillo];
       return {
         cadera: cad, cuello: cue, curva: 0, cabeza: 0,
         codo: codo, mano: mano,
@@ -770,6 +852,7 @@
         var tob = [x, piso - MED.tobillo];
         var fi = lerp(2, 17, p);
         var rod = suma(tob, polar(-90 - fi, MED.pierna));
+        // sumo: los muslos se abren hacia los costados -> de perfil se ven mas cortos
         var lm = lerp(MED.muslo, 226, suave(p));
         var cad = suma(rod, polar(lerp(-87, -3, p), lm));
         var lean = lerp(3, 26, p) + k * lerp(4, 12, p);
@@ -782,22 +865,28 @@
       }
       var p = clamp(o.prof || 0, 0, 1);
       var a = armar(p);
-      var tob2 = [x + 26, piso - MED.tobillo];
+      var tob2 = [x + 34, piso - MED.tobillo];
       var rod2 = ik(a.cad, tob2, a.lm, MED.pierna, -1);
       var pose = {
         cadera: a.cad, cuello: a.cue, curva: a.curva,
-        cabeza: lerp(0, -10, p) * (1 - k) + k * 16,
+        // la mirada queda al frente aunque el tronco se incline; con la espalda
+        // redondeada la cabeza cae
+        cabeza: lerp(0, -16, p) * (1 - k) + k * lerp(-4, -10, p),
         hombro: a.hom, codo: a.codo, mano: a.mano,
         codo2: suma(a.codo, [12, -8]), mano2: suma(a.mano, [6, -4]),
-        rodilla: a.rod, tobillo: a.tob, punta: suma(a.tob, [-104, 32]),
-        rodilla2: rod2, tobillo2: tob2, punta2: suma(tob2, [-104, 32]),
+        rodilla: a.rod, tobillo: a.tob, punta: suma(a.tob, ZAP_PUNTA),
+        rodilla2: rod2, tobillo2: tob2, punta2: suma(tob2, ZAP_PUNTA),
         brazosDentro: true, piso: piso
       };
       if (o.pesa) {
+        // una mancuerna vertical colgando de las dos manos; el largo hace que
+        // en el fondo (prof 1) el centro de la cabeza de abajo quede a 40 del piso
         var fondo1 = armar(1).mano;
+        var agarre = lerpP(a.mano, pose.mano2, 0.5);
+        var lg = clamp(piso - 40 - fondo1[1], 100, 320);
         pose.mancuerna = {
-          agarre: lerpP(a.mano, pose.mano2, 0.5), eje: [0, 1],
-          largo: Math.max(120, piso - 10 - fondo1[1])
+          agarre: agarre, eje: [0, 1], largo: lg,
+          arriba: suma(agarre, [0, -6]), abajo: suma(agarre, [0, lg])
         };
       }
       return pose;
@@ -806,38 +895,50 @@
     // 3. boca arriba en el piso, cabeza a la derecha. x = cadera
     acostado: function (o) {
       o = o || {};
-      var x = o.x == null ? 700 : o.x, piso = o.piso == null ? PISO : o.piso;
+      var x = o.x == null ? 640 : o.x, piso = o.piso == null ? PISO : o.piso;
       var pr = clamp(o.piernas || 0, 0, 90), rd = clamp(o.rodilla || 0, 0, 1), ar = clamp(o.arco || 0, 0, 1);
-      var curva = lerp(0.3, -0.62, ar);
-      var cabeza = -4;
-      var cad = [x, piso - 100], cue = [x + MED.columna, piso - 90];
+      var curva = lerp(0.15, -0.85, suave(ar));
+      var cabeza = -10;
+      var cad = [x, piso - 100], cue = [x + MED.columna, piso - 92];
       var dy = piso - apoyo(cad, cue, curva, cabeza, [0, 1]);
       cad = suma(cad, [0, dy]); cue = suma(cue, [0, dy]);
+      var col = columna(cad, cue, curva);
       var hom = hombroDe(cad, cue, curva);
-      // brazo apoyado en el piso, manos debajo de los gluteos
-      var codo = [hom[0] - 218, piso - R_BRAZO[1] - 2];
-      var mano = [cad[0] - 30, piso - R_PUNO - 2];
-      // piernas
-      var e = lerp(-6, 90, pr / 90);
-      var flex = rd * 72;
-      var th = e + rd * 18, rod, tob, angP;
-      for (var i = 0; i < 120; i++) {
-        rod = suma(cad, polar(180 + th, MED.muslo));
+      // brazo a lo largo del cuerpo, apoyado sobre la mitad de adelante del
+      // tronco (un poco abierto hacia la camara): asi no tapa la zona lumbar y
+      // el hueco con el piso se ve. La mano queda junto al gluteo.
+      // brazo cercano: apoyado en el piso, del lado de la camara. Con la camara
+      // apenas elevada lo que esta mas cerca queda mas abajo en pantalla: el
+      // brazo baja del hombro y corre por delante del piso, asi no tapa ni los
+      // abdominales ni la zona lumbar (el hueco con el piso se ve).
+      var mano = [cad[0] - 24, piso + 20];
+      var codo = [lerp(mano[0], hom[0], 0.5) + 14, piso + 32];
+      // brazo lejano: escondido detras del tronco
+      var codo2 = col.en(0.36, 16), mano2 = col.en(-0.1, -6);
+      // piernas: e = elevacion del muslo; con rodilla el muslo sube un poco mas
+      // y la pierna cae (la rodilla apunta al techo)
+      var hip = cad;
+      var th0 = -Math.asin(clamp((piso - 34 - hip[1]) / (MED.muslo + MED.pierna), -1, 1)) / GRAD;
+      var th = lerp(th0, 90, pr / 90) + rd * 22;
+      var flex = rd * 78;
+      var rod, tob, angP;
+      for (var i = 0; i < 140; i++) {
+        rod = suma(hip, polar(180 + th, MED.muslo));
         angP = 180 + th - flex;
         tob = suma(rod, polar(angP, MED.pierna));
-        if (tob[1] <= piso - 40 || th >= 100) break;
+        if (tob[1] <= piso - 34 || th >= 110) break;
         th += 1;
       }
-      var pun = pieDesde(tob, angP, 60);
-      var nM = flexDe(unidad(resta(rod, cad)));
-      var lj = suma(por(nM, 14), por(unidad(resta(rod, cad)), -4));
+      var pun = pieDesde(tob, angP, 62);
+      // pierna lejana: asoma arriba (en pantalla) y hacia la cabeza
+      var lj = [30, -30];
       return {
         cadera: cad, cuello: cue, curva: curva, cabeza: cabeza,
         hombro: hom, codo: codo, mano: mano,
-        hombro2: suma(hom, [10, -12]), codo2: suma(codo, [16, -10]), mano2: suma(mano, [18, -8]),
+        hombro2: suma(hom, [10, -12]), codo2: codo2, mano2: mano2,
         rodilla: rod, tobillo: tob, punta: pun,
         rodilla2: suma(rod, lj), tobillo2: suma(tob, lj), punta2: suma(pun, lj),
-        piso: piso
+        piso: piso, pegado: { y: piso, lumbar: 1 - suave(ar), alto: 1 }
       };
     },
 
@@ -847,70 +948,96 @@
       var x = o.x == null ? 560 : o.x, piso = o.piso == null ? PISO : o.piso;
       var y = o.y == null ? piso - 290 : o.y;
       var p = clamp(o.p || 0, 0, 1);
-      var curva = 0.12, cabeza = -4;
+      var curva = 0.12, cabeza = -10;
       var cad = [x, y - 100], cue = [x + MED.columna, y - 92];
       var dy = y - apoyo(cad, cue, curva, cabeza, [0, 1]);
       cad = suma(cad, [0, dy]); cue = suma(cue, [0, dy]);
       var col = columna(cad, cue, curva);
       var hom = hombroDe(cad, cue, curva);
       var u = col.tan(0.84), n = col.nrm(0.84);
-      // brazo en 3D [hacia la cabeza, hacia arriba (frente), hacia la camara]
-      var ua = unidad3(lerp3([-0.16, -0.62, 0.77], [0.02, 0.985, 0.17], suave(p)));
-      var fa = unidad3(lerp3([0.04, 0.99, -0.1], [0.0, 0.99, -0.12], p));
+      // brazo: phi = elevacion sobre el plano del banco (-30: codo por debajo
+      // del banco; 84: vertical), alfa = angulo del brazo con el costado hacia
+      // los pies (45: codos a 45 grados del torso). De perfil se ve la proyeccion.
+      var e = suave(p);
+      var phi = lerp(-30, 84, e) * GRAD, alfa = lerp(45, 10, e) * GRAD;
+      var ua = [-Math.cos(phi) * Math.sin(alfa) - 0.06 * e, Math.sin(phi)];
+      var fa = unidad([lerp(0.04, 0.12, e), 0.99]);   // antebrazo vertical; arriba, codo apenas flexionado
       var en2 = function (v, l) { return suma(por(u, v[0] * l), por(n, v[1] * l)); };
       var codo = suma(hom, en2(ua, MED.brazo));
       var mano = suma(codo, en2(fa, MED.ante));
       // piernas: rodillas a ~90 grados, pies apoyados en el piso
       var tob = [cad[0] - 236, piso - MED.tobillo];
       var rod = ik(cad, tob, MED.muslo, MED.pierna, -1);
-      var tob2 = suma(tob, [22, -2]);
+      var tob2 = suma(tob, [34, -2]);
       var rod2 = ik(cad, tob2, MED.muslo, MED.pierna, -1);
-      var bancoX0 = cad[0] - 150;
       return {
         cadera: cad, cuello: cue, curva: curva, cabeza: cabeza,
         hombro: hom, codo: codo, mano: mano,
-        codo2: suma(codo, [14, -10]), mano2: suma(mano, [14, -10]),
+        hombro2: suma(hom, [14, -10]), codo2: suma(codo, [14, -10]), mano2: suma(mano, [14, -10]),
         rodilla: rod, tobillo: tob, punta: suma(tob, ZAP_PUNTA),
         rodilla2: rod2, tobillo2: tob2, punta2: suma(tob2, ZAP_PUNTA),
-        piso: piso, banco: { y: y, x0: bancoX0, x1: cue[0] + 190 }
+        piso: piso, banco: { y: y, x0: cad[0] - 150, x1: cue[0] + 190 }
       };
     },
 
     // 5. colgado de una barra (dominadas), visto de costado
     colgado: function (o) {
       o = o || {};
-      var barra = o.barra || [o.x == null ? 700 : o.x, 210];
+      var barra = o.barra || [o.x == null ? 700 : o.x, 200];
       var sb = clamp(o.sube || 0, 0, 1), rd = clamp(o.rodillas || 0, 0, 1);
       var bal = o.balanceo || 0;
       var e = suave(sb);
-      // brazo en 3D [adelante, arriba, hacia la camara]
-      var ua = unidad3(lerp3([0.05, 0.96, 0.28], [0.34, -0.48, 0.8], e));
-      var fa = unidad3(lerp3([0.04, 0.97, 0.24], [0.14, 0.97, 0.2], e));
-      var v = function (q, l) { return [-q[0] * l, -q[1] * l]; };
       var mano = barra;
-      var codo = resta(mano, v(fa, MED.ante));
-      var hom = resta(codo, v(ua, MED.brazo));
-      var elev = 26 * (1 - e);
-      var cue = suma(hom, [-12, -(MED.cuelloHombro - elev)]);
-      var cad = suma(cue, [6, MED.columna]);
-      var thA = 90 + 4 + rd * 24;
+      // hombro respecto de la barra. Abajo el brazo casi vertical (la cabeza se
+      // dibuja encima del brazo para que la cara se vea); a mitad de camino el
+      // antebrazo sube vertical delante de la cara; arriba el pecho llega a la
+      // barra y la barra queda bajo el menton.
+      var hom = suma(barra, [tabla([[0, -40], [0.5, 132], [1, 116]], e), lerp(444, 46, e)]);
+      // el brazo se abre hacia los costados al subir: de perfil se ve mas corto
+      var l1 = MED.brazo * tabla([[0, 1], [0.5, 0.45], [1, 0.76]], e);
+      var l2 = MED.ante * lerp(1, 0.97, e);
+      var codo = ik(hom, mano, l1, l2, 1);
+      // tronco: abajo casi vertical; arriba se echa atras (cadera adelante)
+      var fi = lerp(2, 5, e);
+      var dn = polar(90 + fi, 1);
+      var cue = suma(hom, por(dn, -(MED.cuelloHombro - 22 * (1 - e))));
+      var cad = suma(cue, por(dn, MED.columna));
+      var thA = 90 + fi + 6 + rd * 34;
       var rod = suma(cad, polar(thA, MED.muslo));
-      var shA = thA - rd * 86;
+      var shA = thA - rd * 100;
       var tob = suma(rod, polar(shA, MED.pierna));
-      var pun = pieDesde(tob, shA, 40);
-      var cruz = lerpP([16, -8], [-34, 6], rd);
-      var tob2 = suma(tob, cruz);
+      var pun = pieDesde(tob, shA, 52);
+      // pierna lejana: con rodillas los tobillos se cruzan (el pie lejano pasa adelante)
+      var cruz = lerpP([30, -10], [-44, 6], rd);
       var pose = {
-        cadera: cad, cuello: cue, curva: -0.08 * e, cabeza: -10 * e,
+        cadera: cad, cuello: cue, curva: -0.1 * e, cabeza: lerp(-6, -14, e),
         hombro: hom, codo: codo, mano: mano,
-        hombro2: suma(hom, [16, -10]), codo2: suma(codo, [18, -6]), mano2: suma(mano, [4, -2]),
+        hombro2: suma(hom, [18, -8]), codo2: suma(codo, [18, -8]), mano2: suma(mano, [6, -2]),
         rodilla: rod, tobillo: tob, punta: pun,
-        rodilla2: suma(rod, [16, -6]), tobillo2: tob2, punta2: suma(pun, cruz),
-        barra: barra
+        rodilla2: suma(rod, lerpP([30, -10], [10, -8], rd)), tobillo2: suma(tob, cruz), punta2: suma(pun, cruz),
+        barra: barra, cabezaEncima: true
       };
-      var giro = bal + 9 * e;
-      return giro ? Object.assign(girar(pose, barra, giro), { barra: barra }) : pose;
-    }
+      // el cuerpo cuelga con el centro de masa bajo la barra; balanceo lo saca de ahi
+      var cm = suma(suma(por(cad, 0.4), por(lerpP(cue, cad, 0.3), 0.3)), suma(por(rod, 0.18), por(tob, 0.12)));
+      // (correccion parcial: de perfil un cuerpo mas vertical se lee mejor)
+      var giro = 0.5 * (90 - angulo(resta(cm, barra))) + bal;
+      return Object.assign(girar(pose, barra, giro), { barra: barra });
+    },
+
+    // mezcla dos poses: t 0 -> a, 1 -> b (puntos y numeros se interpolan)
+    mezclar: function mezclar(a, b, t) {
+      if (typeof a === 'number' && typeof b === 'number') return lerp(a, b, t);
+      if (esPunto(a) && esPunto(b)) return lerpP(a, b, t);
+      if (a && b && typeof a === 'object' && typeof b === 'object' && !Array.isArray(a)) {
+        var r = {};
+        Object.keys(a).forEach(function (k) { r[k] = k in b ? mezclar(a[k], b[k], t) : a[k]; });
+        Object.keys(b).forEach(function (k) { if (!(k in a)) r[k] = b[k]; });
+        return r;
+      }
+      return t < 0.5 ? a : b;
+    },
+    mover: mover,
+    girar: girar
   };
 
   Object.assign(B, {
