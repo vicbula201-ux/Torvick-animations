@@ -257,19 +257,31 @@ Código de color en estos videos (misma paleta de cinco):
 cable flojo, short · `RED` error (y el trapecio cuando se encogen los
 hombros) · `GRN` lo correcto: visto, flechas de corrección.
 
-`cuerpo.jsx` (`window.B`) es reutilizable para otros ejercicios:
+Las piezas de `window.B` son reutilizables para cualquier ejercicio:
 
 ```js
-B.Espalda   // vista posterior: codo, rot, enc, ret, musc{dp,inf,rm,tra,rom,trapRojo}, piernas
-B.Estacion  // vista lateral con polea: p, rot, paso, tension, poleaY, carga, cable, suelta
+// cuerpo.jsx
+B.Espalda   // posterior: codo, rot, enc, ret, piernas | brazos:'arriba' + sube (dominadas,
+            // manos fijas con anclaManos) | cuerpoEntero, rodillas | musc{dp,inf,rm,tra,rom,dor,rM,trapRojo}
+B.Estacion  // lateral con polea: p, rot, paso, tension, poleaY, carga, cable, suelta
 B.Cuenta    // anillo que se vacía con un número adentro (n, p)
 B.FlechaS B.Arco B.Puntos B.Anillo   // overlays SVG que van dentro de children
-B.geoEspalda(props) B.geoEstacion(props)  // las mismas coordenadas, sin dibujar
+// perfil.jsx
+B.Perfil    // perfil articulado (mira a la izquierda); pose = puntos explícitos
+B.posePerfil.depie / sentadilla / acostado / banco / colgado / mezclar / mover / girar
+// frente.jsx
+B.Frente    // de frente o cenital (acostado visto de arriba)
+B.poseFrente.depie / sumo / bancaArriba / mezclar
+// equipo.jsx: cada uno suelto o en versión G para dibujar dentro de un cuerpo
+B.Mancuerna B.Banco B.Barra B.Colchoneta  (+ MancuernaG, BancoG, BarraG, ColchonetaG, SombraG, PisoG)
+B.geoEspalda B.geoEstacion B.geoPerfil B.geoFrente   // las mismas coordenadas, sin dibujar
 ```
 
-`B.Espalda` y `B.Estacion` reciben `children` como función `(g) => <g>…</g>`:
-`g` trae las articulaciones (`g.izq.E`, `g.der.H`, `g.Sj`, `g.rueda`…) en
-coordenadas del viewBox, así las flechas y guías siguen al brazo.
+Los cuerpos reciben `fondo`, `children` (y `agarre`/`medio` los nuevos) como
+función `(g) => <g>…</g>`: `g` trae las articulaciones en coordenadas del
+viewBox, así las flechas, guías y mancuernas siguen al cuerpo. Músculos:
+`musc` amarillo (principal), `muscGris` gris (secundario), `muscRojo` rojo
+(error) en `B.Perfil` y `B.Frente`.
 
 ## Verificación
 
