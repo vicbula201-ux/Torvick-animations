@@ -1,9 +1,10 @@
 /* ============================================================
    compilar.js — regenera primitivas.js y app.js desde los .jsx
 
-   Solo hace falta correrlo si editaste primitivas.jsx o app.jsx:
+   Solo hace falta correrlo si editaste algun .jsx:
 
-       node compilar.js
+       node compilar.js                  (todos)
+       node compilar.js dominadas.jsx    (solo ese)
 
    Existe por una sola razon: los .jsx cargados con type="text/babel"
    se piden por XHR, y el navegador bloquea esa peticion cuando la
@@ -18,7 +19,13 @@ const os = require('os');
 const path = require('path');
 
 const URL_BABEL = 'https://cdn.jsdelivr.net/npm/@babel/standalone@7.26.4/babel.min.js';
-const FUENTES = ['primitivas.jsx', 'app.jsx', 'cuerpo.jsx', 'face-pull.jsx'];
+// orden de carga: motor -> primitivas -> cuerpo -> piezas extra -> marca -> reel -> videos
+const FUENTES = [
+  'primitivas.jsx', 'app.jsx',
+  'cuerpo.jsx', 'perfil.jsx', 'frente.jsx', 'equipo.jsx',
+  'marca.jsx', 'reel.jsx',
+  'face-pull.jsx', 'sentadilla-sumo.jsx', 'elevacion-piernas.jsx', 'press-banca.jsx', 'dominadas.jsx'
+];
 
 async function traerBabel() {
   const cache = path.join(os.tmpdir(), 'babel-standalone-7.26.4.js');
@@ -34,7 +41,9 @@ async function traerBabel() {
 
 (async () => {
   const Babel = await traerBabel();
-  for (const fuente of FUENTES) {
+  const pedidos = process.argv.slice(2);
+  const lista = pedidos.length ? pedidos : FUENTES.filter((f) => fs.existsSync(f));
+  for (const fuente of lista) {
     const destino = fuente.replace(/\.jsx$/, '.js');
     const src = fs.readFileSync(fuente, 'utf8');
     const { code } = Babel.transform(src, { presets: ['react'], filename: fuente });

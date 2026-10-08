@@ -1,6 +1,6 @@
 /* GENERADO por compilar.js desde face-pull.jsx — no editar a mano. */
 /* ============================================================
-   FACE PULL — reel vertical 1080x1920 (~58 s) para poner voz encima
+   FACE PULL — reel vertical 1080x1920 (~60 s con el cierre de marca)
    Fuente tecnica: libro de biomecanica, pag. 90. Polea a la altura
    del pecho, tension desde el inicio, hombros abajo, codos altos,
    rotacion externa al final, vuelta controlada.
@@ -8,13 +8,13 @@
    Cada escena sigue la regla de f(fraccion): si cambias una duracion
    (en ESCENAS o en la lista de la pagina) la coreografia se estira o
    se encoge sola, para calzar con la locucion grabada.
+   La pagina, las transiciones, el sello y el cierre de marca los pone
+   reel.jsx; aca solo van las escenas.
    ============================================================ */
 (function (global) {
   'use strict';
 
   var React = global.React;
-  var useState = React.useState;
-  var useEffect = React.useEffect;
   var M = global.M,
     P = global.P,
     B = global.B;
@@ -23,123 +23,16 @@
     clamp = global.clamp;
   var U = B.util;
   var C = P.C;
-  var ANCHO = 1080,
-    ALTO = 1920;
-
-  /* ---------------- ayudas ---------------- */
-
-  // lo inverso de M.pop: nada se va de golpe
-  function sale(T, cuando, dur) {
-    if (dur == null) dur = 0.3;
-    var k = animate({
-      from: 1,
-      to: 0,
-      start: cuando,
-      end: cuando + dur,
-      ease: Easing.easeInCubic
-    })(T);
-    return {
-      opacity: k,
-      scale: 0.55 + 0.45 * k
-    };
-  }
-  function junta(a, b) {
-    return {
-      opacity: a.opacity * b.opacity,
-      scale: (a.scale == null ? 1 : a.scale) * (b.scale == null ? 1 : b.scale),
-      x: a.x
-    };
-  }
-
-  // repeticiones 0 -> 1 -> 0 entre a y b; n = 1.5 termina arriba
-  function reps(T, a, b, n) {
-    if (T <= a) return 0;
-    var u = Math.min(1, (T - a) / (b - a));
-    return 0.5 - 0.5 * Math.cos(u * n * Math.PI * 2);
-  }
-
-  // caja absoluta: entra con pop o slide, respira y puede temblar
-  function Pos(props) {
-    var e = props.e || {
-      opacity: 1,
-      scale: 1
-    };
-    var sc = e.scale == null ? 1 : e.scale;
-    var dx = (e.x || 0) + (props.dx || 0);
-    var dy = props.dy || 0;
-    return /*#__PURE__*/React.createElement("div", {
-      style: {
-        position: 'absolute',
-        left: props.x,
-        top: props.y,
-        opacity: e.opacity,
-        transformOrigin: props.origen || '50% 50%',
-        transform: 'translate(' + dx.toFixed(2) + 'px,' + dy.toFixed(2) + 'px) scale(' + sc.toFixed(4) + ')'
-      }
-    }, props.children);
-  }
-  function anchoRotulo(txt) {
-    return Math.max(120, String(txt).length * 30) + 64 + 46;
-  }
-
-  // rotulo centrado en x salvo que se pida otra posicion
-  function Rot(props) {
-    var s = props.s || 1.1;
-    var w = anchoRotulo(props.text) * s;
-    var x = props.x == null ? (ANCHO - w) / 2 : props.x;
-    return /*#__PURE__*/React.createElement(Pos, {
-      x: x,
-      y: props.y,
-      e: props.e,
-      dy: M.life(props.T, 3.4, 5, props.fase || 0)
-    }, /*#__PURE__*/React.createElement(P.Rotulo, {
-      text: props.text,
-      dir: props.dir || 'right',
-      s: s
-    }));
-  }
-
-  // camara: escala alrededor de foco y lo deja en mira
-  function Camara(props) {
-    var z = props.zoom == null ? 1 : props.zoom;
-    var f = props.foco || [ANCHO / 2, ALTO / 2];
-    var m = props.mira || f;
-    var tx = m[0] - z * f[0],
-      ty = m[1] - z * f[1];
-    return /*#__PURE__*/React.createElement("div", {
-      style: {
-        position: 'absolute',
-        left: 0,
-        top: 0,
-        width: ANCHO,
-        height: ALTO,
-        transformOrigin: '0 0',
-        transform: 'translate(' + tx.toFixed(2) + 'px,' + ty.toFixed(2) + 'px) scale(' + z.toFixed(4) + ')'
-      }
-    }, props.children);
-  }
-
-  // ventana que muestra solo una franja de una pieza (para las comparaciones)
-  function Recorte(props) {
-    return /*#__PURE__*/React.createElement("div", {
-      style: {
-        position: 'absolute',
-        left: props.x,
-        top: props.y,
-        width: props.w,
-        height: props.h,
-        overflow: 'hidden'
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        position: 'absolute',
-        left: 0,
-        top: -props.desde
-      }
-    }, props.children));
-  }
-
-  // donde caen las piezas grandes en el lienzo
+  var A = global.REELS.ayudas;
+  var sale = A.sale,
+    junta = A.junta,
+    reps = A.reps,
+    Pos = A.Pos,
+    Rot = A.Rot;
+  var Camara = A.Camara,
+    Recorte = A.Recorte;
+  var ANCHO = global.REELS.ANCHO,
+    ALTO = global.REELS.ALTO;
   var ESP = {
     x: -10,
     y: 400,
@@ -1173,7 +1066,8 @@
   /* =========================================================
      GUION — duracion y locucion de cada escena
      Las duraciones salen de leer cada linea a ritmo normal
-     (~2,7 palabras por segundo). Total: 58 s.
+     (~2,7 palabras por segundo). Total: 56,5 s + 3 s del cierre de marca
+     que agrega reel.jsx = 59,5 s.
      ========================================================= */
 
   var ESCENAS = [{
@@ -1208,7 +1102,7 @@
     vo: 'Pero aquí está la parte importante: al acercarte al rostro, no solamente tires hacia atrás. Rota externamente el hombro, llevando las manos hacia los lados.'
   }, {
     nombre: 'Músculos',
-    dur: 8,
+    dur: 7.5,
     C: EscMusculos,
     vo: 'En esta fase participan principalmente el deltoides posterior, infraespinoso y redondo menor, con ayuda del trapecio y los romboides.'
   }, {
@@ -1228,195 +1122,13 @@
     vo: '…y terminar el ejercicio sin rotación externa.'
   }, {
     nombre: 'Cierre',
-    dur: 4,
+    dur: 3,
     C: EscCierre,
     vo: 'Ese es un Face Pull bien ejecutado.'
   }];
-  function Reel(props) {
-    var T = global.useComposition().T;
-    var acc = 0;
-    return /*#__PURE__*/React.createElement("div", {
-      style: {
-        position: 'absolute',
-        inset: 0,
-        overflow: 'hidden'
-      }
-    }, props.escenas.map(function (e, i) {
-      var at = acc;
-      acc += e.dur;
-      var Esc = e.C;
-      return /*#__PURE__*/React.createElement(global.Shot, {
-        key: i,
-        from: at,
-        to: acc
-      }, /*#__PURE__*/React.createElement(Esc, {
-        T: T,
-        at: at,
-        dur: e.dur
-      }));
-    }));
-  }
-
-  /* =========================================================
-     PAGINA — lienzo vertical + guion para grabar la voz
-     #render deja solo el lienzo a 1080x1920 (para exportar video)
-     ========================================================= */
-
-  var CLAVE = 'facepull.duraciones';
-  function durDefecto() {
-    return ESCENAS.map(function (e) {
-      return e.dur;
-    });
-  }
-  function cargarDur() {
-    try {
-      var v = JSON.parse(localStorage.getItem(CLAVE) || 'null');
-      if (Array.isArray(v) && v.length === ESCENAS.length && v.every(function (x) {
-        return typeof x === 'number' && x > 0;
-      })) return v;
-    } catch (e) {/* sin almacenamiento: tiempos por defecto */}
-    return durDefecto();
-  }
-  function fmt(v) {
-    return (Math.round(v * 10) / 10).toFixed(1);
-  }
-
-  // campo de segundos: deja escribir libre y aplica solo valores validos
-  function CampoSeg(props) {
-    var _t = useState(String(props.valor));
-    var txt = _t[0],
-      setTxt = _t[1];
-    var editando = React.useRef(false);
-    useEffect(function () {
-      if (!editando.current) setTxt(String(props.valor));
-    }, [props.valor]);
-    return /*#__PURE__*/React.createElement("input", {
-      type: "number",
-      min: "1",
-      max: "30",
-      step: "0.5",
-      value: txt,
-      onFocus: function () {
-        editando.current = true;
-      },
-      onBlur: function () {
-        editando.current = false;
-        setTxt(String(props.valor));
-      },
-      onChange: function (ev) {
-        setTxt(ev.target.value);
-        var v = parseFloat(ev.target.value);
-        if (v >= 1 && v <= 30) props.onValor(v);
-      }
-    });
-  }
-  function Guion(props) {
-    var api = props.api;
-    useEffect(function () {
-      global.REEL = {
-        seek: api.seek,
-        setPlaying: api.setPlaying,
-        total: api.total
-      };
-    });
-    if (props.render) return null;
-    var acc = 0,
-      actual = -1;
-    var filas = props.escenas.map(function (e, i) {
-      var at = acc;
-      acc += e.dur;
-      var activa = api.T >= at && api.T < acc;
-      if (activa) actual = i;
-      return /*#__PURE__*/React.createElement("li", {
-        key: i,
-        className: activa ? 'activa' : '',
-        onClick: function () {
-          api.seek(at + 0.001);
-        }
-      }, /*#__PURE__*/React.createElement("span", {
-        className: "num"
-      }, i + 1), /*#__PURE__*/React.createElement("div", {
-        className: "texto"
-      }, /*#__PURE__*/React.createElement("b", null, e.nombre), /*#__PURE__*/React.createElement("span", null, e.vo)), /*#__PURE__*/React.createElement("label", {
-        className: "seg",
-        onClick: function (ev) {
-          ev.stopPropagation();
-        }
-      }, /*#__PURE__*/React.createElement(CampoSeg, {
-        valor: e.dur,
-        onValor: function (v) {
-          var nuevo = props.durs.slice();
-          nuevo[i] = v;
-          props.setDurs(nuevo);
-        }
-      }), /*#__PURE__*/React.createElement("span", null, "s")));
-    });
-    var total = acc;
-    return /*#__PURE__*/React.createElement("div", {
-      className: "guion"
-    }, /*#__PURE__*/React.createElement("div", {
-      className: "rotulo"
-    }, "Ahora dice"), /*#__PURE__*/React.createElement("div", {
-      className: "ahora"
-    }, actual >= 0 ? props.escenas[actual].vo : '—'), /*#__PURE__*/React.createElement("div", {
-      className: "total"
-    }, "Total ", fmt(total), " s", total > 60 ? ' · pasa del minuto' : ''), /*#__PURE__*/React.createElement("ol", null, filas), /*#__PURE__*/React.createElement("button", {
-      className: "plano",
-      onClick: function () {
-        props.setDurs(durDefecto());
-      }
-    }, "Restablecer tiempos"));
-  }
-  function App() {
-    var modoRender = global.location.hash === '#render';
-    var _d = useState(modoRender ? durDefecto : cargarDur);
-    var durs = _d[0],
-      setDurs = _d[1];
-    useEffect(function () {
-      if (modoRender) return;
-      try {
-        localStorage.setItem(CLAVE, JSON.stringify(durs));
-      } catch (e) {/* nada */}
-    }, [durs]);
-    var escenas = ESCENAS.map(function (e, i) {
-      return Object.assign({}, e, {
-        dur: durs[i]
-      });
-    });
-    var scenes = escenas.map(function (e) {
-      return {
-        name: e.nombre,
-        dur: e.dur
-      };
-    });
-    return /*#__PURE__*/React.createElement("div", {
-      className: modoRender ? 'fp-render' : 'fp'
-    }, modoRender ? null : /*#__PURE__*/React.createElement("header", {
-      className: "fp-cabecera"
-    }, /*#__PURE__*/React.createElement("div", {
-      className: "marca"
-    }, "Face Pull"), /*#__PURE__*/React.createElement("div", {
-      className: "sub"
-    }, "reel vertical 1080\xD71920 \xB7 le\xE9 la l\xEDnea resaltada mientras corre")), /*#__PURE__*/React.createElement(global.Stage, {
-      ancho: ANCHO,
-      alto: ALTO,
-      scenes: scenes,
-      debajo: function (api) {
-        return /*#__PURE__*/React.createElement(Guion, {
-          api: api,
-          escenas: escenas,
-          durs: durs,
-          setDurs: setDurs,
-          render: modoRender
-        });
-      }
-    }, /*#__PURE__*/React.createElement(Reel, {
-      escenas: escenas
-    })));
-  }
-  global.FACE_PULL = {
-    ESCENAS: ESCENAS,
-    Reel: Reel
-  };
-  ReactDOM.createRoot(document.getElementById('root')).render(/*#__PURE__*/React.createElement(App, null));
+  global.REELS.registrar({
+    id: 'face-pull',
+    titulo: 'Face Pull',
+    escenas: ESCENAS
+  });
 })(window);
