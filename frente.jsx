@@ -16,10 +16,29 @@
    lienzo = brazo derecho de la persona, que mira a camara).
 
    Capas, de atras hacia adelante:
-     fondo(g) -> banco (cenital) -> piernas -> short -> torso -> cabeza
-     -> brazos -> deltoides -> agarre(g) -> puños -> children(g)
+     fondo(g) -> piso o banco -> piernas (+ musculos del muslo) -> zapatillas
+     -> torso (+ musculos) -> short -> cabeza -> brazos -> deltoides
+     -> agarre(g) -> punos -> children(g)
    agarre(g) es para lo que se sostiene en la mano (la mancuerna):
-   queda encima de los brazos y debajo de los puños.
+   queda encima de los brazos y debajo de los punos.
+
+   Props de B.Frente:
+     s          escala (1 = 1200x1600 px)
+     pose       objeto de pose (ver abajo); por defecto depie({})
+     musc       { clave: 0..1 | [izq, der] }  amarillo (lo que trabaja)
+     muscGris   { ... }  gris (secundario)     muscRojo { ... } rojo (error)
+                claves: pec delt bic ante abd obl serr trap cuad aduct sart tfl
+                con 0 el musculo no se dibuja; el tinte entra con opacidad = valor
+     short      fraccion del muslo que tapa la manga (0.36; < 0.2 deja ver el tfl)
+     boca       true dibuja una linea de boca (por defecto: ojos y nariz)
+     sinPiso    sin la linea gris del piso (vista de frente)
+     sinBanco   sin el banco (vista cenital)
+     fondo(g) agarre(g) children(g)   funciones -> SVG en coordenadas del viewBox
+
+   Pose: { vista: 'frente' | 'cenital', centro, cuello, piso?, cabeza?,
+           izq: { codo, mano, rodilla, tobillo, pieAng, hombro?, cadera?,
+                  kCodo?, kMano?, kPie? }, der: { ... },
+           mancuerna?, banco? }
    ============================================================ */
 (function (global) {
   'use strict';
@@ -45,6 +64,7 @@
   var TOBILLO = 32;             // alto del tobillo sobre el piso
   var R_PUNO = 36;
   var CABEZA_D = 162;           // base del cuello -> centro de la cabeza
+  var FAJA = [-96, -58];        // elastico del short (y del torso)
 
   /* ---------------- geometria ---------------- */
 
@@ -72,6 +92,28 @@
     }).join(' ');
   }
 
+  // curva cerrada suave que pasa por todos los puntos (Catmull-Rom)
+  function cerrada(pts) {
+    var n = pts.length, d = 'M ' + pt(pts[0]);
+    for (var i = 0; i < n; i++) {
+      var p0 = pts[(i + n - 1) % n], p1 = pts[i], p2 = pts[(i + 1) % n], p3 = pts[(i + 2) % n];
+      d += ' C ' + pt(suma(p1, por(resta(p2, p0), 1 / 6))) + ' ' +
+        pt(resta(p2, por(resta(p3, p1), 1 / 6))) + ' ' + pt(p2);
+    }
+    return d + ' Z';
+  }
+
+  // curva abierta suave que pasa por todos los puntos
+  function abierta(pts) {
+    var n = pts.length, d = 'M ' + pt(pts[0]);
+    for (var i = 0; i < n - 1; i++) {
+      var p0 = pts[Math.max(0, i - 1)], p1 = pts[i], p2 = pts[i + 1], p3 = pts[Math.min(n - 1, i + 2)];
+      d += ' C ' + pt(suma(p1, por(resta(p2, p0), 1 / 6))) + ' ' +
+        pt(resta(p2, por(resta(p3, p1), 1 / 6))) + ' ' + pt(p2);
+    }
+    return d;
+  }
+
   // dos segmentos de largo l1 y l2 de A a C; la articulacion se dobla hacia nPref
   function ik(A, C, l1, l2, nPref) {
     var d = resta(C, A);
@@ -84,13 +126,30 @@
     return suma(suma(A, por(u, a)), por(n, h));
   }
 
-  // marco de un miembro: t 0..1 de A a B, o = desplazamiento hacia AFUERA del cuerpo
+  // marco de un miembro: f([t, o]) con t 0..1 de A a B, o = desplazamiento hacia AFUERA
   function segF(A, Bp, lado) {
     var d = resta(Bp, A), u = unidad(d);
     var n = lado < 0 ? [-u[1], u[0]] : [u[1], -u[0]];
     var f = function (q) { return suma(suma(A, por(d, q[0])), por(n, q[1])); };
     f.u = u; f.n = n; f.l = largo(d);
     return f;
+  }
+
+  // miembro con perfil: pf = [[t, medioAnchoAfuera, medioAnchoAdentro], ...] de A a B.
+  // Las puntas se cierran redondas; se dibuja con el truco de union como las capsulas.
+  function miembro(A, Bp, lado, pf) {
+    var f = segF(A, Bp, lado), u = f.u, n = f.n;
+    var ext = [], int = [];
+    pf.forEach(function (q) { ext.push(f([q[0], q[1]])); int.push(f([q[0], -q[2]])); });
+    var a0 = pf[0], a1 = pf[pf.length - 1];
+    var rA = (a0[1] + a0[2]) / 2, rB = (a1[1] + a1[2]) / 2;
+    var cA = f([a0[0], (a0[1] - a0[2]) / 2]), cB = f([a1[0], (a1[1] - a1[2]) / 2]);
+    var k = 0.72;
+    var capB = [suma(cB, suma(por(u, rB * k), por(n, rB * k))), suma(cB, por(u, rB)),
+      suma(cB, suma(por(u, rB * k), por(n, -rB * k)))];
+    var capA = [suma(cA, suma(por(u, -rA * k), por(n, -rA * k))), suma(cA, por(u, -rA)),
+      suma(cA, suma(por(u, -rA * k), por(n, rA * k)))];
+    return cerrada(ext.concat(capB, int.reverse(), capA));
   }
 
   // casco convexo (cadena monotona)
@@ -117,7 +176,7 @@
   // zapatilla de frente: perfil lateral [a lo largo desde el tobillo, alto, medio ancho]
   // girado pieAng hacia afuera y proyectado sobre el plano de la camara
   var PERFIL_ZAP = [
-    [-46, 2, 34], [-50, 46, 34], [-22, 74, 36], [30, 72, 40], [96, 52, 46],
+    [-46, 2, 34], [-50, 46, 34], [-22, 76, 36], [30, 72, 40], [96, 52, 46],
     [158, 34, 46], [192, 20, 40], [200, 6, 36], [184, 0, 40], [0, 0, 42]
   ];
   function zapatoFrente(tob, piso, ang, lado) {
@@ -127,7 +186,11 @@
       pts.push([tob[0] + lado * q[0] * sa + q[2] * ca, piso - q[1]]);
       pts.push([tob[0] + lado * q[0] * sa - q[2] * ca, piso - q[1]]);
     });
-    return blando(casco(pts), 0.34);
+    var xs = pts.map(function (q) { return q[0]; });
+    return {
+      d: blando(casco(pts), 0.34),
+      suela: 'M ' + pt([Math.min.apply(null, xs) - 10, piso - 20]) + ' L ' + pt([Math.max.apply(null, xs) + 10, piso - 20])
+    };
   }
 
   // zapatilla vista desde arriba (cenital): huella con la punta hacia dir
@@ -135,9 +198,10 @@
     var n = [-dir[1], dir[0]];
     var q = function (a, c) { return suma(tob, por(suma(por(dir, a), por(n, c)), k)); };
     return {
-      d: blando([q(-40, -24), q(-40, 24), q(60, 40), q(150, 46), q(206, 20), q(206, -20),
-        q(150, -46), q(60, -40)], 0.42),
-      cordon: 'M ' + pt(q(40, 0)) + ' L ' + pt(q(112, 0))
+      d: cerrada([q(-46, 0), q(-38, 30), q(0, 40), q(60, 42), q(120, 50), q(176, 42), q(206, 14),
+        q(206, -14), q(176, -42), q(120, -50), q(60, -42), q(0, -40), q(-38, -30)]),
+      cordon: 'M ' + pt(q(64, 0)) + ' L ' + pt(q(122, 0)),
+      puntera: 'M ' + pt(q(156, -44)) + ' Q ' + pt(q(178, 0)) + ' ' + pt(q(156, 44))
     };
   }
 
@@ -158,7 +222,7 @@
     lados(function (k, l) {
       var S = [x + l * HOMBRO[0], yH + HOMBRO[1]];
       var cad = [x + l * CADERA_X, yH], tob = [x + l * pies, tobY];
-      var E = suma(S, [l * 26, 196]), H = suma(E, [l * 10, 194]);
+      var E = suma(S, [l * 26, 196]), H = suma(E, [l * 8, 194]);
       pose[k] = { codo: E, mano: H, rodilla: lerpP(cad, tob, 0.5), tobillo: tob, pieAng: pieAng };
     });
     return pose;
@@ -194,14 +258,15 @@
       }
       var S = fr.a([l * HOMBRO[0], HOMBRO[1]]);
       var hx = x + l * 30;
-      var alcance = 386;
-      var h = Math.min(S[1] + Math.sqrt(Math.max(0, alcance * alcance - Math.pow(S[0] - hx, 2))), piso - 254);
+      var alcance = 394;   // brazo casi recto (396 = brazo + antebrazo)
+      // brazos rectos; la mancuerna no puede atravesar el piso
+      var h = Math.min(S[1] + Math.sqrt(Math.max(0, alcance * alcance - Math.pow(S[0] - hx, 2))), piso - 226);
       hy = h;
       var H = [hx, h];
       var E = ik(S, H, L_BRAZO, L_ANTE, [l, 0]);
       pose[k] = { codo: E, mano: H, rodilla: rod, tobillo: tob, pieAng: pieAng };
     });
-    pose.mancuerna = { arriba: [x, hy - 38], abajo: [x, hy + 196], centro: [x, hy + 79], eje: 90, largo: 234 };
+    pose.mancuerna = { arriba: [x, hy - 36], abajo: [x, hy + 176], centro: [x, hy + 70], eje: 90, largo: 212 };
     return pose;
   }
 
@@ -225,26 +290,43 @@
     };
     lados(function (k, l) {
       var S = [x + l * HOMBRO[0], y];
+      var S3 = [S[0], S[1], 0];
       var a = abd * GRAD;
       var dirH = [l * Math.sin(a), Math.cos(a)];
-      var th = lerp(-36, 90, p) * GRAD;
-      var adentro = 0.2 * p * p;   // al final las mancuernas se juntan un poco sobre el pecho
-      var v = [dirH[0] * Math.cos(th) - l * adentro, dirH[1] * Math.cos(th), Math.sin(th)];
-      var lv = Math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
-      v = [v[0] / lv, v[1] / lv, v[2] / lv];
-      var E3 = [S[0] + v[0] * L_BRAZO, S[1] + v[1] * L_BRAZO, v[2] * L_BRAZO];
-      var fa = [-l * adentro, 0, 1];
-      var lf = Math.sqrt(fa[0] * fa[0] + 1);
-      var H3 = [E3[0] + fa[0] / lf * L_ANTE, E3[1], E3[2] + L_ANTE / lf];
+      // abajo: codo bajo el banco a abd grados del torso, antebrazo vertical (hacia camara)
+      var th0 = -36 * GRAD;
+      var E0 = [S[0] + dirH[0] * Math.cos(th0) * L_BRAZO, S[1] + dirH[1] * Math.cos(th0) * L_BRAZO,
+        Math.sin(th0) * L_BRAZO];
+      var H0 = [E0[0], E0[1], E0[2] + L_ANTE];
+      // arriba: brazos casi rectos, mancuernas sobre los hombros y un poco hacia adentro
+      var H1 = [S[0] - l * 36, S[1] + 6, 0.97 * (L_BRAZO + L_ANTE)];
+      // la mancuerna sube casi vertical (el antebrazo sigue sobre el codo) y se cierra al final
+      var ph2 = p * p;
+      var H3 = [lerp(H0[0], H1[0], ph2), lerp(H0[1], H1[1], ph2), lerp(H0[2], H1[2], p)];
+      // el codo sale de un IK 3D: se dobla hacia afuera (abd) y hacia el piso
+      var E3 = ik3(S3, H3, L_BRAZO, L_ANTE, [dirH[0], dirH[1], -0.5]);
       var pe = proy(E3), ph = proy(H3);
       // piernas abiertas a los lados del banco, rodillas dobladas, pies al piso
       var rod = [x + l * 196, centro[1] + 222];
       pose[k] = {
         hombro: S, codo: pe.p, mano: ph.p, kCodo: pe.k, kMano: ph.k,
-        rodilla: rod, tobillo: suma(rod, [l * 30, 66]), pieAng: 22, kPie: 0.82, abd: abd
+        rodilla: rod, tobillo: suma(rod, [l * 44, 64]), pieAng: 6, kPie: 0.8, abd: abd
       };
     });
     return pose;
+  }
+
+  function ik3(A, C, l1, l2, polo) {
+    var d = [C[0] - A[0], C[1] - A[1], C[2] - A[2]];
+    var ld = Math.sqrt(d[0] * d[0] + d[1] * d[1] + d[2] * d[2]) || 1;
+    var u = [d[0] / ld, d[1] / ld, d[2] / ld];
+    var dist = Math.min(ld, l1 + l2 - 0.5);
+    var a = (l1 * l1 - l2 * l2 + dist * dist) / (2 * dist);
+    var h = Math.sqrt(Math.max(0, l1 * l1 - a * a));
+    var pu = polo[0] * u[0] + polo[1] * u[1] + polo[2] * u[2];
+    var w = [polo[0] - u[0] * pu, polo[1] - u[1] * pu, polo[2] - u[2] * pu];
+    var lw = Math.sqrt(w[0] * w[0] + w[1] * w[1] + w[2] * w[2]) || 1;
+    return [A[0] + u[0] * a + w[0] / lw * h, A[1] + u[1] * a + w[1] / lw * h, A[2] + u[2] * a + w[2] / lw * h];
   }
 
   // interpola dos poses de la misma forma (puntos, numeros); lo demas cambia a la mitad
@@ -282,7 +364,7 @@
       var S = q.hombro || fr.a([l * HOMBRO[0], HOMBRO[1]]);
       var cad = q.cadera || fr.a([l * CADERA_X, 0]);
       var E = q.codo || suma(S, [l * 26, 196]);
-      var H = q.mano || suma(E, [l * 10, 194]);
+      var H = q.mano || suma(E, [l * 8, 194]);
       var tob = q.tobillo || suma(cad, [l * 10, L_MUSLO + L_PIERNA]);
       var rod = q.rodilla || lerpP(cad, tob, 0.5);
       var pieAng = q.pieAng == null ? 12 : q.pieAng;
@@ -341,7 +423,8 @@
   var LINEA = { fill: 'none', stroke: INK, strokeWidth: 11, strokeLinecap: 'round', strokeLinejoin: 'round' };
   var FIBRA = { fill: 'none', stroke: GRY, strokeWidth: 11, strokeLinecap: 'round', strokeLinejoin: 'round' };
 
-  // un musculo: tinte con opacidad = valor, contorno y fibras que entran mas rapido
+  // un musculo: tinte con opacidad = valor, contorno y fibras que entran mas rapido.
+  // Con valor 0 no se dibuja nada.
   function Musculo(props) {
     var m = props.m;
     if (!m) return null;
@@ -362,18 +445,19 @@
 
   /* ---- torso: todo en coordenadas del torso, lado izquierdo canonico (x < 0) ---- */
 
+  // media silueta: cuello, trapecio, hombro (bajo el deltoides), axila, dorsal en V, cintura
   function mitadTorso(S) {
     var sx = S[0], sy = S[1];
     return {
-      ini: [-40, -446],
+      ini: [-42, -452],
       segs: [
-        [[-40, -420], [-42, -400], [-50, -386]],
-        [[-90, -372], [sx + 58, sy - 52], [sx + 14, sy - 44]],
-        [[sx - 24, sy - 38], [sx - 36, sy + 4], [sx - 20, sy + 44]],
-        [[sx - 8, sy + 64], [sx + 8, sy + 72], [sx + 14, sy + 78]],
-        [[-160, -202], [-160, -176], [-150, -146]],
-        [[-140, -120], [-132, -104], [-134, -84]],
-        [[-136, -70], [-144, -56], [-150, -40]]
+        [[-42, -426], [-44, -404], [-52, -390]],
+        [[-88, -374], [sx + 52, sy - 52], [sx + 12, sy - 46]],
+        [[sx - 24, sy - 40], [sx - 38, sy + 4], [sx - 22, sy + 46]],
+        [[sx - 10, sy + 66], [sx + 4, sy + 76], [sx + 14, sy + 82]],
+        [[-162, -196], [-152, -150], [-136, -122]],
+        [[-124, -102], [-122, -80], [-128, -62]],
+        [[-132, -52], [-138, -44], [-144, -36]]
       ]
     };
   }
@@ -394,28 +478,31 @@
 
   function formasTorso(S) {
     var sx = S[0], sy = S[1];
-    var bordePec = [['M', [sx + 22, sy + 44]], ['C', [-124, -226], [-96, -206], [-58, -204]],
-      ['C', [-30, -204], [-14, -212], [-12, -232]]];
-    var filas = [[-210, -166, 64, 62], [-160, -118, 62, 59], [-112, -72, 58, 54]];
+    var axila = [sx + 30, sy + 36];
+    var bajoPec = [['C', [-128, -236], [-102, -212], [-68, -212]], ['C', [-42, -212], [-24, -216], [-12, -228]]];
+    var filas = [[-204, -172, 58, 56], [-166, -136, 56, 54], [-130, -104, 54, 52]];
     return {
-      bordePec: bordePec,
-      pec: [['M', [-12, -346]], ['C', [-50, -354], [sx + 72, sy - 40], [sx + 30, sy - 26]],
-        ['C', [sx + 12, sy - 4], [sx + 10, sy + 24], [sx + 22, sy + 44]],
-        ['C', [-124, -226], [-96, -206], [-58, -204]], ['C', [-30, -204], [-14, -212], [-12, -232]], 'Z'],
-      pecFibra: [['M', [-34, -236]], ['Q', [-84, -238], [sx + 30, sy + 30]]],
-      trap: [['M', [-44, -460]], ['L', [sx - 30, sy - 120]], ['L', [sx + 24, sy - 30]],
-        ['C', [sx + 70, sy - 38], [-72, -356], [-48, -372]], 'Z'],
-      trapLinea: [['M', [sx + 24, sy - 30]], ['C', [sx + 70, sy - 38], [-72, -356], [-48, -372]]],
-      trapFibra: [['M', [-58, -400]], ['Q', [-92, -384], [sx + 30, sy - 52]]],
+      bordePec: [['M', axila]].concat(bajoPec),
+      pec: [['M', [-12, -346]], ['C', [-52, -354], [sx + 76, sy - 40], [sx + 36, sy - 26]],
+        ['C', [sx + 20, sy - 12], [sx + 18, sy + 20], axila]].concat(bajoPec,
+        [['C', [-10, -262], [-10, -318], [-12, -346]], 'Z']),
+      pecFibras: [
+        [['M', [-26, -244]], ['Q', [-84, -246], [sx + 36, sy + 26]]],
+        [['M', [-26, -310]], ['Q', [-80, -306], [sx + 34, sy - 4]]]
+      ],
+      trap: [['M', [-44, -470]], ['L', [sx - 40, sy - 130]], ['L', [sx + 14, sy - 40]],
+        ['C', [sx + 60, sy - 40], [-78, -362], [-50, -374]], 'Z'],
+      trapLinea: [['M', [sx + 14, sy - 40]], ['C', [sx + 60, sy - 40], [-78, -362], [-50, -374]]],
+      trapFibra: [['M', [-58, -404]], ['Q', [-92, -388], [sx + 30, sy - 56]]],
       abd: filas.map(function (f) {
-        return [[-10, f[0]], [-f[2], f[0] + 2], [-f[3], f[1]], [-10, f[1]]];
+        return [[-9, f[0]], [-f[2], f[0] + 3], [-f[3], f[1]], [-9, f[1]]];
       }),
-      obl: [['M', [-66, -198]], ['C', [-96, -206], [-140, -212], [-178, -198]], ['L', [-178, -30]],
-        ['L', [-64, -50]], ['C', [-58, -100], [-60, -160], [-66, -198]], 'Z'],
-      oblLinea: [['M', [-66, -198]], ['C', [-60, -160], [-58, -100], [-64, -50]]],
-      oblFibras: [[['M', [-150, -178]], ['L', [-96, -124]]], [['M', [-150, -128]], ['L', [-100, -86]]]],
-      serr: [-224, -200, -176].map(function (y, i) {
-        return [[-180, y - 13], [-180, y + 11], [-126 - i * 2, y + 9]];
+      obl: [['M', [-66, -200]], ['C', [-100, -212], [-150, -224], [-200, -214]], ['L', [-200, -40]],
+        ['L', [-62, -40]], ['C', [-56, -90], [-58, -150], [-66, -200]], 'Z'],
+      oblLinea: [['M', [-66, -200]], ['C', [-58, -150], [-56, -90], [-62, -40]]],
+      oblFibras: [[['M', [-150, -186]], ['L', [-100, -140]]], [['M', [-146, -142]], ['L', [-102, -104]]]],
+      serr: [-238, -212, -186].map(function (y, i) {
+        return [[-186, y - 12], [-186, y + 12], [-136 - i * 4, y + 5]];
       })
     };
   }
@@ -437,9 +524,9 @@
             return <Musculo key={'s' + j} m={mSerr} d={blando(q.map(f), 0.3)} />;
           })}
           <Musculo m={mTrap} d={R(F.trap)} sinContorno lineas={[R(F.trapLinea)]} fibras={[R(F.trapFibra)]} />
-          <Musculo m={mPec} d={R(F.pec)} fibras={[R(F.pecFibra)]} />
+          <Musculo m={mPec} d={R(F.pec)} fibras={F.pecFibras.map(R)} />
           {F.abd.map(function (q, j) {
-            return <Musculo key={'a' + j} m={mAbd} d={blando(q.map(f), 0.32)} />;
+            return <Musculo key={'a' + j} m={mAbd} d={blando(q.map(f), 0.34)} />;
           })}
           {/* rasgo fijo: el borde inferior del pectoral dice "de frente" */}
           {mPec ? null : <path d={R(F.bordePec)} {...LINEA} />}
@@ -449,32 +536,45 @@
     return <g>{out}</g>;
   }
 
-  /* ---- miembros: (t 0..1 a lo largo, o hacia afuera) ---- */
+  /* ---- miembros: perfiles y musculos en (t 0..1 a lo largo, o hacia afuera) ---- */
+
+  // muslo de frente: barrido del vasto externo afuera, aductores arriba adentro,
+  // la gota del vasto interno sobre la rodilla
+  // (los dos perfiles se pasan un poco de la rodilla: asi el contorno no se pellizca en la union)
+  var PF_MUSLO = [[0, 70, 62], [0.2, 73, 60], [0.45, 68, 52], [0.68, 58, 45], [0.84, 50, 49],
+    [0.94, 45, 46], [1, 43, 43], [1.06, 43, 43]];
+  // pierna de frente: gemelos que asoman a los dos lados (mas adentro), tobillo fino
+  var PF_PIERNA = [[-0.06, 43, 43], [0, 43, 43], [0.13, 46, 49], [0.32, 48, 54], [0.55, 40, 43], [0.8, 31, 31],
+    [1, 27, 27]];
+
+  var SART = [[0.02, 60], [0.26, 24], [0.5, -14], [0.74, -40], [0.97, -46]];
 
   var FORMAS_MUSLO = {
-    cuad: [['M', [0.22, 62]], ['C', [0.5, 78], [0.8, 60], [0.93, 28]], ['C', [0.99, 10], [0.99, -12], [0.93, -26]],
-      ['C', [0.87, -52], [0.72, -56], [0.6, -44]], ['C', [0.46, -32], [0.3, -36], [0.22, -42]], 'Z'],
-    cuadLineas: [[['M', [0.56, -40]], ['Q', [0.74, -20], [0.9, -14]]]],
-    cuadFibra: [['M', [0.42, 46]], ['Q', [0.62, 54], [0.8, 40]]],
-    aduct: [['M', [0.16, -40]], ['C', [0.34, -34], [0.5, -36], [0.66, -50]], ['L', [0.62, -100]], ['L', [0.12, -100]], 'Z'],
-    aductLinea: [['M', [0.16, -40]], ['C', [0.34, -34], [0.5, -36], [0.66, -50]]],
-    aductFibra: [['M', [0.3, -52]], ['Q', [0.44, -58], [0.56, -58]]],
-    sart: [['M', [0.14, 66]], ['C', [0.4, 30], [0.62, -26], [0.96, -36]], ['L', [0.96, -58]],
-      ['C', [0.6, -50], [0.38, 6], [0.12, 40]], 'Z'],
-    tfl: [['M', [0.06, 60]], ['C', [0.24, 84], [0.44, 84], [0.54, 68]], ['C', [0.42, 56], [0.26, 50], [0.08, 44]], 'Z'],
-    tflLinea: [['M', [0.54, 66]], ['L', [0.94, 44]]]
+    cuad: [[0.1, 92], [0.5, 92], [0.8, 64], [0.88, 40], [0.92, 14], [0.94, -12], [0.92, -34],
+      [0.84, -46], [0.7, -36], [0.5, -6], [0.28, 32], [0.1, 70]],
+    cuadLineas: [[[0.6, -8], [0.78, -18], [0.9, -14]]],
+    cuadFibras: [[[0.4, 32], [0.62, 28], [0.82, 18]]],
+    aduct: [[0.0, 48], [0.26, 12], [0.5, -26], [0.72, -52], [0.72, -130], [0.0, -130]],
+    aductLinea: [[0.0, 48], [0.26, 12], [0.5, -26], [0.72, -52]],
+    aductFibra: [[0.14, -22], [0.46, -50]],
+    tfl: [[0.0, 44], [0.04, 82], [0.26, 82], [0.36, 68], [0.2, 52]],
+    tflLinea: [[0.36, 70], [0.66, 64], [0.95, 52]]
   };
 
   function MusculosMuslo(props) {
     var f = segF(props.A, props.B, props.lado), pr = props.pr, i = props.i;
-    var R = function (c) { return ruta(f, c); };
+    var C = function (pts) { return cerrada(pts.map(f)); };
+    var A = function (pts) { return abierta(pts.map(f)); };
     var F = FORMAS_MUSLO;
+    var sart = SART.map(function (q) { return [q[0], q[1] + 11]; })
+      .concat(SART.slice().reverse().map(function (q) { return [q[0], q[1] - 11]; }));
     return (
       <g>
-        <Musculo m={nivel(pr, 'aduct', i)} d={R(F.aduct)} sinContorno lineas={[R(F.aductLinea)]} fibras={[R(F.aductFibra)]} />
-        <Musculo m={nivel(pr, 'tfl', i)} d={R(F.tfl)} lineas={[R(F.tflLinea)]} />
-        <Musculo m={nivel(pr, 'cuad', i)} d={R(F.cuad)} lineas={F.cuadLineas.map(R)} fibras={[R(F.cuadFibra)]} />
-        <Musculo m={nivel(pr, 'sart', i)} d={R(F.sart)} />
+        <Musculo m={nivel(pr, 'aduct', i)} d={'M ' + F.aduct.map(f).map(pt).join(' L ') + ' Z'} sinContorno
+          lineas={[A(F.aductLinea)]} fibras={[A(F.aductFibra)]} />
+        <Musculo m={nivel(pr, 'tfl', i)} d={C(F.tfl)} lineas={[A(F.tflLinea)]} />
+        <Musculo m={nivel(pr, 'cuad', i)} d={C(F.cuad)} lineas={F.cuadLineas.map(A)} fibras={F.cuadFibras.map(A)} />
+        <Musculo m={nivel(pr, 'sart', i)} d={C(sart)} />
       </g>
     );
   }
@@ -482,14 +582,15 @@
   function MusculoBrazo(props) {
     var f = segF(props.A, props.B, props.lado);
     if (f.l < 70) return null;
-    var R = function (c) { return ruta(f, c); };
+    var C = function (pts) { return cerrada(pts.map(f)); };
+    var A = function (pts) { return abierta(pts.map(f)); };
     var m = nivel(props.pr, props.clave, props.i);
     if (props.clave === 'bic') {
-      return <Musculo m={m} d={R([['M', [0.36, -2]], ['Q', [0.66, 42], [0.96, 0]], ['Q', [0.66, -44], [0.36, -2]], 'Z'])}
-        fibras={[R([['M', [0.5, 0]], ['L', [0.86, 0]]])]} />;
+      return <Musculo m={m} d={C([[0.4, 0], [0.54, 24], [0.76, 28], [0.94, 12], [0.99, -4], [0.82, -24], [0.56, -24]])}
+        fibras={[A([[0.6, 0], [0.76, 2], [0.9, 2]])]} />;
     }
-    return <Musculo m={m} d={R([['M', [0.02, 10]], ['Q', [0.3, 52], [0.72, 8]], ['Q', [0.3, -28], [0.02, 10]], 'Z'])}
-      fibras={[R([['M', [0.14, 12]], ['L', [0.54, 14]]])]} />;
+    return <Musculo m={m} d={C([[0.02, 8], [0.14, 30], [0.4, 26], [0.66, 8], [0.44, -14], [0.12, -16]])}
+      fibras={[A([[0.14, 8], [0.34, 10], [0.52, 8]])]} />;
   }
 
   // deltoides como gorra (igual que en cuerpo.jsx)
@@ -525,17 +626,18 @@
     );
   }
 
+  // cabeza de frente: ovalo, orejas, dos ojos y la nariz (boca opcional)
   function Cabeza(props) {
     var g = props.g;
     return (
       <g transform={'translate(' + pt(g.cabeza).replace(' ', ',') + ') rotate(' + g.inclinacion.toFixed(2) + ')'}>
-        <ellipse cx={-74} cy={8} rx={17} ry={28} fill={BLANCO} stroke={INK} strokeWidth={12} />
-        <ellipse cx={74} cy={8} rx={17} ry={28} fill={BLANCO} stroke={INK} strokeWidth={12} />
+        <ellipse cx={-72} cy={10} rx={17} ry={28} fill={BLANCO} stroke={INK} strokeWidth={12} />
+        <ellipse cx={72} cy={10} rx={17} ry={28} fill={BLANCO} stroke={INK} strokeWidth={12} />
         <ellipse cx={0} cy={0} rx={70} ry={84} fill={BLANCO} stroke={INK} strokeWidth={15} />
         <circle cx={-26} cy={-2} r={8} fill={INK} />
         <circle cx={26} cy={-2} r={8} fill={INK} />
-        <path d="M 0 12 L 0 32" {...LINEA} />
-        <path d="M -16 52 L 16 52" {...LINEA} />
+        <path d="M 0 14 L 0 34" {...LINEA} />
+        {props.boca ? <path d="M -16 54 L 16 54" {...LINEA} /> : null}
       </g>
     );
   }
@@ -557,23 +659,17 @@
     var agarre = llamar(props.agarre);
 
     var lad = [L, R];
-    var kPie = function (q) { return q.kPie; };
 
-    // short: bloque de cadera + mangas cortas (se ven los muslos)
-    var cortoFrac = props.short == null ? 0.3 : props.short;
-    var bloque = blando([[-160, -66], [160, -66], [164, 2], [48, 66], [-48, 66], [-164, 2]].map(fr.a), 0.3);
-    var faja = blando([[-158, -72], [158, -72], [158, -34], [-158, -34]].map(fr.a), 0.22);
-    var manga = function (q) {
-      var u = unidad(resta(q.rodilla, q.cadera));
-      var n = [-u[1], u[0]];
-      var ruedo = lerpP(q.cadera, q.rodilla, cortoFrac);
-      var arriba = suma(q.cadera, por(u, -40));
-      var lr = largo(resta(q.rodilla, q.cadera));
-      var rb = lr < 140 ? 74 : 70;
-      return 'M ' + [suma(arriba, por(n, 76)), suma(ruedo, por(n, rb)), suma(ruedo, por(n, -rb)),
-        suma(arriba, por(n, -76))].map(pt).join(' L ') + ' Z';
+    // la pierna termina un poco antes del tobillo para que la zapatilla la tape entera
+    var finPierna = function (q) {
+      if (cen) return q.tobillo;
+      return suma(q.tobillo, por(unidad(resta(q.rodilla, q.tobillo)), 18));
     };
-
+    var muslo = function (q) { return miembro(q.cadera, q.rodilla, q.lado, PF_MUSLO); };
+    var pierna = function (q) {
+      if (cen) return capsula(q.rodilla, q.tobillo, 42, 30 * q.kPie);
+      return miembro(q.rodilla, finPierna(q), q.lado, PF_PIERNA);
+    };
     var piernas = function (paso) {
       var t = paso === 'trazo';
       return (
@@ -581,9 +677,8 @@
           {lad.map(function (q, i) {
             return (
               <g key={i}>
-                <path d={capsula(q.cadera, q.rodilla, 66, 46)} />
-                <path d={capsula(q.rodilla, finPierna(q), 46, 30 * (cen ? kPie(q) : 1))} />
-                {cen ? null : <path d={pantorrilla(q)} />}
+                <path d={muslo(q)} />
+                <path d={pierna(q)} />
               </g>
             );
           })}
@@ -591,27 +686,14 @@
       );
     };
 
-    // rodilla: un arco corto bajo la rotula, abierto hacia el muslo
+    // rodilla: un arco corto bajo la rotula
     var rotula = function (q) {
-      var v = unidad(resta(q.tobillo, q.rodilla));
+      // de frente la rotula sigue a la pierna; desde arriba, al muslo (la pierna baja al piso)
+      var v = cen ? unidad(resta(q.rodilla, q.cadera)) : unidad(resta(q.tobillo, q.rodilla));
       var n = [-v[1], v[0]];
-      var c = suma(q.rodilla, por(v, 2));
-      return 'M ' + pt(suma(c, suma(por(n, 19), por(v, -6)))) + ' Q ' + pt(suma(c, por(v, 18))) + ' ' +
-        pt(suma(c, suma(por(n, -19), por(v, -6))));
-    };
-    // pantorrilla: un poco de volumen bajo la rodilla, mas hacia adentro
-    var pantorrilla = function (q) {
-      var d = resta(q.tobillo, q.rodilla), l = largo(d);
-      if (l < 120) return '';
-      var v = por(d, 1 / l);
-      var adentro = q.lado < 0 ? [v[1], -v[0]] : [-v[1], v[0]];
-      return capsula(suma(suma(q.rodilla, por(v, l * 0.14)), por(adentro, 3)),
-        suma(q.rodilla, por(v, l * 0.64)), 49, 34);
-    };
-    // la pierna termina un poco antes del tobillo para que la zapatilla la tape entera
-    var finPierna = function (q) {
-      if (cen) return q.tobillo;
-      return suma(q.tobillo, por(unidad(resta(q.rodilla, q.tobillo)), 18));
+      var c = suma(q.rodilla, por(v, 4));
+      return 'M ' + pt(suma(c, suma(por(n, 20), por(v, -8)))) + ' Q ' + pt(suma(c, por(v, 14))) + ' ' +
+        pt(suma(c, suma(por(n, -20), por(v, -8))));
     };
 
     var zapatos = lad.map(function (q, i) {
@@ -621,16 +703,43 @@
           <g key={'z' + i}>
             <path d={z.d} fill={BLANCO} stroke={INK} strokeWidth={14} strokeLinejoin="round" />
             <path d={z.cordon} {...LINEA} />
+            <path d={z.puntera} {...LINEA} />
           </g>
         );
       }
+      var zf = zapatoFrente(q.tobillo, g.piso, q.pieAng, q.lado);
       return (
         <g key={'z' + i}>
-          <path d={zapatoFrente(q.tobillo, g.piso, q.pieAng, q.lado)} fill={BLANCO} stroke={INK}
-            strokeWidth={14} strokeLinejoin="round" />
+          <clipPath id={id + 'z' + i}><path d={zf.d} /></clipPath>
+          <path d={zf.d} fill={BLANCO} stroke="none" />
+          <path d={zf.suela} {...LINEA} clipPath={'url(#' + id + 'z' + i + ')'} />
+          <path d={zf.d} fill="none" stroke={INK} strokeWidth={14} strokeLinejoin="round" />
         </g>
       );
     });
+
+    // short: elastico + cadera + dos mangas cortas con ruedo recto (se ven los muslos)
+    var cortoFrac = props.short == null ? 0.36 : props.short;
+    var bloque = blando([[-140, -74], [140, -74], [166, -4], [0, 30], [-166, -4]].map(fr.a), 0.3);
+    var faja = blando([[-146, FAJA[0]], [146, FAJA[0]], [149, FAJA[1]], [-149, FAJA[1]]].map(fr.a), 0.2);
+    var ruedos = [];
+    var manga = function (q) {
+      var f = segF(q.cadera, q.rodilla, q.lado);
+      var lr = f.l || 1;
+      var arriba = f([-12 / lr, 6]), ruedo = f([cortoFrac, 6]);
+      var hw = lr < 140 ? 76 : 72;
+      var a = suma(arriba, por(f.n, 74)), b = suma(ruedo, por(f.n, hw));
+      var c = suma(ruedo, por(f.n, -hw)), d = suma(arriba, por(f.n, -74));
+      ruedos.push([b, c]);
+      return blando([a, b, c, d], 0.12);
+    };
+    var mangas = [manga(L), manga(R)];
+    // costura de la entrepierna, solo cuando las dos mangas se tocan
+    var costura = null;
+    var ri = ruedos[0][1], rd = ruedos[1][1];
+    if (largo(resta(ri, rd)) < 70) {
+      costura = 'M ' + pt(fr.a([0, 22])) + ' L ' + pt(lerpP(ri, rd, 0.5));
+    }
 
     // brazo superior y antebrazo
     var brazos = function (paso, que) {
@@ -647,10 +756,6 @@
           })}
         </g>
       );
-    };
-
-    var clipCap = function (k, a, b, ra, rb) {
-      return <clipPath id={id + k}><path d={capsula(a, b, ra, rb)} /></clipPath>;
     };
 
     var deltoides = lad.map(function (q, i) {
@@ -677,14 +782,31 @@
       );
     });
 
+    var musculosBrazo = function (q, i, que) {
+      var clave = que === 'brazo' ? 'bic' : 'ante';
+      var A = que === 'brazo' ? q.hombro : q.codo, Bq = que === 'brazo' ? q.codo : q.mano;
+      if (!nivel(props, clave, i)) return null;
+      return (
+        <g key={'m' + que + i} clipPath={'url(#' + id + que[0] + i + ')'}>
+          <MusculoBrazo A={A} B={Bq} lado={q.lado} pr={props} i={i} clave={clave} />
+        </g>
+      );
+    };
+
     return (
       <svg width={FW * s} height={FH * s} viewBox={'0 0 ' + FW + ' ' + FH}
         style={Object.assign({ display: 'block', overflow: 'visible' }, props.style || {})}>
         <defs>
           <clipPath id={id + 't'}><path d={sil} /></clipPath>
-          {lad.map(function (q, i) { return <g key={i}>{clipCap('m' + i, q.cadera, q.rodilla, 66, 46)}</g>; })}
-          {lad.map(function (q, i) { return <g key={i}>{clipCap('b' + i, q.hombro, q.codo, 50, 40 * q.kCodo)}</g>; })}
-          {lad.map(function (q, i) { return <g key={i}>{clipCap('a' + i, q.codo, q.mano, 38 * q.kCodo, 30 * q.kMano)}</g>; })}
+          {lad.map(function (q, i) {
+            return (
+              <g key={i}>
+                <clipPath id={id + 'm' + i}><path d={muslo(q)} /></clipPath>
+                <clipPath id={id + 'b' + i}><path d={capsula(q.hombro, q.codo, 50, 40 * q.kCodo)} /></clipPath>
+                <clipPath id={id + 'a' + i}><path d={capsula(q.codo, q.mano, 38 * q.kCodo, 30 * q.kMano)} /></clipPath>
+              </g>
+            );
+          })}
         </defs>
 
         {fondo}
@@ -710,55 +832,42 @@
         })}
         {cen ? null : zapatos}
 
-        {/* short: cadera + mangas como una sola silueta */}
-        {['trazo', 'relleno'].map(function (paso) {
-          var t = paso === 'trazo';
-          return (
-            <g key={paso} fill={GRY} stroke={t ? INK : 'none'} strokeWidth={t ? 28 : 0} strokeLinejoin="round">
-              <path d={bloque} />
-              <path d={manga(L)} />
-              <path d={manga(R)} />
-            </g>
-          );
-        })}
-
         {/* torso */}
         <path d={sil} fill={BLANCO} stroke="none" />
         <g clipPath={'url(#' + id + 't)'}>
           <MusculosTorso fr={fr} SL={SL} SR={SR} pr={props} />
         </g>
         <path d={sil} fill="none" stroke={INK} strokeWidth={15} strokeLinejoin="round" />
+
+        {/* short: cadera + mangas como una sola silueta, encima el elastico */}
+        {['trazo', 'relleno'].map(function (paso) {
+          var t = paso === 'trazo';
+          return (
+            <g key={paso} fill={GRY} stroke={t ? INK : 'none'} strokeWidth={t ? 28 : 0} strokeLinejoin="round">
+              <path d={bloque} />
+              <path d={mangas[0]} />
+              <path d={mangas[1]} />
+            </g>
+          );
+        })}
+        {costura ? <path d={costura} {...LINEA} /> : null}
         <path d={faja} fill={GRY} stroke={INK} strokeWidth={13} strokeLinejoin="round" />
 
-        <Cabeza g={g} />
+        <Cabeza g={g} boca={props.boca} />
 
-        {/* brazos */}
-        {cen ? brazos('trazo', 'brazo') : brazos('trazo', 'todo')}
-        {cen ? brazos('relleno', 'brazo') : brazos('relleno', 'todo')}
-        {lad.map(function (q, i) {
-          return (
-            <g key={'mb' + i} clipPath={'url(#' + id + 'b' + i + ')'}>
-              <MusculoBrazo A={q.hombro} B={q.codo} lado={q.lado} pr={props} i={i} clave="bic" />
-            </g>
-          );
-        })}
-        {cen ? null : lad.map(function (q, i) {
-          return (
-            <g key={'ma' + i} clipPath={'url(#' + id + 'a' + i + ')'}>
-              <MusculoBrazo A={q.codo} B={q.mano} lado={q.lado} pr={props} i={i} clave="ante" />
-            </g>
-          );
-        })}
+        {/* brazos (en cenital el antebrazo va encima del deltoides: apunta a camara) */}
+        {brazos('trazo', cen ? 'brazo' : 'todo')}
+        {brazos('relleno', cen ? 'brazo' : 'todo')}
+        {lad.map(function (q, i) { return musculosBrazo(q, i, 'brazo'); })}
+        {cen ? null : lad.map(function (q, i) { return musculosBrazo(q, i, 'ante'); })}
         {deltoides}
         {cen ? lad.map(function (q, i) {
+          var d = capsula(q.codo, q.mano, 38 * q.kCodo, 30 * q.kMano);
           return (
             <g key={'ac' + i}>
-              <path d={capsula(q.codo, q.mano, 38 * q.kCodo, 30 * q.kMano)} fill={BLANCO} stroke={INK} strokeWidth={30}
-                strokeLinejoin="round" />
-              <path d={capsula(q.codo, q.mano, 38 * q.kCodo, 30 * q.kMano)} fill={BLANCO} />
-              <g clipPath={'url(#' + id + 'a' + i + ')'}>
-                <MusculoBrazo A={q.codo} B={q.mano} lado={q.lado} pr={props} i={i} clave="ante" />
-              </g>
+              <path d={d} fill={BLANCO} stroke={INK} strokeWidth={30} strokeLinejoin="round" />
+              <path d={d} fill={BLANCO} />
+              {musculosBrazo(q, i, 'ante')}
             </g>
           );
         }) : null}
