@@ -23,10 +23,11 @@
   var C = P.C;
   var A = global.REELS.ayudas;
   var sale = A.sale, junta = A.junta, reps = A.reps, Pos = A.Pos, Rot = A.Rot;
-  var Camara = A.Camara, Recorte = A.Recorte;
+  var Camara = A.Camara;
+  var ANCHO = global.REELS.ANCHO;
   var GRAD = Math.PI / 180;
 
-  var FR = { x: 24, y: 140, s: 0.86 };     // persona de frente, grande (piso en y 1430)
+  var FR = { x: 24, y: 90, s: 0.86 };      // persona de frente, grande (piso en y 1380)
   var PF = { x: -29, y: 234, s: 0.92 };    // persona de perfil, grande (piso en y 1430)
   var PIES = 300;                          // medio ancho entre tobillos: bien abiertos
   function enLienzo(base, p) { return [base.x + p[0] * base.s, base.y + p[1] * base.s]; }
@@ -67,13 +68,15 @@
     var e = props.e || { opacity: 1, scale: 1 };
     var c = U.lerpP(m.arriba, m.abajo, 0.5);
     var sc = e.scale == null ? 1 : e.scale;
+    var dy = props.dy || 0;
     return (
       <g opacity={e.opacity}
-        transform={'translate(' + c[0] + ' ' + c[1] + ') scale(' + sc.toFixed(4) + ') translate(' + (-c[0]) + ' ' + (-c[1]) + ')'}>
+        transform={'translate(' + c[0] + ' ' + (c[1] + dy) + ') scale(' + sc.toFixed(4) + ') translate(' + (-c[0]) + ' ' + (-c[1]) + ')'}>
         <B.MancuernaG a={m.arriba} b={m.abajo} />
       </g>
     );
   }
+  function conMancuerna(g) { return <Mancuerna g={g} />; }
 
   // trazo continuo que se dibuja de a poco (p 0..1)
   function Linea(props) {
@@ -97,36 +100,72 @@
 
   function angulo(a, b) { var d = U.resta(b, a); return Math.atan2(d[1], d[0]) / GRAD; }
 
+  // arco del lado del angulo interno de una articulacion, de B hacia A (la punta
+  // queda del lado de A); se apaga solo cuando la articulacion ya esta casi recta
+  function arcoJunta(c, haciaA, haciaB, r, color, o) {
+    var aA = angulo(c, haciaA), aB = angulo(c, haciaB);
+    var d = aA - aB;
+    while (d > 180) d -= 360;
+    while (d < -180) d += 360;
+    var abs = Math.abs(d), sg = d >= 0 ? 1 : -1;
+    var vis = clamp((168 - abs) / 28, 0, 1) * o;
+    if (vis < 0.02 || abs < 36) return null;
+    return <B.Arco c={c} r={r} a0={aB + sg * 12} a1={aB + d - sg * 12} color={color} sw={19} cabeza={42} opacity={vis} />;
+  }
+
   // flechas horizontales junto a cada rodilla: 'adentro' (empujan hacia el centro) o 'afuera'
-  function flechasRodilla(g, hacia, color, p, opacity) {
+  function flechasRodilla(g, hacia, color, p, opacity, lejos, cerca) {
+    lejos = lejos || 230; cerca = cerca || 90;
     return [g.izq, g.der].map(function (q, i) {
       var R = q.rodilla, l = q.lado;
-      var lejos = U.suma(R, [l * 240, -6]), cerca = U.suma(R, [l * 86, -6]);
-      var a = hacia === 'adentro' ? lejos : cerca;
-      var b = hacia === 'adentro' ? cerca : lejos;
-      return <B.FlechaS key={'fr' + i} a={a} b={b} p={p} opacity={opacity} color={color} sw={20} cabeza={42} />;
+      var aLejos = U.suma(R, [l * lejos, -4]), aCerca = U.suma(R, [l * cerca, -4]);
+      var a = hacia === 'adentro' ? aLejos : aCerca;
+      var b = hacia === 'adentro' ? aCerca : aLejos;
+      return <B.FlechaS key={'fr' + i} a={a} b={b} p={p} opacity={opacity} color={color} sw={22} cabeza={46} />;
     });
   }
 
-  // anillos en las rodillas: k 0 = rojo (mal), 1 = verde (bien)
-  function anillosRodilla(g, p, k, colorMal) {
+  // anillos en las rodillas: k 0 = colorA, 1 = verde (uno se achica y el otro crece, sin mezclarse)
+  function anillosRodilla(g, p, k, colorA) {
     if (p < 0.02) return null;
     return [g.izq, g.der].map(function (q, i) {
       return (
         <g key={'ar' + i}>
-          <g opacity={1 - k}><B.Anillo c={q.rodilla} r={74} p={p} color={colorMal || C.RED} sw={16} /></g>
-          <g opacity={k}><B.Anillo c={q.rodilla} r={74} p={p} color={C.GRN} sw={16} /></g>
+          <B.Anillo c={q.rodilla} r={76} p={p * clamp(1 - 2 * k, 0, 1)} color={colorA || C.RED} sw={17} />
+          <B.Anillo c={q.rodilla} r={76} p={p * clamp(2 * k - 1, 0, 1)} color={C.GRN} sw={17} />
         </g>
       );
     });
   }
 
-  // guia de puntos de la rodilla a la punta de su pie
-  function guiasPunta(g, p, color, opacity) {
+  // guia vertical de puntos que sube desde el medio de cada pie y pasa por la rodilla
+  function guiasPie(g, p, color, opacity) {
     return [g.izq, g.der].map(function (q, i) {
-      return <B.Puntos key={'gp' + i} pts={[q.rodilla, q.punta]} p={p} color={color} sw={17} opacity={opacity} />;
+      var x = q.medioPie[0];
+      return <B.Puntos key={'gp' + i} pts={[[x, g.piso - 4], [x, q.rodilla[1] - 150]]} p={p}
+        color={color} sw={19} opacity={opacity} />;
     });
   }
+
+  // ventana horizontal que muestra solo una franja de una pieza (comparaciones):
+  // el punto 'centro' del viewBox queda en el medio de la franja
+  function Ventana(props) {
+    var s = props.s, c = props.centro, h = props.h;
+    return (
+      <Pos x={0} y={0} e={props.e} dx={props.dx} dy={props.dy}
+        origen={(ANCHO / 2) + 'px ' + (props.y + h / 2) + 'px'}>
+        <div style={{ position: 'absolute', left: 0, top: props.y, width: ANCHO, height: h, overflow: 'hidden' }}>
+          <div style={{ position: 'absolute', left: ANCHO / 2 - c[0] * s, top: h / 2 - c[1] * s }}>
+            {props.children}
+          </div>
+        </div>
+      </Pos>
+    );
+  }
+
+  // franjas de las escenas partidas (arriba / abajo) y donde caen la X y el visto
+  var FRANJA = { arriba: 330, abajo: 905, h: 560 };
+  var JUICIO = [790, 150];
 
   /* =========================================================
      ESCENAS
@@ -146,10 +185,11 @@
     var anillos = animate({ from: 0, to: 1, start: f(0.24), end: f(0.32) })(T);
     var pRojas = M.draw(T, f(0.28), 0.3);
     var oRojas = sale(T, f(0.5)).opacity;
-    var pVerdes = M.draw(T, f(0.6), 0.3);
+    var pVerdes = M.draw(T, f(0.62), 0.3);
 
-    var acerca = animate({ from: 0, to: 1, start: f(0.22), end: f(0.38), ease: Easing.easeInOutCubic })(T) -
-      animate({ from: 0, to: 1, start: f(0.7), end: f(0.86), ease: Easing.easeInOutCubic })(T);
+    // se acerca para el error y se aleja justo cuando las rodillas salen
+    var acerca = animate({ from: 0, to: 1, start: f(0.2), end: f(0.36), ease: Easing.easeInOutCubic })(T) -
+      animate({ from: 0, to: 1, start: f(0.48), end: f(0.62), ease: Easing.easeInOutCubic })(T);
     var zoom = 1 + 0.16 * acerca + 0.03 * t;
 
     var fig = M.pop(T, at - 0.6, 0.5);
@@ -157,32 +197,30 @@
     var pregunta = M.pop(T, f(0.2), 0.45);
     var tacha = junta(M.pop(T, f(0.36), 0.4), sale(T, f(0.54)));
     var visto = M.pop(T, f(0.74), 0.45);
-    var pose = sumo(prof, valgo);
 
     return (
       <div style={{ position: 'absolute', inset: 0 }}>
         <Camara zoom={zoom} foco={enLienzo(FR, [600, 1230])}>
           <Pos x={FR.x} y={FR.y} e={fig} dx={falla} dy={M.life(T, 3.6, 5)}>
-            <B.Frente s={FR.s} pose={pose} musc={{ cuad: luz }}
-              agarre={function (g) { return <Mancuerna g={g} />; }}>
+            <B.Frente s={FR.s} pose={sumo(prof, valgo)} musc={{ cuad: luz }} agarre={conMancuerna}>
               {function (g) {
                 return (
                   <g>
                     {anillosRodilla(g, anillos, corrige)}
                     {flechasRodilla(g, 'adentro', C.RED, pRojas, oRojas)}
-                    {flechasRodilla(g, 'afuera', C.GRN, pVerdes)}
+                    {flechasRodilla(g, 'afuera', C.GRN, pVerdes, 1, 215)}
                   </g>
                 );
               }}
             </B.Frente>
           </Pos>
         </Camara>
-        <Pos x={800} y={520} e={tacha} dx={M.vibra(T, 44, 4)}><P.Tacha s={0.62} /></Pos>
-        <Pos x={800} y={520} e={visto} dy={M.life(T, 2.8, 6)}>
+        <Pos x={800} y={480} e={tacha} dx={M.vibra(T, 44, 4)}><P.Tacha s={0.62} /></Pos>
+        <Pos x={800} y={480} e={visto} dy={M.life(T, 2.8, 6)}>
           <P.Visto s={0.7} p={M.draw(T, f(0.74), 0.4)} />
         </Pos>
         <Rot T={T} text="SENTADILLA SUMO" s={1.4} y={250} e={titulo} />
-        <Rot T={T} text="¿RODILLAS ADENTRO?" y={1450} e={pregunta} fase={0.4} />
+        <Rot T={T} text="¿RODILLAS ADENTRO?" y={1430} e={pregunta} fase={0.4} />
       </div>
     );
   }
@@ -193,21 +231,28 @@
     var f = function (v) { return at + dur * v; };
     var t = clamp((T - at) / dur, 0, 1);
 
-    var abre = animate({ from: 0, to: 1, start: f(0.14), end: f(0.42), ease: Easing.easeInOutCubic })(T);
-    var gira = animate({ from: 0, to: 1, start: f(0.56), end: f(0.8), ease: Easing.easeInOutCubic })(T);
-    var guias = M.draw(T, f(0.03), 0.4);
-    var flechas = junta(M.pop(T, f(0.14), 0.3), sale(T, f(0.52))).opacity;
-    var arcos = animate({ from: 0, to: 1, start: f(0.56), end: f(0.62) })(T);
+    var abre = animate({ from: 0, to: 1, start: f(0.12), end: f(0.4), ease: Easing.easeInOutCubic })(T);
+    var gira = animate({ from: 0, to: 1, start: f(0.6), end: f(0.84), ease: Easing.easeInOutCubic })(T);
+    var guias = M.draw(T, f(0.02), 0.45);
+    var flechas = junta(M.pop(T, f(0.1), 0.3), sale(T, f(0.5))).opacity;
+    var arcos = M.pop(T, f(0.56), 0.3).opacity;
+
+    // al girar las puntas, la camara baja a los pies
+    var acerca = animate({ from: 0, to: 1, start: f(0.46), end: f(0.6), ease: Easing.easeInOutCubic })(T);
+    var foco = enLienzo(FR, [600, 1380]);
+    var zoom = 1 + 0.24 * acerca + 0.02 * t;
+    var mira = U.lerpP(foco, [540, 1190], acerca);
 
     var fig = M.pop(T, at - 0.6, 0.5);
-    var r1 = M.pop(T, f(0.16), 0.45);
-    var r2 = M.pop(T, f(0.56), 0.45);
-    var pose = B.poseFrente.depie({ pies: U.lerp(96, PIES, abre), pieAng: U.lerp(8, 35, gira) });
-    var w1 = A.anchoRotulo('PIES ANCHOS'), w2 = A.anchoRotulo('PUNTAS AFUERA');
+    var r1 = junta(M.pop(T, f(0.18), 0.45), sale(T, f(0.47)));
+    var r2 = M.pop(T, f(0.62), 0.45);
+    var pose = B.poseFrente.depie({ pies: U.lerp(96, PIES, abre), pieAng: U.lerp(6, 35, gira) });
+    var hombros = B.geoFrente({ pose: B.poseFrente.depie({}) });
+    var fin = B.geoFrente({ pose: B.poseFrente.depie({ pies: PIES, pieAng: 6 }) });
 
     return (
       <div style={{ position: 'absolute', inset: 0 }}>
-        <Camara zoom={1 + 0.03 * t} foco={[540, 1000]}>
+        <Camara zoom={zoom} foco={foco} mira={mira}>
           <Pos x={FR.x} y={FR.y} e={fig} dy={M.life(T, 3.6, 5)}>
             <B.Frente s={FR.s} pose={pose}>
               {function (g) {
@@ -216,19 +261,22 @@
                   <g>
                     {[g.izq, g.der].map(function (q, i) {
                       var l = q.lado;
-                      var x = q.hombro[0] + l * 52;
-                      var a0 = l < 0 ? 96 : 84, a1 = l < 0 ? 152 : 28;
+                      var xg = hombros[i === 0 ? 'izq' : 'der'].hombro[0] + l * 30;
+                      var xFin = fin[i === 0 ? 'izq' : 'der'].tobillo[0];
+                      var a0 = l < 0 ? 98 : 82, a1 = l < 0 ? 150 : 30;
                       return (
                         <g key={i}>
-                          <B.Puntos pts={[[x, q.hombro[1] - 40], [x, piso + 8]]} p={guias} color={C.GRY} sw={16} />
-                          {abre > 0.04 ? (
-                            <B.FlechaS a={[x, piso + 66]} b={[q.tobillo[0] + l * 96, piso + 66]}
-                              opacity={flechas} color={C.GRN} sw={18} cabeza={38} />
+                          <B.Puntos pts={[[xg, q.hombro[1] - 30], [xg, piso + 6]]} p={guias} color={C.YEL} sw={19} />
+                          {abre > 0.03 ? (
+                            <B.FlechaS a={[xg, piso + 70]} b={[xFin + l * 40, piso + 70]} p={abre}
+                              opacity={flechas} color={C.GRN} sw={22} cabeza={46} />
                           ) : null}
-                          <g opacity={arcos}>
-                            <B.Arco c={[q.tobillo[0], piso - 24]} r={132} a0={a0} a1={a1} p={gira}
-                              color={C.GRN} sw={18} cabeza={38} />
-                          </g>
+                          {arcos > 0.02 ? (
+                            <g opacity={arcos}>
+                              <B.Arco c={[q.tobillo[0], piso - 30]} r={150} a0={a0} a1={a1}
+                                p={Math.max(0.05, gira)} color={C.GRN} sw={20} cabeza={44} />
+                            </g>
+                          ) : null}
                         </g>
                       );
                     })}
@@ -238,8 +286,8 @@
             </B.Frente>
           </Pos>
         </Camara>
-        <Rot T={T} text="PIES ANCHOS" s={1} x={40} y={250} e={r1} />
-        <Rot T={T} text="PUNTAS AFUERA" s={1} x={1040 - w2} y={250} e={r2} fase={0.4} />
+        <Rot T={T} text="PIES ANCHOS" y={250} e={r1} />
+        <Rot T={T} text="PUNTAS AFUERA" y={1430} e={r2} fase={0.4} />
       </div>
     );
   }
@@ -250,46 +298,49 @@
     var f = function (v) { return at + dur * v; };
     var t = clamp((T - at) / dur, 0, 1);
 
-    var adelante = animate({ from: 0, to: 1, start: f(0.02), end: f(0.18), ease: Easing.easeInOutSine })(T) -
-      animate({ from: 0, to: 1, start: f(0.5), end: f(0.68), ease: Easing.easeInOutCubic })(T);
-    var pose = perfilBrazos(14 * adelante);
-    var lejos = perfilBrazos(14).mancuerna;
-    var manc = M.pop(T, f(0.1), 0.42);
-    var anillo = animate({ from: 0, to: 1, start: f(0.26), end: f(0.34) })(T) * sale(T, f(0.5)).opacity;
-    var flecha = M.draw(T, f(0.48), 0.32);
+    var ANG = 22;
+    var vuelve = animate({ from: 0, to: 1, start: f(0.38), end: f(0.6), ease: Easing.easeInOutCubic })(T);
+    var pose = perfilBrazos(ANG * (1 - vuelve));
+    var lejos = perfilBrazos(ANG).mancuerna;
+    var manc = M.pop(T, f(0.03), 0.42);
+    var anillo = animate({ from: 0, to: 1, start: f(0.1), end: f(0.18) })(T) * sale(T, f(0.36)).opacity;
+    var flecha = M.draw(T, f(0.36), 0.3);
+    var oFlecha = sale(T, f(0.78)).opacity;
 
     var fig = M.pop(T, at - 0.6, 0.5);
-    var visto = M.pop(T, f(0.72), 0.45);
-    var rotulo = M.pop(T, f(0.5), 0.45);
+    var visto = M.pop(T, f(0.62), 0.45);
+    var rotulo = M.pop(T, f(0.42), 0.45);
+    var foco = enLienzo(PF, [640, 900]);
 
     return (
       <div style={{ position: 'absolute', inset: 0 }}>
-        <Camara zoom={1 + 0.04 * t} foco={[540, 1000]}>
+        <Camara zoom={1.12 + 0.03 * t} foco={foco} mira={[640, 1195]}>
           <Pos x={PF.x} y={PF.y} e={fig} dy={M.life(T, 3.6, 5)}>
             <B.Perfil s={PF.s} pose={pose}
               agarre={function (g) { return <Mancuerna g={g} e={manc} />; }}>
               {function (g) {
-                var y = lejos.abajo[1] - 20;
+                var y = lejos.abajo[1] + 10;
+                var cerca = g.mancuerna.abajo[0];
                 return (
                   <g>
-                    <B.Anillo c={g.mano} r={70} p={anillo} color={C.YEL} />
-                    <B.FlechaS a={[lejos.abajo[0] - 150, y]} b={[g.mancuerna.abajo[0] - 96, y]} p={flecha}
-                      color={C.GRN} sw={20} cabeza={42} />
+                    <B.Anillo c={U.lerpP(g.mano, g.mano2, 0.5)} r={72} p={anillo} color={C.YEL} sw={17} />
+                    <B.FlechaS a={[lejos.abajo[0] - 170, y - 60]} b={[cerca - 92, y - 60]} p={flecha}
+                      opacity={oFlecha} color={C.GRN} sw={22} cabeza={46} />
                   </g>
                 );
               }}
             </B.Perfil>
           </Pos>
         </Camara>
-        <Pos x={170} y={760} e={visto} dy={M.life(T, 2.8, 6)}>
-          <P.Visto s={0.62} p={M.draw(T, f(0.72), 0.4)} />
+        <Pos x={250} y={900} e={visto} dy={M.life(T, 2.8, 6)}>
+          <P.Visto s={0.66} p={M.draw(T, f(0.62), 0.4)} />
         </Pos>
         <Rot T={T} text="CERCA DEL CUERPO" y={250} e={rotulo} />
       </div>
     );
   }
 
-  /* 4 — bajada: lenta (3-2-1); cada rodilla sigue la punta de su pie */
+  /* 4 — bajada: lenta (3-2-1); cada rodilla viaja hasta quedar sobre su pie */
   function EscBajada(props) {
     var T = props.T, at = props.at, dur = props.dur;
     var f = function (v) { return at + dur * v; };
@@ -299,26 +350,28 @@
     var prof = Easing.easeInOutSine(u);
     var n = u < 1 / 3 ? 3 : u < 2 / 3 ? 2 : 1;
     var anilloC = u >= 1 ? 0 : 1 - ((u * 3) % 1);
-    var guia = M.draw(T, f(0.24), 0.45);
-    var anillos = animate({ from: 0, to: 1, start: f(0.24), end: f(0.32) })(T);
-    var ok = animate({ from: 0, to: 1, start: f(0.5), end: f(0.6) })(T);
+    var guia = M.draw(T, f(0.08), 0.45);
+    var anillos = animate({ from: 0, to: 1, start: f(0.14), end: f(0.22) })(T);
+    var ok = clamp((prof - 0.8) / 0.16, 0, 1);   // la rodilla ya esta sobre el pie
+
+    var acerca = animate({ from: 0, to: 1, start: f(0.08), end: f(0.62), ease: Easing.easeInOutSine })(T);
+    var zoom = 1 + 0.16 * acerca + 0.02 * t;
 
     var fig = M.pop(T, at - 0.6, 0.5);
     var cuenta = junta(M.pop(T, f(0.03), 0.45), sale(T, f(0.68)));
-    var rotulo = M.pop(T, f(0.28), 0.45);
-    var visto = M.pop(T, f(0.72), 0.45);
-    var pose = sumo(prof, 0);
+    var rotulo = M.pop(T, f(0.26), 0.45);
+    var visto = M.pop(T, f(0.7), 0.45);
 
     return (
       <div style={{ position: 'absolute', inset: 0 }}>
-        <Camara zoom={1 + 0.05 * t} foco={[540, 1150]}>
+        <Camara zoom={zoom} foco={enLienzo(FR, [600, 1280])}>
           <Pos x={FR.x} y={FR.y} e={fig} dy={M.life(T, 3.6, 5)}>
-            <B.Frente s={FR.s} pose={pose} agarre={function (g) { return <Mancuerna g={g} />; }}>
+            <B.Frente s={FR.s} pose={sumo(prof, 0)} agarre={conMancuerna}>
               {function (g) {
                 return (
                   <g>
-                    {guiasPunta(g, guia, C.YEL, 1 - ok)}
-                    {guiasPunta(g, guia, C.GRN, ok)}
+                    {ok < 0.98 ? guiasPie(g, guia, C.YEL, 1 - ok) : null}
+                    {ok > 0.02 ? guiasPie(g, guia, C.GRN, ok) : null}
                     {anillosRodilla(g, anillos, ok, C.YEL)}
                   </g>
                 );
@@ -326,11 +379,11 @@
             </B.Frente>
           </Pos>
         </Camara>
-        <Pos x={80} y={440} e={cuenta} dy={M.life(T, 3, 5)}>
+        <Pos x={70} y={380} e={cuenta} dy={M.life(T, 3, 5)}>
           <B.Cuenta s={0.85} n={n} p={anilloC} />
         </Pos>
-        <Pos x={800} y={560} e={visto} dy={M.life(T, 2.8, 6)}>
-          <P.Visto s={0.62} p={M.draw(T, f(0.72), 0.4)} />
+        <Pos x={800} y={470} e={visto} dy={M.life(T, 2.8, 6)}>
+          <P.Visto s={0.66} p={M.draw(T, f(0.7), 0.4)} />
         </Pos>
         <Rot T={T} text="RODILLA HACIA LA PUNTA" s={1} y={250} e={rotulo} />
       </div>
@@ -343,133 +396,161 @@
     var f = function (v) { return at + dur * v; };
     var t = clamp((T - at) / dur, 0, 1);
 
-    var sube = animate({ from: 0, to: 1, start: f(0.3), end: f(0.82), ease: Easing.easeInOutSine })(T);
+    var sube = animate({ from: 0, to: 1, start: f(0.3), end: f(0.8), ease: Easing.easeInOutSine })(T);
     var pose = perfil(1 - sube, 0);
-    var empuje = M.draw(T, f(0.06), 0.35);
-    var latido = T < f(0.82) ? Math.abs(M.life(T, 0.8, 18)) : 0;
+    var talon = animate({ from: 0, to: 1, start: f(0.04), end: f(0.12) })(T);
+    var empuje = M.draw(T, f(0.08), 0.35);
+    var latido = T < f(0.8) ? Math.abs(M.life(T, 0.8, 16)) : 0;
     var arcos = animate({ from: 0, to: 1, start: f(0.3), end: f(0.38) })(T);
+    var final = animate({ from: 0, to: 1, start: f(0.8), end: f(0.9) })(T);
+    var recta = M.draw(T, f(0.8), 0.4);
 
     var fig = M.pop(T, at - 0.6, 0.5);
     var rotulo = M.pop(T, f(0.1), 0.45);
+    var visto = M.pop(T, f(0.86), 0.45);
+    // abajo la camara mira los pies; al subir se abre, con el piso siempre en el mismo lugar
+    var foco = enLienzo(PF, [640, 1300]);
+    var zoom = U.lerp(1.3, 1, Easing.easeOutQuad(sube)) + 0.02 * t;
 
     return (
       <div style={{ position: 'absolute', inset: 0 }}>
-        <Camara zoom={1 + 0.04 * t} foco={[540, 1100]}>
+        <Camara zoom={zoom} foco={foco} mira={[560, 1440]}>
           <Pos x={PF.x} y={PF.y} e={fig} dy={M.life(T, 3.6, 4)}>
-            <B.Perfil s={PF.s} pose={pose} agarre={function (g) { return <Mancuerna g={g} />; }}>
+            <B.Perfil s={PF.s} pose={pose} agarre={conMancuerna}>
               {function (g) {
-                var aS = angulo(g.rodilla, g.tobillo), aT = angulo(g.rodilla, g.cadera);
-                var aM = angulo(g.cadera, g.rodilla), aTr = angulo(g.cadera, g.cuello);
-                if (aTr < aM) aTr += 360;
-                var x = g.talon[0] + 44;
+                var x = g.talon[0] + 74;
                 return (
                   <g>
-                    <B.FlechaS a={[x, g.piso - 330 - latido]} b={[x, g.piso - 22]} p={empuje}
-                      color={C.GRN} sw={22} cabeza={46} />
-                    <g opacity={arcos}>
-                      <B.Arco c={g.rodilla} r={150} a0={aS - 4} a1={aT + 6} color={C.GRN} sw={18} cabeza={40} />
-                      <B.Arco c={g.cadera} r={150} a0={aM + 6} a1={aTr - 6} color={C.GRN} sw={18} cabeza={40} />
-                    </g>
+                    <B.Anillo c={[g.talon[0] + 14, g.piso - 24]} r={46} p={talon} color={C.YEL} sw={16} />
+                    <B.FlechaS a={[x, g.piso - 290 - latido]} b={[x, g.piso - 8]} p={empuje}
+                      color={C.GRN} sw={24} cabeza={50} />
+                    {arcoJunta(g.rodilla, g.cadera, g.tobillo, 130, C.GRN, arcos)}
+                    {arcoJunta(g.cadera, g.cuello, g.rodilla, 150, C.GRN, arcos)}
+                    {recta > 0.02 ? (
+                      <B.Puntos pts={[U.suma(g.cadera, [0, -120]), [g.cadera[0], g.piso - 40]]} p={recta}
+                        color={C.GRN} sw={17} opacity={final} />
+                    ) : null}
+                    <B.Anillo c={g.cadera} r={58} p={final} color={C.GRN} sw={16} />
+                    <B.Anillo c={g.rodilla} r={58} p={final} color={C.GRN} sw={16} />
                   </g>
                 );
               }}
             </B.Perfil>
           </Pos>
         </Camara>
+        <Pos x={220} y={700} e={visto} dy={M.life(T, 2.8, 6)}>
+          <P.Visto s={0.62} p={M.draw(T, f(0.86), 0.4)} />
+        </Pos>
         <Rot T={T} text="EMPUJA CON LOS TALONES" s={1} y={250} e={rotulo} />
       </div>
     );
   }
 
-  /* 6 — musculos principales: cuadriceps y gluteo mayor, de a uno */
-  function EscMusculosA(props) {
-    var T = props.T, at = props.at, dur = props.dur;
-    var f = function (v) { return at + dur * v; };
-    var t = clamp((T - at) / dur, 0, 1);
+  /* 6 y 7 — musculos: de frente (arriba) se ven los muslos por delante y por
+     dentro; de perfil (abajo), el gluteo, la parte de atras del muslo y la pantorrilla */
+  var MUS_FR = { s: 0.85, centro: [600, 1185] };
+  var MUS_PF = { s: 0.95, centro: [690, 1004] };
 
-    var prof = 0.62 + M.life(T, 2.6, 0.1);
-    var cuad = animate({ from: 0, to: 1, start: f(0.3), end: f(0.4) })(T);
-    var glu = animate({ from: 0, to: 1, start: f(0.58), end: f(0.68) })(T);
+  // flecha gris que senala un musculo secundario desde afuera (de 'lejos' a 'cerca')
+  function senala(key, lejos, cerca, o) {
+    if (o < 0.02) return null;
+    return <B.FlechaS key={key} a={lejos} b={cerca} p={o} opacity={o} color={C.GRY} sw={20} cabeza={44} />;
+  }
 
-    var fig = M.pop(T, at - 0.6, 0.5);
-    var r1 = M.pop(T, f(0.32), 0.45);
-    var r2 = M.pop(T, f(0.6), 0.45);
-
+  function Musculos(props) {
+    var T = props.T;
+    var aduct = props.aduct || 0, isq = props.isq || 0, gem = props.gem || 0;
     return (
       <div style={{ position: 'absolute', inset: 0 }}>
-        <Camara zoom={1.18 + 0.05 * t} foco={[560, 1060]} mira={[540, 960]}>
-          <Pos x={PF.x} y={PF.y} e={fig} dy={M.life(T, 3.6, 4)}>
-            <B.Perfil s={PF.s} pose={perfil(prof, 0)} musc={{ cuad: cuad, glu: glu }}
-              agarre={function (g) { return <Mancuerna g={g} />; }} />
-          </Pos>
-        </Camara>
-        <Rot T={T} text="CUÁDRICEPS" y={260} e={r1} />
-        <Rot T={T} text="GLÚTEO MAYOR" y={1450} e={r2} fase={0.4} />
+        <Ventana y={FRANJA.arriba} h={FRANJA.h} s={MUS_FR.s} centro={MUS_FR.centro} e={props.eArriba}
+          dy={M.life(T, 3.6, 4)}>
+          <B.Frente s={MUS_FR.s} pose={sumo(0.72 + M.life(T, 2.6, 0.06), 0)} short={0}
+            musc={{ cuad: props.cuad }} muscGris={{ aduct: aduct }} agarre={conMancuerna}>
+            {function (g) {
+              return (
+                <g>
+                  {[g.izq, g.der].map(function (q, i) {
+                    var x = U.lerp(q.cadera[0], q.rodilla[0], 0.42);
+                    return senala('ad' + i, [x, g.piso - 70], [x, q.rodilla[1] + 30], aduct);
+                  })}
+                </g>
+              );
+            }}
+          </B.Frente>
+        </Ventana>
+        <Ventana y={FRANJA.abajo} h={FRANJA.h} s={MUS_PF.s} centro={MUS_PF.centro} e={props.eAbajo}
+          dy={M.life(T, 3.6, 4, 0.5)}>
+          <B.Perfil s={MUS_PF.s} pose={perfil(0.14 + M.life(T, 2.6, 0.04), 0)}
+            musc={{ glu: props.glu, cuad: props.cuad }} muscGris={{ isq: isq, gem: gem }}
+            agarre={conMancuerna}>
+            {function (g) {
+              var m = g.ejes.muslo, p = g.ejes.pierna;
+              var q1 = m.en(0.62, -m.r(0.62)), q2 = p.en(0.32, -p.r(0.32) - 18);
+              return (
+                <g>
+                  {senala('isq', U.suma(q1, [240, 0]), U.suma(q1, [50, 0]), isq)}
+                  {senala('gem', U.suma(q2, [240, 0]), U.suma(q2, [50, 0]), gem)}
+                </g>
+              );
+            }}
+          </B.Perfil>
+        </Ventana>
       </div>
     );
   }
 
-  // dos vistas apiladas (arriba / abajo), cada una recortada a una franja
-  function Mitad(props) {
-    var c = props.cfg;
-    var w = c.w, h = c.alto * c.s;
+  function EscMusculosA(props) {
+    var T = props.T, at = props.at, dur = props.dur;
+    var f = function (v) { return at + dur * v; };
+
+    var cuad = animate({ from: 0, to: 1, start: f(0.2), end: f(0.3) })(T);
+    var glu = animate({ from: 0, to: 1, start: f(0.56), end: f(0.66) })(T);
+
+    var arriba = M.pop(T, at - 0.6, 0.5);
+    var abajo = M.pop(T, f(0.06), 0.45);
+    var r1 = M.pop(T, f(0.22), 0.45);
+    var r2 = M.pop(T, f(0.58), 0.45);
+
     return (
-      <Pos x={0} y={0} e={props.e} dx={props.dx} dy={props.dy}
-        origen={(c.x + w / 2) + 'px ' + (props.y + h / 2) + 'px'}>
-        <Recorte x={c.x} y={props.y} w={w} h={h} desde={c.desde * c.s}>
-          <div style={{ position: 'absolute', left: c.ox, top: 0 }}>{props.children}</div>
-        </Recorte>
-      </Pos>
+      <div style={{ position: 'absolute', inset: 0 }}>
+        <Musculos T={T} eArriba={arriba} eAbajo={abajo} cuad={cuad} glu={glu} />
+        <Rot T={T} text="CUÁDRICEPS" y={238} e={r1} />
+        <Rot T={T} text="GLÚTEO MAYOR" y={1478} e={r2} fase={0.4} />
+      </div>
     );
   }
 
-  /* 7 — sinergistas: aductores (de frente), isquios y gemelos (de perfil) */
-  var SIN_FR = { s: 0.74, x: 0, w: 1080, ox: 96, desde: 800, alto: 730 };
-  var SIN_PF = { s: 0.74, x: 0, w: 1080, ox: 20, desde: 640, alto: 700 };
   function EscMusculosB(props) {
     var T = props.T, at = props.at, dur = props.dur;
     var f = function (v) { return at + dur * v; };
 
-    var prof = 0.72 + M.life(T, 2.6, 0.08);
-    var aduct = animate({ from: 0, to: 1, start: f(0.08), end: f(0.2) })(T);
+    var aduct = animate({ from: 0, to: 1, start: f(0.1), end: f(0.22) })(T);
     var isq = animate({ from: 0, to: 1, start: f(0.42), end: f(0.54) })(T);
     var gem = animate({ from: 0, to: 1, start: f(0.6), end: f(0.72) })(T);
 
     var arriba = M.pop(T, at - 0.6, 0.5);
-    var abajo = M.pop(T, f(0.32), 0.45);
-    var r1 = M.pop(T, f(0.08), 0.45);
+    var abajo = M.pop(T, at - 0.6, 0.5);
+    var r1 = M.pop(T, f(0.1), 0.45);
     var r2 = M.pop(T, f(0.44), 0.45);
 
     return (
       <div style={{ position: 'absolute', inset: 0 }}>
-        <Mitad cfg={SIN_FR} y={300} e={arriba} dy={M.life(T, 3.6, 4)}>
-          <B.Frente s={SIN_FR.s} pose={sumo(prof, 0)} short={0.2} musc={{ cuad: 1 }} muscGris={{ aduct: aduct }}
-            agarre={function (g) { return <Mancuerna g={g} />; }} />
-        </Mitad>
-        <Mitad cfg={SIN_PF} y={880} e={abajo} dy={M.life(T, 3.6, 4, 0.5)}>
-          <B.Perfil s={SIN_PF.s} pose={perfil(0.62 + M.life(T, 2.6, 0.08), 0)}
-            musc={{ cuad: 1, glu: 1 }} muscGris={{ isq: isq, gem: gem }}
-            agarre={function (g) { return <Mancuerna g={g} />; }} />
-        </Mitad>
-        <Rot T={T} text="ADUCTORES" s={1} y={235} e={r1} />
-        <Rot T={T} text="ISQUIOS Y GEMELOS" s={1} y={1440} e={r2} fase={0.4} />
+        <Musculos T={T} eArriba={arriba} eAbajo={abajo} cuad={1} glu={1} aduct={aduct} isq={isq} gem={gem} />
+        <Rot T={T} text="ADUCTORES" y={238} e={r1} />
+        <Rot T={T} text="ISQUIOS Y GEMELOS" s={1} y={1478} e={r2} fase={0.4} />
       </div>
     );
   }
 
-  /* comparaciones arriba (mal) / abajo (bien) */
-  var CMP_PF = { s: 0.5, x: 0, w: 1080, ox: 40, desde: 230, alto: 1100 };
-  var CMP_FR = { s: 0.56, x: 0, w: 1080, ox: 80, desde: 520, alto: 1000 };
-  var Y_ARRIBA = 340, Y_ABAJO = 920;
-  var JUICIO = [780, 200];   // X y visto, relativos a cada mitad
+  /* 8 — error 1: espalda curva vs columna neutra (de perfil, del pecho para arriba) */
+  var ERR_PF = { s: 0.74, centro: [700, 625] };
 
-  /* 8 — error 1: espalda curva vs columna neutra */
   function EscError1(props) {
     var T = props.T, at = props.at, dur = props.dur;
     var f = function (v) { return at + dur * v; };
 
-    var prof = 0.3 + 0.7 * reps(T, f(0.02), f(0.98), 2);
-    var falla = prof > 0.6 ? M.vibra(T, 44, 3) : 0;
+    var prof = 0.5 + 0.5 * reps(T, f(0.02), f(0.98), 2);
+    var falla = prof > 0.7 ? M.vibra(T, 44, 3) : 0;
 
     var arriba = M.pop(T, at - 0.6, 0.5);
     var abajo = M.pop(T, f(0.4), 0.45);
@@ -483,7 +564,7 @@
     var espalda = function (g, extra) {
       var pts = [];
       for (var i = 0; i <= 12; i++) {
-        var tt = U.lerp(0.12, 0.98, i / 12);
+        var tt = U.lerp(0.1, 0.98, i / 12);
         pts.push(g.torso(tt, -(g.anchoEspalda(tt) + extra)));
       }
       return pts;
@@ -491,80 +572,90 @@
 
     return (
       <div style={{ position: 'absolute', inset: 0 }}>
-        <Mitad cfg={CMP_PF} y={Y_ARRIBA} e={arriba} dx={falla} dy={M.life(T, 3.6, 4)}>
-          <B.Perfil s={CMP_PF.s} pose={perfil(prof, 1)} muscRojo={{ erec: 1 }}
-            agarre={function (g) { return <Mancuerna g={g} />; }}>
-            {function (g) { return <Linea pts={espalda(g, 40)} p={pRoja} color={C.RED} sw={22} />; }}
+        <Ventana y={FRANJA.arriba} h={FRANJA.h} s={ERR_PF.s} centro={ERR_PF.centro} e={arriba}
+          dx={falla} dy={M.life(T, 3.6, 4)}>
+          <B.Perfil s={ERR_PF.s} pose={perfil(prof, 1)} muscRojo={{ erec: 1 }} agarre={conMancuerna}>
+            {function (g) { return <Linea pts={espalda(g, 44)} p={pRoja} color={C.RED} sw={24} />; }}
           </B.Perfil>
-        </Mitad>
-        <Mitad cfg={CMP_PF} y={Y_ABAJO} e={abajo} dy={M.life(T, 3.6, 4, 0.5)}>
-          <B.Perfil s={CMP_PF.s} pose={perfil(prof, 0)}
-            agarre={function (g) { return <Mancuerna g={g} />; }}>
+        </Ventana>
+        <Ventana y={FRANJA.abajo} h={FRANJA.h} s={ERR_PF.s} centro={ERR_PF.centro} e={abajo}
+          dy={M.life(T, 3.6, 4, 0.5)}>
+          <B.Perfil s={ERR_PF.s} pose={perfil(prof, 0)} agarre={conMancuerna}>
             {function (g) {
-              var e = espalda(g, 40);
-              return <Linea pts={[e[0], e[e.length - 1]]} p={pVerde} color={C.GRN} sw={22} />;
+              var e = espalda(g, 44);
+              return <Linea pts={[e[0], e[e.length - 1]]} p={pVerde} color={C.GRN} sw={24} />;
             }}
           </B.Perfil>
-        </Mitad>
-        <Pos x={JUICIO[0]} y={Y_ARRIBA + JUICIO[1]} e={tacha} dx={M.vibra(T, 44, 4)}>
-          <P.Tacha s={0.55} />
+        </Ventana>
+        <Pos x={JUICIO[0]} y={FRANJA.arriba + JUICIO[1]} e={tacha} dx={M.vibra(T, 44, 4)}>
+          <P.Tacha s={0.6} />
         </Pos>
-        <Pos x={JUICIO[0]} y={Y_ABAJO + JUICIO[1]} e={visto} dy={M.life(T, 2.8, 6)}>
-          <P.Visto s={0.6} p={M.draw(T, f(0.58), 0.4)} />
+        <Pos x={JUICIO[0]} y={FRANJA.abajo + JUICIO[1]} e={visto} dy={M.life(T, 2.8, 6)}>
+          <P.Visto s={0.64} p={M.draw(T, f(0.58), 0.4)} />
         </Pos>
-        <Rot T={T} text="ESPALDA CURVA" s={1} y={235} e={r1} />
-        <Rot T={T} text="COLUMNA NEUTRA" s={1} y={1460} e={r2} fase={0.4} />
+        <Rot T={T} text="ESPALDA CURVA" y={238} e={r1} />
+        <Rot T={T} text="COLUMNA NEUTRA" y={1478} e={r2} fase={0.4} />
       </div>
     );
   }
 
-  /* 9 — error 2: rodillas adentro (valgo) vs rodillas afuera, hacia la punta */
+  /* 9 — error 2: rodillas adentro (valgo) vs rodillas afuera, sobre el pie */
+  var ERR_FR = { s: 0.78, centro: [600, 1190] };
+
   function EscError2(props) {
     var T = props.T, at = props.at, dur = props.dur;
     var f = function (v) { return at + dur * v; };
 
-    var prof = 0.2 + 0.8 * reps(T, f(0.02), f(0.98), 2);
-    var falla = prof > 0.6 ? M.vibra(T, 44, 3) : 0;
+    var prof = 0.55 + 0.45 * reps(T, f(0.02), f(0.98), 2);
+    var falla = prof > 0.75 ? M.vibra(T, 44, 3) : 0;
 
     var arriba = M.pop(T, at - 0.6, 0.5);
     var abajo = M.pop(T, f(0.38), 0.45);
     var tacha = M.pop(T, f(0.14), 0.4);
-    var visto = M.pop(T, f(0.58), 0.45);
+    var visto = M.pop(T, f(0.6), 0.45);
     var r1 = M.pop(T, f(0.04), 0.45);
     var r2 = M.pop(T, f(0.44), 0.45);
     var pRojas = M.draw(T, f(0.08), 0.3);
-    var pVerdes = M.draw(T, f(0.46), 0.3);
-    var pGuia = M.draw(T, f(0.56), 0.4);
+    var pGuiaR = M.draw(T, f(0.1), 0.4);
+    var pVerdes = M.draw(T, f(0.5), 0.3);
+    var pGuiaV = M.draw(T, f(0.46), 0.4);
 
     return (
       <div style={{ position: 'absolute', inset: 0 }}>
-        <Mitad cfg={CMP_FR} y={Y_ARRIBA} e={arriba} dx={falla} dy={M.life(T, 3.6, 4)}>
-          <B.Frente s={CMP_FR.s} pose={sumo(prof, 1)}
-            agarre={function (g) { return <Mancuerna g={g} />; }}>
-            {function (g) { return <g>{flechasRodilla(g, 'adentro', C.RED, pRojas)}</g>; }}
-          </B.Frente>
-        </Mitad>
-        <Mitad cfg={CMP_FR} y={Y_ABAJO} e={abajo} dy={M.life(T, 3.6, 4, 0.5)}>
-          <B.Frente s={CMP_FR.s} pose={sumo(prof, 0)}
-            agarre={function (g) { return <Mancuerna g={g} />; }}>
+        <Ventana y={FRANJA.arriba} h={FRANJA.h} s={ERR_FR.s} centro={ERR_FR.centro} e={arriba}
+          dx={falla} dy={M.life(T, 3.6, 4)}>
+          <B.Frente s={ERR_FR.s} pose={sumo(prof, 1)} agarre={conMancuerna}>
             {function (g) {
               return (
                 <g>
-                  {guiasPunta(g, pGuia, C.GRN)}
-                  {flechasRodilla(g, 'afuera', C.GRN, pVerdes)}
+                  {guiasPie(g, pGuiaR, C.RED)}
+                  {flechasRodilla(g, 'adentro', C.RED, pRojas, 1, 250, 96)}
                 </g>
               );
             }}
           </B.Frente>
-        </Mitad>
-        <Pos x={JUICIO[0]} y={Y_ARRIBA + JUICIO[1]} e={tacha} dx={M.vibra(T, 44, 4)}>
-          <P.Tacha s={0.55} />
+        </Ventana>
+        <Ventana y={FRANJA.abajo} h={FRANJA.h} s={ERR_FR.s} centro={ERR_FR.centro} e={abajo}
+          dy={M.life(T, 3.6, 4, 0.5)}>
+          <B.Frente s={ERR_FR.s} pose={sumo(prof, 0)} agarre={conMancuerna}>
+            {function (g) {
+              return (
+                <g>
+                  {guiasPie(g, pGuiaV, C.GRN)}
+                  {flechasRodilla(g, 'afuera', C.GRN, pVerdes, 1, 215, 96)}
+                </g>
+              );
+            }}
+          </B.Frente>
+        </Ventana>
+        <Pos x={JUICIO[0]} y={FRANJA.arriba + 40} e={tacha} dx={M.vibra(T, 44, 4)}>
+          <P.Tacha s={0.6} />
         </Pos>
-        <Pos x={JUICIO[0]} y={Y_ABAJO + JUICIO[1]} e={visto} dy={M.life(T, 2.8, 6)}>
-          <P.Visto s={0.6} p={M.draw(T, f(0.58), 0.4)} />
+        <Pos x={JUICIO[0]} y={FRANJA.abajo + 40} e={visto} dy={M.life(T, 2.8, 6)}>
+          <P.Visto s={0.64} p={M.draw(T, f(0.6), 0.4)} />
         </Pos>
-        <Rot T={T} text="RODILLAS ADENTRO" s={1} y={235} e={r1} />
-        <Rot T={T} text="RODILLAS AFUERA" s={1} y={1460} e={r2} fase={0.4} />
+        <Rot T={T} text="RODILLAS ADENTRO" y={238} e={r1} />
+        <Rot T={T} text="RODILLAS AFUERA" y={1478} e={r2} fase={0.4} />
       </div>
     );
   }
@@ -585,17 +676,17 @@
 
     return (
       <div style={{ position: 'absolute', inset: 0 }}>
-        <Camara zoom={1 + 0.05 * t} foco={[540, 1000]}>
+        <Camara zoom={1 + 0.05 * t} foco={[540, 960]}>
           <Pos x={FR.x} y={FR.y} e={fig} dy={M.life(T, 3.6, 5)}>
             <B.Frente s={FR.s} pose={sumo(prof, 0)} musc={{ cuad: luz }} muscGris={{ aduct: luz }}
-              agarre={function (g) { return <Mancuerna g={g} />; }} />
+              agarre={conMancuerna} />
           </Pos>
         </Camara>
-        <Pos x={790} y={540} e={visto} dy={M.life(T, 2.8, 6)}>
+        <Pos x={790} y={480} e={visto} dy={M.life(T, 2.8, 6)}>
           <P.Visto s={0.85} p={M.draw(T, f(0.46), 0.4)} />
         </Pos>
         <Rot T={T} text="SENTADILLA SUMO" s={1.4} y={250} e={r1} />
-        <Rot T={T} text="TÉCNICA > PESO" y={1450} e={r2} fase={0.4} />
+        <Rot T={T} text="TÉCNICA > PESO" y={1430} e={r2} fase={0.4} />
       </div>
     );
   }
