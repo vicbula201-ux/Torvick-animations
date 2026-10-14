@@ -22,8 +22,8 @@ const URL_BABEL = 'https://cdn.jsdelivr.net/npm/@babel/standalone@7.26.4/babel.m
 // orden de carga: motor -> primitivas -> cuerpo -> piezas extra -> marca -> reel -> videos
 const FUENTES = [
   'primitivas.jsx', 'app.jsx',
-  'cuerpo.jsx', 'perfil.jsx', 'frente.jsx', 'equipo.jsx',
-  'marca.jsx', 'reel.jsx',
+  'cuerpo.jsx', 'perfil.jsx', 'frente.jsx', 'equipo.jsx', 'tor.jsx',
+  'marca.jsx', 'reel.jsx', 'identidad.jsx',
   'face-pull.jsx', 'sentadilla-sumo.jsx', 'elevacion-piernas.jsx', 'press-banca.jsx', 'dominadas.jsx',
   'silla-extensora.jsx', 'fondos.jsx', 'flexiones.jsx', 'remo-t.jsx', 'encogimientos.jsx'
 ];

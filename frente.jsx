@@ -33,7 +33,8 @@
                 claves: pec delt bic ante abd obl serr trap cuad aduct sart tfl
                 con 0 el musculo no se dibuja; el tinte entra con opacidad = valor
      short      fraccion del muslo que tapa la manga (0.34; < 0.2 deja ver el tfl)
-     boca       true dibuja una linea de boca (por defecto: ojos y nariz)
+     boca       true dibuja una linea de boca (por defecto: ojos y nariz);
+                'sonrisa' o 'triste' la curvan
      sinPiso    sin la linea gris del piso (vista de frente)
      sinBanco   sin el banco (vista cenital)
      fondo(g) agarre(g) children(g)   funciones -> SVG en coordenadas del viewBox
@@ -667,7 +668,9 @@
         <circle cx={-26} cy={-2} r={8} fill={INK} />
         <circle cx={26} cy={-2} r={8} fill={INK} />
         <path d="M 0 14 L 0 34" {...LINEA} />
-        {props.boca ? <path d="M -16 54 L 16 54" {...LINEA} /> : null}
+        {props.boca === 'sonrisa' ? <path d="M -24 46 Q 0 68 24 46" {...LINEA} />
+          : props.boca === 'triste' ? <path d="M -20 62 Q 0 46 20 62" {...LINEA} />
+          : props.boca ? <path d="M -16 54 L 16 54" {...LINEA} /> : null}
       </g>
     );
   }

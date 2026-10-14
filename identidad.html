@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Identidad — Torvick</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Barlow+Semi+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: #171614; color: #F2EFE9;
+    font-family: 'Barlow Semi Condensed', system-ui, sans-serif;
+  }
+  .id { padding: 24px; }
+  .id h1 { font-size: 26px; margin: 0 0 4px; }
+  .id p { color: #8C867C; margin: 0 0 24px; font-size: 16px; }
+  .id-fila { display: flex; flex-wrap: wrap; gap: 24px; margin-bottom: 32px; align-items: flex-start; }
+  .id-pieza { background: #201F1C; border: 1px solid #3A362F; padding: 12px; }
+  .id-pieza span { display: block; margin-top: 8px; font-weight: 600; letter-spacing: 1px; font-size: 14px; }
+  .id-chico { zoom: 0.3; }
+  .id-exportar { display: flex; flex-direction: column; gap: 40px; padding: 40px; background: #555; }
+</style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <!-- sin crossorigin: asi cargan tambien con doble clic (file://) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+
+  <script src="motor.js"></script>
+  <script src="primitivas.js"></script>
+  <script src="cuerpo.js"></script>
+  <script src="frente.js"></script>
+  <script src="tor.js"></script>
+  <script src="identidad.js"></script>
+
+  <script>
+    (function () {
+      var h = React.createElement, I = window.IDENTIDAD;
+      // nombre del PNG -> elemento a tamaño real
+      var PIEZAS = [
+        ['perfil-amarillo', h(I.Perfil, { variante: 'amarillo' })],
+        ['perfil-negro', h(I.Perfil, { variante: 'negro' })]
+      ];
+      I.ICONOS.forEach(function (t) {
+        PIEZAS.push(['destacada-' + t, h(I.Destacada, { tipo: t, alto: 1920 })]);
+        PIEZAS.push(['destacada-' + t + '-cuadrada', h(I.Destacada, { tipo: t, alto: 1080 })]);
+      });
+      PIEZAS.push(['vista-previa', h(I.Maqueta)]);
+
+      // #exportar: todo a tamaño real, para herramientas/imagenes.js
+      var exportar = location.hash === '#exportar';
+      var vista = exportar
+        ? h('div', { className: 'id-exportar' }, PIEZAS.map(function (p) {
+            return h('div', { key: p[0], 'data-png': p[0], style: { alignSelf: 'flex-start' } }, p[1]);
+          }))
+        : h('div', { className: 'id' },
+            h('h1', null, 'Identidad de Torvick'),
+            h('p', null, 'Foto de perfil (Instagram y TikTok la recortan en círculo) y portadas de historias destacadas. ' +
+              'Los PNG se exportan con: node herramientas/imagenes.js'),
+            h('div', { className: 'id-fila' }, PIEZAS.filter(function (p) { return !/cuadrada/.test(p[0]); }).map(function (p) {
+              return h('div', { key: p[0], className: 'id-pieza' },
+                h('div', { className: 'id-chico' }, p[1]), h('span', null, p[0]));
+            })));
+      ReactDOM.createRoot(document.getElementById('root')).render(vista);
+    })();
+  </script>
+</body>
+</html>
