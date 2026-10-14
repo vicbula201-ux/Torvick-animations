@@ -395,7 +395,7 @@
   function Mitad(props) {
     var s = CMP.s;
     return (
-      <Pos x={0} y={0} e={props.e} dx={props.dx} dy={props.dy}>
+      <Pos x={0} y={0} e={props.e} dx={props.dx} dy={props.dy} origen={'540px ' + (props.y + CMP.alto * s / 2) + 'px'}>
         <Recorte x={CMP.x} y={props.y} w={1100 * s} h={CMP.alto * s} desde={CMP.desde * s}>
           {props.children}
         </Recorte>

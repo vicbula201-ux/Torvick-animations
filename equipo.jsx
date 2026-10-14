@@ -56,6 +56,12 @@
      arriba -> { vista, centro, ang, largo, ancho, u, n, extremos, x0, x1, y0, y1
                (caja sin girar), patas [p,p] (centro de cada travesano) }
 
+   --- Barra libre con discos (solo version G) ---
+   B.BarraLibreG({ vista:'lado' | 'frente', c, k, r, ancho, largo, color, opacity })
+     lado    de punta: el disco cercano (r 100*k) centrado en c (la mano)
+     frente  barra horizontal centrada en c; discos de canto a +-ancho (400*k)
+             del centro, la barra llega a +-largo (600*k). color de discos GRY
+
    --- Barra de dominadas (viewBox 1200x1750) ---
    B.BarraG({ vista:'frente', x, y, ancho, piso, agarre, zona, sinBase, opacity })
      x,y    centro de la barra (y = altura de la barra; default 600,200)
@@ -732,6 +738,49 @@
     );
   }
 
+  /* ---------------- barra libre con discos ---------------- */
+
+  // vista 'lado': la barra de punta (se ve el disco cercano, centrado en c)
+  // vista 'frente': la barra horizontal centrada en c, discos de canto a +-ancho
+  function BarraLibreG(props) {
+    var c = props.c || [0, 0];
+    var k = num(props.k, 1);
+    var color = props.color || GRY;
+    var r = num(props.r, 100) * k;
+    if (props.vista !== 'frente') {
+      return (
+        <g opacity={props.opacity}>
+          <circle cx={f1(c[0])} cy={f1(c[1])} r={f1(r)} fill={color} stroke={INK} strokeWidth={13} />
+          <circle cx={f1(c[0])} cy={f1(c[1])} r={f1(r * 0.64)} fill="none" stroke={INK} strokeWidth={9} />
+          <circle cx={f1(c[0])} cy={f1(c[1])} r={f1(20 * k)} fill={BLANCO} stroke={INK} strokeWidth={10} />
+        </g>
+      );
+    }
+    var ancho = num(props.ancho, 400) * k, largo = num(props.largo, 600) * k;
+    var y = c[1];
+    var disco = function (x, w, h) {
+      return <rect x={f1(x - w / 2)} y={f1(y - h / 2)} width={f1(w)} height={f1(h)} rx={f1(12 * k)}
+        fill={color} stroke={INK} strokeWidth={11} />;
+    };
+    return (
+      <g opacity={props.opacity}>
+        <rect x={f1(c[0] - largo)} y={f1(y - 11 * k)} width={f1(2 * largo)} height={f1(22 * k)} rx={f1(11 * k)}
+          fill={BLANCO} stroke={INK} strokeWidth={11} />
+        {[-1, 1].map(function (l) {
+          var x0 = c[0] + l * ancho;
+          return (
+            <g key={l}>
+              <rect x={f1(x0 - (l < 0 ? 22 : 0) * k)} y={f1(y - 22 * k)} width={f1(22 * k)} height={f1(44 * k)}
+                rx={f1(6 * k)} fill={BLANCO} stroke={INK} strokeWidth={11} />
+              {disco(x0 + l * 52 * k, 46 * k, 2 * r)}
+              {disco(x0 + l * 100 * k, 38 * k, 1.5 * r)}
+            </g>
+          );
+        })}
+      </g>
+    );
+  }
+
   /* ---------------- sombra y piso ---------------- */
 
   function SombraG(props) {
@@ -753,6 +802,7 @@
     Banco: Banco, BancoG: BancoG, geoBanco: geoBanco,
     Barra: Barra, BarraG: BarraG, geoBarra: geoBarra,
     Colchoneta: Colchoneta, ColchonetaG: ColchonetaG, geoColchoneta: geoColchoneta,
+    BarraLibreG: BarraLibreG,
     SombraG: SombraG, PisoG: PisoG,
     EQUIPO: {
       mancuerna: { largo: 308, radio: 76, mango: 96, puno: 36 },

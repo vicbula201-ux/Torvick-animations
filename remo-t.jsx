@@ -234,7 +234,7 @@
   function Mitad(props) {
     var s = CMP.s;
     return (
-      <Pos x={0} y={0} e={props.e} dx={props.dx} dy={props.dy}>
+      <Pos x={0} y={0} e={props.e} dx={props.dx} dy={props.dy} origen={'540px ' + (props.y + CMP.h / 2) + 'px'}>
         <Recorte x={0} y={props.y} w={CMP.w} h={CMP.h} desde={CMP.desdeY * s}>
           <div style={{ position: 'absolute', left: 520 - CMP.centroX * s, top: 0 }}>{props.children}</div>
         </Recorte>
@@ -273,7 +273,7 @@
   function MitadEsp(props) {
     var s = CMPE.s;
     return (
-      <Pos x={0} y={0} e={props.e} dx={props.dx} dy={props.dy}>
+      <Pos x={0} y={0} e={props.e} dx={props.dx} dy={props.dy} origen={'540px ' + (props.y + CMPE.alto * s / 2) + 'px'}>
         <Recorte x={CMPE.x} y={props.y} w={1100 * s} h={CMPE.alto * s} desde={CMPE.desde * s}>
           {props.children}
         </Recorte>

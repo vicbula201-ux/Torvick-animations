@@ -422,7 +422,8 @@
       y: 0,
       e: props.e,
       dx: props.dx,
-      dy: props.dy
+      dy: props.dy,
+      origen: '540px ' + (props.y + CMP.h / 2) + 'px'
     }, /*#__PURE__*/React.createElement(Recorte, {
       x: 0,
       y: props.y,
