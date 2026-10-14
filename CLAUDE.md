@@ -22,9 +22,13 @@ reel.jsx          window.REELS: armazón común de los reels verticales
 reels.html        abre los reels: lienzo 9:16 + guion + selector de video
 face-pull.jsx, sentadilla-sumo.jsx, elevacion-piernas.jsx,
 press-banca.jsx, dominadas.jsx   un archivo por video (solo escenas)
+silla-extensora.jsx, fondos.jsx, flexiones.jsx, remo-t.jsx,
+encogimientos.jsx                reels cortos (formato actual, ~30 s)
 face-pull.html    redirige a reels.html#face-pull
 compilar.js       regenera los .js desde los .jsx
 prueba-piezas.html  verificación: motor + las 21 piezas + las piezas de B
+herramientas/     grabar.js (exporta MP4 con música y efectos) + audio.py
+                  (sintetiza la música y los efectos); no son parte de la app
 ```
 
 **Los .jsx son la fuente; los .js son generados.** `index.html` carga
@@ -214,8 +218,9 @@ global.REELS.registrar({ id: 'dominadas', titulo: 'Dominadas', escenas: ESCENAS 
 ```
 
 Las ayudas para escribir escenas están en `REELS.ayudas` (`Pos`, `Rot`,
-`Camara`, `Recorte`, `sale`, `junta`, `reps`). `face-pull.jsx` es la
-implementación de referencia. Para sumar un video: crear `nuevo.jsx`,
+`Camara`, `Recorte`, `sale`, `junta`, `reps`, `Mal`, `Bien`, `sonido`).
+`face-pull.jsx` es la implementación de referencia del armazón;
+`fondos.jsx` lo es del formato corto. Para sumar un video: crear `nuevo.jsx`,
 agregarlo a `FUENTES` en `compilar.js` y un `<script src="nuevo.js">` en
 `reels.html`.
 
@@ -233,9 +238,25 @@ Los logos están dibujados con la paleta de cinco (YouTube rojo, Instagram
 amarillo, TikTok negro con eco rojo). El nombre, la arroba y el número de
 `B.Cuenta` son el único texto del lienzo además de `P.Rotulo`.
 
-**Duración:** cada video dura como máximo 60 s *con* el cierre, o sea
-57 s de escenas propias. Entre escena y escena `reel.jsx` hace un empuje
-corto (0,36 s); no hace falta hacer transiciones a mano.
+**Formato corto (el de ahora en adelante):** 30 a 35 s *con* el cierre
+de 3 s; la retención de Shorts/Reels está en 20-25 s, así que nada
+redundante. Siete escenas de 2,5 a 5,5 s: Gancho, Posición, Ejecución,
+Músculos, Error 1, Error 2, Cierre. Los cinco primeros videos (face pull a
+dominadas) son más largos, del formato anterior (hasta 60 s).
+
+- **Gancho:** la voz dice "Estás haciendo mal tu/tus <ejercicio>". En
+  pantalla **no** va ese texto: solo el ejercicio mal hecho (vibrando,
+  músculo en rojo), dos `Mal` (X rojas, cada una con su sonido de error)
+  y el rótulo con el nombre del ejercicio.
+- **`Mal`** (X que vibra) y **`Bien`** (visto que se dibuja) registran
+  solos su sonido: "error" y "tin". Usarlos siempre en vez de
+  `P.Tacha`/`P.Visto` sueltos, así el video exportado suena sincronizado.
+  `sonido(tipo, segundo)` marca otro efecto a mano.
+- Cada escena tiene su `vo` (la línea de locución). Se escribe para leerse
+  a ~3 palabras por segundo dentro de la duración de la escena.
+
+Entre escena y escena `reel.jsx` hace un empuje corto (0,36 s) que suena
+como un "whoosh"; no hace falta hacer transiciones a mano.
 
 **Zonas que tapan las apps:** el sello ocupa arriba a la izquierda
 (y 140-215), así que los rótulos van de y 230 para abajo. Abajo de y 1560
@@ -248,9 +269,23 @@ las escenas usan `f(fracción)`, la coreografía se estira sola. Para que
 el cambio quede fijo, pasá los números a `ESCENAS` en el `.jsx` del video.
 
 **Exportar:** `reels.html#<id>/render` muestra solo el lienzo a 1080x1920,
-sin controles, y deja `window.REEL` (`seek`, `setPlaying`, `total`) para
-grabar cuadro por cuadro con un navegador automatizado. Sin eso, grabá
-la pantalla con el reel en reproducción.
+sin controles, y deja `window.REEL` (`seek`, `setPlaying`, `total`,
+`cues`, `guion`) para grabar cuadro por cuadro con un navegador
+automatizado. Eso hace la herramienta de escritorio:
+
+```
+node herramientas/grabar.js <id> [carpeta]   # por defecto ./videos (ignorada por git)
+```
+
+Deja `<id>.mp4` (video + música + efectos, listo para ponerle la voz),
+`<id>-sin-musica.mp4` (solo efectos), `<id>-guion.txt` (cada línea de voz
+con su tramo de tiempo) y `<id>-cues.json`. La música es original,
+sintetizada por `herramientas/audio.py` (sin derechos de terceros); para
+usar otra pista, `python3 herramientas/audio.py --dur <s> --cues
+<id>-cues.json --musica tema.wav --out pista.wav` (trae los efectos) y
+reemplazar con ella el audio del MP4 (`ffmpeg -i <id>.mp4 -i pista.wav
+-map 0:v -map 1:a -c:v copy -c:a aac salida.mp4`). Necesita Node, Playwright, ffmpeg y
+python3 con numpy. Sin eso, grabá la pantalla con el reel en reproducción.
 
 Código de color en estos videos (misma paleta de cinco):
 `YEL` músculo principal, trayectoria, guía · `GRY` músculo secundario,

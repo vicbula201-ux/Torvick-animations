@@ -454,11 +454,12 @@
   // media silueta: cuello, trapecio, hombro (bajo el deltoides), axila, dorsal en V, cintura
   function mitadTorso(S) {
     var sx = S[0], sy = S[1];
+    var e = Math.max(0, HOMBRO[1] - sy);   // hombro elevado (encogimiento): el trapecio se abomba
     return {
       ini: [-42, -452],
       segs: [
         [[-42, -426], [-44, -404], [-52, -390]],
-        [[-88, -374], [sx + 52, sy - 52], [sx + 12, sy - 46]],
+        [[-88, -374 - 0.9 * e], [sx + 52, sy - 52 - 0.3 * e], [sx + 12, sy - 46]],
         [[sx - 24, sy - 40], [sx - 38, sy + 4], [sx - 22, sy + 46]],
         [[sx - 10, sy + 66], [sx + 4, sy + 76], [sx + 14, sy + 82]],
         [[-162, -196], [-152, -150], [-136, -122]],
@@ -484,6 +485,7 @@
 
   function formasTorso(S) {
     var sx = S[0], sy = S[1];
+    var e = Math.max(0, HOMBRO[1] - sy);
     var axila = [sx + 28, sy + 38];
     var bajoPec = [['C', [-128, -232], [-100, -206], [-66, -207]], ['C', [-38, -208], [-18, -216], [-10, -234]]];
     return {
@@ -496,8 +498,8 @@
         [['M', [-26, -310]], ['Q', [-80, -306], [sx + 34, sy - 4]]]
       ],
       trap: [['M', [-44, -470]], ['L', [sx - 40, sy - 130]], ['L', [sx + 14, sy - 40]],
-        ['C', [sx + 60, sy - 40], [-78, -362], [-50, -374]], 'Z'],
-      trapLinea: [['M', [sx + 14, sy - 40]], ['C', [sx + 60, sy - 40], [-78, -362], [-50, -374]]],
+        ['C', [sx + 60, sy - 40 + 0.8 * e], [-78, -362], [-50, -374]], 'Z'],
+      trapLinea: [['M', [sx + 14, sy - 40]], ['C', [sx + 60, sy - 40 + 0.8 * e], [-78, -362], [-50, -374]]],
       trapFibra: [['M', [-58, -404]], ['Q', [-92, -388], [sx + 30, sy - 56]]],
       // recto abdominal: una banda por lado (la linea alba queda entre las dos) y
       // las intersecciones tendinosas que arman los cuadritos
