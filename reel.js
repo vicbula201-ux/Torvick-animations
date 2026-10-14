@@ -146,6 +146,62 @@
   }
 
   /* =========================================================
+     SONIDOS: cada escena marca cuando suena un efecto
+     El grabador (herramientas/grabar.js) los lee con window.REEL.cues()
+     y herramientas/audio.py arma la pista: musica + efectos.
+     tipos: 'error' (X roja), 'bien' (visto verde), 'paso' (cambio de
+     escena), 'marca' (entra el cierre), 'golpe' (acento libre)
+     ========================================================= */
+
+  var CUES = {};
+  var firmaCues = '';
+  function sonido(tipo, cuando) {
+    var k = tipo + '@' + cuando.toFixed(3);
+    if (!CUES[k]) CUES[k] = {
+      tipo: tipo,
+      t: Math.round(cuando * 1000) / 1000
+    };
+  }
+  function listaCues() {
+    return Object.keys(CUES).map(function (k) {
+      return CUES[k];
+    }).sort(function (a, b) {
+      return a.t - b.t;
+    });
+  }
+
+  // X roja: entra con rebote, vibra y suena el error. hasta = cuando se va (opcional)
+  function Mal(props) {
+    sonido('error', props.cuando);
+    var e = M.pop(props.T, props.cuando, 0.4);
+    if (props.hasta != null) e = junta(e, sale(props.T, props.hasta));
+    return /*#__PURE__*/React.createElement(Pos, {
+      x: props.x,
+      y: props.y,
+      e: e,
+      dx: M.vibra(props.T, 44, 4)
+    }, /*#__PURE__*/React.createElement(P.Tacha, {
+      s: props.s || 0.55
+    }));
+  }
+
+  // visto verde: se dibuja con rebote y suena el "tin"
+  function Bien(props) {
+    sonido('bien', props.cuando);
+    var e = M.pop(props.T, props.cuando, 0.45);
+    if (props.hasta != null) e = junta(e, sale(props.T, props.hasta));
+    return /*#__PURE__*/React.createElement(Pos, {
+      x: props.x,
+      y: props.y,
+      e: e,
+      dy: M.life(props.T, 2.8, 6, props.fase || 0)
+    }, /*#__PURE__*/React.createElement(P.Visto, {
+      s: props.s || 0.6,
+      p: M.draw(props.T, props.cuando, 0.4)
+    }));
+  }
+
+  /* =========================================================
      REEL: escenas + transiciones + sello + cierre de marca
      ========================================================= */
 
@@ -163,6 +219,18 @@
       acc += e.dur;
     });
     var total = acc;
+
+    // si cambian las duraciones, los efectos se vuelven a marcar
+    var firma = escenas.map(function (e) {
+      return e.nombre + ':' + e.dur;
+    }).join('|');
+    if (firma !== firmaCues) {
+      CUES = {};
+      firmaCues = firma;
+    }
+    escenas.forEach(function (e, i) {
+      if (i > 0) sonido(e.marca ? 'marca' : 'paso', limites[i] - h);
+    });
     var capas = [];
     escenas.forEach(function (e, i) {
       var at = limites[i],
@@ -300,7 +368,15 @@
       global.REEL = {
         seek: api.seek,
         setPlaying: api.setPlaying,
-        total: api.total
+        total: api.total,
+        cues: listaCues,
+        guion: props.escenas.map(function (e) {
+          return {
+            nombre: e.nombre,
+            dur: e.dur,
+            vo: e.vo
+          };
+        })
       };
     });
     if (props.render) return null;
@@ -476,7 +552,10 @@
       Rot: Rot,
       Camara: Camara,
       Recorte: Recorte,
-      anchoRotulo: anchoRotulo
+      anchoRotulo: anchoRotulo,
+      Mal: Mal,
+      Bien: Bien,
+      sonido: sonido
     }
   };
 })(window);
