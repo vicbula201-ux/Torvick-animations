@@ -16,19 +16,25 @@ app.jsx           UI, llamada al modelo, transpilación, montaje, ajuste
 cuerpo.jsx        window.B: espalda, estación de polea, overlays SVG
 perfil.jsx        B.Perfil: figura de perfil articulada + poses
 frente.jsx        B.Frente: figura de frente + poses
-equipo.jsx        mancuerna, banco, barra, colchoneta, sombra
+equipo.jsx        mancuerna, banco, barra, barra libre con discos, colchoneta, sombra
+tor.jsx           window.TOR: Tor, el avatar de la marca (pose de doble bíceps)
+nutricion.jsx     window.N: comida, plato, balanza y dial (videos de nutrición)
 marca.jsx         window.MARCA: firma de Torvick (nombre, redes, sello, cierre)
 reel.jsx          window.REELS: armazón común de los reels verticales
 reels.html        abre los reels: lienzo 9:16 + guion + selector de video
 face-pull.jsx, sentadilla-sumo.jsx, elevacion-piernas.jsx,
 press-banca.jsx, dominadas.jsx   un archivo por video (solo escenas)
 silla-extensora.jsx, fondos.jsx, flexiones.jsx, remo-t.jsx,
-encogimientos.jsx                reels cortos (formato actual, ~30 s)
+encogimientos.jsx, jalon.jsx, curl-barra.jsx, fondos-banco.jsx,
+pantorrilla.jsx                  reels cortos de ejercicios (formato actual, ~30 s)
+proteinas.jsx                    reel corto de nutrición (protagonista: Tor)
+identidad.jsx/.html  foto de perfil y portadas de destacadas (PNG en identidad/)
 face-pull.html    redirige a reels.html#face-pull
 compilar.js       regenera los .js desde los .jsx
 prueba-piezas.html  verificación: motor + las 21 piezas + las piezas de B
-herramientas/     grabar.js (exporta MP4 con música y efectos) + audio.py
-                  (sintetiza la música y los efectos); no son parte de la app
+herramientas/     grabar.js (exporta MP4 con música y efectos), audio.py
+                  (sintetiza la música y los efectos) e imagenes.js (exporta
+                  los PNG de identidad.html); no son parte de la app
 ```
 
 **Los .jsx son la fuente; los .js son generados.** `index.html` carga
@@ -287,6 +293,22 @@ reemplazar con ella el audio del MP4 (`ffmpeg -i <id>.mp4 -i pista.wav
 -map 0:v -map 1:a -c:v copy -c:a aac salida.mp4`). Necesita Node, Playwright, ffmpeg y
 python3 con numpy. Sin eso, grabá la pantalla con el reel en reproducción.
 
+**Videos de nutrición:** mismo formato corto, misma música y sonidos, y
+el protagonista es **Tor**, el avatar de la marca (`TOR.Tor`: la figura
+de frente de `B.Frente` con `flex` 0..1 para la pose de doble bíceps y
+`boca` `'sonrisa'`/`'triste'`). Las piezas de comida están en `window.N`.
+El gancho sigue la misma idea que en ejercicios —señalar el error del que
+mira— adaptada: "Estás comiendo poca proteína." (en pantalla, Tor triste,
+un medidor en rojo y las X). Escenas de `proteinas.jsx`: Gancho, Qué es,
+Para qué, Fuentes, Cuánta, Ejemplo (con números concretos), Cierre. Los
+números del libro van en rótulos (`1,6 A 2,2 G`) o en `B.Cuenta`.
+
+**Identidad:** `identidad.html` (doble clic) muestra la foto de perfil de
+Tor (amarilla y negra) y las portadas de historias destacadas (entreno,
+nutrición, descanso, suplementos). `node herramientas/imagenes.js` las
+exporta a `identidad/` en 1080x1080 (perfil y destacadas cuadradas) y
+1080x1920 (destacadas para subir como historia).
+
 Código de color en estos videos (misma paleta de cinco):
 `YEL` músculo principal, trayectoria, guía · `GRY` músculo secundario,
 cable flojo, short · `RED` error (y el trapecio cuando se encogen los
@@ -309,6 +331,7 @@ B.Frente    // de frente o cenital (acostado visto de arriba)
 B.poseFrente.depie / sumo / bancaArriba / mezclar
 // equipo.jsx: cada uno suelto o en versión G para dibujar dentro de un cuerpo
 B.Mancuerna B.Banco B.Barra B.Colchoneta  (+ MancuernaG, BancoG, BarraG, ColchonetaG, SombraG, PisoG)
+B.BarraLibreG   // barra olímpica con discos: vista 'lado' (el disco, en la mano) o 'frente'
 B.geoEspalda B.geoEstacion B.geoPerfil B.geoFrente   // las mismas coordenadas, sin dibujar
 ```
 
