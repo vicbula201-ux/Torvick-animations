@@ -305,7 +305,7 @@
       dur: 3,
       C: EscMarca,
       marca: true,
-      vo: '(opcional) Sígueme para más técnica.'
+      vo: 'Tu cierre: soy Torvick, sígueme en YouTube, Instagram y TikTok.'
     }
   };
 })(window);
