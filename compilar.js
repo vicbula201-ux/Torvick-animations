@@ -23,10 +23,11 @@ const URL_BABEL = 'https://cdn.jsdelivr.net/npm/@babel/standalone@7.26.4/babel.m
 const FUENTES = [
   'primitivas.jsx', 'app.jsx',
   'cuerpo.jsx', 'perfil.jsx', 'frente.jsx', 'equipo.jsx', 'tor.jsx',
-  'nutricion.jsx', 'marca.jsx', 'reel.jsx', 'identidad.jsx',
+  'nutricion.jsx', 'marca.jsx', 'reel.jsx', 'plantillas.jsx', 'identidad.jsx',
   'face-pull.jsx', 'sentadilla-sumo.jsx', 'elevacion-piernas.jsx', 'press-banca.jsx', 'dominadas.jsx',
   'silla-extensora.jsx', 'fondos.jsx', 'flexiones.jsx', 'remo-t.jsx', 'encogimientos.jsx',
-  'proteinas.jsx', 'curl-barra.jsx', 'fondos-banco.jsx', 'pantorrilla.jsx', 'jalon.jsx'
+  'proteinas.jsx', 'curl-barra.jsx', 'fondos-banco.jsx', 'pantorrilla.jsx', 'jalon.jsx',
+  'hierro.jsx', 'grasas.jsx', 'carbohidratos.jsx', 'minerales.jsx', 'objetivos.jsx'
 ];
 
 async function traerBabel() {
