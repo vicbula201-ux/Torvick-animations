@@ -21,13 +21,15 @@ tor.jsx           window.TOR: Tor, el avatar de la marca (pose de doble bíceps)
 nutricion.jsx     window.N: comida, plato, balanza y dial (videos de nutrición)
 marca.jsx         window.MARCA: firma de Torvick (nombre, redes, sello, cierre)
 reel.jsx          window.REELS: armazón común de los reels verticales
+plantillas.jsx    window.PL: escenas armadas con datos para los videos con Tor
 reels.html        abre los reels: lienzo 9:16 + guion + selector de video
 face-pull.jsx, sentadilla-sumo.jsx, elevacion-piernas.jsx,
 press-banca.jsx, dominadas.jsx   un archivo por video (solo escenas)
 silla-extensora.jsx, fondos.jsx, flexiones.jsx, remo-t.jsx,
 encogimientos.jsx, jalon.jsx, curl-barra.jsx, fondos-banco.jsx,
 pantorrilla.jsx                  reels cortos de ejercicios (formato actual, ~30 s)
-proteinas.jsx                    reel corto de nutrición (protagonista: Tor)
+proteinas.jsx, hierro.jsx, grasas.jsx, carbohidratos.jsx,
+minerales.jsx, objetivos.jsx     reels cortos con Tor (nutrición y temas de entreno)
 identidad.jsx/.html  foto de perfil y portadas de destacadas (PNG en identidad/)
 face-pull.html    redirige a reels.html#face-pull
 compilar.js       regenera los .js desde los .jsx
@@ -302,6 +304,17 @@ mira— adaptada: "Estás comiendo poca proteína." (en pantalla, Tor triste,
 un medidor en rojo y las X). Escenas de `proteinas.jsx`: Gancho, Qué es,
 Para qué, Fuentes, Cuánta, Ejemplo (con números concretos), Cierre. Los
 números del libro van en rótulos (`1,6 A 2,2 G`) o en `B.Cuenta`.
+
+Los videos con Tor nuevos se escriben con **`PL.escena({...})`**
+(`plantillas.jsx`): cada escena es un objeto con `tor` (uno o varios),
+`piezas` (cualquier pieza de `P`, `N` o `B` con su posición y su
+`cuando`), `lienzo` (flechas y líneas), `mal`, `bien`, `r1` y `r2`; los
+tiempos son fracciones y la plantilla aplica pop, respiración y sonidos.
+`PL.grilla` arma la escena de fuentes (comida en platos, cada una cuando
+la voz la nombra). `hierro.jsx` es la referencia. Ganchos usados, todos
+"error del que mira": "Estás ignorando el hierro", "Estás evitando las
+grasas", "Estás comiendo pocos carbohidratos", "Estás olvidando los
+minerales", "Estás entrenando sin un objetivo claro".
 
 **Identidad:** `identidad.html` (doble clic) muestra la foto de perfil de
 Tor (amarilla y negra) y las portadas de historias destacadas (entreno,
