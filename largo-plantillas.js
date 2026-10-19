@@ -578,7 +578,7 @@
     var cI = ancla(izq.c != null ? izq.c : f(0.05), props.at, 0.3);
     var cD = der.c != null ? der.c : f(0.3);
     var cG = props.cGira != null ? props.cGira : f(0.55);
-    var giro = (props.hacia === 'der' ? 1 : -1) * 13 * mov.prog(T, cG, 1.0, Easing.easeOutBack);
+    var giro = (props.hacia === 'der' ? 1 : -1) * 13 * mov.prog(T, cG, 0.9, Easing.easeInOutCubic);
     var cx = 960,
       cy = 330,
       brazo = 470;
@@ -907,7 +907,7 @@
     var cMas = props.cMas != null ? props.cMas : f(0.45);
     var x = props.dosPilas === false ? 960 : 620;
     var bloque = function (cx, y, i, c, color, w) {
-      var p = mov.prog(T, c, 0.55, Easing.easeOutBack);
+      var p = mov.prog(T, c, 0.55, mov.suave);
       if (p <= 0) return null;
       return /*#__PURE__*/React.createElement("div", {
         key: cx + ':' + i,
@@ -1473,7 +1473,7 @@
       var d = dest[i];
       var cI = c0 + 0.35 * (i / (cols * filas));
       var activo = d && T >= d.c;
-      var pa = d ? mov.prog(T, d.c, 0.5, Easing.easeOutBack) : 0;
+      var pa = d ? mov.prog(T, d.c, 0.5, mov.suave) : 0;
       out.push(/*#__PURE__*/React.createElement(React.Fragment, {
         key: i
       }, d && pa > 0 ? /*#__PURE__*/React.createElement("svg", {
@@ -1715,7 +1715,7 @@
     }), Array.apply(null, Array(n)).map(function (_, i) {
       var c = cLlena + durLlena * i / n;
       var lleno = saltar.indexOf(i) < 0 && T >= c;
-      var pp = lleno ? mov.prog(T, c, 0.3, Easing.easeOutBack) : 0;
+      var pp = lleno ? mov.prog(T, c, 0.3, mov.suave) : 0;
       return /*#__PURE__*/React.createElement("div", {
         key: i,
         style: {

@@ -66,7 +66,7 @@
   // corazon que late
   function Corazon(props) {
     var T = props.T;
-    var en = mov.entra(T, props.c, { dy: 10, desde: 0.4, ease: Easing.easeOutBack, dur: 0.6 });
+    var en = mov.entra(T, props.c, { dy: 10, desde: 0.4, ease: mov.suave, dur: 0.6 });
     var lat = 1 + 0.06 * Math.max(0, Math.sin((T - props.c) * 7.5)) * (T > props.c + 0.4 ? 1 : 0);
     return (
       <E.Pos x={props.x} y={props.y} e={en} esc={lat}>
@@ -198,7 +198,7 @@
   function EscTuTambien(props) {
     var T = props.T, at = props.at;
     var cG = t('convertir', 185);
-    var anillo = mov.prog(T, cG - 0.2, 0.6, Easing.easeOutBack);
+    var anillo = mov.prog(T, cG - 0.2, 0.6, mov.suave);
     return (
       <X.Marco p={props}>
         {[0, 1, 2].map(function (i) {
@@ -259,7 +259,7 @@
     }
     var pc = mov.prog(T, at - 0.1, 1.0, Easing.easeInOutCubic);
     var cFuera = t('dejar de ser', 306) + 0.4, cMedia = t('de la media', 307);
-    var anillo = mov.prog(T, cFuera + 0.2, 0.5, Easing.easeOutBack);
+    var anillo = mov.prog(T, cFuera + 0.2, 0.5, mov.suave);
     return (
       <X.Marco p={props}>
         <svg width={1920} height={1080} style={{ position: 'absolute', left: 0, top: 0 }}>
@@ -311,8 +311,8 @@
   function EscVozEntorno(props) {
     var T = props.T, at = props.at;
     var c1 = t('amargarse', 336), c2 = t('la vida es una', 339);
-    var b1 = mov.entra(T, c1, { dy: 20, desde: 0.2, ease: Easing.easeOutBack });
-    var b2 = mov.entra(T, c2, { dy: 20, desde: 0.2, ease: Easing.easeOutBack });
+    var b1 = mov.entra(T, c1, { dy: 20, desde: 0.2, ease: mov.suave });
+    var b2 = mov.entra(T, c2, { dy: 20, desde: 0.2, ease: mov.suave });
     return (
       <X.Marco p={props}>
         <E.Icono T={T} n="mensaje" x={420} y={620} c={at} tam={280} />
@@ -411,7 +411,7 @@
           <E.Ico n="pesa" p={1} tam={300} />
         </E.Pos>
         {['×1', '×2', '×3'].map(function (s, i) {
-          var en = mov.entra(T, cs[i], { dy: 30, desde: 0.3, ease: Easing.easeOutBack, dur: 0.5 });
+          var en = mov.entra(T, cs[i], { dy: 30, desde: 0.3, ease: mov.suave, dur: 0.5 });
           return (
             <E.Pos key={i} x={980 + i * 220} y={700 - i * 130} e={en}>
               <div style={{ fontFamily: F, fontWeight: 900, fontSize: 130 + i * 30, letterSpacing: '-0.04em', color: i === 2 ? GRN : INK }}>{s}</div>
@@ -427,7 +427,7 @@
   function EscOrden(props) {
     var T = props.T, at = props.at;
     var cO = at + 1.4;
-    var k = Easing.easeOutBack(clamp((T - cO) / 0.8, 0, 1));
+    var k = mov.suave(clamp((T - cO) / 0.8, 0, 1));
     var iconos = ['pesa', 'laptop', 'dinero', 'corazon', 'cama', 'libro'];
     var desorden = [[-14, -40], [9, 30], [-6, -10], [16, 50], [-11, -30], [7, 20]];
     return (
@@ -459,7 +459,7 @@
     var T = props.T, at = props.at, fase = props.fase;
     var cD = props.cDificil, cF = props.cFacil;
     var bloque = function (x, y, color, c, key, txt) {
-      var en = mov.entra(T, c, { dy: -40, desde: 0.2, ease: Easing.easeOutBack, dur: 0.5 });
+      var en = mov.entra(T, c, { dy: -40, desde: 0.2, ease: mov.suave, dur: 0.5 });
       return (
         <E.Pos key={key} x={x} y={y} e={en}>
           <div style={{ width: 230, height: 70, borderRadius: 14, background: color, boxShadow: L.SOMBRA_CHICA, display: 'flex', alignItems: 'center',
@@ -605,7 +605,7 @@
     return (
       <X.Marco p={props}>
         <svg width={1920} height={1080} style={{ position: 'absolute', left: 0, top: 0 }}>
-          <circle cx={360} cy={900} r={120 * mov.prog(T, at + 0.1, 0.5, Easing.easeOutBack)} fill="none" stroke={YEL} strokeWidth={14} />
+          <circle cx={360} cy={900} r={120 * mov.prog(T, at + 0.1, 0.5, mov.suave)} fill="none" stroke={YEL} strokeWidth={14} />
         </svg>
         <E.Figura T={T} x={360} y={890} c={at} tam={480} />
         <E.Flecha T={T} de={[560, 700]} a={[980, 640]} c={at + 0.5} grosor={8} color={GRY} />
@@ -662,7 +662,7 @@
   function EscPausa(props) {
     var T = props.T, at = props.at;
     var cP = props.cPausa;
-    var en = mov.entra(T, cP, { dy: 0, desde: 0.4, ease: Easing.easeOutBack, dur: 0.5 });
+    var en = mov.entra(T, cP, { dy: 0, desde: 0.4, ease: mov.suave, dur: 0.5 });
     return (
       <X.Marco p={props}>
         <E.Pos x={420} y={500} e={mov.entra(T, at - 0.1, { dy: 40 })}>
@@ -836,10 +836,10 @@
       { n: 'nube', txt: 'Lo que piensas', c: t('pensamientos', 277) },
       { fig: 'empuja', txt: 'Lo que haces', c: t('acciones', 278), check: t('acciones', 278) + 0.8 }] }, { entra: 'barrido', sale: 'latigo' }),
     tapar(282.2, 283.4),
-    dice('dichos objetivos', 281, 1.8, { marcadas: ['objetivos.'] }),
+    p.texto(282.35, 283.6, 'dichos objetivos', { marcadas: ['objetivos'] }),
     esc(284.9, 289.0, EscFuturo, { cGrande: 285.3, cFlecha: 285.7, cBombillo: t('hoy', 287) - 0.3, cTxt: t('depende', 284) + 0.4, txtFuturo: 'Depende de lo que haces hoy' },
       { entra: 'latigo', sale: 'latigo' }),
-    p.etiqueta(289.1, 291.3, 'Otra característica', { pos: [140, 230], dir: 'der', ancla: 'izq' }),
+    p.etiqueta(289.25, 291.3, 'Otra característica', { pos: [140, 230], dir: 'der', ancla: 'izq' }),
     p.mantener(291.3, 296.7),
     dice('orden excesivo', 291, 2.6, { marcadas: ['orden'] }),
     dice('milimétricamente', 296, 2.4, { marcadas: ['milimétricamente'] }, 'milimétricamente medido'),
@@ -856,7 +856,7 @@
     p.mantener(332.4, 336.5),
     dice('disfrutar la vida', 332, 2.4, { marcadas: ['disfrutar'] }),
     esc(336.5, 341.0, EscVozEntorno, {}, { entra: 'barrido', sale: 'latigo' }),
-    dice('posibilidad de ir', 342, 2.4, { marcadas: ['fácil'] }, 'la posibilidad de ir por el camino fácil'),
+    dice('personas disciplinadas', 341, 2.4, { marcadas: ['disciplinadas'] }, 'las personas disciplinadas'),
     esc(344.7, 349.7, EscCaminos, {}, { entra: 'latigo', sale: 'latigo' }),
     p.detras(t('por qué no lo hacen', 350) - 0.05, 352.3, '¿POR QUÉ?', { color: 'amarillo' }),
     tapar(353.8, 355.0, { mov: 'golpe' }),
@@ -934,7 +934,7 @@
     p.escena(t('número 2', 501) - 0.4, 507.2 + VENT.latigo, X.Paso, { n: 2, titulo: 'Elimina lo que\nno suma', marcadas: ['elimina'], n2: 'bloque',
       c: t('número 2', 501) - 0.2 }, { entra: 'barrido', sale: 'latigo' }),
     tapar(508.4, 509.6),
-    dice('ni aporte nada', 507, 2, { marcadas: ['nada'] }, 'ni aporta nada'),
+    p.texto(507.45, 509.3, 'ni aporta nada', { marcadas: ['nada'] }),
     esc(511.5, 516.5, X.Balanza, { hacia: 'der', cGira: t('dejar de', 515),
       izq: { n: 'corazon', txt: 'Lo que haces', c: 511.6, tam: 150 }, der: { n: 'celular', txt: 'Lo que dejas', c: t('también', 514), tam: 150 } },
     { entra: 'zoom', sale: 'latigo' }),
@@ -943,7 +943,7 @@
     tapar(523.2, 524.4),
     dice('la siguiente pregunta', 521, 2.2, { marcadas: ['pregunta.'] }, 'hazte esta pregunta'),
     esc(525.4, 528.9, X.Frase, { texto: '¿Me acerca\no me aleja?', marcadas: ['acerca:verde', 'aleja?:rojo'], tam: 1.5 }, { entra: 'barrido', sale: 'latigo' }),
-    p.detras(t('una sola pregunta', 528) - 0.05, 531.3, 'UNA SOLA\nPREGUNTA', { color: 'amarillo' }),
+    p.detras(529.12, 531.3, 'UNA SOLA\nPREGUNTA', { color: 'amarillo' }),
     esc(531.5, 536.9, X.Comparar, { conector: 'linea', yTit: 260, yIco: 470,
       izq: { titulo: 'TE ACERCA', color: 'verde', tam: 1.05, items: [{ texto: 'Entrenar', c: 532.0 }, { texto: 'Leer', c: 532.6 }, { texto: 'Dormir bien', c: 533.2 }], c: 531.5 },
       der: { titulo: 'TE ALEJA', color: 'rojo', tam: 1.05, items: [{ texto: 'Scroll infinito', c: 533.8 }, { texto: 'Comida chatarra', c: 534.4 }, { texto: 'Vicios', c: 535.0 }], c: 531.6 },
@@ -959,7 +959,7 @@
       { n: 'celular', c: 556.6, tacha: 556.95 }, { n: 'hamburguesa', c: 556.8, tacha: 557.5 }, { n: 'tv', c: 557.0, tacha: 558.0 }],
       rotulo: { txt: 'Deja de hacerlo', c: 558.5, y: 900 } }, { entra: 'barrido', sale: 'latigo' }),
     tapar(561.0, 564.8),
-    dice('calidad sobre cantidad', 560, 2.8, { marcadas: ['calidad'] }),
+    p.texto(561.25, 563.9, 'calidad sobre cantidad', { marcadas: ['calidad'] }),
     esc(565.3, 568.7, X.Comparar, { conector: 'flecha', yTit: 300, yIco: 600,
       izq: { titulo: 'Cantidad', color: 'gris', tam: 0.9, n: 'capas', tamIco: 300, c: 565.3 },
       der: { titulo: 'Calidad', tam: 0.9, n: 'medalla', tamIco: 300, c: 566.0 },

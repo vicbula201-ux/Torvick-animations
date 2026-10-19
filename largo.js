@@ -61,8 +61,8 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
   };
   var F = "'Inter Tight', 'Inter', 'Helvetica Neue', Arial, sans-serif";
   var F_MONO = "'IBM Plex Mono', 'Courier Prime', monospace";
-  var SOMBRA = '0 34px 80px rgba(20,17,15,0.22), 0 10px 24px rgba(20,17,15,0.14)';
-  var SOMBRA_CHICA = '0 14px 34px rgba(20,17,15,0.18), 0 4px 10px rgba(20,17,15,0.12)';
+  var SOMBRA = '0 2px 4px rgba(20,17,15,0.10), 0 22px 80px rgba(20,17,15,0.22)';
+  var SOMBRA_CHICA = '0 1px 3px rgba(20,17,15,0.10), 0 12px 36px rgba(20,17,15,0.16)';
   // texto blanco sobre la camara: sombra suave y ancha, sin contorno
   var SOMBRA_TX = '0 2px 4px rgba(0,0,0,0.30), 0 8px 40px rgba(0,0,0,0.45)';
   function col(c, def) {
@@ -90,6 +90,13 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
      arriba con desenfoque. Lo que queda en pantalla deriva muy despacio.
      ========================================================= */
 
+  // sobreimpulso leve (~4 %): solo para circulos y signos, nunca rebote de caricatura
+  function suave(u) {
+    var k = 0.9;
+    u = u - 1;
+    return u * u * ((k + 1) * u + k) + 1;
+  }
+
   // 0..1 con ease-out exponencial
   function prog(T, c, dur, ease) {
     return (ease || Easing.easeOutExpo)(clamp((T - c) / (dur || 0.6), 0, 1));
@@ -98,11 +105,11 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
   // entrada estandar. o: { dur, dy, dx, desde (escala que le falta), blur }
   function entra(T, c, o) {
     o = o || {};
-    var dur = o.dur || 0.62;
+    var dur = o.dur || 0.5;
     var p = prog(T, c, dur, o.ease);
     return {
       p: p,
-      opacity: clamp((T - c) / (dur * 0.35), 0, 1),
+      opacity: T >= c ? clamp(0.25 + (T - c) / (dur * 0.4), 0, 1) : 0,
       x: (o.dx || 0) * (1 - p),
       y: (o.dy == null ? 36 : o.dy) * (1 - p),
       escala: 1 - (o.desde == null ? 0.05 : o.desde) * (1 - p),
@@ -250,9 +257,9 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
       }, pals.map(function (pal, pi) {
         var i = k++;
         var c = props.tiempos && props.tiempos[i] != null ? props.tiempos[i] : (props.c || 0) + i * esc;
-        var dur = props.dur || 0.55;
+        var dur = props.dur || 0.45;
         var p = prog(T, c, dur);
-        var op = clamp((T - c) / (dur * 0.3), 0, 1);
+        var op = T >= c ? clamp(0.3 + (T - c) / (dur * 0.35), 0, 1) : 0;
         var fuera = salida == null ? 0 : Easing.easeInCubic(clamp((T - salida - (props.salidaEsc || 0) * i) / 0.24, 0, 1));
         var marcada = marcarTodo || marcadas.indexOf(norm(pal)) >= 0;
         var pb = marcada ? prog(T, c + 0.08, 0.45, Easing.easeOutQuart) : 0;
@@ -1204,7 +1211,7 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
       style: {
         position: 'absolute',
         inset: 0,
-        background: 'radial-gradient(ellipse 75% 70% at 50% 46%, #FFFFFF 0%, ' + PAPEL + ' 55%, ' + PAPEL_BORDE + ' 100%)'
+        background: 'radial-gradient(ellipse 78% 74% at 50% 46%, #FFFFFF 0%, ' + PAPEL + ' 50%, #DAD6CF 100%)'
       }
     }, props.puntos === false ? null : /*#__PURE__*/React.createElement("svg", {
       width: ANCHO,
@@ -1620,9 +1627,9 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
     var e = junta(entra(T, props.c, {
       dy: 0,
       desde: 0.3,
-      blur: 0,
-      dur: 0.5,
-      ease: Easing.easeOutBack
+      blur: 6,
+      dur: 0.4,
+      ease: suave
     }), sale(T, props.s));
     var p = prog(T, props.c + 0.05, 0.45, Easing.easeInOutCubic);
     var color = bien ? GRN : RED;
@@ -1995,7 +2002,7 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
     var e = sale(T, props.s);
     for (var i = 0; i < n; i++) {
       var c = props.c + (props.dur || 1) * i / n;
-      var p = prog(T, c, 0.4, Easing.easeOutBack);
+      var p = prog(T, c, 0.4, suave);
       if (p <= 0) continue;
       var enc = props.encendidos != null && i < props.encendidos && T >= (props.cEnciende || c);
       out.push(/*#__PURE__*/React.createElement("circle", {
@@ -2023,10 +2030,10 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
     var T = props.T;
     var e = junta(entra(T, props.c, {
       dy: 20,
-      desde: 0.2,
-      blur: 6,
-      dur: 0.55,
-      ease: Easing.easeOutBack
+      desde: 0.12,
+      blur: 8,
+      dur: 0.45,
+      ease: suave
     }), sale(T, props.s));
     if (!props.mudo) sonido('pop', props.c, 0.35);
     var fs = 52 * (props.tam || 1);
@@ -3798,12 +3805,17 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
     });
     // lo de encima de la camara se va antes de que entre una escena a pantalla completa
     // (si empieza dentro de una escena, es a proposito y se respeta)
+    // y si empieza cuando la escena ya tapa la camara, no sale (avisa: es un tiempo mal puesto)
     d.encima.concat(d.detras).forEach(function (b) {
       if (b.sobreEscena) return;
       d.pantallas.forEach(function (pn) {
-        var vent = pn.camara ? T_TARJETA : VENTANA[pn.entra || 'latigo'] || 0;
+        if (pn.camara) return;
+        var vent = VENTANA[pn.entra || 'latigo'] || 0;
         var corte = pn.ini - vent;
-        if (corte > b.ini && corte < b.fin) b.fin = corte;
+        if (corte > b.ini && corte < b.fin) b.fin = corte;else if (b.ini >= corte && b.ini < pn.fin) {
+          if (global.console) console.warn('texto dentro de una escena (no sale):', b.txt || b.tipo, b.ini.toFixed(2));
+          b.fin = b.ini;
+        }
       });
     });
     // dos cosas en la misma zona no se pisan: la anterior se va justo antes
@@ -4328,7 +4340,8 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
       deriva: deriva,
       hash: hash,
       norm: norm,
-      formato: formato
+      formato: formato,
+      suave: suave
     },
     E: {
       Escena: Escena,

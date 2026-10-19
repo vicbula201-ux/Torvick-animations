@@ -130,7 +130,7 @@
     var en = mov.entra(T, props.c, {
       dy: 10,
       desde: 0.4,
-      ease: Easing.easeOutBack,
+      ease: mov.suave,
       dur: 0.6
     });
     var lat = 1 + 0.06 * Math.max(0, Math.sin((T - props.c) * 7.5)) * (T > props.c + 0.4 ? 1 : 0);
@@ -508,7 +508,7 @@
     var T = props.T,
       at = props.at;
     var cG = t('convertir', 185);
-    var anillo = mov.prog(T, cG - 0.2, 0.6, Easing.easeOutBack);
+    var anillo = mov.prog(T, cG - 0.2, 0.6, mov.suave);
     return /*#__PURE__*/React.createElement(X.Marco, {
       p: props
     }, [0, 1, 2].map(function (i) {
@@ -696,7 +696,7 @@
     var pc = mov.prog(T, at - 0.1, 1.0, Easing.easeInOutCubic);
     var cFuera = t('dejar de ser', 306) + 0.4,
       cMedia = t('de la media', 307);
-    var anillo = mov.prog(T, cFuera + 0.2, 0.5, Easing.easeOutBack);
+    var anillo = mov.prog(T, cFuera + 0.2, 0.5, mov.suave);
     return /*#__PURE__*/React.createElement(X.Marco, {
       p: props
     }, /*#__PURE__*/React.createElement("svg", {
@@ -840,12 +840,12 @@
     var b1 = mov.entra(T, c1, {
       dy: 20,
       desde: 0.2,
-      ease: Easing.easeOutBack
+      ease: mov.suave
     });
     var b2 = mov.entra(T, c2, {
       dy: 20,
       desde: 0.2,
-      ease: Easing.easeOutBack
+      ease: mov.suave
     });
     return /*#__PURE__*/React.createElement(X.Marco, {
       p: props
@@ -1126,7 +1126,7 @@
       var en = mov.entra(T, cs[i], {
         dy: 30,
         desde: 0.3,
-        ease: Easing.easeOutBack,
+        ease: mov.suave,
         dur: 0.5
       });
       return /*#__PURE__*/React.createElement(E.Pos, {
@@ -1158,7 +1158,7 @@
     var T = props.T,
       at = props.at;
     var cO = at + 1.4;
-    var k = Easing.easeOutBack(clamp((T - cO) / 0.8, 0, 1));
+    var k = mov.suave(clamp((T - cO) / 0.8, 0, 1));
     var iconos = ['pesa', 'laptop', 'dinero', 'corazon', 'cama', 'libro'];
     var desorden = [[-14, -40], [9, 30], [-6, -10], [16, 50], [-11, -30], [7, 20]];
     return /*#__PURE__*/React.createElement(X.Marco, {
@@ -1238,7 +1238,7 @@
       var en = mov.entra(T, c, {
         dy: -40,
         desde: 0.2,
-        ease: Easing.easeOutBack,
+        ease: mov.suave,
         dur: 0.5
       });
       return /*#__PURE__*/React.createElement(E.Pos, {
@@ -1629,7 +1629,7 @@
     }, /*#__PURE__*/React.createElement("circle", {
       cx: 360,
       cy: 900,
-      r: 120 * mov.prog(T, at + 0.1, 0.5, Easing.easeOutBack),
+      r: 120 * mov.prog(T, at + 0.1, 0.5, mov.suave),
       fill: "none",
       stroke: YEL,
       strokeWidth: 14
@@ -1792,7 +1792,7 @@
     var en = mov.entra(T, cP, {
       dy: 0,
       desde: 0.4,
-      ease: Easing.easeOutBack,
+      ease: mov.suave,
       dur: 0.5
     });
     return /*#__PURE__*/React.createElement(X.Marco, {
@@ -2472,8 +2472,8 @@
   }, {
     entra: 'barrido',
     sale: 'latigo'
-  }), tapar(282.2, 283.4), dice('dichos objetivos', 281, 1.8, {
-    marcadas: ['objetivos.']
+  }), tapar(282.2, 283.4), p.texto(282.35, 283.6, 'dichos objetivos', {
+    marcadas: ['objetivos']
   }), esc(284.9, 289.0, EscFuturo, {
     cGrande: 285.3,
     cFlecha: 285.7,
@@ -2483,7 +2483,7 @@
   }, {
     entra: 'latigo',
     sale: 'latigo'
-  }), p.etiqueta(289.1, 291.3, 'Otra característica', {
+  }), p.etiqueta(289.25, 291.3, 'Otra característica', {
     pos: [140, 230],
     dir: 'der',
     ancla: 'izq'
@@ -2513,9 +2513,9 @@
   }), esc(336.5, 341.0, EscVozEntorno, {}, {
     entra: 'barrido',
     sale: 'latigo'
-  }), dice('posibilidad de ir', 342, 2.4, {
-    marcadas: ['fácil']
-  }, 'la posibilidad de ir por el camino fácil'), esc(344.7, 349.7, EscCaminos, {}, {
+  }), dice('personas disciplinadas', 341, 2.4, {
+    marcadas: ['disciplinadas']
+  }, 'las personas disciplinadas'), esc(344.7, 349.7, EscCaminos, {}, {
     entra: 'latigo',
     sale: 'latigo'
   }), p.detras(t('por qué no lo hacen', 350) - 0.05, 352.3, '¿POR QUÉ?', {
@@ -2812,9 +2812,9 @@
   }, {
     entra: 'barrido',
     sale: 'latigo'
-  }), tapar(508.4, 509.6), dice('ni aporte nada', 507, 2, {
+  }), tapar(508.4, 509.6), p.texto(507.45, 509.3, 'ni aporta nada', {
     marcadas: ['nada']
-  }, 'ni aporta nada'), esc(511.5, 516.5, X.Balanza, {
+  }), esc(511.5, 516.5, X.Balanza, {
     hacia: 'der',
     cGira: t('dejar de', 515),
     izq: {
@@ -2843,7 +2843,7 @@
   }, {
     entra: 'barrido',
     sale: 'latigo'
-  }), p.detras(t('una sola pregunta', 528) - 0.05, 531.3, 'UNA SOLA\nPREGUNTA', {
+  }), p.detras(529.12, 531.3, 'UNA SOLA\nPREGUNTA', {
     color: 'amarillo'
   }), esc(531.5, 536.9, X.Comparar, {
     conector: 'linea',
@@ -2925,7 +2925,7 @@
   }, {
     entra: 'barrido',
     sale: 'latigo'
-  }), tapar(561.0, 564.8), dice('calidad sobre cantidad', 560, 2.8, {
+  }), tapar(561.0, 564.8), p.texto(561.25, 563.9, 'calidad sobre cantidad', {
     marcadas: ['calidad']
   }), esc(565.3, 568.7, X.Comparar, {
     conector: 'flecha',

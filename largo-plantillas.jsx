@@ -271,7 +271,7 @@
     var cI = ancla(izq.c != null ? izq.c : f(0.05), props.at, 0.3);
     var cD = der.c != null ? der.c : f(0.3);
     var cG = props.cGira != null ? props.cGira : f(0.55);
-    var giro = (props.hacia === 'der' ? 1 : -1) * 13 * mov.prog(T, cG, 1.0, Easing.easeOutBack);
+    var giro = (props.hacia === 'der' ? 1 : -1) * 13 * mov.prog(T, cG, 0.9, Easing.easeInOutCubic);
     var cx = 960, cy = 330, brazo = 470;
     var rad = giro * Math.PI / 180;
     var pI = [cx - brazo * Math.cos(rad), cy - brazo * Math.sin(rad)];
@@ -386,7 +386,7 @@
     var cMas = props.cMas != null ? props.cMas : f(0.45);
     var x = props.dosPilas === false ? 960 : 620;
     var bloque = function (cx, y, i, c, color, w) {
-      var p = mov.prog(T, c, 0.55, Easing.easeOutBack);
+      var p = mov.prog(T, c, 0.55, mov.suave);
       if (p <= 0) return null;
       return <div key={cx + ':' + i} style={{ position: 'absolute', left: cx - w / 2, top: y - 34, width: w, height: 68, borderRadius: 14,
         background: color, transform: 'translateY(' + ((1 - p) * -60).toFixed(1) + 'px) scaleX(' + (0.6 + 0.4 * p).toFixed(3) + ')',
@@ -625,7 +625,7 @@
       var d = dest[i];
       var cI = c0 + 0.35 * (i / (cols * filas));
       var activo = d && T >= d.c;
-      var pa = d ? mov.prog(T, d.c, 0.5, Easing.easeOutBack) : 0;
+      var pa = d ? mov.prog(T, d.c, 0.5, mov.suave) : 0;
       out.push(
         <React.Fragment key={i}>
           {d && pa > 0 ? (
@@ -727,7 +727,7 @@
           {Array.apply(null, Array(n)).map(function (_, i) {
             var c = cLlena + durLlena * i / n;
             var lleno = saltar.indexOf(i) < 0 && T >= c;
-            var pp = lleno ? mov.prog(T, c, 0.3, Easing.easeOutBack) : 0;
+            var pp = lleno ? mov.prog(T, c, 0.3, mov.suave) : 0;
             return (
               <div key={i} style={{ position: 'absolute', left: x0 + (i % cols) * (lado + sep), top: y0 + Math.floor(i / cols) * (lado + sep),
                 width: lado, height: lado, borderRadius: 22, background: BLANCO, boxShadow: '0 6px 18px rgba(20,17,15,0.10)', overflow: 'hidden' }}>
