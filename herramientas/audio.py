@@ -5,8 +5,15 @@ audio.py — arma la pista de un reel: musica original + efectos en los momentos
     python3 herramientas/audio.py --dur 32 --cues cues.json --out pista.wav [--sin-musica]
                                   [--musica mi-tema.wav] [--bpm 118] [--semilla 3]
 
-cues.json = [{"tipo": "error"|"bien"|"paso"|"marca"|"golpe", "t": segundos}, ...]
+cues.json = [{"tipo": "error"|"bien"|"paso"|"marca"|"golpe", "t": segundos, "g": ganancia}, ...]
 (lo escribe herramientas/grabar.js a partir de window.REEL.cues()).
+
+Para los videos largos (herramientas/grabar-largo.js):
+    --base voz.wav        la voz del video va debajo de todo, a volumen original
+    --nivel-efectos -6    dB de los efectos (0 = como en los reels)
+    tipos extra: pop, whoosh (cruza de izquierda a derecha, como la banda amarilla),
+    ding, click, campana, subida
+Con --base y musica, la musica baja sola cuando hay voz.
 
 Todo se sintetiza aca, sin samples ajenos: la musica es original y libre de derechos.
 Si se pasa --musica, usa ese archivo (wav) como fondo en vez del tema sintetizado.
@@ -239,9 +246,112 @@ def fx_golpe(rng):
     return k * 0.7
 
 
+def fx_pop():
+    """'bloop' corto: un tono que cae rapido, para stickers y textos"""
+    n = seg(0.12)
+    t = np.arange(n) / SR
+    f = 320 + 700 * np.exp(-t / 0.025)
+    x = np.sin(2 * np.pi * np.cumsum(f) / SR) * decae(n, 0.045)
+    x[:seg(0.003)] *= np.linspace(0, 1, seg(0.003))
+    return x / (np.abs(x).max() + 1e-9) * 0.7
+
+
+def fx_whoosh(rng):
+    """aire que cruza de izquierda a derecha (estereo): la banda amarilla"""
+    n = seg(0.5)
+    x = pasaaltos(pasabajos(rng.standard_normal(n), 4200), 500)
+    e = np.sin(np.pi * np.linspace(0, 1, n)) ** 2
+    x = x * e / (np.abs(x * e).max() + 1e-9) * 0.5
+    pan = np.linspace(-0.8, 0.8, n)
+    izq, der = np.sqrt(0.5 * (1 - pan)), np.sqrt(0.5 * (1 + pan))
+    return np.stack([x * izq, x * der], axis=1) * 1.414
+
+
+def fx_click():
+    n = seg(0.03)
+    t = np.arange(n) / SR
+    x = np.sin(2 * np.pi * 2300 * t) * decae(n, 0.006)
+    return x / (np.abs(x).max() + 1e-9) * 0.6
+
+
+def fx_campana():
+    """dos golpes de campanita (suscribirse)"""
+    out = np.zeros(seg(1.1))
+    for j, f in enumerate((1318.5, 1760.0)):
+        n = seg(0.9)
+        t = np.arange(n) / SR
+        x = (np.sin(2 * np.pi * f * t) * decae(n, 0.3) + 0.4 * np.sin(2 * np.pi * f * 2.0 * t) * decae(n, 0.12))
+        i = seg(j * 0.13)
+        out[i:i + n] += x[:len(out) - i]
+    return out / (np.abs(out).max() + 1e-9) * 0.55
+
+
+def fx_subida(rng):
+    """subida de tension: ruido y tono que suben"""
+    n = seg(1.1)
+    t = np.arange(n) / SR
+    f = 260 * (4 ** (t / t[-1]))
+    x = np.sin(2 * np.pi * np.cumsum(f) / SR) * 0.4 + pasaaltos(rng.standard_normal(n), 2000) * 0.25
+    x *= np.linspace(0, 1, n) ** 2
+    x[-seg(0.05):] *= np.linspace(1, 0, seg(0.05))
+    return x / (np.abs(x).max() + 1e-9) * 0.5
+
+
+def poner2(buf, x, t, g=1.0):
+    """como poner, pero x ya es estereo"""
+    i = seg(t)
+    if i >= buf.shape[0] or i + len(x) <= 0:
+        return
+    j0 = max(0, -i)
+    x = x[j0:]
+    i = max(0, i)
+    n = min(len(x), buf.shape[0] - i)
+    buf[i:i + n] += x[:n] * g
+
+
+def normalizar_voz(voz, objetivo=-19.0):
+    """lleva la voz a ~-19 dBFS RMS medido solo donde se habla"""
+    mono = np.abs(voz).mean(axis=1)
+    w = seg(0.05)
+    n = len(mono) // w
+    rms = np.sqrt(np.mean(mono[:n * w].reshape(n, w) ** 2, axis=1) + 1e-12)
+    hablado = rms[rms > np.percentile(rms, 50)]
+    actual = 20 * np.log10(np.sqrt(np.mean(hablado ** 2)) + 1e-12)
+    return voz * 10 ** ((objetivo - actual) / 20)
+
+
+def limitar(x, techo=0.92):
+    """limitador de picos: baja la ganancia rapido y la devuelve despacio"""
+    w = seg(0.005)
+    n = len(x) // w + 1
+    pad = np.zeros((n * w, 2))
+    pad[:len(x)] = x
+    picos = np.abs(pad).reshape(n, w, 2).max(axis=(1, 2))
+    g = np.minimum(1.0, techo / (picos + 1e-9))
+    # mira hacia adelante un bloque y suelta en ~120 ms
+    g = np.minimum(g, np.concatenate([g[1:], [1.0]]))
+    suelta = np.exp(-1 / (0.12 / 0.005))
+    for i in range(1, n):
+        g[i] = min(g[i], g[i - 1] * suelta + (1 - suelta))
+    gm = np.repeat(g, w)[:len(x)]
+    return x * gm[:, None]
+
+
+def envolvente_voz(voz):
+    """0..1 segun cuanto se habla (ventanas de 50 ms, suavizado)"""
+    mono = np.abs(voz).mean(axis=1)
+    w = seg(0.05)
+    n = len(mono) // w
+    rms = np.sqrt(np.mean(mono[:n * w].reshape(n, w) ** 2, axis=1) + 1e-12)
+    ref = np.percentile(rms, 90) + 1e-9
+    k = np.clip(rms / ref, 0, 1)
+    k = np.convolve(k, np.ones(8) / 8, mode='same')
+    return np.interp(np.arange(len(mono)), np.arange(n) * w + w / 2, k)
+
+
 # ---------------------------------------------------------------- mezcla
 
-def leer_wav(ruta, dur):
+def leer_wav(ruta, dur, fundido=True):
     w = wave.open(ruta)
     sr, ch, n = w.getframerate(), w.getnchannels(), w.getnframes()
     x = np.frombuffer(w.readframes(n), dtype=np.int16).astype(float) / 32768
@@ -253,8 +363,9 @@ def leer_wav(ruta, dur):
         x = np.stack([np.interp(idx, np.arange(len(x)), x[:, c]) for c in range(2)], axis=1)
     reps = int(np.ceil(seg(dur) / len(x)))
     x = np.tile(x, (reps, 1))[:seg(dur)]
-    fo = seg(1.2)
-    x[-fo:] *= np.linspace(1, 0, fo)[:, None]
+    if fundido:
+        fo = seg(1.2)
+        x[-fo:] *= np.linspace(1, 0, fo)[:, None]
     return x
 
 
@@ -268,27 +379,51 @@ def main():
     ap.add_argument('--bpm', type=float, default=118)
     ap.add_argument('--semilla', type=int, default=3)
     ap.add_argument('--nivel-musica', type=float, default=-21.0, help='dB RMS del fondo')
+    ap.add_argument('--base', default=None, help='wav de la voz (videos largos): va a volumen original')
+    ap.add_argument('--nivel-efectos', type=float, default=0.0, help='dB de los efectos')
     a = ap.parse_args()
 
     rng = np.random.default_rng(a.semilla)
     total = np.zeros((seg(a.dur), 2))
+    voz = normalizar_voz(leer_wav(a.base, a.dur, fundido=False)) if a.base else None
 
     if not a.sin_musica:
         fondo = leer_wav(a.musica, a.dur) if a.musica else musica(a.dur, a.bpm, a.semilla)
         rms = np.sqrt(np.mean(fondo ** 2)) + 1e-9
         fondo *= 10 ** (a.nivel_musica / 20) / rms
-        total += fondo[:len(total)]
+        fondo = fondo[:len(total)]
+        if voz is not None:
+            # la musica baja hasta -10 dB mientras se habla
+            k = envolvente_voz(voz)[:len(fondo)]
+            fondo *= (1 - 0.68 * k)[:, None]
+        total[:len(fondo)] += fondo
 
-    efectos = {'error': fx_error(), 'bien': fx_bien(), 'paso': fx_paso(rng),
-               'marca': fx_marca(), 'golpe': fx_golpe(rng)}
-    ganancia = {'error': 0.85, 'bien': 0.75, 'paso': 0.5, 'marca': 0.7, 'golpe': 0.6}
+    efectos = {'error': fx_error(), 'bien': fx_bien(), 'ding': fx_bien(), 'paso': fx_paso(rng),
+               'marca': fx_marca(), 'golpe': fx_golpe(rng), 'pop': fx_pop(), 'whoosh': fx_whoosh(rng),
+               'click': fx_click(), 'campana': fx_campana(), 'subida': fx_subida(rng)}
+    ganancia = {'error': 0.85, 'bien': 0.75, 'ding': 0.6, 'paso': 0.5, 'marca': 0.7, 'golpe': 0.6,
+                'pop': 0.55, 'whoosh': 0.7, 'click': 0.6, 'campana': 0.6, 'subida': 0.5}
+    if voz is not None:
+        # en los largos los efectos acompanan a la voz: quedan unos dB por debajo
+        ganancia.update({'error': 0.3, 'golpe': 0.35, 'ding': 0.45, 'bien': 0.45, 'pop': 0.6, 'whoosh': 0.8,
+                         'click': 0.5, 'campana': 0.45, 'subida': 0.4, 'marca': 0.5})
+    nivel = 10 ** (a.nivel_efectos / 20)
     with open(a.cues) as fh:
         cues = json.load(fh)
     for c in cues:
         x = efectos.get(c['tipo'])
-        if x is not None:
-            poner(total, x, max(0.0, float(c['t'])), ganancia[c['tipo']])
+        if x is None:
+            continue
+        g = ganancia[c['tipo']] * float(c.get('g', 1)) * nivel
+        if x.ndim == 2:
+            poner2(total, x, max(0.0, float(c['t'])), g)
+        else:
+            poner(total, x, max(0.0, float(c['t'])), g)
+    if voz is not None:
+        total += voz[:len(total)]
 
+    if voz is not None:
+        total = limitar(total)
     pico = np.abs(total).max()
     if pico > 0.89:
         total *= 0.89 / pico

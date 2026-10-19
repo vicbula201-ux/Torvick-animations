@@ -32,11 +32,19 @@ proteinas.jsx, hierro.jsx, grasas.jsx, carbohidratos.jsx,
 minerales.jsx, objetivos.jsx     reels cortos con Tor (nutrición y temas de entreno)
 identidad.jsx/.html  foto de perfil y portadas de destacadas (PNG en identidad/)
 face-pull.html    redirige a reels.html#face-pull
+largo.html        videos largos de YouTube (16:9): el video con cortes + capas encima
+largo.jsx         window.LARGOS: cámara, escenas, textos, stickers, CTA, sonidos
+largo-plantillas.jsx  LARGOS.X: escenas armadas con datos para los largos
+largos/<id>/      un video largo: plan.jsx + transcripcion.* (+ media/, fuera de git)
+largos/stickers.js    Fluent Emoji usados por los planes (generado)
+LARGOS.md         guía de estilo y flujo de los videos largos
 compilar.js       regenera los .js desde los .jsx
 prueba-piezas.html  verificación: motor + las 21 piezas + las piezas de B
 herramientas/     grabar.js (exporta MP4 con música y efectos), audio.py
-                  (sintetiza la música y los efectos) e imagenes.js (exporta
-                  los PNG de identidad.html); no son parte de la app
+                  (sintetiza la música y los efectos), imagenes.js (exporta
+                  los PNG de identidad.html) y las de los largos: transcribir.py,
+                  stickers.js, revisar-largo.js, grabar-largo.js, tramos.py;
+                  no son parte de la app
 ```
 
 **Los .jsx son la fuente; los .js son generados.** `index.html` carga
@@ -353,6 +361,39 @@ función `(g) => <g>…</g>`: `g` trae las articulaciones en coordenadas del
 viewBox, así las flechas, guías y mancuernas siguen al cuerpo. Músculos:
 `musc` amarillo (principal), `muscGris` gris (secundario), `muscRojo` rojo
 (error) en `B.Perfil` y `B.Frente`.
+
+## Videos largos de YouTube — `largo.html`
+
+Los videos educativos de 8 a 13 minutos (masa muscular, creatina,
+disciplina, concentración…). El autor manda el video **con sus cortes
+finales**; el sistema pone encima textos, stickers, escenas y zooms
+sincronizados con la voz. Todo está en **`LARGOS.md`**: el estilo, el flujo
+semanal y la referencia del plan. Lo esencial:
+
+- La voz manda el tiempo: `T` es el segundo del video, no una duración de
+  autor. Los tiempos del plan se sacan de la transcripción con
+  `t = LARGOS.buscador(id)` → `t('frase', desde)`. Dentro de una escena sigue
+  valiendo `f(fracción)` o los tiempos de `t()`; nunca segundos inventados.
+- Flujo: `herramientas/transcribir.py` → `largos/<id>/plan.jsx` →
+  `node compilar.js && node herramientas/stickers.js` →
+  `node herramientas/revisar-largo.js <id>` → `largo.html#<id>` →
+  `node herramientas/grabar-largo.js <id>` (MP4 + .srt en `videos/`).
+- Paleta: la de cinco + blanco para todo lo dibujado; el color extra lo ponen
+  los **stickers** (Fluent Emoji, MIT, troquelados con borde blanco y contorno
+  de tinta). En los largos sí hay emojis (pedido del autor); en el generador y
+  en los reels siguen prohibidos.
+- Textos clave: Barlow Condensed 900 itálica con contorno y sombra dura,
+  amarillo = idea clave, verde = correcto, rojo = error, blanco = neutro.
+  Las 2 reglas de oro valen igual: todo entra con golpe/pop y todo respira.
+- Firma: el barrido amarillo entre cámara y escena (alternar con empuje,
+  pop y corte); tarjetas de capítulo negras con número en caja amarilla.
+- La cámara tiene que estar en pantalla más de la mitad del tiempo: las
+  escenas explican, pero el que conecta es el presentador.
+- `largos/<id>/media/` no va a git (videos pesados); sí van el plan y la
+  transcripción. Los `.js` de `largos/` también se generan con `compilar.js`.
+- `largos/disciplina/` es la reedición del video ya publicado (sin crudo):
+  tapa los insertos viejos (`fuente-tramos.json`, `p.mantener`) y esconde las
+  placas viejas con primeros planos. Para videos nuevos no hace falta.
 
 ## Verificación
 

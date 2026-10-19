@@ -20,6 +20,7 @@ const path = require('path');
 
 const URL_BABEL = 'https://cdn.jsdelivr.net/npm/@babel/standalone@7.26.4/babel.min.js';
 // orden de carga: motor -> primitivas -> cuerpo -> piezas extra -> marca -> reel -> videos
+// (los videos largos: motor -> primitivas -> marca -> largos/stickers.js -> largo -> largos/<id>/)
 const FUENTES = [
   'primitivas.jsx', 'app.jsx',
   'cuerpo.jsx', 'perfil.jsx', 'frente.jsx', 'equipo.jsx', 'tor.jsx',
@@ -27,8 +28,21 @@ const FUENTES = [
   'face-pull.jsx', 'sentadilla-sumo.jsx', 'elevacion-piernas.jsx', 'press-banca.jsx', 'dominadas.jsx',
   'silla-extensora.jsx', 'fondos.jsx', 'flexiones.jsx', 'remo-t.jsx', 'encogimientos.jsx',
   'proteinas.jsx', 'curl-barra.jsx', 'fondos-banco.jsx', 'pantorrilla.jsx', 'jalon.jsx',
-  'hierro.jsx', 'grasas.jsx', 'carbohidratos.jsx', 'minerales.jsx', 'objetivos.jsx'
+  'hierro.jsx', 'grasas.jsx', 'carbohidratos.jsx', 'minerales.jsx', 'objetivos.jsx',
+  'largo.jsx', 'largo-plantillas.jsx'
 ];
+
+// videos largos: cada largos/<id>/*.jsx se compila solo, sin anotarlo aca
+function fuentesLargos() {
+  if (!fs.existsSync('largos')) return [];
+  const out = [];
+  for (const d of fs.readdirSync('largos')) {
+    const dir = path.join('largos', d);
+    if (!fs.statSync(dir).isDirectory()) continue;
+    for (const f of fs.readdirSync(dir)) if (f.endsWith('.jsx')) out.push(path.join(dir, f));
+  }
+  return out.sort();
+}
 
 async function traerBabel() {
   const cache = path.join(os.tmpdir(), 'babel-standalone-7.26.4.js');
@@ -45,7 +59,7 @@ async function traerBabel() {
 (async () => {
   const Babel = await traerBabel();
   const pedidos = process.argv.slice(2);
-  const lista = pedidos.length ? pedidos : FUENTES.filter((f) => fs.existsSync(f));
+  const lista = pedidos.length ? pedidos : FUENTES.filter((f) => fs.existsSync(f)).concat(fuentesLargos());
   for (const fuente of lista) {
     const destino = fuente.replace(/\.jsx$/, '.js');
     const src = fs.readFileSync(fuente, 'utf8');
