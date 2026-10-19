@@ -4,16 +4,24 @@
        node herramientas/grabar-largo.js <id> [opciones]
 
      --salida <carpeta>   por defecto ./videos
+     --fuente <video>     el master en 4K (o el que sea) en vez del video del plan;
+                          tiene que ser el MISMO corte: el plan se hizo con el liviano
+     --4k                 exporta 3840x2160 (los graficos se dibujan al doble)
      --desde <s> --hasta <s>   solo un tramo (para revisar)
      --cuadros 12.5,40,61 solo esas fotos (PNG), sin video
-     --trabajos <n>       paginas en paralelo (por defecto 3)
-     --crf <n>            calidad x264 (por defecto 19; menos = mejor)
+     --trabajos <n>       paginas en paralelo (por defecto: nucleos - 1, hasta 6)
+     --crf <n>            calidad x264 (por defecto 18; menos = mejor)
+     --preset <p>         preset de x264 (por defecto fast)
      --musica             agrega la musica sintetizada debajo de la voz
      --musica-wav <wav>   o una musica propia
      --nivel-efectos <dB> volumen de los efectos (por defecto -6)
 
    Por cada cuadro: lee el cuadro del video (ffmpeg), se lo pasa a la pagina en
-   modo render (#<id>/render), mueve T y saca la foto del lienzo de 1920x1080.
+   modo render (#<id>/render), mueve T y saca la foto del lienzo (1920x1080, o
+   3840x2160 con --4k). Los cuadros en que no hay nada encima de la camara pasan
+   directo, sin navegador (mas rapido y sin perder calidad). Si el plan pone
+   textos detras de la persona (p.detras), antes calcula las mascaras con
+   herramientas/recortar.py.
    Al final une los tramos, mezcla la voz del video con los efectos que marcan
    los beats (herramientas/audio.py) y deja:
      <id>.mp4        el video editado
@@ -53,8 +61,8 @@ function opciones(argv) {
 const raiz = path.resolve(__dirname, '..');
 const FPS = 30;
 
-async function abrirPagina(browser, id) {
-  const p = await browser.newPage({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 1 });
+async function abrirPagina(browser, id, escala) {
+  const p = await browser.newPage({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: escala || 1 });
   p.on('pageerror', (e) => console.log('error en la pagina:', e.message));
   p.on('console', (m) => { if (m.type() === 'warning' || m.type() === 'error') console.log('pagina:', m.text()); });
   const vendor = process.env.TORVICK_VENDOR;
@@ -81,10 +89,8 @@ async function abrirPagina(browser, id) {
     actual = buf;
     await p.evaluate((u) => window.LARGO.cuadro(u), 'http://cuadro.local/' + (n++) + '.jpg');
   };
-  p.ver = async (t) => {
-    await p.evaluate((t) => window.LARGO.seek(t), t);
-    await p.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
-  };
+  // mueve T y espera a que todo lo que se dibuja (imagenes, mascaras) este listo
+  p.ver = async (t) => { await p.evaluate((t) => window.LARGO.seek(t), t); };
   return p;
 }
 
@@ -163,17 +169,33 @@ function leerTranscripcion(id) {
   fs.mkdirSync(salida, { recursive: true });
   const { chromium } = cargarPlaywright();
   const browser = await chromium.launch();
-  const p0 = await abrirPagina(browser, id);
+  const escala = o['4k'] ? 2 : 1;
+  const W = 1920 * escala, H = 1080 * escala;
+  const p0 = await abrirPagina(browser, id, escala);
   const info = await p0.evaluate(() => ({ total: window.LARGO.total, video: window.LARGO.video }));
-  const fuente = path.join(raiz, info.video);
+  const fuente = o.fuente ? path.resolve(String(o.fuente)) : path.join(raiz, info.video);
   if (!fs.existsSync(fuente)) throw new Error('no encuentro el video: ' + fuente);
+  // si la fuente es mas chica que la salida, un poco de nitidez despues de agrandarla
+  const altoFuente = Number(execFileSync('ffprobe', ['-v', 'error', '-select_streams', 'v:0', '-show_entries', 'stream=height',
+    '-of', 'csv=p=0', fuente]).toString().trim()) || H;
+  const escalar = 'scale=' + W + ':' + H + ':flags=lanczos' + (altoFuente < H * 0.95 ? ',unsharp=5:5:0.6:5:5:0' : '');
+  if (altoFuente < H * 0.95) console.log('ojo: la fuente es de ' + altoFuente + 'p y la salida de ' + H + 'p (se agranda)');
+
+  // ---------- mascaras para los textos detras de la persona ----------
+  const recorte = await p0.evaluate(() => window.LARGO.tramos().recorte || []);
+  if (recorte.length) {
+    console.log('recortando a la persona en', recorte.length, 'tramos…');
+    execFileSync('python3', [path.join(raiz, 'herramientas', 'recortar.py'), fuente, '--tramos',
+      recorte.map((r) => r[0].toFixed(2) + '-' + r[1].toFixed(2)).join(','),
+      '--out', path.join(raiz, 'largos', id, 'media', 'recorte')], { stdio: 'inherit' });
+  }
 
   // ---------- fotos sueltas ----------
   if (o.cuadros) {
     const ts = String(o.cuadros).split(',').map(Number);
     for (const t of ts) {
       const jpg = execFileSync('ffmpeg', ['-v', 'error', '-ss', String(t), '-i', fuente, '-frames:v', '1',
-        '-vf', 'scale=1920:1080:flags=lanczos', '-f', 'image2pipe', '-c:v', 'mjpeg', '-q:v', '2', '-'], { maxBuffer: 1 << 26 });
+        '-vf', escalar, '-f', 'image2pipe', '-c:v', 'mjpeg', '-q:v', '2', '-'], { maxBuffer: 1 << 28 });
       await p0.cuadro(jpg);
       await p0.ver(t);
       const dest = path.join(salida, id + '-' + t.toFixed(2) + '.png');
@@ -187,13 +209,18 @@ function leerTranscripcion(id) {
   // ---------- efectos ----------
   await p0.evaluate(() => window.LARGO.recolectar());
   const cues = await p0.evaluate(() => window.LARGO.cues());
-  await p0.close();
-
   const desde = Number(o.desde || 0);
   const hasta = Math.min(Number(o.hasta || info.total), info.total);
   const nTot = Math.floor((hasta - desde) * FPS);
-  const trabajos = Math.max(1, Number(o.trabajos || 3));
-  const crf = String(o.crf || 19);
+  // '1' = cuadro con algo encima (pasa por el navegador) · '0' = camara limpia (pasa directo)
+  const marcas = await p0.evaluate(([a, n, fps]) => window.LARGO.ocupados(a, n, fps), [desde, nTot, FPS]);
+  await p0.close();
+  const directos = marcas.split('').filter((c) => c === '0').length;
+  console.log('cuadros:', nTot, '·', directos, 'pasan directo (' + Math.round(100 * directos / Math.max(1, nTot)) + ' %)');
+
+  const trabajos = Math.max(1, Number(o.trabajos || Math.min(6, Math.max(1, os.cpus().length - 1))));
+  const crf = String(o.crf || 18);
+  const preset = String(o.preset || 'fast');
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'largo-' + id + '-'));
   const por = Math.ceil(nTot / trabajos);
   const t0 = Date.now();
@@ -202,21 +229,24 @@ function leerTranscripcion(id) {
   const tramo = async (k) => {
     const i0 = k * por, i1 = Math.min(nTot, (k + 1) * por);
     if (i1 <= i0) return null;
-    const p = await abrirPagina(browser, id);
+    const p = await abrirPagina(browser, id, escala);
     const a = desde + i0 / FPS;
     const lector = lectorCuadros(['-v', 'error', '-ss', a.toFixed(4), '-i', fuente, '-frames:v', String(i1 - i0),
-      '-vf', 'fps=' + FPS + ',scale=1920:1080:flags=bicubic', '-f', 'image2pipe', '-c:v', 'mjpeg', '-q:v', '3', '-']);
+      '-vf', 'fps=' + FPS + ',' + escalar, '-f', 'image2pipe', '-c:v', 'mjpeg', '-q:v', '2', '-']);
     const seg = path.join(tmp, 'tramo-' + String(k).padStart(2, '0') + '.mp4');
     const enc = spawn('ffmpeg', ['-y', '-v', 'error', '-f', 'image2pipe', '-framerate', String(FPS), '-c:v', 'mjpeg', '-i', '-',
-      '-c:v', 'libx264', '-preset', 'veryfast', '-crf', crf, '-pix_fmt', 'yuv420p', '-r', String(FPS), seg],
+      '-c:v', 'libx264', '-preset', preset, '-crf', crf, '-pix_fmt', 'yuv420p', '-r', String(FPS), seg],
     { stdio: ['pipe', 'inherit', 'inherit'] });
     let ultimo = null;
     for (let i = i0; i < i1; i++) {
       const c = await lector.siguiente();
       if (c) ultimo = c;
-      if (ultimo) await p.cuadro(ultimo);
-      await p.ver(desde + i / FPS);
-      const foto = await p.screenshot({ type: 'jpeg', quality: 92, clip: { x: 0, y: 0, width: 1920, height: 1080 } });
+      let foto = ultimo;
+      if (marcas[i] !== '0' || !ultimo) {
+        if (ultimo) await p.cuadro(ultimo);
+        await p.ver(desde + i / FPS);
+        foto = await p.screenshot({ type: 'jpeg', quality: 95, clip: { x: 0, y: 0, width: 1920, height: 1080 } });
+      }
       if (!enc.stdin.write(foto)) await new Promise((r) => enc.stdin.once('drain', r));
       hechos++;
       if (hechos % 300 === 0) {

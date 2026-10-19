@@ -1,119 +1,142 @@
 # Videos largos de YouTube — estilo y flujo
 
-Los videos educativos largos (8 a 13 min, 16:9) se editan solos a partir del
+Los videos educativos largos (10 a 13 min, 16:9) se editan solos a partir del
 video con los cortes finales: se transcribe la voz, se escribe un **plan**
 (qué aparece y cuándo, anclado a las palabras que se dicen), se revisa y se
 graba. Nada de línea de tiempo a mano.
 
 ```
 largo.html            vista previa: el video corre y encima se ven las capas (doble clic)
-largo.jsx             el motor: cámara, escenas, textos, stickers, CTA, sonidos
-largo-plantillas.jsx  LARGOS.X: escenas armadas con datos (Fila, Palabra, Vs, ...)
-largos/stickers.js    los emojis que usan los planes (generado)
+largo.jsx             el motor: cámara, texto detrás de la persona, escenas, textos, tarjetas, CTA, sonidos
+largo-iconos.jsx      LARGOS.I: los íconos de línea (diana, pesa, cerebro, batería…)
+largo-plantillas.jsx  LARGOS.X: escenas armadas con datos (Frase, Barras, Comparar, Camino…)
+prueba-largos.html    todos los íconos y las poses del monigote (doble clic)
+largos/perfil.jpg     la foto de perfil del botón de suscripción
 largos/<id>/
   media/fuente.mp4    el video con los cortes finales (no va a git)
+  media/recorte/      máscaras de la persona para los textos detrás (generadas, no van a git)
   transcripcion.*     .json/.js/.txt con el tiempo de cada palabra (generado)
   plan.jsx            el plan de edición de ese video
 herramientas/
   transcribir.py      voz -> palabras con tiempo (parakeet + whisper, sin internet)
-  stickers.js         arma largos/stickers.js con los emojis usados
+  recortar.py         separa a la persona del fondo (Robust Video Matting) para p.detras
   revisar-largo.js    revisa el plan antes de grabar
-  grabar-largo.js     graba el MP4 final + subtítulos .srt
+  grabar-largo.js     graba el MP4 final (1080p o 4K) + subtítulos .srt
   tramos.py           solo para reeditar un video que ya traía edición
   audio.py            mezcla voz + efectos (+ música opcional)
 ```
 
 ## Flujo semanal
 
-1. Grabar y cortar (los cortes son del autor). Exportar 1080p o 4K, 30 fps.
-   Encuadre con aire arriba y a los costados: los zooms recortan sin perder la
-   cara. **Sin textos ni música quemados**: eso lo pone el sistema. Los clips
-   propios (gimnasio, b-roll) van dentro del corte; las capturas de estudios y
-   fotos van como archivos sueltos en `media/` y se ponen con `p.imagen`.
-2. Copiar el video a `largos/<id>/media/fuente.mp4`.
+1. **Grabar y cortar** (los cortes son del autor). Exportar el **master** en
+   4K, 30 fps, sin textos ni música quemados. Encuadre con aire a los
+   costados: los titulares van al lado de la cara. Los clips propios
+   (gimnasio, b-roll) van dentro del corte; capturas de estudios y fotos, como
+   archivos sueltos en `media/` (se ponen con `p.imagen` o `p.paper`).
+2. **Mandar un liviano para planificar**: el mismo corte comprimido (720p o
+   1080p, ~30 MB) más el guion con notas si hay algo puntual ("en
+   'pestañas' va la captura del estudio"). Con eso se transcribe y se escribe
+   el plan: los tiempos son los mismos que en el master porque el corte es
+   el mismo.
 3. `python3 herramientas/transcribir.py largos/<id>/media/fuente.mp4 --out largos/<id>/transcripcion.json`
-   (la primera vez baja los modelos, ver la cabecera del script). Revisar el
-   `.txt`: si un nombre propio quedó mal, corregir el `.json` y correr otra vez
-   con `--solo-js`.
-4. Escribir `largos/<id>/plan.jsx` (ver abajo). Agregar
-   `<script src="largos/<id>/transcripcion.js">` y `<script src="largos/<id>/plan.js">`
+4. Escribir `largos/<id>/plan.jsx` (receta abajo) y sumar sus dos `<script>`
    en `largo.html`.
-5. `node compilar.js && node herramientas/stickers.js && node herramientas/revisar-largo.js <id>`
-6. Mirar `largo.html#<id>` (el video manda el tiempo; la barra marca en
-   amarillo las escenas y en rojo los capítulos). Fotos sueltas para revisar:
+5. `node compilar.js && node herramientas/revisar-largo.js <id>`
+6. Mirar `largo.html#<id>` o fotos sueltas:
    `node herramientas/grabar-largo.js <id> --cuadros 12.5,40,61`
-7. `node herramientas/grabar-largo.js <id>` → `videos/<id>.mp4` + `videos/<id>.srt`
-   (subir el .srt a YouTube como subtítulos). Con `--musica` agrega música
-   original debajo de la voz (baja sola cuando se habla); `--musica-wav tema.wav`
-   usa otra.
+7. **Exportar en 4K con el master**:
+   `node herramientas/grabar-largo.js <id> --fuente ruta/al/master.mp4 --4k`
+   → `videos/<id>.mp4` (3840×2160) + `videos/<id>.srt`. Los gráficos se
+   dibujan al doble de resolución y la cámara sale del master sin pasar por el
+   comprimido. Los tramos con la cámara limpia pasan directo, sin navegador.
+
+### Entregas en 4K (el video pesado)
+
+El adjunto de Claude Code obliga a comprimir, y eso es lo que borroneaba el
+video de disciplina (llegó en 1280×720). Dos caminos:
+
+- **Liviano + render en tu PC (recomendado).** Mandas el liviano para
+  planificar; cuando el plan está, en tu computadora corres el paso 7 con el
+  master. Una sola instalación: Node, ffmpeg, Python 3 con `numpy` y
+  `onnxruntime`, y `npm i -g playwright && npx playwright install chromium`.
+  Un video de 12 min en 4K tarda del orden de 1 a 3 h según la máquina.
+- **Subir el master a Google Drive** y pasar el enlace. Hace falta que el
+  entorno de Claude pueda entrar a Drive: en la configuración del entorno,
+  *Network access* → agregar `drive.google.com` y
+  `drive.usercontent.google.com` a *Allowed domains*. Ahí se baja el master y
+  el render 4K sale de acá.
 
 ## El estilo
 
-**Identidad:** la paleta de la marca (tinta `#14110F`, amarillo `#FFD400`,
-rojo `#E03A2F`, verde `#16A06A`, gris `#C9C3B8`, blanco) para todo lo que
-dibuja el sistema; el color extra lo ponen los stickers. El presentador es la
-estrella: **la cámara tiene que ocupar más de la mitad del video** (en
-creatina y masa muscular estuvo 57-65 % del tiempo; en disciplina, 48 %).
+**La base son las animaciones originales de disciplina**: fondo claro, línea
+de tinta pareja y redondeada, monigotes de palitos, dianas, barras amarillas
+y grises, etiquetas negras con flechita, números de capítulo "01 | PREGUNTA",
+HOY en rojo → MAÑANA en verde. Encima, lo que hace que se vea profesional
+(lo que hacen Borja, Jeff Nippard, Adrián Sáenz y Adrià Solà):
 
-**Textos clave** (sobre la cámara, abajo): Barlow Condensed 900 itálica en
-mayúsculas, contorno de tinta grueso y sombra dura. Pocas palabras (1 a 5),
-las que se están diciendo. Aparecen **palabra por palabra al ritmo de la voz**
-(`estilo: 'palabras'`) o de un golpe. Color por significado:
-- amarillo: la idea clave · blanco: neutro · verde: lo correcto, el progreso ·
-  rojo: el error, lo que daña
-- `caja` (amarilla con borde): la frase que hay que llevarse
-- `rotulo` (etiqueta negra): datos, nombres, listas cortas sobre clips
+- **Tipografía**: Inter Tight 900/800 con el espaciado cerrado (números y
+  titulares enormes, como Borja), IBM Plex Mono para rótulos chicos
+  ("CAPÍTULO 1 DE 3", "cada punto = 1 persona"). Nada de contornos gruesos ni
+  sombras duras.
+- **Resaltado**: la palabra clave va en **caja amarilla que se estira de
+  izquierda a derecha** y el texto pasa a tinta.
+- **Movimiento**: todo entra con *ease-out* exponencial (acelera y frena en
+  seco), subiendo desde una línea de corte (máscara) y enfocándose desde un
+  desenfoque. Las palabras entran **al ritmo de la voz**. Las líneas se
+  dibujan solas. Los números cuentan. Sale rápido hacia arriba.
+- **Profundidad**: sombras suaves y largas en tarjetas, fondo de papel con
+  viñeta suave, empuje lento de toda la escena (nada queda quieto, sin
+  rebotes de caricatura).
+- **Sin emojis ni stickers.** El color sale de la paleta.
 
-**Stickers:** Fluent Emoji de Microsoft (licencia MIT) troquelados: borde
-blanco, contorno de tinta y sombra. Entran con rebote, flotan y se balancean.
-Al costado de la cara (`pos: [1500, 360]` o `[420, 360]`), nunca encima.
-Buscar nombres: `node herramientas/stickers.js buscar brain`.
+**Paleta**: tinta `#14110F`, amarillo `#FFD400` (lo clave), blanco/papel;
+rojo `#E03A2F` (error, lo que daña) y verde `#16A06A` (lo correcto, el
+progreso) solo de apoyo; gris `#C9C3B8` para lo secundario.
 
-**Escenas a pantalla completa** (papel blanco con puntitos, negro o amarillo):
-se arman por partes mientras se habla, como una pizarra. Íconos grandes +
-rótulos + flechas que se dibujan + signos `= + → >`. Una idea por escena,
-2 a 8 segundos.
+**Sobre la cámara** (el presentador es la estrella: más de la mitad del
+video), de más a menos frecuente:
+- `texto` (estilo `linea`): la frase clave abajo, palabra por palabra al
+  ritmo de la voz, con velo oscuro suave detrás. Una cada 10-20 s de cámara.
+- `titular`: texto grande al costado de la cara (Sáenz), con línea chica
+  debajo y barra opcional. Para las ideas fuertes, 1 cada ~1 min.
+- `detras`: **la palabra gigante detrás de la persona** (Nippard). La firma;
+  4-6 por video, en los remates.
+- `caja` (tinta sobre amarillo), `etiqueta` (la negra con flechita, para
+  nombres y datos sobre clips), `tarjeta` (blanca flotante con título,
+  número, lista o barra), `dato` (caja oscura con números grandes), `paper`
+  (recorte de un estudio con la frase resaltada), `imagen`.
+- Cámara: primer plano corto (`golpe`) en los remates, `empuje` lento en lo
+  emotivo, blanco y negro para la ironía.
 
-**Transiciones:** la firma es el **barrido amarillo** (banda inclinada que
-cruza de izquierda a derecha, con su "whoosh" que también cruza). Se alterna
-con `empuje` (entra de costado), `pop` y `corte` para no cansar. Volver a la
-cámara casi siempre es `corte`.
+**Escenas a pantalla completa**: una idea por escena, 2 a 8 s, armada mientras
+se habla (cada pieza entra cuando se la nombra). Rótulo amarillo arriba a la
+izquierda (`encabezado`) cuando hace falta contexto.
 
-**Cámara:** primer plano (zoom 1.25-1.4) en los énfasis, `golpe` (zoom
-rápido con temblor) en los remates, `empuje` (acercamiento lento) en lo
-emotivo, blanco y negro para la ironía. En el video crudo hay que dejar aire
-para que el zoom no corte la cabeza.
+**Transiciones**: `latigo` (paneo rápido con desenfoque: la de todos los
+días), `barrido` (panel amarillo con filo de tinta: para abrir capítulos y
+escenas importantes), `zoom` (la cámara se acerca y la escena llega desde
+grande), `fundido`, `pop`, `corte`. Y la **escena dividida**
+(`{ camara: 'der' }`): la cámara se achica a una tarjeta al costado y la
+explicación queda al lado, sin perder la cara.
 
-**Estructura visual de cada video:**
-- gancho (0-15 s) con la pregunta o el problema en pantalla
-- "En este video": lista de lo que se va a ver (máximo 3-4 puntos)
-- tarjeta de capítulo (fondo negro, número en caja amarilla) y rótulo de
-  capítulo arriba a la izquierda durante 4 s
-- citas en tarjeta (comillas amarillas, la frase aparece al ritmo de la voz)
-- pasos numerados en tarjeta amarilla (`X.Paso`)
-- CTA de suscripción (botón que se clickea solo) y meta de suscriptores
-- pantalla final de 10-20 s con huecos para los elementos de YouTube
-
-**Sonido:** pop (stickers y textos), whoosh (transiciones), ding (vistos y
-listas), error (X roja), golpe (zooms y capítulos), click + campana (suscribirse).
-Todo sintetizado por `audio.py`, sin derechos de terceros. Los efectos quedan
-5-10 dB por debajo de la voz; la voz se normaliza a ~-19 dBFS.
+**Sonido**: whoosh (transiciones, tarjetas, titulares), pop suave (frases),
+click (etiquetas), ding (vistos), error (X), golpe (capítulos, texto detrás),
+click + campana (suscribirse). Sintetizado por `audio.py`; los efectos quedan
+por debajo de la voz (~-19 dBFS).
 
 ## Cómo escribir el plan (receta)
 
 1. Leer `transcripcion.txt` entero y marcar: gancho, capítulos (preguntas),
-   analogías, números, citas, chistes, pedidos de suscripción.
-2. Capítulos → `p.capitulo`; lo que se promete al inicio → `p.lista`.
-3. Cada explicación que se entiende mejor dibujada (una relación, un antes y
-   después, una lista, una curva) → una escena de 2 a 8 s anclada a las
-   palabras con `t()`. Que cada pieza entre cuando se la nombra.
-4. Sobre la cámara: un texto clave cada 5-8 s de cámara (la palabra que se
-   está diciendo), un sticker cada 8-12 s, un cambio de encuadre (primer
-   plano, golpe, empuje) cada 10-15 s, un interruptor (blanco y negro, chiste)
-   cada 45-60 s.
-5. Densidad de referencia para 10 min de video crudo: 25-40 escenas, la cámara
-   en pantalla más del 55 % del tiempo.
-6. Revisar con `revisar-largo.js` y con fotos sueltas en los momentos clave.
+   analogías, números, citas, remates, pedidos de suscripción.
+2. Capítulos → `p.capitulo`; lo que se promete al inicio → escena
+   `X.Opciones` (se enciende cada punto cuando se nombra).
+3. Cada explicación que se entiende mejor dibujada → una escena anclada a las
+   palabras con `t()`.
+4. Sobre la cámara: frases clave, 1 titular por minuto, 4-6 textos detrás,
+   un cambio de encuadre cada 10-15 s.
+5. Densidad de referencia para 10 min: 25-40 escenas y la cámara en pantalla
+   más del 55 % del tiempo.
+6. `revisar-largo.js` + fotos sueltas en los momentos clave.
 
 ## El plan
 
@@ -126,16 +149,18 @@ Todo sintetizado por `audio.py`, sin derechos de terceros. Los efectos quedan
     id: 'concentracion', titulo: 'Concentración',
     video: 'largos/concentracion/media/fuente.mp4',
     plan: [
-      p.texto(t('celular'), t('celular') + 2, 'el celular', { estilo: 'palabras', color: 'rojo' }),
-      p.sticker(t('celular') - 0.1, t('celular') + 2.2, 'mobile-phone', { pos: [1500, 360] }),
-      p.camara(t('muy importante') - 0.1, t('muy importante') + 1.6, { zoom: 1.3, foco: [0.5, 0.38], mov: 'golpe' }),
+      p.texto(t('el celular') - 0.05, t('el celular') + 2, 'el celular te distrae', { marcadas: ['celular'] }),
+      p.titular(t('pestañas') - 0.1, t('pestañas') + 3, '47 pestañas\nabiertas', { marcadas: ['pestañas'], sub: 'así está tu cerebro' }),
+      p.detras(t('foco') - 0.05, t('foco') + 2, 'FOCO', { color: 'amarillo' }),
+      p.camara(t('muy importante') - 0.1, t('muy importante') + 1.6, { zoom: 1.25, foco: [0.5, 0.4], mov: 'golpe' }),
       p.escena(30.2, 36.5, X.Fila, { con: '→', items: [
-        { n: 'mobile-phone', txt: 'Notificación', c: t('notificación') },
-        { n: 'brain', txt: 'Te distraes', c: t('distraes') }] }),
-      p.capitulo(40, 43, { n: 1, de: 3, titulo: '¿Por qué no te puedes concentrar?', ico: 'brain', corto: 'Por qué' }),
-      p.cita(a, b, { texto: '…', autor: '…', ico: 'books' }),
-      p.lista(a, b, { titulo: 'En este video', items: [{ texto: '…', ico: '…', t: t('…') }] }),
-      p.suscribete(a, b), p.meta(a, b, { desde: 700, hasta: 800 }),
+        { n: 'celular', txt: 'Notificación', c: t('notificación') },
+        { n: 'cerebro', txt: 'Te distraes', c: t('distraes') }] }),
+      p.paper(a, b, { fuente: 'Ward et al. · 2017', texto: '…', resaltar: '…' }),
+      p.capitulo(40, 43, { n: 1, de: 3, titulo: '¿Por qué no te puedes concentrar?', corto: 'Por qué' }),
+      p.cita(a, b, { texto: '…', autor: '…', rol: '…' }),
+      p.escena(a, b, X.Barras, { encabezado: '…', barras: [{ v: 47, txt: '…' }, { v: 12, txt: '…', color: 'amarillo' }] }, { camara: 'der' }),
+      p.suscribete(a, b),
       p.cierre(fin - 12, fin)
     ]
   });
@@ -150,50 +175,56 @@ segundo buscar. `t.fin('frase')` da el final de la frase.
 
 | beat | qué hace |
 |---|---|
-| `texto(ini, fin, txt, o)` | texto clave. `o`: `estilo` golpe/palabras/caja/rotulo, `color`, `marcadas` (palabras en color de acento), `pos` (abajo, arriba, izq, der, [x, y]), `tam`, `rot` |
-| `caja` / `rotulo` | atajos de `texto` con ese estilo |
-| `sticker(ini, fin, nombre, o)` | `pos`, `tam` (px), `rot`, `entra` pop/cae/lado |
-| `imagen(ini, fin, src, o)` | imagen propia (`largos/<id>/media/…`): captura de un estudio, una foto. `estilo` tarjeta/polaroid/completa, `ancho`, `pos`, `pie`, `resaltar: [{ x, y, w, h, c }]` (resaltador amarillo en fracciones de la imagen) |
+| `texto(ini, fin, txt, o)` | frase clave abajo al ritmo de la voz. `o`: `marcadas` (palabras en caja amarilla), `pos`, `tam`, `color` |
+| `titular(ini, fin, txt, o)` | texto grande al costado. `lado` izq/der, `sub`, `barra` (0..1), `marcadas` |
+| `caja` · `etiqueta` | tinta sobre amarillo · la negra con flechita (`dir`, `pos`) |
+| `detras(ini, fin, txt, o)` | palabra gigante detrás de la persona. `color`, `y`, `tam` |
+| `tarjeta(ini, fin, o)` | tarjeta blanca flotante: `lado`, `etiqueta`, `titulo`, `valor` + `unidad`, `texto`, `items: [{ texto, bien, mal }]`, `barra` |
+| `dato(ini, fin, o)` | caja oscura: `filas: [{ etiqueta, valor, unidad, color }]`, `lado` |
+| `paper(ini, fin, o)` | recorte de un estudio: `fuente`, `texto`, `resaltar` (palabras), `pos` |
+| `imagen(ini, fin, src, o)` | imagen propia: `estilo` tarjeta/completa, `ancho`, `pos`, `pie`, `resaltar: [{ x, y, w, h, c }]` |
 | `camara(ini, fin, o)` | `zoom`, `foco` [x, y] 0..1, `mov` corte/suave/golpe/empuje, `bn`, `desenfoque`, `oscuro` |
-| `escena(ini, fin, C, props, o)` | escena a pantalla completa; `o.entra`/`o.sale`: barrido, empuje, pop, fundido, corte |
-| `capitulo(ini, fin, o)` | `n`, `de`, `titulo`, `ico`, `corto` (rótulo de arriba) |
-| `cita(ini, fin, o)` | `texto`, `autor`, `ico`, `marcadas` |
-| `lista(ini, fin, o)` | `titulo`, `items: [{ texto, ico, t, check }]` |
-| `suscribete(ini, fin)` · `meta(ini, fin, { desde, hasta })` · `cierre(ini, fin)` | CTA, meta de suscriptores, pantalla final |
+| `escena(ini, fin, C, props, o)` | pantalla completa; `o.entra`/`o.sale`: latigo, barrido, zoom, fundido, pop, corte; `o.camara: 'der'/'izq'` la vuelve dividida |
+| `capitulo(ini, fin, o)` | `n`, `de`, `titulo`, `corto` (rótulo de arriba), `marcadas` |
+| `cita(ini, fin, o)` | `texto`, `autor`, `rol`, `marcadas` |
+| `lista(ini, fin, o)` | `titulo`, `items: [{ texto, ico, t, check, tacha }]` |
+| `suscribete(ini, fin)` · `meta(ini, fin, { desde, hasta })` · `cierre(ini, fin)` | CTA con la foto de perfil, meta de suscriptores, pantalla final |
 | `sonido(t, tipo)` · `flash(t)` · `sacudida(t)` | sueltos |
 | `mantener(ini, fin)` | solo al reeditar: tramo del video viejo que se deja |
 
 Reglas automáticas (no hace falta cuidarlas a mano):
-- un texto o sticker de cámara se retira solo antes de que entre la escena
-  siguiente (salvo `sobreEscena: true`); si le quedan menos de 0,4 s, no sale;
-- dos textos (o dos stickers) en la misma posición no se pisan: el anterior se
-  va justo antes de que entre el siguiente;
-- las plantillas muestran su primera pieza apenas terminan de entrar, aunque la
-  voz la nombre un poco después (una escena nunca entra vacía).
+- lo de encima de la cámara se retira solo antes de que entre una escena
+  (salvo `sobreEscena: true`); si le quedan menos de 0,4 s, no sale;
+- dos cosas en la misma zona no se pisan: la anterior se va justo antes;
+- las plantillas muestran su primera pieza apenas terminan de entrar (una
+  escena nunca entra vacía);
+- `grabar-largo.js` calcula solo las máscaras que piden los `detras`.
 
 ### Escenas armadas (`LARGOS.X`)
 
-`Fila` (stickers en fila con conectores), `Palabra` (frase grande palabra por
-palabra), `Vs` (dos mitades), `Alrededor` (centro + causas), `Lista`
-(pendientes que se tachan), `Balanza`, `Camino` (fácil/difícil), `Grafico`
-(curvas que se dibujan), `Numero` (cuenta), `Multitud` (personas grises con
-una destacada), `Paso` (recomendación numerada). Las props están documentadas
-en `largo-plantillas.jsx`.
+`Frase`, `Numero`, `Barras`, `Comparar`, `Fila`, `Balanza`, `Camino`,
+`Progreso`, `Capas`, `Bateria`, `Pensamiento`, `Alrededor`, `Grafico`,
+`Puntos`, `Opciones`, `Icono`, `Paso`, `Multitud`, `Tareas`, `Calendario`.
+Las props están en la cabecera de `largo-plantillas.jsx`. Todas aceptan
+`encabezado` y funcionan como escena dividida.
 
 ### Kit para escenas propias (`LARGOS.E`)
 
-Piezas posicionadas por su centro en el lienzo de 1920×1080: `Papel` (fondo),
-`St` (sticker), `Tx` (texto), `Rot` (rótulo), `Caja`, `Resalta` (resaltador),
-`Flecha` (se dibuja), `Signo`, `Check`, `Tacha`, `Tachon`, `Barra`, `Num`,
-`Grafico`, `Burbuja`, `Tarjeta`. Todas reciben `T`, `c` (cuándo entra) y `s`
-(cuándo sale, opcional). Dentro de una escena se respeta la regla de
-`f(fracción)` del resto del repo, o se anclan los tiempos a la voz con `t()`.
+`Escena` (fondo + empuje), `Fondo`, `Pos`, `Palabras` (tipografía cinética),
+`Titulo`, `Texto`, `Rot`/`Etiqueta`, `Ico`/`Icono` (íconos de línea que se
+dibujan solos), `Monigote`/`Figura` (poses: depie, brazos, señala, empuja,
+triste, sentado, piensa, carga, caído, camina, corre; `{ de, a, k }` mezcla
+dos), `Flecha`, `Linea`, `Check`, `Tacha`, `Tachon`, `Barra`, `Num`,
+`Tarjeta`, `Barras`, `Grafico`, `Puntos`, `Burbuja`, `Opciones`. Reciben `T`,
+`c` (cuándo entra) y `s` (cuándo sale, opcional). Ejemplos de escenas propias:
+`largos/disciplina/plan.jsx`.
 
 ## Reeditar un video que ya tiene edición
 
-Fue el caso de disciplina (solo estaba el video publicado). `tramos.py` marca
-en qué tramos se ve la cámara y en cuáles había un inserto; el plan tapa cada
-inserto con una escena nueva y `revisar-largo.js` avisa si quedó alguno a la
-vista. Las placas de texto viejas sobre la cámara se esconden con un primer
-plano que las deja fuera de cuadro. La música y los efectos viejos quedan en
-el audio. Con el video crudo nada de esto hace falta.
+Fue el caso de disciplina (solo estaba el video publicado, en 720p). `tramos.py`
+marca en qué tramos se ve la cámara y en cuáles había un inserto; el plan tapa
+cada inserto con una escena nueva y `revisar-largo.js` avisa si quedó alguno a
+la vista (y si una escena dividida mostraría uno en su tarjeta). Las placas de
+texto viejas sobre la cámara se esconden con un primer plano corto. La música
+y los efectos viejos quedan en el audio. Con el video crudo nada de esto hace
+falta.

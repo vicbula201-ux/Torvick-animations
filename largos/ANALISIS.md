@@ -44,7 +44,7 @@ de imagen (cámara, escena, clip).
    "hasta en la sopa".
 8. **Honestidad con el canal:** cuánto tarda editar, la meta de suscriptores
    (100 → 200 → 700). Es auténtico y la gente responde.
-9. **La cara en pantalla con textos y stickers encima** (57-65 % del tiempo):
+9. **La cara en pantalla con textos encima** (57-65 % del tiempo):
    la explicación entra por los gráficos, pero la conexión es contigo.
 
 ## Por qué disciplina rindió menos (lo que se puede controlar)
@@ -89,11 +89,11 @@ de imagen (cámara, escena, clip).
 
 | Tramo | Qué va | En pantalla |
 |---|---|---|
-| 0:00-0:10 | **Gancho:** pregunta de dolor o polémica + qué gana el espectador | texto palabra por palabra, sticker, zoom golpe |
+| 0:00-0:10 | **Gancho:** pregunta de dolor o polémica + qué gana el espectador | texto palabra por palabra, palabra detrás de ti, zoom golpe |
 | 0:10-0:40 | "En este video…" (3 puntos, no 4) + credibilidad en una frase + **"Acompáñame"** | lista "En este video" |
 | cada 1:30-2:30 | **Capítulo = una pregunta** que la gente busca | tarjeta de capítulo + rótulo arriba |
 | dentro de cada capítulo | analogía → dato o estudio → ejemplo de la vida real → "RECUERDA" en una frase | escenas armadas, captura del estudio con resaltador, caja amarilla |
-| cada 45-60 s | **interruptor**: chiste, pregunta directa, blanco y negro, meme propio | B/N + golpe de zoom, sticker |
+| cada 45-60 s | **interruptor**: chiste, pregunta directa, blanco y negro, meme propio | B/N + golpe de zoom, titular al costado |
 | a mitad (tras un resultado) | historia personal corta o meta de suscriptores, **≤ 20 s** | CTA de suscripción, meta |
 | últimos 60 s | resumen en 3 ideas + pregunta concreta para comentar + "mira este video" | lista, pantalla final con 2 videos |
 
@@ -140,8 +140,9 @@ para después · decidir la próxima acción antes de sentarte · dormir y entre
 
 ## Para grabar pensando en la edición automática
 
-- Graba en 4K o 1080p a 30 fps, con aire arriba y a los costados (los zooms
-  recortan y los stickers van al lado de la cara).
+- Graba en 4K a 30 fps, con aire arriba y a los costados (los zooms recortan
+  y los titulares van al lado de la cara). Para planificar alcanza un liviano
+  del mismo corte; el master 4K se usa al exportar (ver `LARGOS.md`).
 - El micrófono no debe tapar la boca; la cámara fija y a la altura de los ojos.
 - Manda el **corte final sin nada encima** (ni textos, ni música, ni efectos).
   Tus clips (gimnasio, celular, calle) van dentro del corte; las capturas de

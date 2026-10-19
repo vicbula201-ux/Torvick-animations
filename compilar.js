@@ -20,7 +20,7 @@ const path = require('path');
 
 const URL_BABEL = 'https://cdn.jsdelivr.net/npm/@babel/standalone@7.26.4/babel.min.js';
 // orden de carga: motor -> primitivas -> cuerpo -> piezas extra -> marca -> reel -> videos
-// (los videos largos: motor -> primitivas -> marca -> largos/stickers.js -> largo -> largos/<id>/)
+// (los videos largos: motor -> primitivas -> marca -> largo -> largo-iconos -> largo-plantillas -> largos/<id>/)
 const FUENTES = [
   'primitivas.jsx', 'app.jsx',
   'cuerpo.jsx', 'perfil.jsx', 'frente.jsx', 'equipo.jsx', 'tor.jsx',
@@ -29,7 +29,7 @@ const FUENTES = [
   'silla-extensora.jsx', 'fondos.jsx', 'flexiones.jsx', 'remo-t.jsx', 'encogimientos.jsx',
   'proteinas.jsx', 'curl-barra.jsx', 'fondos-banco.jsx', 'pantorrilla.jsx', 'jalon.jsx',
   'hierro.jsx', 'grasas.jsx', 'carbohidratos.jsx', 'minerales.jsx', 'objetivos.jsx',
-  'largo.jsx', 'largo-plantillas.jsx'
+  'largo.jsx', 'largo-iconos.jsx', 'largo-plantillas.jsx'
 ];
 
 // videos largos: cada largos/<id>/*.jsx se compila solo, sin anotarlo aca

@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Prueba — piezas de los videos largos</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=IBM+Plex+Mono:wght@500;600&family=Inter+Tight:ital,wght@0,600;0,700;0,800;0,900;1,700;1,800&family=Source+Serif+4:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: #F4F3F0; font-family: 'Inter Tight', sans-serif; color: #14110F; }
+  h2 { font-weight: 900; letter-spacing: -0.03em; margin: 28px 32px 8px; }
+  .grilla { display: flex; flex-wrap: wrap; gap: 18px; padding: 8px 32px 24px; }
+  .celda { width: 170px; display: flex; flex-direction: column; align-items: center; gap: 8px; background: #fff;
+    border-radius: 18px; padding: 16px 8px 12px; box-shadow: 0 10px 30px rgba(20,17,15,0.08); }
+  .celda span { font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: rgba(20,17,15,0.55); }
+</style>
+</head>
+<body>
+  <div id="root"></div>
+  <!--
+    Verificacion de los videos largos (doble clic): todos los iconos de linea de
+    LARGOS.I y las poses del monigote. Revisar a ojo: ningun trazo cortado por el
+    borde, las formas cerradas con relleno, el acento amarillo en un solo lugar.
+  -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+  <script src="motor.js"></script>
+  <script src="primitivas.js"></script>
+  <script src="marca.js"></script>
+  <script src="largo.js"></script>
+  <script src="largo-iconos.js"></script>
+  <script>
+    (function () {
+      var h = React.createElement, L = window.LARGOS, E = L.E;
+      var iconos = Object.keys(L.I).map(function (n) {
+        return h('div', { className: 'celda', key: n }, h(E.Ico, { n: n, p: 1, tam: 140 }), h('span', null, n));
+      });
+      var poses = Object.keys(L.POSES).concat(['camina', 'corre']).map(function (n) {
+        return h('div', { className: 'celda', key: n }, h(E.Monigote, { pose: n, fase: 0.2, tam: 180, p: 1 }), h('span', null, n));
+      });
+      ReactDOM.createRoot(document.getElementById('root')).render(h('div', null,
+        h('h2', null, 'Iconos (LARGOS.I)'), h('div', { className: 'grilla' }, iconos),
+        h('h2', null, 'Monigote (LARGOS.POSES)'), h('div', { className: 'grilla' }, poses)));
+    })();
+  </script>
+</body>
+</html>
