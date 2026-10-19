@@ -176,28 +176,34 @@
   // la evolucion: antes costaba sobrevivir; hoy no
   function EscEvolucion(props) {
     var T = props.T;
-    var cA = t('evolucionado', 148),
+    var cA = props.at + 0.1,
       cI = t('supervivencia', 150),
       cE = t('esfuerzo que', 150),
       cP = t('cosas del pasado', 150);
-    return /*#__PURE__*/React.createElement(E.Papel, null, /*#__PURE__*/React.createElement(E.Flecha, {
+    return /*#__PURE__*/React.createElement(E.Papel, null, /*#__PURE__*/React.createElement(E.Resalta, {
+      T: T,
+      x: 960,
+      y: 110,
+      c: cA,
+      tam: 0.85
+    }, "LA EVOLUCI\xD3N"), /*#__PURE__*/React.createElement(E.Flecha, {
       T: T,
       de: [200, 880],
       a: [1720, 880],
-      c: cA - 0.2,
+      c: cA,
       grosor: 16,
       dur: 1.2
     }), /*#__PURE__*/React.createElement(E.Rot, {
       T: T,
       x: 250,
       y: 960,
-      c: cA,
+      c: cA + 0.2,
       dir: "ninguna"
     }, "Antes"), /*#__PURE__*/React.createElement(E.Rot, {
       T: T,
       x: 1660,
       y: 960,
-      c: cA + 0.8,
+      c: t('evolucionado', 148),
       dir: "ninguna"
     }, "Hoy"), /*#__PURE__*/React.createElement(E.St, {
       T: T,
@@ -224,7 +230,7 @@
     }), /*#__PURE__*/React.createElement(E.Tx, {
       T: T,
       x: 500,
-      y: 230,
+      y: 250,
       c: cI,
       tam: 0.8
     }, "SUPERVIVENCIA"), /*#__PURE__*/React.createElement(E.St, {
@@ -269,7 +275,7 @@
   // la motivacion sube y baja: no sirve de apoyo
   function EscMotivacion(props) {
     var T = props.T;
-    var c0 = t('motivación es traicionera', 205) - 0.3,
+    var c0 = props.at + 0.1,
       cv = t('así como viene', 208),
       cs = t('se va', 209);
     return /*#__PURE__*/React.createElement(X.Grafico, {
@@ -311,7 +317,7 @@
   // placer inmediato: sube rapido y a la larga se hunde
   function EscPlacer(props) {
     var T = props.T;
-    var c0 = t('placeres inmediatos', 225) - 0.6,
+    var c0 = props.at + 0.1,
       cl = t('a la larga', 228);
     return /*#__PURE__*/React.createElement(X.Grafico, {
       T: T,
@@ -363,7 +369,7 @@
   // primero lo dificil y despues la gloria
   function EscGloria(props) {
     var T = props.T;
-    var c0 = t('primero lo difícil', 236) - 0.3,
+    var c0 = Math.min(t('primero lo difícil', 236) - 0.3, props.at + 0.1),
       cg = t('gloria', 239);
     return /*#__PURE__*/React.createElement(X.Grafico, {
       T: T,
@@ -859,16 +865,16 @@
     marcadas: ['precio'],
     tam: 1.15,
     stickers: [{
-      n: 'money-with-wings',
-      x: 420,
-      y: 300,
-      c: t('pagar', 69)
-    }, {
       n: 'person-shrugging',
       x: 1500,
       y: 790,
       c: t('poca gente', 68),
       tam: 260
+    }, {
+      n: 'money-with-wings',
+      x: 420,
+      y: 300,
+      c: t('pagar', 69)
     }],
     rotulo: {
       txt: 'Muy poca gente está dispuesta',
@@ -1114,7 +1120,6 @@
     color: 'amarillo'
   }, 'lo que más los diferencia'), esc(195.8, 200.6, X.Fila, {
     titulo: 'NO LES IMPORTA',
-    cTitulo: t('no les importan', 195),
     con: '=',
     items: [{
       n: 'battery',

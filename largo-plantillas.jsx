@@ -28,6 +28,10 @@
     return function (v) { return at + dur * v; };
   }
 
+  // la escena nunca entra vacia: su primera pieza aparece apenas termina de entrar
+  // (el resto sigue a la voz)
+  function ancla(c, at, margen) { return Math.min(c, at + (margen == null ? 0.2 : margen)); }
+
   // rotulo o texto bajo una pieza
   function Etiqueta(props) {
     var T = props.T;
@@ -51,6 +55,8 @@
     var y = props.y || (props.titulo ? 560 : 500);
     var tam = props.tam || (n >= 4 ? 250 : n === 3 ? 290 : 340);
     var cs = items.map(function (it, i) { return it.c != null ? it.c : f(0.04 + 0.62 * i / Math.max(1, n)); });
+    if (n && !props.titulo) cs[0] = ancla(cs[0], props.at);
+    else if (n) cs[0] = ancla(cs[0], props.at, 0.9);
     var con = props.con;
     return (
       <E.Papel fondo={props.fondo}>
@@ -131,7 +137,8 @@
           })}
         </div>
         {(props.stickers || []).map(function (s, i) {
-          return <E.St key={i} T={T} n={s.n} x={s.x} y={s.y} tam={s.tam || 240} c={s.c != null ? s.c : f(0.1 + 0.3 * i)} rot={s.rot} s={s.s} />;
+          var c = s.c != null ? s.c : f(0.1 + 0.3 * i);
+          return <E.St key={i} T={T} n={s.n} x={s.x} y={s.y} tam={s.tam || 240} c={i === 0 ? ancla(c, props.at, 0.15) : c} rot={s.rot} s={s.s} />;
         })}
         {props.rotulo ? <E.Rot T={T} x={props.rotulo.x || 960} y={props.rotulo.y || 900} c={props.rotulo.c || f(0.5)}
           dir={props.rotulo.dir || 'ninguna'}>{props.rotulo.txt}</E.Rot> : null}
@@ -170,6 +177,7 @@
   function Vs(props) {
     var T = props.T, f = reloj(props);
     var izq = Object.assign({ c: f(0.03) }, props.izq), der = Object.assign({ c: f(0.4) }, props.der);
+    izq.c = ancla(izq.c, props.at, 0.15);
     var linea = M.draw(T, Math.min(izq.c, der.c), 0.4);
     return (
       <E.Papel fondo={props.fondo}>
@@ -194,7 +202,7 @@
     var T = props.T, f = reloj(props);
     var items = props.items || [];
     var cx = props.cx || 960, cy = props.cy || 560, rx = props.rx || 640, ry = props.ry || 330;
-    var cc = props.centro && props.centro.c != null ? props.centro.c : f(0.02);
+    var cc = ancla(props.centro && props.centro.c != null ? props.centro.c : f(0.02), props.at, 0.15);
     return (
       <E.Papel fondo={props.fondo}>
         {props.titulo ? <E.Resalta T={T} x={960} y={110} c={props.cTitulo || f(0.01)} tam={0.85}>{props.titulo}</E.Resalta> : null}
@@ -232,7 +240,7 @@
     var alto = 116;
     var h = 150 + items.length * alto;
     var y0 = 540 - h / 2;
-    var ct = props.c != null ? props.c : f(0.02);
+    var ct = ancla(props.c != null ? props.c : f(0.02), props.at, 0.1);
     var e = E.golpe(T, ct, 0.4);
     return (
       <E.Papel fondo={props.fondo}>
@@ -285,6 +293,7 @@
     var T = props.T, f = reloj(props);
     var ci = props.izq && props.izq.c != null ? props.izq.c : f(0.1);
     var cd = props.der && props.der.c != null ? props.der.c : f(0.35);
+    if (ci <= cd) ci = ancla(ci, props.at, 0.3); else cd = ancla(cd, props.at, 0.3);
     var cg = props.cGira != null ? props.cGira : f(0.6);
     var hacia = props.hacia === 'der' ? 1 : -1;
     var ang = hacia * 14 * Easing.easeOutElastic(clamp((T - cg) / 0.9, 0, 1)) + M.life(T, 3, 0.8);
@@ -330,8 +339,8 @@
   function Camino(props) {
     var T = props.T, f = reloj(props);
     var cp = props.cPersona != null ? props.cPersona : f(0.02);
-    var cf = props.facil && props.facil.c != null ? props.facil.c : f(0.2);
-    var cd = props.dificil && props.dificil.c != null ? props.dificil.c : f(0.45);
+    var cf = ancla(props.facil && props.facil.c != null ? props.facil.c : f(0.2), props.at, 0.35);
+    var cd = ancla(props.dificil && props.dificil.c != null ? props.dificil.c : f(0.45), props.at, 0.7);
     var pf = M.draw(T, cf, 0.6), pd = M.draw(T, cd, 0.6);
     var base = [960, 900];
     return (
@@ -360,7 +369,7 @@
   function Grafico(props) {
     var T = props.T, f = reloj(props);
     var x0 = props.x0 || 330, y0 = props.y0 || 900, w = props.w || 1260, h = props.h || 640;
-    var ce = props.c != null ? props.c : f(0.02);
+    var ce = ancla(props.c != null ? props.c : f(0.02), props.at, 0.1);
     return (
       <E.Papel fondo={props.fondo}>
         {props.titulo ? <E.Resalta T={T} x={960} y={100} c={ce} tam={0.8}>{props.titulo}</E.Resalta> : null}
@@ -384,7 +393,7 @@
 
   function Numero(props) {
     var T = props.T, f = reloj(props);
-    var c = props.c != null ? props.c : f(0.05);
+    var c = ancla(props.c != null ? props.c : f(0.05), props.at, 0.2);
     return (
       <E.Papel fondo={props.fondo}>
         <E.Num T={T} x={props.x || 960} y={props.y || 470} c={c} dur={props.durCuenta || 1} desde={props.desde || 0}
@@ -409,7 +418,7 @@
     var dx = props.dx || 190, dy = props.dy || 200;
     var x0 = 960 - (cols - 1) * dx / 2, y0 = (props.y || 560) - (filas - 1) * dy / 2;
     var dest = props.destacados || [];
-    var c0 = props.c != null ? props.c : f(0.02);
+    var c0 = ancla(props.c != null ? props.c : f(0.02), props.at, 0.05);
     var cosas = [];
     for (var r = 0; r < filas; r++) {
       for (var k = 0; k < cols; k++) {
@@ -461,7 +470,7 @@
   // tarjeta de recomendacion numerada (fondo amarillo): numero en circulo negro + titulo
   function Paso(props) {
     var T = props.T, f = reloj(props);
-    var c = props.c != null ? props.c : f(0.03);
+    var c = ancla(props.c != null ? props.c : f(0.03), props.at, 0.15);
     L.sonido('golpe', c, 0.8);
     var e = E.golpe(T, c, 0.4);
     return (

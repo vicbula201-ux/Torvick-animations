@@ -1481,7 +1481,7 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
     })), /*#__PURE__*/React.createElement(Centro, {
       x: 1240,
       y: 880,
-      e: golpe(T, f(0.12), 0.4),
+      e: golpe(T, at + 0.3, 0.4),
       rot: -2,
       dy: M.life(T, 3.4, 4, 0.5)
     }, /*#__PURE__*/React.createElement("div", {
@@ -1506,7 +1506,7 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
       x: 1660,
       y: 760,
       tam: 280,
-      c: f(0.1),
+      c: at + 0.45,
       rot: 8
     }) : null);
   }
@@ -2187,6 +2187,18 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
         var corte = pn.ini - vent;
         if (corte > b.ini && corte < b.fin) b.fin = corte;
       });
+    });
+    // dos textos (o dos stickers) en el mismo lugar no se pisan: el anterior se va
+    // justo antes de que entre el siguiente
+    var ultimo = {};
+    d.encima.slice().sort(function (x, y) {
+      return x.ini - y.ini;
+    }).forEach(function (b) {
+      if (b.tipo !== 'texto' && b.tipo !== 'sticker') return;
+      var k = b.tipo + ':' + posicion(b.pos || (b.tipo === 'sticker' ? 'der' : 'abajo')).join(',');
+      var prev = ultimo[k];
+      if (prev && b.ini < prev.fin + 0.1) prev.fin = Math.max(prev.ini, b.ini - 0.14);
+      ultimo[k] = b;
     });
     // lo que queda con menos de 0.4 s a la vista no llega a leerse: se saca
     d.encima = d.encima.filter(function (b) {

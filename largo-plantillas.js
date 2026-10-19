@@ -38,6 +38,12 @@
     };
   }
 
+  // la escena nunca entra vacia: su primera pieza aparece apenas termina de entrar
+  // (el resto sigue a la voz)
+  function ancla(c, at, margen) {
+    return Math.min(c, at + (margen == null ? 0.2 : margen));
+  }
+
   // rotulo o texto bajo una pieza
   function Etiqueta(props) {
     var T = props.T;
@@ -80,6 +86,7 @@
     var cs = items.map(function (it, i) {
       return it.c != null ? it.c : f(0.04 + 0.62 * i / Math.max(1, n));
     });
+    if (n && !props.titulo) cs[0] = ancla(cs[0], props.at);else if (n) cs[0] = ancla(cs[0], props.at, 0.9);
     var con = props.con;
     return /*#__PURE__*/React.createElement(E.Papel, {
       fondo: props.fondo
@@ -225,6 +232,7 @@
         }, p.toUpperCase());
       }));
     })), (props.stickers || []).map(function (s, i) {
+      var c = s.c != null ? s.c : f(0.1 + 0.3 * i);
       return /*#__PURE__*/React.createElement(E.St, {
         key: i,
         T: T,
@@ -232,7 +240,7 @@
         x: s.x,
         y: s.y,
         tam: s.tam || 240,
-        c: s.c != null ? s.c : f(0.1 + 0.3 * i),
+        c: i === 0 ? ancla(c, props.at, 0.15) : c,
         rot: s.rot,
         s: s.s
       });
@@ -325,6 +333,7 @@
       der = Object.assign({
         c: f(0.4)
       }, props.der);
+    izq.c = ancla(izq.c, props.at, 0.15);
     var linea = M.draw(T, Math.min(izq.c, der.c), 0.4);
     return /*#__PURE__*/React.createElement(E.Papel, {
       fondo: props.fondo
@@ -379,7 +388,7 @@
       cy = props.cy || 560,
       rx = props.rx || 640,
       ry = props.ry || 330;
-    var cc = props.centro && props.centro.c != null ? props.centro.c : f(0.02);
+    var cc = ancla(props.centro && props.centro.c != null ? props.centro.c : f(0.02), props.at, 0.15);
     return /*#__PURE__*/React.createElement(E.Papel, {
       fondo: props.fondo
     }, props.titulo ? /*#__PURE__*/React.createElement(E.Resalta, {
@@ -455,7 +464,7 @@
     var alto = 116;
     var h = 150 + items.length * alto;
     var y0 = 540 - h / 2;
-    var ct = props.c != null ? props.c : f(0.02);
+    var ct = ancla(props.c != null ? props.c : f(0.02), props.at, 0.1);
     var e = E.golpe(T, ct, 0.4);
     return /*#__PURE__*/React.createElement(E.Papel, {
       fondo: props.fondo
@@ -580,6 +589,7 @@
       f = reloj(props);
     var ci = props.izq && props.izq.c != null ? props.izq.c : f(0.1);
     var cd = props.der && props.der.c != null ? props.der.c : f(0.35);
+    if (ci <= cd) ci = ancla(ci, props.at, 0.3);else cd = ancla(cd, props.at, 0.3);
     var cg = props.cGira != null ? props.cGira : f(0.6);
     var hacia = props.hacia === 'der' ? 1 : -1;
     var ang = hacia * 14 * Easing.easeOutElastic(clamp((T - cg) / 0.9, 0, 1)) + M.life(T, 3, 0.8);
@@ -702,8 +712,8 @@
     var T = props.T,
       f = reloj(props);
     var cp = props.cPersona != null ? props.cPersona : f(0.02);
-    var cf = props.facil && props.facil.c != null ? props.facil.c : f(0.2);
-    var cd = props.dificil && props.dificil.c != null ? props.dificil.c : f(0.45);
+    var cf = ancla(props.facil && props.facil.c != null ? props.facil.c : f(0.2), props.at, 0.35);
+    var cd = ancla(props.dificil && props.dificil.c != null ? props.dificil.c : f(0.45), props.at, 0.7);
     var pf = M.draw(T, cf, 0.6),
       pd = M.draw(T, cd, 0.6);
     var base = [960, 900];
@@ -793,7 +803,7 @@
       y0 = props.y0 || 900,
       w = props.w || 1260,
       h = props.h || 640;
-    var ce = props.c != null ? props.c : f(0.02);
+    var ce = ancla(props.c != null ? props.c : f(0.02), props.at, 0.1);
     return /*#__PURE__*/React.createElement(E.Papel, {
       fondo: props.fondo
     }, props.titulo ? /*#__PURE__*/React.createElement(E.Resalta, {
@@ -854,7 +864,7 @@
   function Numero(props) {
     var T = props.T,
       f = reloj(props);
-    var c = props.c != null ? props.c : f(0.05);
+    var c = ancla(props.c != null ? props.c : f(0.05), props.at, 0.2);
     return /*#__PURE__*/React.createElement(E.Papel, {
       fondo: props.fondo
     }, /*#__PURE__*/React.createElement(E.Num, {
@@ -904,7 +914,7 @@
     var x0 = 960 - (cols - 1) * dx / 2,
       y0 = (props.y || 560) - (filas - 1) * dy / 2;
     var dest = props.destacados || [];
-    var c0 = props.c != null ? props.c : f(0.02);
+    var c0 = ancla(props.c != null ? props.c : f(0.02), props.at, 0.05);
     var cosas = [];
     for (var r = 0; r < filas; r++) {
       for (var k = 0; k < cols; k++) {
@@ -1005,7 +1015,7 @@
   function Paso(props) {
     var T = props.T,
       f = reloj(props);
-    var c = props.c != null ? props.c : f(0.03);
+    var c = ancla(props.c != null ? props.c : f(0.03), props.at, 0.15);
     L.sonido('golpe', c, 0.8);
     var e = E.golpe(T, c, 0.4);
     return /*#__PURE__*/React.createElement(E.Papel, {

@@ -90,16 +90,17 @@
   // la evolucion: antes costaba sobrevivir; hoy no
   function EscEvolucion(props) {
     var T = props.T;
-    var cA = t('evolucionado', 148), cI = t('supervivencia', 150), cE = t('esfuerzo que', 150), cP = t('cosas del pasado', 150);
+    var cA = props.at + 0.1, cI = t('supervivencia', 150), cE = t('esfuerzo que', 150), cP = t('cosas del pasado', 150);
     return (
       <E.Papel>
-        <E.Flecha T={T} de={[200, 880]} a={[1720, 880]} c={cA - 0.2} grosor={16} dur={1.2} />
-        <E.Rot T={T} x={250} y={960} c={cA} dir="ninguna">Antes</E.Rot>
-        <E.Rot T={T} x={1660} y={960} c={cA + 0.8} dir="ninguna">Hoy</E.Rot>
+        <E.Resalta T={T} x={960} y={110} c={cA} tam={0.85}>LA EVOLUCIÓN</E.Resalta>
+        <E.Flecha T={T} de={[200, 880]} a={[1720, 880]} c={cA} grosor={16} dur={1.2} />
+        <E.Rot T={T} x={250} y={960} c={cA + 0.2} dir="ninguna">Antes</E.Rot>
+        <E.Rot T={T} x={1660} y={960} c={t('evolucionado', 148)} dir="ninguna">Hoy</E.Rot>
         <E.St T={T} n="bow-and-arrow" x={330} y={420} tam={240} c={cI} rot={-10} />
         <E.St T={T} n="fire" x={560} y={520} tam={200} c={cI + 0.3} />
         <E.St T={T} n="bison" x={330} y={680} tam={190} c={cI + 0.5} />
-        <E.Tx T={T} x={500} y={230} c={cI} tam={0.8}>SUPERVIVENCIA</E.Tx>
+        <E.Tx T={T} x={500} y={250} c={cI} tam={0.8}>SUPERVIVENCIA</E.Tx>
         <E.St T={T} n="person-climbing" x={800} y={560} tam={230} c={cE} />
         <E.Caja T={T} x={620} y={760} c={cP} fondo="gris" tam={0.75}>COSAS DEL PASADO</E.Caja>
         <E.St T={T} n="couch-and-lamp" x={1350} y={500} tam={260} c={cP + 0.35} />
@@ -112,7 +113,7 @@
   // la motivacion sube y baja: no sirve de apoyo
   function EscMotivacion(props) {
     var T = props.T;
-    var c0 = t('motivación es traicionera', 205) - 0.3, cv = t('así como viene', 208), cs = t('se va', 209);
+    var c0 = props.at + 0.1, cv = t('así como viene', 208), cs = t('se va', 209);
     return (
       <X.Grafico T={T} at={props.at} dur={props.dur} c={c0} titulo="LA MOTIVACIÓN" ejeX="tiempo" ejeY="ganas"
         curvas={[{ puntos: [[0, 0.1], [0.12, 0.85], [0.24, 0.2], [0.36, 0.95], [0.5, 0.15], [0.62, 0.7], [0.74, 0.05], [1, 0.03]],
@@ -125,7 +126,7 @@
   // placer inmediato: sube rapido y a la larga se hunde
   function EscPlacer(props) {
     var T = props.T;
-    var c0 = t('placeres inmediatos', 225) - 0.6, cl = t('a la larga', 228);
+    var c0 = props.at + 0.1, cl = t('a la larga', 228);
     return (
       <X.Grafico T={T} at={props.at} dur={props.dur} c={c0} titulo="UNA VIDA DE PLACERES INMEDIATOS" ejeX="tiempo"
         curvas={[{ puntos: [[0, 0.3], [0.08, 0.95], [0.2, 0.7], [0.45, 0.4], [0.75, 0.18], [1, 0.04]], color: 'rojo', c: c0 + 0.2, dur: 3 }]}
@@ -138,7 +139,7 @@
   // primero lo dificil y despues la gloria
   function EscGloria(props) {
     var T = props.T;
-    var c0 = t('primero lo difícil', 236) - 0.3, cg = t('gloria', 239);
+    var c0 = Math.min(t('primero lo difícil', 236) - 0.3, props.at + 0.1), cg = t('gloria', 239);
     return (
       <X.Grafico T={T} at={props.at} dur={props.dur} c={c0} titulo="PRIMERO LO DIFÍCIL" ejeX="tiempo"
         curvas={[{ puntos: [[0, 0.1], [0.3, 0.05], [0.55, 0.25], [0.8, 0.7], [1, 0.98]], color: 'verde', c: c0 + 0.2, dur: 2.6 }]}
@@ -298,7 +299,7 @@
       { n: 'hourglass-not-done', txt: 'Sacrificio', c: 64.6 },
       { n: 'bullseye', txt: 'Objetivos', c: t('objetivos', 64) }] }, { entra: 'pop' }),
     esc(68.4, 73.6, X.Palabra, { texto: 'PAGAR ESE PRECIO', marcadas: ['precio'], tam: 1.15,
-      stickers: [{ n: 'money-with-wings', x: 420, y: 300, c: t('pagar', 69) }, { n: 'person-shrugging', x: 1500, y: 790, c: t('poca gente', 68), tam: 260 }],
+      stickers: [{ n: 'person-shrugging', x: 1500, y: 790, c: t('poca gente', 68), tam: 260 }, { n: 'money-with-wings', x: 420, y: 300, c: t('pagar', 69) }],
       rotulo: { txt: 'Muy poca gente está dispuesta', c: t('dispuesta', 69), y: 860, x: 720 } }, { entra: 'empuje' }),
     p.escena(73.6 + H, 77.8 + H, X.Fila, { con: '→', items: [
       { n: 'person-running', txt: 'Vas por tu meta', c: 73.7 },
@@ -370,7 +371,7 @@
     p.capitulo(187.6 + H, 190.8 + H, { n: 2, de: 3, titulo: 'Características de una persona disciplinada', ico: 'person-superhero',
       corto: 'Características', entra: 'corte', sale: 'corte' }),
     dice('más diferencia', 190, 2.2, { color: 'amarillo' }, 'lo que más los diferencia'),
-    esc(195.8, 200.6, X.Fila, { titulo: 'NO LES IMPORTA', cTitulo: t('no les importan', 195), con: '=', items: [
+    esc(195.8, 200.6, X.Fila, { titulo: 'NO LES IMPORTA', con: '=', items: [
       { n: 'battery', txt: 'Motivados', c: t('estar o no', 197) },
       { n: 'low-battery', txt: 'Sin motivación', c: t('no estar motivadas', 198) + 0.2 }],
       abajo: { txt: 'IGUAL LO HACEN', c: t('motivadas', 199) + 0.3 } }, { entra: 'barrido' }),
