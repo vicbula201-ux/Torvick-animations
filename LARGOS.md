@@ -163,8 +163,13 @@ segundo buscar. `t.fin('frase')` da el final de la frase.
 | `sonido(t, tipo)` · `flash(t)` · `sacudida(t)` | sueltos |
 | `mantener(ini, fin)` | solo al reeditar: tramo del video viejo que se deja |
 
-Un texto o sticker de cámara se retira solo antes de que entre la escena
-siguiente (salvo `sobreEscena: true`).
+Reglas automáticas (no hace falta cuidarlas a mano):
+- un texto o sticker de cámara se retira solo antes de que entre la escena
+  siguiente (salvo `sobreEscena: true`); si le quedan menos de 0,4 s, no sale;
+- dos textos (o dos stickers) en la misma posición no se pisan: el anterior se
+  va justo antes de que entre el siguiente;
+- las plantillas muestran su primera pieza apenas terminan de entrar, aunque la
+  voz la nombre un poco después (una escena nunca entra vacía).
 
 ### Escenas armadas (`LARGOS.X`)
 
