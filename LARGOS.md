@@ -175,10 +175,10 @@ segundo buscar. `t.fin('frase')` da el final de la frase.
 
 | beat | qué hace |
 |---|---|
-| `texto(ini, fin, txt, o)` | frase clave abajo al ritmo de la voz. `o`: `marcadas` (palabras en caja amarilla), `pos`, `tam`, `color` |
-| `titular(ini, fin, txt, o)` | texto grande al costado. `lado` izq/der, `sub`, `barra` (0..1), `marcadas` |
+| `texto(ini, fin, txt, o)` | frase clave abajo al ritmo de la voz. `o`: `marcadas` (palabras en caja amarilla; `'qué'` con tilde no marca `'que'`; `'palabra:verde'` cambia el color de la caja), `pos`, `tam`, `color`, `voz: false` (entra toda junta, sin esperar a la voz) |
+| `titular(ini, fin, txt, o)` | texto grande al costado. `lado` izq/der, `sub` (+ `cSub`: cuándo entra), `barra` (0..1), `marcadas`, `tam` |
 | `caja` · `etiqueta` | tinta sobre amarillo · la negra con flechita (`dir`, `pos`) |
-| `detras(ini, fin, txt, o)` | palabra gigante detrás de la persona. `color`, `y`, `tam` |
+| `detras(ini, fin, txt, o)` | palabra gigante detrás de la persona. `color`, `x`, `y`, `tam`. La cabeza tapa ~300 px: mejor palabras largas y grandes, o dos palabras con espacios de más para que la cabeza caiga en el hueco (`'¿POR   QUÉ?'`) |
 | `tarjeta(ini, fin, o)` | tarjeta blanca flotante: `lado`, `etiqueta`, `titulo`, `valor` + `unidad`, `texto`, `items: [{ texto, bien, mal }]`, `barra` |
 | `dato(ini, fin, o)` | caja oscura: `filas: [{ etiqueta, valor, unidad, color }]`, `lado` |
 | `paper(ini, fin, o)` | recorte de un estudio: `fuente`, `texto`, `resaltar` (palabras), `pos` |
@@ -186,15 +186,17 @@ segundo buscar. `t.fin('frase')` da el final de la frase.
 | `camara(ini, fin, o)` | `zoom`, `foco` [x, y] 0..1, `mov` corte/suave/golpe/empuje, `bn`, `desenfoque`, `oscuro` |
 | `escena(ini, fin, C, props, o)` | pantalla completa; `o.entra`/`o.sale`: latigo, barrido, zoom, fundido, pop, corte; `o.camara: 'der'/'izq'` la vuelve dividida |
 | `capitulo(ini, fin, o)` | `n`, `de`, `titulo`, `corto` (rótulo de arriba), `marcadas` |
-| `cita(ini, fin, o)` | `texto`, `autor`, `rol`, `marcadas` |
+| `cita(ini, fin, o)` | `texto`, `autor`, `rol`, `marcadas`, `previa: true` (la frase entera ya está en tenue y cada palabra se entinta con la voz: no queda vacía mientras la voz presenta al autor) |
 | `lista(ini, fin, o)` | `titulo`, `items: [{ texto, ico, t, check, tacha }]` |
 | `suscribete(ini, fin)` · `meta(ini, fin, { desde, hasta })` · `cierre(ini, fin)` | CTA con la foto de perfil, meta de suscriptores, pantalla final |
 | `sonido(t, tipo)` · `flash(t)` · `sacudida(t)` | sueltos |
 | `mantener(ini, fin)` | solo al reeditar: tramo del video viejo que se deja |
 
 Reglas automáticas (no hace falta cuidarlas a mano):
-- lo de encima de la cámara se retira solo antes de que entre una escena
-  (salvo `sobreEscena: true`); si le quedan menos de 0,4 s, no sale;
+- lo de encima de la cámara termina de salir antes de que arranque la
+  transición de una escena (salvo `sobreEscena: true`); si le quedan menos
+  de 0,4 s, no sale y `revisar-largo.js` avisa ("texto muy corto");
+- el rótulo chico de capítulo se retira antes de la escena siguiente;
 - dos cosas en la misma zona no se pisan: la anterior se va justo antes;
 - las plantillas muestran su primera pieza apenas terminan de entrar (una
   escena nunca entra vacía);
@@ -225,6 +227,9 @@ Fue el caso de disciplina (solo estaba el video publicado, en 720p). `tramos.py`
 marca en qué tramos se ve la cámara y en cuáles había un inserto; el plan tapa
 cada inserto con una escena nueva y `revisar-largo.js` avisa si quedó alguno a
 la vista (y si una escena dividida mostraría uno en su tarjeta). Las placas de
-texto viejas sobre la cámara se esconden con un primer plano corto. La música
+texto viejas sobre la cámara se esconden con un primer plano corto (zoom 1,4
+con el foco arriba: con 1,3 asomaban; si la placa está más alta, 1,5-1,55). Un
+tramo de cámara de menos de ~1 s entre dos escenas se tapa encadenándolas con
+`corte` (si no, la cámara parpadea entre dos látigos). La música
 y los efectos viejos quedan en el audio. Con el video crudo nada de esto hace
 falta.
