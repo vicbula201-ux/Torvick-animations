@@ -64,7 +64,7 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
   var SOMBRA = '0 2px 4px rgba(20,17,15,0.10), 0 22px 80px rgba(20,17,15,0.22)';
   var SOMBRA_CHICA = '0 1px 3px rgba(20,17,15,0.10), 0 12px 36px rgba(20,17,15,0.16)';
   // texto blanco sobre la camara: sombra suave y ancha, sin contorno
-  var SOMBRA_TX = '0 2px 4px rgba(0,0,0,0.30), 0 8px 40px rgba(0,0,0,0.45)';
+  var SOMBRA_TX = '0 1px 2px rgba(0,0,0,0.45), 0 3px 12px rgba(0,0,0,0.42), 0 8px 40px rgba(0,0,0,0.45)';
   function col(c, def) {
     return COLOR[c] || c || def;
   }
@@ -81,6 +81,13 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
   }
   function norm(p) {
     return String(p).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9ñ%]/g, '');
+  }
+  // para marcar palabras: con tilde solo marca la palabra con tilde ('qué' no marca 'que')
+  function normTilde(p) {
+    return String(p).toLowerCase().normalize('NFC').replace(/[^a-z0-9ñáéíóúü%]/g, '');
+  }
+  function claveMarca(p) {
+    return normTilde(p) === norm(p) ? norm(p) : '~' + normTilde(p);
   }
 
   /* =========================================================
@@ -232,7 +239,7 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
       colorDe = {};
     (props.marcadas || []).forEach(function (m) {
       var partes = String(m).split(':');
-      var k = norm(partes[0]);
+      var k = claveMarca(partes[0]);
       marcadas.push(k);
       if (partes[1]) colorDe[k] = col(partes[1]);
     });
@@ -260,10 +267,16 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
         var dur = props.dur || 0.45;
         var p = prog(T, c, dur);
         var op = T >= c ? clamp(0.3 + (T - c) / (dur * 0.35), 0, 1) : 0;
+        if (props.previa != null) {
+          // la frase entera ya esta, tenue, y cada palabra se entinta con la voz
+          p = prog(T, props.previa + i * 0.012, 0.6);
+          op = p * (0.2 + 0.8 * (T >= c ? clamp((T - c) / 0.22, 0, 1) : 0));
+        }
         var fuera = salida == null ? 0 : Easing.easeInCubic(clamp((T - salida - (props.salidaEsc || 0) * i) / 0.24, 0, 1));
-        var marcada = marcarTodo || marcadas.indexOf(norm(pal)) >= 0;
+        var clave = marcadas.indexOf('~' + normTilde(pal)) >= 0 ? '~' + normTilde(pal) : norm(pal);
+        var marcada = marcarTodo || marcadas.indexOf(clave) >= 0;
         var pb = marcada ? prog(T, c + 0.08, 0.45, Easing.easeOutQuart) : 0;
-        var cajaPal = colorDe[norm(pal)] || colorAcento;
+        var cajaPal = colorDe[clave] || colorAcento;
         var tintaCaja = cajaPal === YEL || cajaPal === BLANCO ? INK : BLANCO;
         var colorPal = marcada && acento === 'caja' ? pb > 0.35 ? tintaCaja : color : marcada && acento === 'color' ? cajaPal : color;
         var texto = mayus ? pal.toUpperCase() : pal;
@@ -1108,7 +1121,7 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
       saleT = 'dividida';
     }
     var desde = entraT === 'pop' ? b.ini : b.ini - he;
-    var hasta = saleT === 'pop' ? b.fin : b.fin + hs;
+    var hasta = saleT === 'pop' ? b.fin : saleT === 'corte' ? b.fin + 1 / 30 : b.fin + hs;
     if (T < desde || T >= hasta) return null;
     if (entraT !== 'corte' && he > 0 && T < b.ini + he) return {
       fase: 'entra',
@@ -1271,7 +1284,7 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
         } else if (fz.tipo === 'latigo') {
           var e = Easing.easeInOutCubic(u);
           estilo.transform = 'translateX(' + (ANCHO * 0.55 * (1 - e)).toFixed(1) + 'px)';
-          var bl = 36 * Math.sin(Math.PI * Math.max(0, u * 1.2 - 0.2));
+          var bl = 36 * Math.cos(Math.PI / 2 * clamp((u - 0.5) / 0.5, 0, 1));
           if (bl > 0.2) estilo.filter = 'blur(' + bl.toFixed(1) + 'px)';
           estilo.opacity = clamp(u * 2.2, 0, 1);
         } else if (fz.tipo === 'zoom') {
@@ -1297,7 +1310,7 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
         } else if (fz.tipo === 'latigo') {
           var es = Easing.easeInOutCubic(u);
           estilo.transform = 'translateX(' + (-ANCHO * 0.55 * es).toFixed(1) + 'px)';
-          var bs = 36 * Math.sin(Math.PI * Math.min(1, u * 1.2));
+          var bs = 36 * Math.sin(Math.PI / 2 * Math.min(1, u * 2));
           if (bs > 0.2) estilo.filter = 'blur(' + bs.toFixed(1) + 'px)';
           estilo.opacity = clamp((1 - u) * 2.2, 0, 1);
         } else if (fz.tipo === 'zoom') {
@@ -2200,7 +2213,7 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
   function Velo(props) {
     var k = props.k;
     if (k <= 0.002) return null;
-    var g = props.lado === 'abajo' ? 'linear-gradient(0deg, rgba(12,10,9,0.58) 0%, rgba(12,10,9,0.30) 17%, rgba(12,10,9,0) 36%)' : props.lado === 'der' ? 'linear-gradient(270deg, rgba(12,10,9,0.62) 0%, rgba(12,10,9,0.34) 30%, rgba(12,10,9,0) 58%)' : 'linear-gradient(90deg, rgba(12,10,9,0.62) 0%, rgba(12,10,9,0.34) 30%, rgba(12,10,9,0) 58%)';
+    var g = props.lado === 'abajo' ? 'linear-gradient(0deg, rgba(12,10,9,0.64) 0%, rgba(12,10,9,0.38) 18%, rgba(12,10,9,0) 38%)' : props.lado === 'der' ? 'linear-gradient(270deg, rgba(12,10,9,0.62) 0%, rgba(12,10,9,0.34) 30%, rgba(12,10,9,0) 58%)' : 'linear-gradient(90deg, rgba(12,10,9,0.62) 0%, rgba(12,10,9,0.34) 30%, rgba(12,10,9,0) 58%)';
     return /*#__PURE__*/React.createElement("div", {
       style: {
         position: 'absolute',
@@ -2931,7 +2944,8 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
       alinear: "izq",
       ancho: ancho,
       marcadas: props.marcadas,
-      italica: props.italica !== false
+      italica: props.italica !== false,
+      previa: props.previa ? at + 0.25 : null
     }))), /*#__PURE__*/React.createElement("div", {
       style: {
         display: 'flex',
@@ -3406,8 +3420,8 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
     var out = null;
     def.capitulos.forEach(function (c) {
       var a = c.fin + 0.1,
-        b = c.fin + 4.4;
-      if (T < a - 0.05 || T > b + 0.4) return;
+        b = c.hasta;
+      if (b - a < 1.2 || T < a - 0.05 || T > b + 0.4) return;
       var e = junta(entra(T, a, {
         dy: 0,
         dx: -40,
@@ -3798,12 +3812,19 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
     d.capitulos = d.pantallas.filter(function (b) {
       return b.capitulo;
     }).map(function (b) {
+      // el rotulo chico se retira antes de la proxima escena a pantalla completa
+      var hasta = b.fin + 4.4;
+      d.pantallas.forEach(function (pn) {
+        if (pn.camara || pn === b || pn.ini <= b.fin) return;
+        hasta = Math.min(hasta, pn.ini - (VENTANA[pn.entra || 'latigo'] || 0) - 0.4);
+      });
       return {
         n: b.props.n,
         titulo: b.props.titulo,
         corto: b.props.corto,
         ini: b.ini,
-        fin: b.fin
+        fin: b.fin,
+        hasta: hasta
       };
     });
     // lo de encima de la camara se va antes de que entre una escena a pantalla completa
@@ -3815,7 +3836,10 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
         if (pn.camara) return;
         var vent = VENTANA[pn.entra || 'latigo'] || 0;
         var corte = pn.ini - vent;
-        if (corte > b.ini && corte < b.fin) b.fin = corte;else if (b.ini >= corte && b.ini < pn.fin) {
+        // la salida (~0,3 s) termina antes de que arranque la transicion
+        // (lo de detras va dentro de la camara y se va con ella)
+        var margen = b.tipo === 'detras' ? 0 : 0.3;
+        if (corte > b.ini && corte < b.fin + margen) b.fin = Math.max(b.ini, Math.min(b.fin, corte - margen));else if (b.ini >= corte && b.ini < pn.fin) {
           if (global.console) console.warn('texto dentro de una escena (no sale):', b.txt || b.tipo, b.ini.toFixed(2));
           b.fin = b.ini;
         }
@@ -3833,12 +3857,13 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
       ultimo[k] = b;
     });
     // lo que queda menos de 0.4 s a la vista no llega a leerse: se saca
-    d.encima = d.encima.filter(function (b) {
-      return b.fin - b.ini >= 0.4;
-    });
-    d.detras = d.detras.filter(function (b) {
-      return b.fin - b.ini >= 0.4;
-    });
+    var leible = function (b) {
+      if (b.fin - b.ini >= 0.4) return true;
+      if (global.console && b.fin > b.ini) console.warn('texto muy corto (no sale):', b.txt || b.tipo, b.ini.toFixed(2));
+      return false;
+    };
+    d.encima = d.encima.filter(leible);
+    d.detras = d.detras.filter(leible);
     d.encima.forEach(function (b) {
       if (b.tipo === 'texto' && (b.estilo || 'linea') !== 'caja' && b.estilo !== 'etiqueta' && b.voz !== false) {
         b.tiempos = tiemposDe(d.id, b.txt, b.ini, b.fin);

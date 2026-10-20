@@ -61,7 +61,11 @@ const VENTANA = { latigo: 0.2, barrido: 0.26, zoom: 0.22, fundido: 0.16, pop: 0,
   // escenas que se pisan (mas alla de sus transiciones)
   const pan = tr.pantallas.map(([a, z, en, sa, tipo]) => ({ a, z, en, sa, dividida: tipo === 'dividida' })).sort((x, y) => x.a - y.a);
   for (let i = 1; i < pan.length; i++) {
-    if (pan[i].a < pan[i - 1].z - 0.02) {
+    // a proposito: la anterior sale en corte justo cuando termina de entrar la siguiente
+    // (un barrido o un latigo que pasa por encima)
+    const VENT = { latigo: 0.2, barrido: 0.26, zoom: 0.22, fundido: 0.16, pop: 0.2, corte: 0 };
+    const encima = pan[i - 1].sa === 'corte' && pan[i - 1].z <= pan[i].a + (VENT[pan[i].en] || 0) + 0.02;
+    if (pan[i].a < pan[i - 1].z - 0.02 && !encima) {
       console.log('PISA  escena %s-%s con %s-%s', pan[i - 1].a.toFixed(2), pan[i - 1].z.toFixed(2), pan[i].a.toFixed(2), pan[i].z.toFixed(2));
       problemas++;
     }

@@ -57,8 +57,8 @@
   // primer plano corto que deja fuera de cuadro las placas viejas de abajo
   function tapar(a, b, o) {
     return p.camara(a - 0.2, b + 0.2, Object.assign({
-      zoom: 1.3,
-      foco: [0.47, 0.385]
+      zoom: 1.4,
+      foco: [0.47, 0.36]
     }, o || {}));
   }
   // frase clave abajo, palabra por palabra al ritmo de la voz
@@ -197,7 +197,7 @@
         overflow: 'visible'
       }
     }, /*#__PURE__*/React.createElement("path", {
-      d: "M 1150 360 Q 1040 330 930 380",
+      d: "M 1034 515 Q 1092 468 1148 488",
       fill: "none",
       stroke: INK,
       strokeWidth: "6",
@@ -208,7 +208,7 @@
     })), /*#__PURE__*/React.createElement("div", {
       style: {
         position: 'absolute',
-        left: 930,
+        left: 830,
         top: 380,
         transformOrigin: '0 0',
         opacity: clamp((T - cTag) / 0.15, 0, 1),
@@ -565,7 +565,7 @@
       T: T,
       txt: "T\xFA tambi\xE9n puedes",
       x: 1400,
-      y: 980,
+      y: 945,
       c: cG + 0.4,
       tam: 1.2
     }));
@@ -575,8 +575,8 @@
   function EscMotivacionCero(props) {
     var T = props.T,
       at = props.at;
-    var cM = t('estar o no', 197),
-      cT = cM + 0.9;
+    var cM = t('importan', 197) - 0.1,
+      cT = t('estar o no', 197);
     var nivel = 0.62 * (1 - Easing.easeInOutCubic(clamp((T - at - 0.2) / 1.6, 0, 1)));
     return /*#__PURE__*/React.createElement(X.Marco, {
       p: props
@@ -676,7 +676,7 @@
       T: T,
       txt: props.txtFuturo || 'Tu yo del futuro',
       x: 1400,
-      y: 975,
+      y: 945,
       c: props.cTxt,
       tam: 1.15
     }));
@@ -836,7 +836,7 @@
     var T = props.T,
       at = props.at;
     var c1 = t('amargarse', 336),
-      c2 = t('la vida es una', 339);
+      c2 = t('la vida es una', 339) - 0.3;
     var b1 = mov.entra(T, c1, {
       dy: 20,
       desde: 0.2,
@@ -902,7 +902,7 @@
     var cD = at + 1.0;
     var k = Easing.easeInOutSine(clamp((T - cD) / 2.8, 0, 1));
     var x = 380 + (1300 - 380) * k,
-      y = 560 - (560 - 300) * k;
+      y = 560 - 230 * k;
     return /*#__PURE__*/React.createElement(X.Marco, {
       p: props
     }, /*#__PURE__*/React.createElement(E.Linea, {
@@ -943,8 +943,8 @@
     }), /*#__PURE__*/React.createElement(X.Rotulo, {
       T: T,
       txt: "El dif\xEDcil",
-      x: 900,
-      y: 310,
+      x: 960,
+      y: 485,
       c: at + 0.9,
       tam: 1
     }), /*#__PURE__*/React.createElement(E.Figura, {
@@ -952,7 +952,7 @@
       x: x,
       y: y,
       c: at,
-      tam: 300,
+      tam: 270,
       pose: T > cD ? 'camina' : 'depie',
       fase: (T - cD) * 1.4
     }), /*#__PURE__*/React.createElement(E.Tacha, {
@@ -1044,8 +1044,8 @@
     }) : null, /*#__PURE__*/React.createElement(X.Rotulo, {
       T: T,
       txt: "Una sola decisi\xF3n",
-      x: fase2 ? 560 : 900,
-      y: fase2 ? 980 : 380,
+      x: fase2 ? 560 : 960,
+      y: fase2 ? 980 : 604,
       c: fase2 ? at - 1 : t('milésimas', 357),
       tam: 1.1,
       dir: fase2 ? 'ninguna' : 'izq'
@@ -1227,11 +1227,10 @@
     }));
   }
 
-  // la energia del dia: lo dificil temprano (fase 1), lo facil al final (fase 2)
+  // la energia del dia: lo dificil temprano, lo facil al final
   function EscEnergia(props) {
     var T = props.T,
-      at = props.at,
-      fase = props.fase;
+      at = props.at;
     var cD = props.cDificil,
       cF = props.cFacil;
     var bloque = function (x, y, color, c, key, txt) {
@@ -1248,7 +1247,7 @@
         e: en
       }, /*#__PURE__*/React.createElement("div", {
         style: {
-          width: 230,
+          width: 260,
           height: 70,
           borderRadius: 14,
           background: color,
@@ -1271,22 +1270,22 @@
       y: 880,
       w: 1400,
       h: 600,
-      c: fase === 1 ? at - 0.2 : at - 3,
+      c: at - 0.2,
       ejeX: "hora del d\xEDa",
       ejeY: "energ\xEDa",
       curvas: [{
         puntos: [[0, 0.95], [0.3, 0.78], [0.6, 0.4], [1, 0.12]],
         color: 'negro',
         grosor: 10,
-        c: fase === 1 ? at : at - 3,
+        c: at,
         dur: 1.0
       }]
-    }), bloque(560, 380, YEL, fase === 1 ? cD : at - 3, 'd1', 'Lo difícil'), bloque(820, 470, YEL, fase === 1 ? cD + 0.5 : at - 3, 'd2', 'Lo pesado'), fase === 2 ? bloque(1380, 700, GRY, cF, 'f1', 'Lo fácil') : null, fase === 2 ? bloque(1600, 760, GRY, cF + 0.5, 'f2', 'Lo irrelevante') : null, /*#__PURE__*/React.createElement(X.Rotulo, {
+    }), bloque(610, 290, YEL, cD, 'd1', 'Lo difícil'), bloque(840, 380, YEL, cD + 0.5, 'd2', 'Lo pesado'), bloque(1330, 610, GRY, cF, 'f1', 'Lo fácil'), bloque(1630, 720, GRY, cF + 0.5, 'f2', 'Lo irrelevante'), /*#__PURE__*/React.createElement(X.Rotulo, {
       T: T,
-      txt: fase === 1 ? 'Energía del día' : 'Lo duro temprano',
-      x: fase === 1 ? 1300 : 1200,
+      txt: "Lo duro, temprano",
+      x: 1300,
       y: 300,
-      c: fase === 1 ? cD + 0.9 : cF + 0.9,
+      c: cD + 0.9,
       tam: 1.1,
       dir: "izq"
     }));
@@ -1297,7 +1296,7 @@
     var T = props.T,
       at = props.at;
     var c7 = t('700', 600);
-    var k = Easing.easeInOutCubic(clamp((T - c7) / 2.4, 0, 1));
+    var k = Easing.easeInOutCubic(clamp((T - c7) / 1.3, 0, 1));
     var v = Math.round(634 + 66 * k);
     var en = mov.entra(T, at, {
       dy: 30
@@ -1528,7 +1527,7 @@
       txt: "La ra\xEDz: el prop\xF3sito",
       x: 1300,
       y: 880,
-      c: t('propósito claro', 615) + 1.2,
+      c: t('propósito claro', 615) + 0.2,
       tam: 1.15,
       dir: "izq"
     }));
@@ -1671,8 +1670,8 @@
       T: T,
       txt: "Aunque no entiendan",
       x: 1410,
-      y: 960,
-      c: t('no entienda', 643),
+      y: 945,
+      c: t('aunque la misma', 640) + 0.2,
       tam: 1.15
     }));
   }
@@ -1734,9 +1733,9 @@
     }), /*#__PURE__*/React.createElement(E.Titulo, {
       T: T,
       x: 960,
-      y: 960,
+      y: 190,
       c: cR,
-      tam: 0.72,
+      tam: 1.1,
       marcadas: ['respeto']
     }, "Respeto por ti mismo"));
   }
@@ -1772,7 +1771,16 @@
       c: cC,
       tam: 1.6,
       marcadas: ['creer']
-    }, "Creer para ver"), /*#__PURE__*/React.createElement(E.Texto, {
+    }, "Creer para ver"), /*#__PURE__*/React.createElement("div", {
+      style: {
+        position: 'absolute',
+        left: 0,
+        top: 0,
+        width: 1920,
+        height: 1080,
+        transform: 'translateY(' + (-330 * (1 - mov.prog(T, cX + 0.2, 0.7, Easing.easeInOutCubic))).toFixed(1) + 'px)'
+      }
+    }, /*#__PURE__*/React.createElement(E.Texto, {
       T: T,
       x: 960,
       y: 860,
@@ -1781,7 +1789,7 @@
       mayus: true,
       tam: 0.95,
       color: TENUE
-    }, "Ilia Topuria"));
+    }, "Ilia Topuria")));
   }
 
   // el 3 queda en pausa: "espera"
@@ -1798,7 +1806,7 @@
     return /*#__PURE__*/React.createElement(X.Marco, {
       p: props
     }, /*#__PURE__*/React.createElement(E.Pos, {
-      x: 420,
+      x: 420 + 540 * (1 - mov.prog(T, cP - 0.15, 0.6, Easing.easeInOutCubic)),
       y: 500,
       e: mov.entra(T, at - 0.1, {
         dy: 40
@@ -1871,7 +1879,7 @@
       n: 'diana',
       txt: 'Lo que quieres mañana',
       c: t('para poder', 7),
-      cIco: t('quieres', 9),
+      cIco: t('conseguir', 8),
       bien: t('mañana', 9) + 0.1
     },
     cCon: t('para poder', 7) - 0.3,
@@ -1882,8 +1890,10 @@
   }, {
     entra: 'latigo',
     sale: 'latigo'
-  }), p.detras(t('preciso momento', 12) - 0.1, 14.68, 'AHORA', {
-    color: 'amarillo'
+  }), p.detras(t('en este preciso', 13) - 0.05, 14.68, 'AHORA', {
+    color: 'amarillo',
+    tam: 440,
+    y: 260
   }), esc(14.9, 18.8, X.Balanza, {
     encabezado: 'En el fondo lo sabes',
     hacia: 'der',
@@ -1913,13 +1923,13 @@
     sale: 'latigo'
   }), dice('simplista', 20, 2.2, {
     marcadas: ['simplista']
-  }, 'un poco simplista'), tapar(22.8, 23.8), esc(23.7, 26.9, X.Capas, {
+  }, 'un poco simplista'), tapar(22.8, 23.8), esc(23.7, 27.4, X.Capas, {
     encabezado: 'La disciplina',
     izqTxt: 'Lo simple',
     cMas: t('muchísimos', 24) + 0.4,
     rotulo: {
       txt: 'Hay muchas más capas',
-      c: t('conceptos', 25)
+      c: t('muchísimos', 25)
     }
   }, {
     entra: 'barrido',
@@ -1928,7 +1938,7 @@
     marcadas: ['disciplinados.']
   }, 'ser disciplinados de verdad'), tapar(31.0, 32.2), dice('quédate en este video', 31.5, 2.2, {
     marcadas: ['video']
-  }), esc(34.4, 43.9, X.Opciones, {
+  }), esc(34.4, 45.4, X.Opciones, {
     encabezado: 'En este video',
     cols: 2,
     activo: 'ultimo',
@@ -1952,10 +1962,8 @@
     }]
   }, {
     entra: 'barrido',
-    sale: 'latigo'
-  }), dice('acompáñanos', 43, 1.5, {
-    marcadas: ['acompáñanos.']
-  }, 'acompáñanos.'), /* ---------------- CAPITULO 1 ---------------- */
+    sale: 'corte'
+  }), /* ---------------- CAPITULO 1 ---------------- */
   p.capitulo(45.4 - VENT.barrido, 47.9 + VENT.latigo, {
     n: 1,
     de: 3,
@@ -1968,8 +1976,8 @@
   }), tapar(53.4, 55.8), dice('presente', 53, 2.6, {
     marcadas: ['futuro.']
   }, 'presente y futuro'), esc(56.7, 60.9, X.Barras, {
-    encabezado: 'Altas en el gimnasio · por mes',
-    nota: 'Fuente: IHRSA · altas de enero',
+    encabezado: 'Inscritos de enero que siguen yendo',
+    nota: 'Ilustrativo · según IHRSA',
     alto: 470,
     base: 840,
     barras: [{
@@ -2051,7 +2059,7 @@
     sale: 'latigo'
   }), p.titular(t('esfuerzos y sacrificios', 60) - 0.1, 63.3, 'Esfuerzos y\nsacrificios', {
     marcadas: ['sacrificios']
-  }), esc(63.6, 67.3, X.Pensamiento, {
+  }), esc(63.6, 67.85, X.Pensamiento, {
     x: 560,
     c: 63.6,
     cNube: 63.8,
@@ -2087,28 +2095,28 @@
     }]
   }, {
     entra: 'barrido',
-    sale: 'latigo'
-  }), esc(68.4, 72.7, EscPrecio, {}, {
-    entra: 'latigo',
-    sale: 'latigo'
-  }), esc(73.6, 77.0, X.Camino, {
+    sale: 'corte'
+  }), esc(67.85, 73.15, EscPrecio, {}, {
+    entra: 'corte',
+    sale: 'corte'
+  }), esc(73.15, 77.7, X.Camino, {
     obstaculo: true,
     final: 'abandona',
-    cInicio: 73.6,
+    cInicio: 73.2,
     cObstaculo: t('dificultad', 74) - 0.2,
-    cFinal: t('abandonan', 76) - 0.3,
+    cFinal: t('simplemente', 76) - 0.1,
     rotulos: [{
       txt: 'Al primer golpe abandonan',
       x: 1100,
       y: 300,
-      c: t('abandonan', 76),
+      c: t('simplemente', 76) + 0.2,
       dir: 'ninguna'
     }]
   }, {
-    entra: 'latigo',
-    sale: 'latigo'
-  }), esc(77.8, 81.5, X.Progreso, {
-    cInicio: 77.8,
+    entra: 'corte',
+    sale: 'corte'
+  }), esc(77.7, 81.5, X.Progreso, {
+    cInicio: 77.75,
     cFin: 81.3,
     desde: 0.05,
     hasta: 0.11,
@@ -2126,7 +2134,7 @@
       y: 720
     }
   }, {
-    entra: 'latigo',
+    entra: 'corte',
     sale: 'latigo'
   }), dice('extremadamente difícil', 82, 2.2, {
     marcadas: ['difícil']
@@ -2184,6 +2192,8 @@
       tam: 300
     },
     c: 124.1,
+    cy: 500,
+    ry: 300,
     items: [{
       n: 'mensaje',
       txt: 'Amigos',
@@ -2213,7 +2223,7 @@
   }, {
     entra: 'corte',
     sale: 'latigo'
-  }), p.caja(t('no es tu culpa', 134) - 0.05, 137.4, 'Quizás no es tu culpa', {
+  }), p.caja(t('quizás', 136) - 0.05, 137.5, 'Quizás no es tu culpa', {
     pos: [960, 990],
     tam: 0.8,
     sobreEscena: true,
@@ -2269,16 +2279,18 @@
     sale: 'latigo'
   }), p.titular(t('no necesitas esforzarte', 158) - 0.1, 163.0, 'No necesitas\nesforzarte', {
     marcadas: ['esforzarte'],
-    sub: 'ni sufrir para conseguir lo básico'
-  }), p.mantener(167.1, 170.0), p.etiqueta(t('comida', 165) - 0.05, 170.0, 'Comida', {
+    sub: 'ni sufrir para\nconseguir lo básico',
+    cSub: t('ni sufrir', 160) - 0.05,
+    tam: 0.74
+  }), p.mantener(167.1, 170.0), p.etiqueta(t('comida', 165) - 0.05, 169.85, 'Comida', {
     pos: [140, 230],
     dir: 'der',
     ancla: 'izq'
-  }), p.etiqueta(t('refugio', 167) - 0.05, 170.0, 'Refugio', {
+  }), p.etiqueta(t('refugio', 167) - 0.05, 169.85, 'Refugio', {
     pos: [140, 330],
     dir: 'der',
     ancla: 'izq'
-  }), p.etiqueta(t('hogar', 168) - 0.05, 170.0, 'Hogar', {
+  }), p.etiqueta(t('hogar', 168) - 0.05, 169.85, 'Hogar', {
     pos: [140, 430],
     dir: 'der',
     ancla: 'izq'
@@ -2293,14 +2305,14 @@
     }],
     rotulo: {
       txt: 'Uno entre cientos',
-      c: 177.6,
-      y: 990
+      c: 177.4,
+      y: 935
     }
   }, {
     entra: 'zoom',
     sale: 'latigo'
-  }), tapar(181.4, 182.6), dice('no existen', 180, 2.2, {
-    marcadas: ['existen']
+  }), tapar(181.4, 182.6), dice('no quiere decir', 180, 2.4, {
+    marcadas: ['existan']
   }, 'no quiere decir que no existan'), esc(184.3, 188.2, EscTuTambien, {}, {
     entra: 'latigo',
     sale: 'corte'
@@ -2343,24 +2355,25 @@
       txt: 'La disciplina sigue',
       x: 0.78,
       y: 1.05,
-      c: t('se va', 210),
+      c: t('así como viene', 209) + 0.6,
       fondo: GRN
     }]
   }, {
     entra: 'latigo',
     sale: 'corte'
-  }), p.cita(211.3, 217.3 + VENT.latigo, {
+  }), p.cita(211.3, 218.2 + VENT.latigo, {
     texto: 'No actúes por emoción, actúa por deber.',
     autor: 'Marco Aurelio',
     rol: 'emperador romano',
     marcadas: ['deber.'],
+    previa: true,
     entra: 'corte',
     sale: 'latigo'
   }), esc(219.9, 224.0, EscFuturo, {
     cGrande: t('futuro yo', 219) + 0.3,
     cFlecha: t('dependen', 220),
     cBombillo: t('acciones', 221),
-    cTxt: t('presente', 222)
+    cTxt: t('futuro yo', 219) + 0.6
   }, {
     entra: 'latigo',
     sale: 'latigo'
@@ -2382,7 +2395,7 @@
     }],
     rotulos: [{
       txt: 'Placer inmediato',
-      x: 0.3,
+      x: 0.42,
       y: 1.08,
       c: 226.4,
       fondo: RED
@@ -2398,11 +2411,13 @@
     sale: 'latigo'
   }), tapar(231.4, 233.0), dice('totalmente miserable', 230, 2.2, {
     marcadas: ['miserable']
-  }, 'una vida miserable'), tapar(236.2, 237.2, {
-    mov: 'golpe'
+  }, 'una vida miserable'), tapar(236.0, 237.2, {
+    mov: 'golpe',
+    zoom: 1.55,
+    foco: [0.47, 0.34]
   }), p.texto(t('todo lo contrario', 234) - 0.05, 237.0, 'todo lo contrario', {
     marcadas: ['contrario']
-  }), p.escena(237.2 - VENT.latigo, t('mohamed', 241) - 0.15, X.Fila, {
+  }), p.escena(237.2 - VENT.latigo, t('mohamed', 241) + 0.25, X.Fila, {
     con: '→',
     items: [{
       n: 'pesa',
@@ -2411,18 +2426,19 @@
     }, {
       n: 'trofeo',
       txt: 'Después la gloria',
-      c: t('gloria', 240) - 0.3,
-      check: t('gloria', 240) + 0.2
+      c: t('luego', 241) - 0.2,
+      check: t('gloria', 240)
     }]
   }, {
     entra: 'latigo',
-    sale: 'latigo'
-  }), p.cita(t('mohamed', 241) - 0.15 + 0.4, 254.2 + VENT.latigo, {
+    sale: 'corte'
+  }), p.cita(t('mohamed', 241) + 0.25, 255.0 + VENT.latigo, {
     texto: 'Odié cada segundo de mis entrenamientos, pero me repetía: no renuncies, sufre ahora y vive el resto de tu vida como un campeón.',
     autor: 'Muhammad Ali',
     rol: 'campeón de boxeo',
     marcadas: ['renuncies,', 'campeón.'],
-    entra: 'latigo',
+    previa: true,
+    entra: 'corte',
     sale: 'latigo'
   }), p.camara(t('sería', 257) - 0.1, 259.7, {
     zoom: 1.2,
@@ -2466,18 +2482,21 @@
     }, {
       fig: 'empuja',
       txt: 'Lo que haces',
-      c: t('acciones', 278),
-      check: t('acciones', 278) + 0.8
+      c: t('pensamientos', 277) + 0.6,
+      check: t('acciones', 278) + 0.2
     }]
   }, {
     entra: 'barrido',
     sale: 'latigo'
-  }), tapar(282.2, 283.4), p.texto(282.35, 283.6, 'dichos objetivos', {
+  }), tapar(282.2, 283.4, {
+    zoom: 1.5,
+    foco: [0.47, 0.34]
+  }), p.texto(282.35, 283.6, 'dichos objetivos', {
     marcadas: ['objetivos']
   }), esc(284.9, 289.0, EscFuturo, {
     cGrande: 285.3,
     cFlecha: 285.7,
-    cBombillo: t('hoy', 287) - 0.3,
+    cBombillo: t('completamente', 285),
     cTxt: t('depende', 284) + 0.4,
     txtFuturo: 'Depende de lo que haces hoy'
   }, {
@@ -2499,7 +2518,10 @@
   }), esc(306.1, 311.1, EscCampana, {}, {
     entra: 'barrido',
     sale: 'latigo'
-  }), tapar(313.6, 314.4), dice('no hacen', 311, 1.8, {
+  }), tapar(313.5, 314.45, {
+    zoom: 1.55,
+    foco: [0.47, 0.36]
+  }), dice('no hacen', 311, 1.8, {
     marcadas: ['hacen.']
   }, 'lo que la media no hace'), esc(317.4, 321.5, EscBarrera, {}, {
     entra: 'latigo',
@@ -2510,7 +2532,7 @@
     marcadas: ['tanto']
   }, '¿por qué se esfuerzan tanto?'), p.mantener(332.4, 336.5), dice('disfrutar la vida', 332, 2.4, {
     marcadas: ['disfrutar']
-  }), esc(336.5, 341.0, EscVozEntorno, {}, {
+  }), esc(336.5, 342.1, EscVozEntorno, {}, {
     entra: 'barrido',
     sale: 'latigo'
   }), dice('personas disciplinadas', 341, 2.4, {
@@ -2518,8 +2540,10 @@
   }, 'las personas disciplinadas'), esc(344.7, 349.7, EscCaminos, {}, {
     entra: 'latigo',
     sale: 'latigo'
-  }), p.detras(t('por qué no lo hacen', 350) - 0.05, 352.3, '¿POR QUÉ?', {
-    color: 'amarillo'
+  }), p.detras(t('por qué no lo hacen', 350) - 0.05, 352.3, '¿POR   QUÉ?', {
+    color: 'amarillo',
+    tam: 300,
+    x: 880
   }), tapar(353.8, 355.0, {
     mov: 'golpe'
   }), dice('sencilla razón', 352, 1.8, {
@@ -2529,13 +2553,13 @@
   }, {
     entra: 'latigo',
     sale: 'corte'
-  }), p.escena(361.7, 364.5 + VENT.corte, EscTorre, {
+  }), p.escena(361.7, 364.55, EscTorre, {
     fase: 2,
     cSaca: 361.85
   }, {
     entra: 'corte',
     sale: 'corte'
-  }), esc(366.2, 369.6, EscAleja, {}, {
+  }), tapar(365.45, 366.0), esc(366.2, 369.6, EscAleja, {}, {
     entra: 'latigo',
     sale: 'latigo'
   }), p.camara(t('muy bien', 371) - 0.1, t.fin('qué hago', 376) + 0.4, {
@@ -2555,8 +2579,6 @@
     sale: 'latigo'
   }), p.detras(t('la disciplina funciona', 382) - 0.05, 385.05, 'DISCIPLINA', {
     color: 'amarillo'
-  }), dice('como un músculo', 383, 1.9, {
-    marcadas: ['músculo.']
   }), esc(385.3, 388.6, EscMusculo, {}, {
     entra: 'latigo',
     sale: 'latigo'
@@ -2578,7 +2600,7 @@
     sale: 'latigo'
   }), tapar(408.0, 409.4), dice('lograr el objetivo', 407, 1.8, {
     marcadas: ['objetivo.']
-  }), p.escena(t('son las listas', 412) - 0.4, 415.6, X.Paso, {
+  }), p.escena(413.3, 415.6, X.Paso, {
     n: 1,
     titulo: 'Haz listas',
     marcadas: ['listas'],
@@ -2632,19 +2654,14 @@
   }, {
     entra: 'latigo',
     sale: 'latigo'
-  }), dice('más fricción', 424, 2, {
-    marcadas: ['fricción']
-  }), esc(426.4, 429.2, EscEnergia, {
-    fase: 1,
-    cDificil: t('hazlo al principio', 427) - 0.2
-  }, {
-    entra: 'barrido',
-    sale: 'corte'
-  }), p.escena(429.2, 434.2 + VENT.latigo, EscEnergia, {
-    fase: 2,
+  }), p.texto(424.45, 426.0, 'lo que más fricción te genere', {
+    marcadas: ['fricción'],
+    voz: false
+  }), esc(426.4, 434.2, EscEnergia, {
+    cDificil: t('hazlo al principio', 427) - 0.2,
     cFacil: t('más fácil', 431)
   }, {
-    entra: 'corte',
+    entra: 'barrido',
     sale: 'latigo'
   }), p.mantener(435.6, 438.1), dice('tiempo límite', 435, 2.2, {
     marcadas: ['límite']
@@ -2670,15 +2687,15 @@
         T: T,
         x: 1420,
         y: 430,
-        c: t('comprometas', 443) - 0.2,
+        c: t('relajes', 440) - 0.1,
         tam: 300,
         vueltas: 1.6
       }), /*#__PURE__*/React.createElement(X.BateriaGrande, {
         T: T,
         x: 1420,
         y: 760,
-        c: t('tiempo determinado', 446),
-        nivel: 0.9 - 0.75 * Easing.easeInOutCubic(clamp((T - t('tiempo determinado', 446) - 0.4) / 2.2, 0, 1)),
+        c: t('comprometas', 443) + 0.5,
+        nivel: 0.9 - 0.75 * Easing.easeInOutCubic(clamp((T - t('tiempo determinado', 446)) / 0.9, 0, 1)),
         verde: true
       }));
     },
@@ -2740,8 +2757,6 @@
     sale: 'latigo'
   }), tapar(468.2, 469.0, {
     mov: 'golpe'
-  }), dice('muy importante', 466, 1.8, {
-    marcadas: ['importante']
   }), esc(469.0, 472.6, X.Frase, {
     texto: 'No existe la\nperfección',
     marcadas: ['perfección'],
@@ -2763,14 +2778,23 @@
       txt: 'Leer'
     }],
     derecha: function (T) {
-      return /*#__PURE__*/React.createElement(Corazon, {
+      // gris y apagado mientras no completaste todo; se enciende con 'y eso esta bien'
+      var k = mov.prog(T, t('eso está bien', 476) - 0.1, 0.5, Easing.easeInOutCubic);
+      return /*#__PURE__*/React.createElement("div", {
+        style: {
+          position: 'absolute',
+          inset: 0,
+          filter: k < 0.99 ? 'grayscale(' + (1 - k).toFixed(3) + ')' : undefined,
+          opacity: 0.5 + 0.5 * k
+        }
+      }, /*#__PURE__*/React.createElement(Corazon, {
         T: T,
         x: 1450,
         y: 430,
-        c: t('eso está bien', 476),
+        c: t('completaste', 472),
         tam: 280,
         acento: YEL
-      });
+      }));
     },
     rotulo: {
       txt: 'Y está bien',
@@ -2781,8 +2805,9 @@
   }, {
     entra: 'corte',
     sale: 'latigo'
-  }), dice('días perfectos', 478, 2.2, {
-    marcadas: ['perfectos']
+  }), dice('no van a haber', 478, 1.6, {
+    marcadas: ['perfectos'],
+    voz: false
   }, 'no hay días perfectos'), esc(481.7, 486.0, X.Calendario, {
     c: 481.7,
     cLlena: 481.95,
@@ -2816,7 +2841,7 @@
     marcadas: ['nada']
   }), esc(511.5, 516.5, X.Balanza, {
     hacia: 'der',
-    cGira: t('dejar de', 515),
+    cGira: t('también', 514) + 0.4,
     izq: {
       n: 'corazon',
       txt: 'Lo que haces',
@@ -2884,13 +2909,15 @@
     rotulo: {
       txt: 'Sé brutalmente honesto',
       c: t('brutalmente', 533),
-      y: 960
+      y: 1000
     }
   }, {
     entra: 'latigo',
     sale: 'latigo'
-  }), p.detras(t('elimines', 537) - 0.05, 540.25, 'ELIMINA', {
-    color: 'amarillo'
+  }), p.titular(t('elimines', 537) - 0.1, 540.2, 'Elimina lo\nque no sirve', {
+    marcadas: ['Elimina'],
+    lado: 'der',
+    tam: 0.85
   }), p.mantener(540.4, 550.0), p.caja(t('deja de seguir a gente', 539) - 0.05, t('deja de seguir haciendo', 542) - 0.1, 'Deja de seguir a quien no aporta', {
     pos: 'abajo',
     tam: 0.75
@@ -2903,7 +2930,7 @@
   }), tapar(555.2, 556.4), dice('primero tienes que dejar de hacer', 553, 2.6, {
     marcadas: ['dejar']
   }, 'primero, deja de hacer'), esc(556.5, 561.0, X.Fila, {
-    encabezado: 'Igual o más importante que hacer',
+    encabezado: 'Dejar de hacer importa tanto como hacer',
     items: [{
       n: 'celular',
       c: 556.6,
@@ -2948,27 +2975,27 @@
     },
     rotulo: {
       txt: 'Poco y bueno',
-      c: t('siempre', 566),
+      c: 566.6,
       y: 900
     }
   }, {
     entra: 'latigo',
     sale: 'corte'
   }), p.escena(568.7, 572.3 + VENT.latigo, EscPausa, {
-    cPausa: 570.9
+    cPausa: 570.1
   }, {
     entra: 'corte',
     sale: 'latigo'
-  }), p.camara(t('espera', 573) - 0.05, 576.15, {
-    zoom: 1.24,
+  }), p.camara(574.55, 576.15, {
+    zoom: 1.4,
     foco: [0.47, 0.4],
     mov: 'golpe',
     bn: true
-  }), p.detras(t('espera', 573) - 0.05, 576.05, '¡ESPERA!', {
+  }), p.flash(574.72), p.detras(t('espera', 573) - 0.05, 576.05, '¡ESPERA!', {
     color: 'amarillo'
   }), tapar(576.4, 578.8), dice('un mensaje muy importante', 576, 2.4, {
     marcadas: ['importante']
-  }), esc(580.1, 583.1, X.Fila, {
+  }), esc(580.1, 584.4, X.Fila, {
     items: [{
       n: 'pulgar',
       txt: 'Dale like',
@@ -2980,7 +3007,7 @@
     }, {
       n: 'mensaje',
       txt: 'Compártelo',
-      c: t('compartir', 581)
+      c: t('compartir', 581) - 0.2
     }]
   }, {
     entra: 'barrido',
@@ -2988,21 +3015,42 @@
   }), p.titular(t('bastante edición', 584) - 0.1, 590.6, 'Edición y\nanimaciones', {
     marcadas: ['animaciones'],
     sub: 'tardan bastante en hacerse'
-  }), p.mantener(592.7, 595.2), p.etiqueta(592.7, 595.2, 'Lo edito yo mismo', {
-    pos: [140, 230],
-    dir: 'der',
-    ancla: 'izq'
+  }), esc(592.7, 595.2, X.Tareas, {
+    titulo: 'Yo mismo',
+    x: 620,
+    c: 592.7,
+    items: [{
+      txt: 'Grabar',
+      check: 592.75
+    }, {
+      txt: 'Editar',
+      check: t('edito', 592)
+    }, {
+      txt: 'Guion',
+      check: t('inicio', 593)
+    }],
+    derecha: function (T) {
+      return /*#__PURE__*/React.createElement(E.Icono, {
+        T: T,
+        n: "laptop",
+        x: 1420,
+        y: 520,
+        c: 592.8,
+        tam: 320
+      });
+    }
+  }, {
+    entra: 'latigo',
+    sale: 'latigo'
   }), esc(597.2, 603.6, EscMetaCanal, {}, {
     entra: 'barrido',
     sale: 'latigo'
-  }), p.suscribete(604.2, 609.0), tapar(605.8, 609.2), esc(609.2, 612.5, EscCalidad, {
+  }), p.suscribete(604.2, 608.4), tapar(605.8, 609.2), esc(609.2, 612.5, EscCalidad, {
     cPlay: t('calidad', 609) - 0.2
   }, {
     entra: 'latigo',
     sale: 'latigo'
-  }), tapar(613.6, 614.8), dice('continuamos con el video', 612, 2, {
-    marcadas: ['continuamos']
-  }, 'continuemos'), p.escena(614.7 - VENT.barrido, 616.3, X.Paso, {
+  }), tapar(613.6, 614.8), p.escena(614.7 - VENT.barrido, 616.3, X.Paso, {
     n: 3,
     titulo: 'Ten un propósito',
     marcadas: ['propósito'],
@@ -3017,13 +3065,13 @@
   }), dice('por qué haces lo que haces', 619, 2.4, {
     marcadas: ['por', 'qué']
   }, '¿por qué haces lo que haces?'), esc(622.0, 625.4, EscExcusas, {
-    cs: [t('excusa', 622) - 0.3, t('excusa', 622) + 0.4, t('rendirte', 623) - 0.6]
+    cs: [622.3, t('excusa', 622) + 0.4, t('rendirte', 623) - 0.6]
   }, {
     entra: 'latigo',
     sale: 'latigo'
-  }), dice('bien sólido', 626, 2.2, {
-    marcadas: ['sólido']
-  }, 'bien definido y sólido'), esc(628.8, 631.1, EscExcusas, {
+  }), dice('propósito bien definido', 626, 2.0, {
+    marcadas: ['definido']
+  }), esc(628.8, 631.1, EscExcusas, {
     firme: true,
     cs: [628.85, 629.35, 629.85]
   }, {
@@ -3031,12 +3079,12 @@
     sale: 'latigo'
   }), p.mantener(633.3, 637.0), dice('te conviertes en esa persona', 631, 2.6, {
     marcadas: ['persona']
-  }), dice('adversidades', 637, 2.4, {
+  }), dice('a pesar de todas', 637, 3.3, {
     marcadas: ['adversidades']
   }, 'a pesar de todas las adversidades'), esc(640.6, 644.6, EscNoEntienden, {}, {
     entra: 'latigo',
     sale: 'latigo'
-  }), p.titular(t('veas atrás', 647) - 0.1, 650.7, 'Valió\nla pena', {
+  }), p.titular(t('valió la pena', 652) - 0.1, 654.3, 'Valió\nla pena', {
     marcadas: ['pena'],
     lado: 'izq'
   }), p.mantener(650.9, 653.6), esc(654.7, 662.25, EscAmorPropio, {}, {
@@ -3045,9 +3093,11 @@
   }), p.escena(662.25, 670.5 + VENT.latigo, EscTopuria, {}, {
     entra: 'corte',
     sale: 'latigo'
-  }), p.titular(t('convertirte', 670) - 0.1, 675.5, 'Conviértete en\nesa persona', {
+  }), p.titular(t('convertirte', 670) - 0.1, 675.5, 'Conviértete\nen esa persona', {
     marcadas: ['persona'],
-    sub: 'gracias a la disciplina'
+    sub: 'gracias a la disciplina',
+    cSub: t('persona', 672) + 0.5,
+    tam: 0.9
   }), esc(675.8, 679.7, X.Fila, {
     items: [{
       n: 'campana',
@@ -3065,12 +3115,12 @@
   }, {
     entra: 'barrido',
     sale: 'latigo'
-  }), p.suscribete(680.6, 686.4), esc(687.8, 691.1, EscCalidad, {
+  }), p.suscribete(681.25, 686.4), esc(687.8, 691.8, EscCalidad, {
     cPlay: 688.3
   }, {
     entra: 'latigo',
     sale: 'latigo'
-  }), tapar(692.8, 696.0), dice('muchas gracias', 692, 2.2, {
+  }), tapar(692.2, 696.0), dice('muchas gracias', 692, 2.2, {
     marcadas: ['gracias']
   }, '¡muchas gracias!'), p.cierre(696.9 - VENT.barrido, 706.8)];
   L.registrar({

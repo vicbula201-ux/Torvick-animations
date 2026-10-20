@@ -1113,10 +1113,10 @@
       f = reloj(props);
     var items = props.items || [];
     var c0 = ancla(props.c != null ? props.c : f(0.02), props.at);
-    var cx = 960,
-      cy = 560,
-      rx = 640,
-      ry = 330;
+    var cx = props.cx || 960,
+      cy = props.cy || 560,
+      rx = props.rx || 640,
+      ry = props.ry || 330;
     return /*#__PURE__*/React.createElement(Marco, {
       p: props
     }, props.centro ? /*#__PURE__*/React.createElement(Pieza, {
