@@ -866,9 +866,12 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
       objectFit: 'cover',
       display: 'block'
     };
+    // con un texto detras, el fondo baja un poco (la persona, recortada encima, no)
+    var filtro = filtrosCamara(st, ext);
+    if (props.atenuar > 0.002) filtro = (filtro ? filtro + ' ' : '') + 'brightness(' + (1 - 0.28 * props.atenuar).toFixed(3) + ')';
     return /*#__PURE__*/React.createElement(MarcoCamara, {
       g: g,
-      filtro: filtrosCamara(st, ext),
+      filtro: filtro,
       sombra: true,
       opacidad: ext ? ext.opacidad : 1
     }, props.render ? /*#__PURE__*/React.createElement("img", {
@@ -3976,7 +3979,10 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
       st: st,
       ext: ext,
       render: props.render,
-      medioRef: props.medioRef
+      medioRef: props.medioRef,
+      atenuar: detras.reduce(function (m, b) {
+        return Math.max(m, Math.min(clamp((T - b.ini + 0.05) / 0.35, 0, 1), 1 - clamp((T - b.fin) / 0.4, 0, 1)));
+      }, 0)
     }), detras.length ? /*#__PURE__*/React.createElement(React.Fragment, null, detras.map(function (b, i) {
       return /*#__PURE__*/React.createElement(DetrasBeat, {
         key: i,

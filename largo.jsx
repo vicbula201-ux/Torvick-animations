@@ -507,8 +507,11 @@
     var st = props.st, ext = props.ext;
     var g = geometriaCamara(st, ext);
     var estiloMedio = { position: 'absolute', left: 0, top: 0, width: ANCHO, height: ALTO, objectFit: 'cover', display: 'block' };
+    // con un texto detras, el fondo baja un poco (la persona, recortada encima, no)
+    var filtro = filtrosCamara(st, ext);
+    if (props.atenuar > 0.002) filtro = (filtro ? filtro + ' ' : '') + 'brightness(' + (1 - 0.28 * props.atenuar).toFixed(3) + ')';
     return (
-      <MarcoCamara g={g} filtro={filtrosCamara(st, ext)} sombra opacidad={ext ? ext.opacidad : 1}>
+      <MarcoCamara g={g} filtro={filtro} sombra opacidad={ext ? ext.opacidad : 1}>
         {props.render
           ? <img ref={props.medioRef} style={estiloMedio} alt="" />
           : <video ref={props.medioRef} src={props.def.video} style={estiloMedio} playsInline preload="auto" />}
@@ -1983,7 +1986,8 @@
     return (
       <div style={{ position: 'absolute', left: 0, top: 0, width: ANCHO, height: ALTO, overflow: 'hidden', background: INK }}>
         <FondoDivididas T={T} def={def} />
-        <Camara T={T} def={def} st={st} ext={ext} render={props.render} medioRef={props.medioRef} />
+        <Camara T={T} def={def} st={st} ext={ext} render={props.render} medioRef={props.medioRef}
+          atenuar={detras.reduce(function (m, b) { return Math.max(m, Math.min(clamp((T - b.ini + 0.05) / 0.35, 0, 1), 1 - clamp((T - b.fin) / 0.4, 0, 1))); }, 0)} />
         {detras.length ? (
           <React.Fragment>
             {detras.map(function (b, i) { return <DetrasBeat key={i} T={T} b={b} />; })}
