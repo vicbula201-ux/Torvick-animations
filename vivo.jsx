@@ -225,7 +225,9 @@
   //              bien: (T, f, t, s) => elem, vibraMal }  dos franjas apiladas
   //   tomas / golpes / pulsos   como V.Camara (las X suman su golpe solas)
   //   lienzo   (T, f, t) => SVG en coordenadas del lienzo, dentro de la camara
-  //   mal / bien  [{ x, y, cuando, s }]   (en una comparacion hay valores por defecto)
+  //   encima   (T, f, t) => elementos HTML fuera de la camara (cuentas, piezas fijas)
+  //   mal / bien  [{ x, y, cuando, s, hasta }]   (en una comparacion hay valores por defecto;
+  //               hasta: fraccion en la que se retira)
   //   r1 / r2     { text, y, cuando, s }
   function escena(o) {
     return function Escena(props) {
@@ -279,8 +281,13 @@
             golpes={golpes} pulsos={o.pulsos}>
             {hijos}
           </Camara>
-          {mal.map(function (m, i) { return <A.Mal key={'m' + i} T={T} cuando={f(m.cuando)} x={m.x} y={m.y} s={m.s} />; })}
-          {bien.map(function (b, i) { return <A.Bien key={'b' + i} T={T} cuando={f(b.cuando)} x={b.x} y={b.y} s={b.s} fase={i * 0.4} />; })}
+          {o.encima ? o.encima(T, f, t) : null}
+          {mal.map(function (m, i) {
+            return <A.Mal key={'m' + i} T={T} cuando={f(m.cuando)} hasta={m.hasta == null ? null : f(m.hasta)} x={m.x} y={m.y} s={m.s} />;
+          })}
+          {bien.map(function (b, i) {
+            return <A.Bien key={'b' + i} T={T} cuando={f(b.cuando)} hasta={b.hasta == null ? null : f(b.hasta)} x={b.x} y={b.y} s={b.s} fase={i * 0.4} />;
+          })}
           {rot(o.r1, 0)}
           {rot(o.r2, 1)}
         </div>

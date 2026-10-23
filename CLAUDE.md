@@ -33,6 +33,9 @@ pantorrilla.jsx                  reels cortos de ejercicios (formato actual, ~30
 proteinas.jsx, hierro.jsx, grasas.jsx, carbohidratos.jsx,
 minerales.jsx, objetivos.jsx     reels cortos con Tor (nutrición y temas de entreno)
 curl-mancuernas.jsx              primer reel del ESTILO 2 (el formato de ahora en adelante)
+triceps-polea.jsx, bulgara.jsx,
+abduccion.jsx, plancha.jsx       reels de ejercicios en estilo 2 (con V.escena)
+peptidos.jsx                     reel con Tor en estilo 2 (con PL.escena2)
 identidad.jsx/.html  foto de perfil y portadas de destacadas (PNG en identidad/)
 face-pull.html    redirige a reels.html#face-pull
 largo.html        videos largos de YouTube (16:9): el video con cortes + capas encima
@@ -289,6 +292,28 @@ referencia. Lo que cambia, todo desde `vivo.jsx` y `reel.jsx`:
 
 `curl-mancuernas.jsx` es la referencia del estilo 2. Los videos anteriores
 siguen con el estilo 1 (no llevan `estilo`).
+
+Para no escribir la cámara y los efectos a mano en cada escena hay dos
+armadores del estilo 2 (los tiempos siguen siendo fracciones):
+
+- **`V.escena({...})`** (ejercicios; `plancha.jsx` es el más simple):
+  `fig` `{x, y, s}` y `figura(T, f, t, s)` con el cuerpo (elemento
+  principal: entra con pop en `at - 0.6` y respira solo; `vibra` lo hace
+  temblar), o `comparar: { cmp, mal, bien }` para las dos franjas mal/bien
+  apiladas; `tomas`, `golpes` y `pulsos` como `V.Camara` (cada X suma su
+  golpe); `lienzo` (SVG dentro de la cámara), `encima` (elementos fuera de
+  la cámara, como `B.Cuenta`), `mal` / `bien` `[{x, y, cuando, s, hasta}]`
+  y `r1` / `r2` (rótulos `V.Rot`, con `y` opcional). `V.fase` y `V.ida`
+  arman las repeticiones (va, aguanta, vuelve lento).
+- **`PL.escena2({...})`** (videos con Tor): lo mismo que `PL.escena` pero
+  con cámara viva, Tor que parpadea y rótulos `V.Rot`.
+
+Las tomas se escriben con un `en([x, y])` que pasa coordenadas del cuerpo
+a coordenadas del lienzo (`foco`) y un `mira` que dice dónde queda ese
+punto en pantalla; en los primeros planos bajá `mira` para que la cabeza
+no quede debajo del rótulo de arriba. En `B.Frente`, `sinZapato` en un lado
+termina la pierna en el tobillo (el pie de atrás de la búlgara, apoyado en
+el banco y fuera de vista).
 
 **Formato corto:** 30 a 35 s *con* el cierre
 de 3 s; la retención de Shorts/Reels está en 20-25 s, así que nada

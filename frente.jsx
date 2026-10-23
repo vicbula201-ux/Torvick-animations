@@ -42,10 +42,12 @@
 
    Pose: { vista: 'frente' | 'cenital', centro, cuello, piso?, cabeza?,
            izq: { codo, mano, rodilla, tobillo, pieAng, hombro?, cadera?,
-                  kCodo?, kMano?, kPie? }, der: { ... },
+                  kCodo?, kMano?, kPie?, sinZapato? }, der: { ... },
            mancuerna?, banco? }
    Si se mueve el cuello (inclinar el torso) hay que mover tambien codo y
    mano: los brazos son puntos absolutos, no siguen solos al hombro.
+   sinZapato: esa pierna termina en el tobillo, sin zapatilla (el pie que
+   se va hacia atras y no se ve, como en la sentadilla bulgara).
    ============================================================ */
 (function (global) {
   'use strict';
@@ -390,7 +392,7 @@
       var lado = {
         lado: l, hombro: S, codo: E, mano: H, cadera: cad, rodilla: rod, tobillo: tob,
         punta: punta, dirPie: dirPie, pieAng: pieAng, medioPie: medioPie, kPie: kPie,
-        kCodo: q.kCodo == null ? 1 : q.kCodo, kMano: q.kMano == null ? 1 : q.kMano,
+        kCodo: q.kCodo == null ? 1 : q.kCodo, kMano: q.kMano == null ? 1 : q.kMano, sinZapato: !!q.sinZapato,
         guiaRodilla: [[medioPie[0], pisoL - 6], [medioPie[0], rod[1] - 80]],
         desvioRodilla: l * (rod[0] - medioPie[0])
       };
@@ -702,7 +704,7 @@
 
     // la pierna termina un poco antes del tobillo para que la zapatilla la tape entera
     var finPierna = function (q) {
-      if (cen) return q.tobillo;
+      if (cen || q.sinZapato) return q.tobillo;
       return suma(q.tobillo, por(unidad(resta(q.rodilla, q.tobillo)), 18));
     };
     var muslo = function (q) { return miembro(q.cadera, q.rodilla, q.lado, PF_MUSLO); };
@@ -737,6 +739,7 @@
     };
 
     var zapatos = lad.map(function (q, i) {
+      if (q.sinZapato) return null;
       if (cen) {
         var z = zapatoArriba(q.tobillo, q.dirPie, q.kPie);
         return (

@@ -44,10 +44,12 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
 
    Pose: { vista: 'frente' | 'cenital', centro, cuello, piso?, cabeza?,
            izq: { codo, mano, rodilla, tobillo, pieAng, hombro?, cadera?,
-                  kCodo?, kMano?, kPie? }, der: { ... },
+                  kCodo?, kMano?, kPie?, sinZapato? }, der: { ... },
            mancuerna?, banco? }
    Si se mueve el cuello (inclinar el torso) hay que mover tambien codo y
    mano: los brazos son puntos absolutos, no siguen solos al hombro.
+   sinZapato: esa pierna termina en el tobillo, sin zapatilla (el pie que
+   se va hacia atras y no se ve, como en la sentadilla bulgara).
    ============================================================ */
 (function (global) {
   'use strict';
@@ -532,6 +534,7 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
         kPie: kPie,
         kCodo: q.kCodo == null ? 1 : q.kCodo,
         kMano: q.kMano == null ? 1 : q.kMano,
+        sinZapato: !!q.sinZapato,
         guiaRodilla: [[medioPie[0], pisoL - 6], [medioPie[0], rod[1] - 80]],
         desvioRodilla: l * (rod[0] - medioPie[0])
       };
@@ -996,7 +999,7 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
 
     // la pierna termina un poco antes del tobillo para que la zapatilla la tape entera
     var finPierna = function (q) {
-      if (cen) return q.tobillo;
+      if (cen || q.sinZapato) return q.tobillo;
       return suma(q.tobillo, por(unidad(resta(q.rodilla, q.tobillo)), 18));
     };
     var muslo = function (q) {
@@ -1034,6 +1037,7 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
       return 'M ' + pt(suma(c, suma(por(n, 20), por(v, -8)))) + ' Q ' + pt(suma(c, por(v, 14))) + ' ' + pt(suma(c, suma(por(n, -20), por(v, -8))));
     };
     var zapatos = lad.map(function (q, i) {
+      if (q.sinZapato) return null;
       if (cen) {
         var z = zapatoArriba(q.tobillo, q.dirPie, q.kPie);
         return /*#__PURE__*/React.createElement("g", {
