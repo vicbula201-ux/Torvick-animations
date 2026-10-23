@@ -6,7 +6,8 @@
 
    PL.escena(o) -> componente de escena ({ T, at, dur }) con:
      o.tor     { x, y, s, flex, boca, musc, muscGris, muscRojo, balanza,
-                 vibra, cuando, extra(g, T, f) } o una lista de varios.
+                 vibra, cuando, extra(g, T, f), ropa, pose } o una lista de varios
+                 (ropa: la de B.Frente, por ejemplo una camiseta; pose: de B.Frente).
                  flex/boca/musc/... pueden ser numeros/objetos o funciones (T, f).
                  Sin cuando, Tor es el elemento principal (ya esta en pantalla).
      o.camara  { zoom, foco, mira } (zoom suma 0.04 * t solo)
@@ -52,7 +53,8 @@
         <TOR.Tor s={s} flex={valor(o.flex, T, f) || 0} boca={valor(o.boca, T, f)} sinPiso
           parpadeo={props.v2 ? global.V.parpadeo(T, props.i * 1.3) : 0}
           musc={valor(o.musc, T, f)} muscGris={valor(o.muscGris, T, f)} muscRojo={valor(o.muscRojo, T, f)}
-          piso={o.balanza ? PISO_BALANZA : undefined} fondo={o.balanza ? balanza : undefined}
+          piso={o.balanza ? PISO_BALANZA : undefined} fondo={o.balanza ? balanza : undefined} ropa={valor(o.ropa, T, f)}
+          pose={valor(o.pose, T, f)}
           extra={o.extra ? function (g) { return o.extra(g, T, f); } : null} />
       </Pos>
     );

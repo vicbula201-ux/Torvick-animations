@@ -5,7 +5,8 @@ audio.py — arma la pista de un reel: musica original + efectos en los momentos
     python3 herramientas/audio.py --dur 32 --cues cues.json --out pista.wav [--sin-musica]
                                   [--musica mi-tema.wav] [--bpm 118] [--semilla 3]
 
-cues.json = [{"tipo": "error"|"bien"|"paso"|"marca"|"golpe", "t": segundos, "g": ganancia}, ...]
+cues.json = [{"tipo": "error"|"bien"|"paso"|"marca"|"golpe"|"siu", "t": segundos, "g": ganancia}, ...]
+("siu": el festejo "¡siuuu!" sintetizado, para el video de Cristiano)
 (lo escribe herramientas/grabar.js a partir de window.REEL.cues()).
 
 Para los videos largos (herramientas/grabar-largo.js):
@@ -297,6 +298,58 @@ def fx_subida(rng):
     return x / (np.abs(x).max() + 1e-9) * 0.5
 
 
+def resonador(x, f, bw):
+    """formante: filtro de 2 polos con frecuencia f y ancho bw (arrays, cambian en el tiempo)"""
+    r = np.exp(-np.pi * bw / SR)
+    c1 = (2 * r * np.cos(2 * np.pi * f / SR)).tolist()
+    c2 = (-r * r).tolist()
+    g = (1 - r).tolist()
+    xs = x.tolist()
+    y = [0.0] * len(xs)
+    y1 = y2 = 0.0
+    for i in range(len(xs)):
+        v = g[i] * xs[i] + c1[i] * y1 + c2[i] * y2
+        y2 = y1
+        y1 = v
+        y[i] = v
+    return np.array(y)
+
+
+def fx_siu(rng):
+    """'¡siuuu!' de festejo, sintetizado (sin grabaciones ajenas): una 's' de ruido y una
+    vocal 'i' que se cierra en 'u' larga, gritada por cuatro voces (Tor y la tribuna)"""
+    dur = 1.9
+    n = seg(dur)
+    t = np.arange(n) / SR
+    out = np.zeros((n, 2))
+    voces = [(1.0, 0.0, 1.0, 0.0), (0.82, 0.035, 0.55, -0.5), (1.14, 0.05, 0.45, 0.5), (0.7, 0.02, 0.5, -0.2)]
+    k = np.clip((t - 0.2) / 0.3, 0, 1)
+    k = k * k * (3 - 2 * k)                       # de 'i' a 'u'
+    F = [(280 + 40 * k, 70), (2250 - 1380 * k, 110), (2950 - 650 * k, 160)]
+    for mult, retraso, gan, pan in voces:
+        # tono de grito: sube al principio y cae despacio, con vibrato
+        f0 = 250 * mult * (1 + 0.16 * np.clip(t / 0.22, 0, 1) - 0.2 * np.clip((t - 0.4) / 1.3, 0, 1))
+        f0 *= 1 + 0.018 * np.sin(2 * np.pi * 5.6 * t + rng.uniform(0, 6))
+        fase = np.cumsum(f0) / SR
+        fuente = 2 * (fase % 1) - 1
+        fuente = pasabajos(fuente, 3600) + 0.04 * rng.standard_normal(n)
+        vocal = sum(resonador(fuente, fq, np.full(n, bw)) * w for (fq, bw), w in zip(F, (1.0, 0.55, 0.3)))
+        env = np.clip((t - 0.15) / 0.05, 0, 1) * np.where(t < 1.3, 1.0, np.exp(-(t - 1.3) / 0.18))
+        ese = pasaaltos(rng.standard_normal(n), 4200) * np.clip(t / 0.03, 0, 1) * np.clip((0.19 - t) / 0.05, 0, 1)
+        x = vocal / (np.abs(vocal).max() + 1e-9) * env + 0.35 * ese
+        i = seg(retraso)
+        izq, der = np.sqrt(0.5 * (1 - pan)), np.sqrt(0.5 * (1 + pan))
+        out[i:, 0] += x[:n - i] * gan * izq
+        out[i:, 1] += x[:n - i] * gan * der
+    # un poco de estadio: ecos cortos
+    eco = np.zeros_like(out)
+    for d, a in ((0.045, 0.32), (0.083, 0.24), (0.131, 0.16), (0.2, 0.1)):
+        j = seg(d)
+        eco[j:] += out[:-j] * a
+    out += np.stack([pasabajos(eco[:, 0], 3000), pasabajos(eco[:, 1], 3000)], axis=1)
+    return out / (np.abs(out).max() + 1e-9) * 0.85
+
+
 def poner2(buf, x, t, g=1.0):
     """como poner, pero x ya es estereo"""
     i = seg(t)
@@ -400,9 +453,9 @@ def main():
 
     efectos = {'error': fx_error(), 'bien': fx_bien(), 'ding': fx_bien(), 'paso': fx_paso(rng),
                'marca': fx_marca(), 'golpe': fx_golpe(rng), 'pop': fx_pop(), 'whoosh': fx_whoosh(rng),
-               'click': fx_click(), 'campana': fx_campana(), 'subida': fx_subida(rng)}
+               'click': fx_click(), 'campana': fx_campana(), 'subida': fx_subida(rng), 'siu': fx_siu(rng)}
     ganancia = {'error': 0.85, 'bien': 0.75, 'ding': 0.6, 'paso': 0.5, 'marca': 0.7, 'golpe': 0.6,
-                'pop': 0.55, 'whoosh': 0.7, 'click': 0.6, 'campana': 0.6, 'subida': 0.5}
+                'pop': 0.55, 'whoosh': 0.7, 'click': 0.6, 'campana': 0.6, 'subida': 0.5, 'siu': 0.9}
     if voz is not None:
         # en los largos los efectos acompanan a la voz: quedan unos dB por debajo
         ganancia.update({'error': 0.3, 'golpe': 0.35, 'ding': 0.45, 'bien': 0.45, 'pop': 0.6, 'whoosh': 0.8,

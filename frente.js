@@ -39,6 +39,9 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
      boca       true dibuja una linea de boca (por defecto: ojos y nariz);
                 'sonrisa' o 'triste' la curvan
      sinPiso    sin la linea gris del piso (vista de frente)
+     ropa       { camiseta, cuello, short, numero }: camiseta de color (tapa el
+                torso y los hombros, con cuello y punos de color 'cuello' y el
+                numero en el pecho) y color del short (por defecto GRY)
      sinBanco   sin el banco (vista cenital)
      fondo(g) agarre(g) children(g)   funciones -> SVG en coordenadas del viewBox
 
@@ -63,6 +66,7 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
     YEL = P.C.YEL,
     RED = P.C.RED,
     GRY = P.C.GRY;
+  var C_NUM = '#ffffff'; // numero de la camiseta: blanco con borde negro
   var BLANCO = '#ffffff';
   var GRAD = Math.PI / 180;
   var lerp = U.lerp,
@@ -989,6 +993,9 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
       SR = fr.inv(R.hombro);
     var sil = siluetaTorso(fr, SL, SR);
     var tDelt = [nivel(props, 'delt', 0), nivel(props, 'delt', 1)];
+    var ropa = props.ropa || {};
+    var cam = ropa.camiseta,
+      colShort = ropa.short || GRY;
     var llamar = function (x) {
       return typeof x === 'function' ? x(g) : x;
     };
@@ -1135,6 +1142,32 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
       var dir = lb > 24 ? q.codo : suma(q.hombro, [q.lado * 60, 100]);
       var dl = deltoide(q.hombro, dir, clamp(lb * 0.56, 58, 112));
       var m = tDelt[i];
+      if (cam) {
+        // manga corta: tubo hasta la mitad del brazo, el hombro del color de la camiseta y el puno
+        var u = unidad(resta(dir, q.hombro)),
+          nn = [-u[1], u[0]];
+        var fin = suma(q.hombro, por(u, clamp(lb * 0.5, 60, 104)));
+        return /*#__PURE__*/React.createElement("g", {
+          key: 'd' + i
+        }, /*#__PURE__*/React.createElement("path", {
+          d: capsula(q.hombro, fin, 56, 52),
+          fill: cam,
+          stroke: INK,
+          strokeWidth: 13,
+          strokeLinejoin: "round"
+        }), /*#__PURE__*/React.createElement("path", {
+          d: dl.d,
+          fill: cam,
+          stroke: INK,
+          strokeWidth: 13,
+          strokeLinejoin: "round"
+        }), /*#__PURE__*/React.createElement("path", {
+          d: 'M ' + pt(suma(fin, por(nn, 46))) + ' L ' + pt(suma(fin, por(nn, -46))),
+          stroke: ropa.cuello || INK,
+          strokeWidth: 16,
+          strokeLinecap: "round"
+        }));
+      }
       return /*#__PURE__*/React.createElement("g", {
         key: 'd' + i
       }, /*#__PURE__*/React.createElement("path", {
@@ -1155,6 +1188,51 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
         strokeLinejoin: "round"
       }));
     });
+
+    // camiseta: cuello en V redondeada y el numero en el pecho
+    var detallesCamiseta = cam ? function () {
+      var cuello = 'M ' + pt(fr.a([-74, -368])) + ' Q ' + pt(fr.a([0, -276])) + ' ' + pt(fr.a([74, -368]));
+      var c = fr.a([0, -168]);
+      var ang = Math.atan2(fr.u[0], -fr.u[1]) / GRAD;
+      // el cuello de la persona queda sin pintar, por encima del cuello de la camiseta
+      var piel = cuello + ' L ' + pt(fr.a([74, -560])) + ' L ' + pt(fr.a([-74, -560])) + ' Z';
+      return /*#__PURE__*/React.createElement("g", null, /*#__PURE__*/React.createElement("g", {
+        clipPath: 'url(#' + id + 't)'
+      }, /*#__PURE__*/React.createElement("path", {
+        d: piel,
+        fill: BLANCO
+      })), /*#__PURE__*/React.createElement("path", {
+        d: sil,
+        fill: "none",
+        stroke: INK,
+        strokeWidth: 15,
+        strokeLinejoin: "round"
+      }), /*#__PURE__*/React.createElement("path", {
+        d: cuello,
+        fill: "none",
+        stroke: INK,
+        strokeWidth: 34,
+        strokeLinecap: "round"
+      }), /*#__PURE__*/React.createElement("path", {
+        d: cuello,
+        fill: "none",
+        stroke: ropa.cuello || BLANCO,
+        strokeWidth: 16,
+        strokeLinecap: "round"
+      }), ropa.numero != null ? /*#__PURE__*/React.createElement("text", {
+        x: c[0],
+        y: c[1],
+        transform: 'rotate(' + ang.toFixed(2) + ' ' + c[0].toFixed(1) + ' ' + c[1].toFixed(1) + ')',
+        textAnchor: "middle",
+        fontFamily: "'Archivo Black', sans-serif",
+        fontSize: 150,
+        fill: C_NUM,
+        stroke: INK,
+        strokeWidth: 10,
+        strokeLinejoin: "round",
+        paintOrder: "stroke"
+      }, ropa.numero) : null);
+    }() : null;
     var punos = lad.map(function (q, i) {
       return /*#__PURE__*/React.createElement("g", {
         key: 'p' + i
@@ -1243,9 +1321,9 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
       }, LINEA));
     }), cen ? null : zapatos, /*#__PURE__*/React.createElement("path", {
       d: sil,
-      fill: BLANCO,
+      fill: cam || BLANCO,
       stroke: "none"
-    }), /*#__PURE__*/React.createElement("g", {
+    }), cam ? null : /*#__PURE__*/React.createElement("g", {
       clipPath: 'url(#' + id + 't)'
     }, /*#__PURE__*/React.createElement(MusculosTorso, {
       fr: fr,
@@ -1258,11 +1336,11 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
       stroke: INK,
       strokeWidth: 15,
       strokeLinejoin: "round"
-    }), ['trazo', 'relleno'].map(function (paso) {
+    }), detallesCamiseta, ['trazo', 'relleno'].map(function (paso) {
       var t = paso === 'trazo';
       return /*#__PURE__*/React.createElement("g", {
         key: paso,
-        fill: GRY,
+        fill: colShort,
         stroke: t ? INK : 'none',
         strokeWidth: t ? 28 : 0,
         strokeLinejoin: "round"
@@ -1275,7 +1353,7 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
       }));
     }), /*#__PURE__*/React.createElement("path", {
       d: faja,
-      fill: GRY,
+      fill: colShort,
       stroke: INK,
       strokeWidth: 13,
       strokeLinejoin: "round"

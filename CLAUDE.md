@@ -34,8 +34,11 @@ proteinas.jsx, hierro.jsx, grasas.jsx, carbohidratos.jsx,
 minerales.jsx, objetivos.jsx     reels cortos con Tor (nutrición y temas de entreno)
 curl-mancuernas.jsx              primer reel del ESTILO 2 (el formato de ahora en adelante)
 triceps-polea.jsx, bulgara.jsx,
-abduccion.jsx, plancha.jsx       reels de ejercicios en estilo 2 (con V.escena)
-peptidos.jsx                     reel con Tor en estilo 2 (con PL.escena2)
+abduccion.jsx, plancha.jsx,
+hip-thrust.jsx, remo-bajo.jsx,
+elevacion-lateral.jsx,
+triceps-frances.jsx              reels de ejercicios en estilo 2 (con V.escena)
+peptidos.jsx, cristiano.jsx      reels con Tor en estilo 2 (con PL.escena2)
 identidad.jsx/.html  foto de perfil y portadas de destacadas (PNG en identidad/)
 face-pull.html    redirige a reels.html#face-pull
 largo.html        videos largos de YouTube (16:9): el video con cortes + capas encima
@@ -313,7 +316,18 @@ a coordenadas del lienzo (`foco`) y un `mira` que dice dónde queda ese
 punto en pantalla; en los primeros planos bajá `mira` para que la cabeza
 no quede debajo del rótulo de arriba. En `B.Frente`, `sinZapato` en un lado
 termina la pierna en el tobillo (el pie de atrás de la búlgara, apoyado en
-el banco y fuera de vista).
+el banco y fuera de vista). En `B.Perfil`, `cabezaEncima: true` en la pose
+dibuja la cabeza delante de los brazos (brazos arriba, como en el tríceps
+francés).
+
+**Tor disfrazado:** `ropa` en `B.Frente`, `TOR.Tor` y el `tor` de `PL`
+(`{ camiseta, cuello, short, numero }`) le pone una camiseta de color con
+cuello y puños, el número en el pecho y el short de color; siempre con la
+paleta de cinco. `cristiano.jsx` lo viste con la de Portugal (roja, verde,
+el 7) y termina con el festejo "¡siuuu!": el sonido es el tipo `siu` de
+`herramientas/audio.py` (sintetizado, sin la voz real), que `grabar.js`
+deja sonar igual que las X y los vistos. Íconos de fútbol en `N.ICONOS`:
+`balon` (con `giro`), `arco`, `copa`, `mundo`.
 
 **Formato corto:** 30 a 35 s *con* el cierre
 de 3 s; la retención de Shorts/Reels está en 20-25 s, así que nada

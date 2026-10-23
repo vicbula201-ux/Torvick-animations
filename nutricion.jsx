@@ -11,7 +11,8 @@
    Conceptos (viewBox 240x240):
      N.ICONOS = { hueso, gota, escudo, termometro, hormona, capsula (color),
                   globulo (o2 0..4), glucosa, zapatilla, calendario, barras (p 0..1),
-                  vial (color), jeringa (color), raton, adn, estetoscopio, luna }
+                  vial (color), jeringa (color), raton, adn, estetoscopio, luna,
+                  balon (giro), arco, copa, mundo }
    N.Plato    plato visto de arriba (viewBox 420x420); children van encima
    N.Bola     aminoacido: una bolita de color (r, color) para armar cadenas
    N.Balanza  balanza de baño vista de frente; va debajo de los pies de Tor
@@ -565,6 +566,79 @@
     );
   }
 
+  /* ---------------- futbol (video de Cristiano) ---------------- */
+
+  // pelota de futbol; giro (grados) rueda el dibujo
+  function Balon(props) {
+    var g = props.giro || 0;
+    var pent = function (cx, cy, r, a0) {
+      var pts = [];
+      for (var i = 0; i < 5; i++) {
+        var a = (a0 + i * 72) * Math.PI / 180;
+        pts.push((cx + r * Math.cos(a)).toFixed(1) + ' ' + (cy + r * Math.sin(a)).toFixed(1));
+      }
+      return 'M ' + pts.join(' L ') + ' Z';
+    };
+    var parches = [], rayos = [];
+    for (var i = 0; i < 5; i++) {
+      var a = (-90 + g + i * 72) * Math.PI / 180, b = (-54 + g + i * 72) * Math.PI / 180;
+      rayos.push(<path key={'r' + i} d={'M ' + (120 + 32 * Math.cos(a)).toFixed(1) + ' ' + (120 + 32 * Math.sin(a)).toFixed(1) +
+        ' L ' + (120 + 72 * Math.cos(a)).toFixed(1) + ' ' + (120 + 72 * Math.sin(a)).toFixed(1)} stroke={C.INK} strokeWidth={9} strokeLinecap="round" />);
+      parches.push(<path key={'p' + i} d={pent(120 + 98 * Math.cos(b), 120 + 98 * Math.sin(b), 30, -54 + g + i * 72)} fill={C.INK} />);
+    }
+    return (
+      <Svg s={props.s}>
+        <defs><clipPath id="n-balon"><circle cx={120} cy={120} r={96} /></clipPath></defs>
+        <circle cx={120} cy={120} r={96} fill={BLANCO} />
+        <g clipPath="url(#n-balon)">{parches}</g>
+        {rayos}
+        <path d={pent(120, 120, 34, -90 + g)} fill={C.INK} stroke={C.INK} strokeWidth={6} strokeLinejoin="round" />
+        <circle cx={120} cy={120} r={96} fill="none" {...T0} />
+      </Svg>
+    );
+  }
+
+  // arco de futbol de frente, con la red
+  function Arco(props) {
+    var red = [];
+    for (var x = 40; x <= 200; x += 32) red.push(<path key={'x' + x} d={'M ' + x + ' 72 L ' + x + ' 186'} stroke={C.GRY} strokeWidth={6} />);
+    for (var y = 98; y <= 186; y += 30) red.push(<path key={'y' + y} d={'M 22 ' + y + ' L 218 ' + y} stroke={C.GRY} strokeWidth={6} />);
+    return (
+      <Svg s={props.s}>
+        {red}
+        <path d="M 14 196 L 14 62 L 226 62 L 226 196" fill="none" {...T0} strokeWidth={15} />
+        <path d="M 2 198 L 238 198" stroke={C.GRY} strokeWidth={10} strokeLinecap="round" />
+      </Svg>
+    );
+  }
+
+  // copa (trofeo)
+  function Copa(props) {
+    return (
+      <Svg s={props.s}>
+        <path d="M 62 52 C 22 52 26 116 78 116 M 178 52 C 218 52 214 116 162 116" fill="none" {...T0} />
+        <path d="M 60 34 L 180 34 L 176 80 C 172 128 146 146 120 146 C 94 146 68 128 64 80 Z" fill={C.YEL} {...T0} />
+        <path d="M 108 146 L 104 178 L 136 178 L 132 146" fill={C.YEL} {...T0} />
+        <rect x={74} y={178} width={92} height={30} rx={8} fill={C.GRY} {...T0} />
+        <path d="M 92 60 C 92 92 100 112 112 122" fill="none" stroke={BLANCO} strokeWidth={10} strokeLinecap="round" />
+      </Svg>
+    );
+  }
+
+  // planeta: la marca en todo el mundo
+  function Mundo(props) {
+    return (
+      <Svg s={props.s}>
+        <circle cx={120} cy={120} r={96} fill={BLANCO} />
+        <path d="M 44 92 C 60 60 96 50 112 62 C 128 74 104 86 112 100 C 120 114 100 128 86 122 C 74 154 92 168 78 186 C 58 172 46 150 50 128 C 36 120 36 104 44 92 Z" fill={C.GRN} stroke={C.INK} strokeWidth={9} strokeLinejoin="round" />
+        <path d="M 142 44 C 168 46 196 70 204 100 C 194 108 178 98 170 114 C 186 130 176 160 156 168 C 142 150 150 128 138 118 C 124 104 134 88 150 84 C 140 72 130 58 142 44 Z" fill={C.GRN} stroke={C.INK} strokeWidth={9} strokeLinejoin="round" />
+        <ellipse cx={120} cy={120} rx={44} ry={96} fill="none" stroke={C.GRY} strokeWidth={7} />
+        <path d="M 30 92 L 210 92 M 30 148 L 210 148" stroke={C.GRY} strokeWidth={7} />
+        <circle cx={120} cy={120} r={96} fill="none" {...T0} />
+      </Svg>
+    );
+  }
+
   var COMIDA = {
     pollo: Pollo, pescado: Pescado, huevo: Huevo, leche: Leche,
     legumbres: Legumbres, frutosSecos: FrutosSecos, semillas: Semillas,
@@ -575,7 +649,8 @@
   var ICONOS = {
     hueso: Hueso, gota: Gota, escudo: Escudo, termometro: Termometro, hormona: Hormona, capsula: Capsula,
     globulo: Globulo, glucosa: Glucosa, zapatilla: Zapatilla, calendario: Calendario, barras: Barras,
-    vial: Vial, jeringa: Jeringa, raton: Raton, adn: Adn, estetoscopio: Estetoscopio, luna: Luna
+    vial: Vial, jeringa: Jeringa, raton: Raton, adn: Adn, estetoscopio: Estetoscopio, luna: Luna,
+    balon: Balon, arco: Arco, copa: Copa, mundo: Mundo
   };
 
   /* ---------------- plato, aminoacidos, balanza ---------------- */

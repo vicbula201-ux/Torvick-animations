@@ -84,9 +84,9 @@ function fmtT(s) {
   const guion = await p.evaluate(() => window.REEL.guion);
   await b.close();
 
-  // solo suenan las X y los vistos; con --con-musica tambien los cambios de escena
+  // solo suenan las X, los vistos y el "siuuu" (si el video lo marca); con --con-musica tambien los cambios de escena
   const fCues = path.join(salida, id + '-cues.json');
-  fs.writeFileSync(fCues, JSON.stringify(cues.filter(c => c.tipo === 'error' || c.tipo === 'bien'), null, 1));
+  fs.writeFileSync(fCues, JSON.stringify(cues.filter(c => c.tipo === 'error' || c.tipo === 'bien' || c.tipo === 'siu'), null, 1));
   const fCuesTodos = path.join(salida, id + '.cues-todos.json');
   fs.writeFileSync(fCuesTodos, JSON.stringify(cues, null, 1));
   let acc = 0;

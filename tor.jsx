@@ -7,7 +7,7 @@
        al costado -> 1 doble biceps (brazos afuera, puños a la altura de la
        cabeza). El brazo sube y el antebrazo gira por afuera, sin cruzar el
        torso.
-   <TOR.Tor s flex musc muscGris muscRojo boca pose sinPiso fondo agarre extra />
+   <TOR.Tor s flex musc muscGris muscRojo boca pose sinPiso fondo agarre extra ropa />
        B.Frente + el pico del biceps (se abomba con flex; amarillo con
        musc.bic). extra(g) se dibuja encima de todo, como children.
    ============================================================ */
@@ -84,7 +84,7 @@
     // con el brazo flexionado el biceps lo dibuja el pico entero
     var sinBic = function (m) { return h > 2 && m ? Object.assign({}, m, { bic: 0 }) : m; };
     return (
-      <B.Frente s={props.s} pose={p} boca={props.boca} sinPiso={props.sinPiso} parpadeo={props.parpadeo}
+      <B.Frente s={props.s} pose={p} boca={props.boca} sinPiso={props.sinPiso} parpadeo={props.parpadeo} ropa={props.ropa}
         musc={sinBic(props.musc)} muscGris={props.muscGris} muscRojo={sinBic(props.muscRojo)}
         fondo={props.fondo} agarre={props.agarre}
         children={function (g) {
