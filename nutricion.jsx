@@ -10,7 +10,8 @@
      (las primeras siete tambien sueltas: N.Pollo N.Pescado N.Huevo ...)
    Conceptos (viewBox 240x240):
      N.ICONOS = { hueso, gota, escudo, termometro, hormona, capsula (color),
-                  globulo (o2 0..4), glucosa, zapatilla, calendario, barras (p 0..1) }
+                  globulo (o2 0..4), glucosa, zapatilla, calendario, barras (p 0..1),
+                  vial (color), jeringa (color), raton, adn, estetoscopio, luna }
    N.Plato    plato visto de arriba (viewBox 420x420); children van encima
    N.Bola     aminoacido: una bolita de color (r, color) para armar cadenas
    N.Balanza  balanza de baño vista de frente; va debajo de los pies de Tor
@@ -472,6 +473,98 @@
     );
   }
 
+  // frasco de peptido: vidrio blanco, liquido (color), tapa gris y etiqueta
+  function Vial(props) {
+    var liq = props.color || C.YEL;
+    return (
+      <Svg s={props.s}>
+        <rect x={92} y={26} width={56} height={34} rx={8} fill={C.GRY} {...T0} />
+        <path d="M 100 60 L 140 60 L 140 76 C 172 84 176 100 176 118 L 176 196 Q 176 214 158 214 L 82 214 Q 64 214 64 196 L 64 118 C 64 100 68 84 100 76 Z"
+          fill={BLANCO} {...T0} />
+        <path d="M 70 140 L 170 140 L 170 196 Q 170 208 158 208 L 82 208 Q 70 208 70 196 Z" fill={liq} stroke="none" />
+        <path d="M 100 60 L 140 60 L 140 76 C 172 84 176 100 176 118 L 176 196 Q 176 214 158 214 L 82 214 Q 64 214 64 196 L 64 118 C 64 100 68 84 100 76 Z"
+          fill="none" {...T0} />
+        <rect x={86} y={104} width={68} height={28} rx={6} fill={BLANCO} stroke={C.INK} strokeWidth={9} />
+        <path d="M 84 160 L 84 190" stroke={BLANCO} strokeWidth={9} strokeLinecap="round" />
+      </Svg>
+    );
+  }
+
+  function Jeringa(props) {
+    return (
+      <Svg s={props.s}>
+        <g transform="rotate(-40 120 120)">
+          <path d="M 120 18 L 120 50" stroke={C.INK} strokeWidth={9} strokeLinecap="round" />
+          <rect x={98} y={50} width={44} height={110} rx={8} fill={BLANCO} {...T0} />
+          <rect x={104} y={104} width={32} height={52} rx={4} fill={props.color || C.YEL} stroke="none" />
+          <path d="M 104 78 L 116 78 M 104 96 L 116 96 M 104 114 L 116 114" stroke={C.INK} strokeWidth={6} strokeLinecap="round" />
+          <rect x={84} y={158} width={72} height={16} rx={6} fill={C.GRY} {...T0} strokeWidth={10} />
+          <path d="M 120 174 L 120 206" stroke={C.INK} strokeWidth={14} strokeLinecap="round" />
+          <rect x={96} y={204} width={48} height={16} rx={6} fill={BLANCO} {...T0} strokeWidth={10} />
+        </g>
+      </Svg>
+    );
+  }
+
+  // raton de laboratorio (los estudios en animales)
+  function Raton(props) {
+    return (
+      <Svg s={props.s}>
+        <path d="M 200 156 C 230 150 232 120 214 112" fill="none" stroke={C.INK} strokeWidth={10} strokeLinecap="round" />
+        <path d="M 60 170 C 52 120 92 84 140 88 C 186 92 208 132 200 170 Z" fill={BLANCO} {...T0} />
+        <path d="M 74 112 C 52 104 30 120 30 140 C 30 156 46 166 64 166" fill={BLANCO} {...T0} />
+        <circle cx={92} cy={96} r={22} fill={BLANCO} {...T0} />
+        <circle cx={92} cy={96} r={10} fill={C.GRY} />
+        <circle cx={58} cy={134} r={6} fill={C.INK} />
+        <circle cx={32} cy={146} r={7} fill={C.RED} stroke={C.INK} strokeWidth={5} />
+        <path d="M 80 170 L 76 188 M 170 170 L 174 188" stroke={C.INK} strokeWidth={10} strokeLinecap="round" />
+      </Svg>
+    );
+  }
+
+  // doble helice de ADN
+  function Adn(props) {
+    var a = [], b = [], peld = [];
+    for (var i = 0; i <= 20; i++) {
+      var y = 24 + i * 9.6, x = 120 + 56 * Math.sin(i * 0.52);
+      a.push(x.toFixed(1) + ' ' + y.toFixed(1)); b.push((240 - x).toFixed(1) + ' ' + y.toFixed(1));
+      if (i % 2 === 0 && i > 0 && i < 20) peld.push(<path key={i} d={'M ' + x.toFixed(1) + ' ' + y.toFixed(1) + ' L ' + (240 - x).toFixed(1) + ' ' + y.toFixed(1)}
+        stroke={i % 4 ? C.YEL : C.GRY} strokeWidth={10} strokeLinecap="round" />);
+    }
+    return (
+      <Svg s={props.s}>
+        {peld}
+        <path d={'M ' + a.join(' L ')} fill="none" {...T0} />
+        <path d={'M ' + b.join(' L ')} fill="none" {...T0} />
+      </Svg>
+    );
+  }
+
+  function Estetoscopio(props) {
+    return (
+      <Svg s={props.s}>
+        <path d="M 64 30 L 64 92 C 64 136 116 136 116 92 L 116 30" fill="none" {...T0} />
+        <path d="M 90 128 L 90 170 C 90 206 160 210 166 168 L 166 146" fill="none" {...T0} />
+        <circle cx={166} cy={128} r={22} fill={C.GRY} {...T0} />
+        <circle cx={166} cy={128} r={8} fill={BLANCO} stroke={C.INK} strokeWidth={6} />
+        <circle cx={64} cy={28} r={8} fill={C.INK} />
+        <circle cx={116} cy={28} r={8} fill={C.INK} />
+      </Svg>
+    );
+  }
+
+  // luna con las "z" del sueño (descanso)
+  function Luna(props) {
+    var z = function (x, y, s) { return 'M ' + x + ' ' + y + ' L ' + (x + s) + ' ' + y + ' L ' + x + ' ' + (y + s) + ' L ' + (x + s) + ' ' + (y + s); };
+    return (
+      <Svg s={props.s}>
+        <path d="M 132 40 A 86 86 0 1 0 204 168 A 70 70 0 1 1 132 40 Z" fill={C.YEL} {...T0} />
+        <path d={z(160, 64, 34)} fill="none" {...T0} strokeWidth={11} />
+        <path d={z(198, 28, 24)} fill="none" {...T0} strokeWidth={10} />
+      </Svg>
+    );
+  }
+
   var COMIDA = {
     pollo: Pollo, pescado: Pescado, huevo: Huevo, leche: Leche,
     legumbres: Legumbres, frutosSecos: FrutosSecos, semillas: Semillas,
@@ -481,7 +574,8 @@
   };
   var ICONOS = {
     hueso: Hueso, gota: Gota, escudo: Escudo, termometro: Termometro, hormona: Hormona, capsula: Capsula,
-    globulo: Globulo, glucosa: Glucosa, zapatilla: Zapatilla, calendario: Calendario, barras: Barras
+    globulo: Globulo, glucosa: Glucosa, zapatilla: Zapatilla, calendario: Calendario, barras: Barras,
+    vial: Vial, jeringa: Jeringa, raton: Raton, adn: Adn, estetoscopio: Estetoscopio, luna: Luna
   };
 
   /* ---------------- plato, aminoacidos, balanza ---------------- */

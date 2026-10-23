@@ -24,6 +24,8 @@
    V.Lineas({ c, dir, v, largo })    lineas de velocidad detras de algo que se mueve
    V.Chispa({ T, c, cuando, r })     estallido amarillo corto
    V.Sombra({ c, rx })               sombra gris en el piso
+   V.escena({ fig, figura, comparar, tomas, lienzo, mal, bien, r1, r2 })   escena armada
+   V.Mitad({ cmp, y, e })   franja de comparacion      V.fase / V.ida   ritmo de repeticiones
    ============================================================ */
 (function (global) {
   'use strict';
@@ -200,8 +202,110 @@
     return <ellipse cx={c[0]} cy={c[1]} rx={rx} ry={rx * 0.12} fill={C.GRY} />;
   }
 
+  /* ---------------- escenas armadas (estilo 2) ---------------- */
+
+  // franja de una comparacion (mal arriba / bien abajo): recorta la figura y entra desde su centro
+  function Mitad(props) {
+    var A = global.REELS.ayudas;
+    var c = props.cmp, s = c.s;
+    return (
+      <A.Pos x={0} y={0} e={props.e} dx={props.dx} dy={props.dy} origen={'540px ' + (props.y + c.h / 2) + 'px'}>
+        <A.Recorte x={0} y={props.y} w={ANCHO} h={c.h} desde={c.desdeY * s}>
+          <div style={{ position: 'absolute', left: 540 - c.centroX * s, top: 0 }}>{props.children}</div>
+        </A.Recorte>
+      </A.Pos>
+    );
+  }
+
+  // V.escena({ ... }) -> componente de escena ({ T, at, dur }):
+  //   fig      { x, y, s } donde va la figura (cuerpo entero)
+  //   figura   (T, f, t, s) => elemento (B.Perfil, B.Frente...); es el elemento principal
+  //   vibra    true: la figura tiembla (errores)
+  //   comparar { cmp: { s, desdeY, h, centroX, yArriba, yAbajo }, mal: (T, f, t, s) => elem,
+  //              bien: (T, f, t, s) => elem, vibraMal }  dos franjas apiladas
+  //   tomas / golpes / pulsos   como V.Camara (las X suman su golpe solas)
+  //   lienzo   (T, f, t) => SVG en coordenadas del lienzo, dentro de la camara
+  //   mal / bien  [{ x, y, cuando, s }]   (en una comparacion hay valores por defecto)
+  //   r1 / r2     { text, y, cuando, s }
+  function escena(o) {
+    return function Escena(props) {
+      var A = global.REELS.ayudas;
+      var T = props.T, at = props.at, dur = props.dur;
+      var f = function (v) { return at + dur * v; };
+      var t = clamp((T - at) / dur, 0, 1);
+      var cmp = o.comparar ? o.comparar.cmp : null;
+      var mal = o.mal || (cmp ? [{ x: 870, y: cmp.yArriba + 40, cuando: 0.14, s: 0.5 }] : []);
+      var bien = o.bien || (cmp ? [{ x: 870, y: cmp.yAbajo + 40, cuando: 0.56 }] : []);
+      var golpes = (o.golpes || []).concat(mal.map(function (m) { return m.cuando; }));
+      var hijos = [];
+      if (o.figura) {
+        var fig = o.fig;
+        hijos.push(
+          <A.Pos key="fig" x={fig.x} y={fig.y} e={M.pop(T, at - 0.6, 0.5)} dx={o.vibra ? M.vibra(T, 30, 3) : 0}
+            dy={M.life(T, 3.6, 4)}>
+            {o.figura(T, f, t, fig.s)}
+          </A.Pos>
+        );
+      }
+      if (cmp) {
+        hijos.push(
+          <Mitad key="m" cmp={cmp} y={cmp.yArriba} e={M.pop(T, at - 0.6, 0.5)}
+            dx={o.comparar.vibraMal === false ? 0 : M.vibra(T, 30, 2)} dy={M.life(T, 3.6, 4)}>
+            {o.comparar.mal(T, f, t, cmp.s)}
+          </Mitad>
+        );
+        hijos.push(
+          <Mitad key="b" cmp={cmp} y={cmp.yAbajo} e={M.pop(T, f(0.3), 0.45)} dy={M.life(T, 3.6, 4, 0.5)}>
+            {o.comparar.bien(T, f, t, cmp.s)}
+          </Mitad>
+        );
+      }
+      if (o.lienzo) {
+        hijos.push(
+          <svg key="l" width={ANCHO} height={ALTO} style={{ position: 'absolute', left: 0, top: 0, overflow: 'visible' }}>
+            {o.lienzo(T, f, t)}
+          </svg>
+        );
+      }
+      var rot = function (r, i) {
+        if (!r) return null;
+        var y = r.y != null ? r.y : (i ? (cmp ? 1530 : 1490) : (cmp ? 250 : 270));
+        return <Rot key={'r' + i} T={T} text={r.text} y={y} s={r.s || (cmp ? 1 : 1.1)} fase={i * 0.4}
+          cuando={r.cuando == null ? at - 0.6 : f(r.cuando)} />;
+      };
+      return (
+        <div style={{ position: 'absolute', inset: 0 }}>
+          <Camara T={T} at={at} dur={dur} tomas={o.tomas || [[0, { zoom: 1 }], [1, { zoom: 1.05 }]]}
+            golpes={golpes} pulsos={o.pulsos}>
+            {hijos}
+          </Camara>
+          {mal.map(function (m, i) { return <A.Mal key={'m' + i} T={T} cuando={f(m.cuando)} x={m.x} y={m.y} s={m.s} />; })}
+          {bien.map(function (b, i) { return <A.Bien key={'b' + i} T={T} cuando={f(b.cuando)} x={b.x} y={b.y} s={b.s} fase={i * 0.4} />; })}
+          {rot(o.r1, 0)}
+          {rot(o.r2, 1)}
+        </div>
+      );
+    };
+  }
+
+  // repeticion: fraccion del ciclo k (0..1) dentro de [a, b] con n repeticiones
+  function fase(T, a, b, n) {
+    if (T <= a || b <= a) return 0;
+    var u = Math.min(1, (T - a) / (b - a)) * (n || 1);
+    return u >= (n || 1) ? 0 : u - Math.floor(u);
+  }
+  // perfil de una repeticion: va en el % ida, aguanta, vuelve lento (0 -> 1 -> 0)
+  function ida(k, va, aguanta) {
+    va = va == null ? 0.4 : va; aguanta = aguanta == null ? 0.1 : aguanta;
+    if (k <= 0 || k >= 1) return 0;
+    if (k < va) return Easing.easeInOutSine(k / va);
+    if (k < va + aguanta) return 1;
+    return 1 - Easing.easeInOutSine((k - va - aguanta) / (1 - va - aguanta));
+  }
+
   global.V = {
     Camara: Camara, tomaEn: tomaEn, parpadeo: parpadeo, respira: respira, Rot: Rot,
-    Brillo: Brillo, Gotas: Gotas, Lineas: Lineas, Chispa: Chispa, Sombra: Sombra
+    Brillo: Brillo, Gotas: Gotas, Lineas: Lineas, Chispa: Chispa, Sombra: Sombra,
+    Mitad: Mitad, escena: escena, fase: fase, ida: ida
   };
 })(window);

@@ -18,6 +18,8 @@
      o.lienzo  (T, f) => SVG en coordenadas del lienzo (flechas, lineas)
      o.mal / o.bien  [{ x, y, cuando, s }]  X con sonido de error / visto con "tin"
      o.r1 / o.r2     { text, y, cuando, s }  rotulos (maximo dos)
+   PL.escena2(o)  lo mismo en ESTILO 2: camara viva (o.tomas, o.pulsos; las X la
+     sacuden), Tor que parpadea y rotulos que entran deslizando
    PL.grilla(lista, opciones) -> piezas: comida en filas (3, 2, 2...) que
      aparecen cuando la voz las nombra. lista = [[tipo de N.COMIDA, fraccion], ...]
    PL.sangre(T, f, op)   vaso sanguineo con globulos que llevan oxigeno (para o.lienzo)
@@ -78,6 +80,7 @@
       flex: valor(o.flex, T, f) || 0,
       boca: valor(o.boca, T, f),
       sinPiso: true,
+      parpadeo: props.v2 ? global.V.parpadeo(T, props.i * 1.3) : 0,
       musc: valor(o.musc, T, f),
       muscGris: valor(o.muscGris, T, f),
       muscRojo: valor(o.muscRojo, T, f),
@@ -149,6 +152,7 @@
           fase: i * 0.4
         });
       };
+      if (o.v2) return escenaV2(o, props, tors, f);
       return /*#__PURE__*/React.createElement("div", {
         style: {
           position: 'absolute',
@@ -206,6 +210,100 @@
         });
       }), rot(o.r1, 0), rot(o.r2, 1));
     };
+  }
+
+  // estilo 2: la camara viva (V.Camara) se lleva a Tor, las piezas y el lienzo; las X
+  // la sacuden solas; Tor parpadea; los rotulos entran deslizando (V.Rot)
+  function escenaV2(o, props, tors, f) {
+    var V = global.V;
+    var T = props.T,
+      at = props.at,
+      dur = props.dur;
+    var mal = o.mal || [],
+      bien = o.bien || [];
+    var rot = function (r, i) {
+      if (!r) return null;
+      return /*#__PURE__*/React.createElement(V.Rot, {
+        key: 'r' + i,
+        T: T,
+        text: r.text,
+        y: r.y == null ? i ? 1490 : 270 : r.y,
+        s: r.s,
+        fase: i * 0.4,
+        cuando: r.cuando == null ? at - 0.6 : f(r.cuando)
+      });
+    };
+    return /*#__PURE__*/React.createElement("div", {
+      style: {
+        position: 'absolute',
+        inset: 0
+      }
+    }, /*#__PURE__*/React.createElement(V.Camara, {
+      T: T,
+      at: at,
+      dur: dur,
+      tomas: o.tomas || [[0, {
+        zoom: 1
+      }], [1, {
+        zoom: 1.06
+      }]],
+      golpes: mal.map(function (m) {
+        return m.cuando;
+      }),
+      pulsos: o.pulsos
+    }, tors.map(function (to, i) {
+      return /*#__PURE__*/React.createElement(TorEn, {
+        key: 't' + i,
+        o: to,
+        T: T,
+        f: f,
+        at: at,
+        i: i,
+        v2: true
+      });
+    }), (o.piezas || []).map(function (pz, i) {
+      return /*#__PURE__*/React.createElement(Pieza, {
+        key: 'p' + i,
+        o: pz,
+        T: T,
+        f: f,
+        at: at,
+        i: i
+      });
+    }), o.lienzo ? /*#__PURE__*/React.createElement("svg", {
+      width: 1080,
+      height: 1920,
+      style: {
+        position: 'absolute',
+        left: 0,
+        top: 0,
+        overflow: 'visible'
+      }
+    }, o.lienzo(T, f)) : null), mal.map(function (m, i) {
+      return /*#__PURE__*/React.createElement(Mal, {
+        key: 'm' + i,
+        T: T,
+        cuando: f(m.cuando),
+        x: m.x,
+        y: m.y,
+        s: m.s
+      });
+    }), bien.map(function (b, i) {
+      return /*#__PURE__*/React.createElement(Bien, {
+        key: 'b' + i,
+        T: T,
+        cuando: f(b.cuando),
+        x: b.x,
+        y: b.y,
+        s: b.s,
+        fase: i * 0.4
+      });
+    }), rot(o.r1, 0), rot(o.r2, 1));
+  }
+  function escena2(o) {
+    return escena(Object.assign({}, o, {
+      v2: true
+    }));
   }
 
   // comida en filas de 3 y luego de 2, centradas; cada plato aparece en su fraccion
@@ -326,6 +424,7 @@
   }
   global.PL = {
     escena: escena,
+    escena2: escena2,
     grilla: grilla,
     sangre: sangre,
     alBiceps: alBiceps,

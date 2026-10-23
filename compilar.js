@@ -29,7 +29,7 @@ const FUENTES = [
   'silla-extensora.jsx', 'fondos.jsx', 'flexiones.jsx', 'remo-t.jsx', 'encogimientos.jsx',
   'proteinas.jsx', 'curl-barra.jsx', 'fondos-banco.jsx', 'pantorrilla.jsx', 'jalon.jsx',
   'hierro.jsx', 'grasas.jsx', 'carbohidratos.jsx', 'minerales.jsx', 'objetivos.jsx',
-  'curl-mancuernas.jsx',
+  'curl-mancuernas.jsx', 'peptidos.jsx', 'triceps-polea.jsx', 'bulgara.jsx', 'abduccion.jsx', 'plancha.jsx',
   'largo.jsx', 'largo-iconos.jsx', 'largo-plantillas.jsx'
 ];
 
