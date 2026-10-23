@@ -6,7 +6,8 @@
 
    Mira hacia la IZQUIERDA: -x es el frente. viewBox 1400x1400, piso y=1300.
 
-   <B.Perfil s pose musc muscGris muscRojo fondo medio agarre children style />
+   <B.Perfil s pose musc muscGris muscRojo fondo medio agarre children style parpadeo />
+     parpadeo  0..1 cierra el ojo (1 = una linea): para que la figura parpadee
      pose      puntos de la pose (ver abajo); sin pose = posePerfil.depie({})
      musc      { clave: 0..1 } amarillo (principal). 0 = no se dibuja
      muscGris  { clave: 0..1 } gris (secundario)
@@ -700,7 +701,9 @@
     var cabeza = (
       <g>
         <path d={f.cabeza} fill={BLANCO} stroke={INK} strokeWidth={15} strokeLinejoin="round" />
-        <circle cx={f.ojo[0]} cy={f.ojo[1]} r={8} fill={INK} />
+        {(props.parpadeo || 0) > 0.6
+          ? <path d={'M ' + (f.ojo[0] - 9) + ' ' + f.ojo[1] + ' L ' + (f.ojo[0] + 9) + ' ' + f.ojo[1]} stroke={INK} strokeWidth={7} strokeLinecap="round" />
+          : <ellipse cx={f.ojo[0]} cy={f.ojo[1]} rx={8} ry={8 * (1 - 0.8 * (props.parpadeo || 0))} fill={INK} />}
         <path d={f.oreja} fill="none" stroke={INK} strokeWidth={11} strokeLinecap="round" strokeLinejoin="round" />
       </g>
     );

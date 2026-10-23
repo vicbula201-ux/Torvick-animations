@@ -131,6 +131,7 @@
       pose: p,
       boca: props.boca,
       sinPiso: props.sinPiso,
+      parpadeo: props.parpadeo,
       musc: sinBic(props.musc),
       muscGris: props.muscGris,
       muscRojo: sinBic(props.muscRojo),

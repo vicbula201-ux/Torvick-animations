@@ -7,7 +7,8 @@
 
    Mira hacia la IZQUIERDA: -x es el frente. viewBox 1400x1400, piso y=1300.
 
-   <B.Perfil s pose musc muscGris muscRojo fondo medio agarre children style />
+   <B.Perfil s pose musc muscGris muscRojo fondo medio agarre children style parpadeo />
+     parpadeo  0..1 cierra el ojo (1 = una linea): para que la figura parpadee
      pose      puntos de la pose (ver abajo); sin pose = posePerfil.depie({})
      musc      { clave: 0..1 } amarillo (principal). 0 = no se dibuja
      muscGris  { clave: 0..1 } gris (secundario)
@@ -968,10 +969,16 @@
       stroke: INK,
       strokeWidth: 15,
       strokeLinejoin: "round"
-    }), /*#__PURE__*/React.createElement("circle", {
+    }), (props.parpadeo || 0) > 0.6 ? /*#__PURE__*/React.createElement("path", {
+      d: 'M ' + (f.ojo[0] - 9) + ' ' + f.ojo[1] + ' L ' + (f.ojo[0] + 9) + ' ' + f.ojo[1],
+      stroke: INK,
+      strokeWidth: 7,
+      strokeLinecap: "round"
+    }) : /*#__PURE__*/React.createElement("ellipse", {
       cx: f.ojo[0],
       cy: f.ojo[1],
-      r: 8,
+      rx: 8,
+      ry: 8 * (1 - 0.8 * (props.parpadeo || 0)),
       fill: INK
     }), /*#__PURE__*/React.createElement("path", {
       d: f.oreja,

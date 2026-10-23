@@ -170,9 +170,13 @@
     // si cambian las duraciones, los efectos se vuelven a marcar
     var firma = escenas.map(function (e) { return e.nombre + ':' + e.dur; }).join('|');
     if (firma !== firmaCues) { CUES = {}; firmaCues = firma; }
-    escenas.forEach(function (e, i) {
-      if (i > 0) sonido(e.marca ? 'marca' : 'paso', limites[i] - h);
-    });
+    var v2 = props.estilo === 2;
+    // estilo 2: solo suenan las X y los vistos (sin musica ni whoosh)
+    if (!v2) {
+      escenas.forEach(function (e, i) {
+        if (i > 0) sonido(e.marca ? 'marca' : 'paso', limites[i] - h);
+      });
+    }
 
     var capas = [];
     escenas.forEach(function (e, i) {
@@ -180,17 +184,20 @@
       var desde = i > 0 ? at - h : at;
       var hasta = i < n - 1 ? fin + h : fin;
       if (T < desde || T >= hasta) return;
-      var x = 0;
+      var x = 0, esc = 1, op = 1;
       if (i > 0 && T < at + h) {
-        x = ANCHO * (1 - Easing.easeInOutCubic(clamp((T - (at - h)) / (2 * h), 0, 1)));
+        var kE = Easing.easeInOutCubic(clamp((T - (at - h)) / (2 * h), 0, 1));
+        if (v2) { esc = 1.14 - 0.14 * kE; op = kE; } else x = ANCHO * (1 - kE);
       } else if (i < n - 1 && T >= fin - h) {
-        x = -ANCHO * Easing.easeInOutCubic(clamp((T - (fin - h)) / (2 * h), 0, 1));
+        var kS = Easing.easeInOutCubic(clamp((T - (fin - h)) / (2 * h), 0, 1));
+        if (v2) { esc = 1 + 0.2 * kS; op = 1 - kS; } else x = -ANCHO * kS;
       }
       var Esc = e.C;
+      var tr = x ? 'translateX(' + x.toFixed(1) + 'px)' : esc !== 1 ? 'scale(' + esc.toFixed(4) + ')' : undefined;
       capas.push(
         <div key={i} style={{
-          position: 'absolute', left: 0, top: 0, width: ANCHO, height: ALTO,
-          transform: x ? 'translateX(' + x.toFixed(1) + 'px)' : undefined
+          position: 'absolute', left: 0, top: 0, width: ANCHO, height: ALTO, opacity: op,
+          transformOrigin: '50% 45%', transform: tr
         }}>
           <Esc T={T} at={at} dur={e.dur} />
         </div>
@@ -210,7 +217,7 @@
         {capas}
         {sello.opacity > 0.01 ? (
           <Pos x={ESQUINA.x} y={ESQUINA.y} e={sello} origen="0 50%" dy={M.life(T, 4, 3)}>
-            <MARCA.Esquina s={0.84} />
+            {v2 ? <MARCA.Esquina2 s={0.8} /> : <MARCA.Esquina s={0.84} />}
           </Pos>
         ) : null}
       </div>
@@ -234,7 +241,7 @@
 
   // escenas propias + el cierre de marca: va SIEMPRE, en todos los videos (pedido del autor)
   function conMarca(def) {
-    return def.escenas.concat([MARCA.escena]);
+    return def.escenas.concat([def.estilo === 2 ? MARCA.escena2 : MARCA.escena]);
   }
 
   /* =========================================================
@@ -282,6 +289,7 @@
     useEffect(function () {
       global.REEL = {
         seek: api.seek, setPlaying: api.setPlaying, total: api.total, cues: listaCues,
+        estilo: props.estilo || 1, fps: props.estilo === 2 ? 60 : 30,
         guion: props.escenas.map(function (e) { return { nombre: e.nombre, dur: e.dur, vo: e.vo }; })
       };
     });
@@ -346,9 +354,9 @@
       <global.Stage ancho={ANCHO} alto={ALTO} scenes={scenes}
         debajo={function (api) {
           return <Guion api={api} escenas={escenas} durs={durs} setDurs={setDurs}
-            defecto={durDefecto(def)} render={modoRender} />;
+            defecto={durDefecto(def)} render={modoRender} estilo={def.estilo} />;
         }}>
-        <Reel escenas={escenas} />
+        <Reel escenas={escenas} estilo={def.estilo} />
       </global.Stage>
     );
   }

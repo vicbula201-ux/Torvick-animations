@@ -35,6 +35,7 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
                 claves: pec delt bic ante abd obl serr trap cuad aduct sart tfl
                 con 0 el musculo no se dibuja; el tinte entra con opacidad = valor
      short      fraccion del muslo que tapa la manga (0.34; < 0.2 deja ver el tfl)
+     parpadeo   0..1 cierra los ojos (1 = dos lineas): para que la figura parpadee
      boca       true dibuja una linea de boca (por defecto: ojos y nariz);
                 'sonrisa' o 'triste' la curvan
      sinPiso    sin la linea gris del piso (vista de frente)
@@ -946,17 +947,24 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
       fill: BLANCO,
       stroke: INK,
       strokeWidth: 15
-    }), /*#__PURE__*/React.createElement("circle", {
+    }), (props.parpadeo || 0) > 0.6 ? /*#__PURE__*/React.createElement("path", {
+      d: "M -35 -2 L -17 -2 M 17 -2 L 35 -2",
+      stroke: INK,
+      strokeWidth: 7,
+      strokeLinecap: "round"
+    }) : /*#__PURE__*/React.createElement("g", null, /*#__PURE__*/React.createElement("ellipse", {
       cx: -26,
       cy: -2,
-      r: 8,
+      rx: 8,
+      ry: 8 * (1 - 0.8 * (props.parpadeo || 0)),
       fill: INK
-    }), /*#__PURE__*/React.createElement("circle", {
+    }), /*#__PURE__*/React.createElement("ellipse", {
       cx: 26,
       cy: -2,
-      r: 8,
+      rx: 8,
+      ry: 8 * (1 - 0.8 * (props.parpadeo || 0)),
       fill: INK
-    }), /*#__PURE__*/React.createElement("path", _extends({
+    })), /*#__PURE__*/React.createElement("path", _extends({
       d: "M 0 14 L 0 34"
     }, LINEA)), props.boca === 'sonrisa' ? /*#__PURE__*/React.createElement("path", _extends({
       d: "M -24 46 Q 0 68 24 46"
@@ -1269,7 +1277,8 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
       strokeLinejoin: "round"
     }), /*#__PURE__*/React.createElement(Cabeza, {
       g: g,
-      boca: props.boca
+      boca: props.boca,
+      parpadeo: props.parpadeo
     }), brazos('trazo', cen ? 'brazo' : 'todo'), brazos('relleno', cen ? 'brazo' : 'todo'), lad.map(function (q, i) {
       return musculosBrazo(q, i, 'brazo');
     }), cen ? null : lad.map(function (q, i) {

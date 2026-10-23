@@ -228,9 +228,13 @@
       CUES = {};
       firmaCues = firma;
     }
-    escenas.forEach(function (e, i) {
-      if (i > 0) sonido(e.marca ? 'marca' : 'paso', limites[i] - h);
-    });
+    var v2 = props.estilo === 2;
+    // estilo 2: solo suenan las X y los vistos (sin musica ni whoosh)
+    if (!v2) {
+      escenas.forEach(function (e, i) {
+        if (i > 0) sonido(e.marca ? 'marca' : 'paso', limites[i] - h);
+      });
+    }
     var capas = [];
     escenas.forEach(function (e, i) {
       var at = limites[i],
@@ -238,13 +242,24 @@
       var desde = i > 0 ? at - h : at;
       var hasta = i < n - 1 ? fin + h : fin;
       if (T < desde || T >= hasta) return;
-      var x = 0;
+      var x = 0,
+        esc = 1,
+        op = 1;
       if (i > 0 && T < at + h) {
-        x = ANCHO * (1 - Easing.easeInOutCubic(clamp((T - (at - h)) / (2 * h), 0, 1)));
+        var kE = Easing.easeInOutCubic(clamp((T - (at - h)) / (2 * h), 0, 1));
+        if (v2) {
+          esc = 1.14 - 0.14 * kE;
+          op = kE;
+        } else x = ANCHO * (1 - kE);
       } else if (i < n - 1 && T >= fin - h) {
-        x = -ANCHO * Easing.easeInOutCubic(clamp((T - (fin - h)) / (2 * h), 0, 1));
+        var kS = Easing.easeInOutCubic(clamp((T - (fin - h)) / (2 * h), 0, 1));
+        if (v2) {
+          esc = 1 + 0.2 * kS;
+          op = 1 - kS;
+        } else x = -ANCHO * kS;
       }
       var Esc = e.C;
+      var tr = x ? 'translateX(' + x.toFixed(1) + 'px)' : esc !== 1 ? 'scale(' + esc.toFixed(4) + ')' : undefined;
       capas.push(/*#__PURE__*/React.createElement("div", {
         key: i,
         style: {
@@ -253,7 +268,9 @@
           top: 0,
           width: ANCHO,
           height: ALTO,
-          transform: x ? 'translateX(' + x.toFixed(1) + 'px)' : undefined
+          opacity: op,
+          transformOrigin: '50% 45%',
+          transform: tr
         }
       }, /*#__PURE__*/React.createElement(Esc, {
         T: T,
@@ -284,7 +301,9 @@
       e: sello,
       origen: "0 50%",
       dy: M.life(T, 4, 3)
-    }, /*#__PURE__*/React.createElement(MARCA.Esquina, {
+    }, v2 ? /*#__PURE__*/React.createElement(MARCA.Esquina2, {
+      s: 0.8
+    }) : /*#__PURE__*/React.createElement(MARCA.Esquina, {
       s: 0.84
     })) : null);
   }
@@ -304,7 +323,7 @@
 
   // escenas propias + el cierre de marca: va SIEMPRE, en todos los videos (pedido del autor)
   function conMarca(def) {
-    return def.escenas.concat([MARCA.escena]);
+    return def.escenas.concat([def.estilo === 2 ? MARCA.escena2 : MARCA.escena]);
   }
 
   /* =========================================================
@@ -370,6 +389,8 @@
         setPlaying: api.setPlaying,
         total: api.total,
         cues: listaCues,
+        estilo: props.estilo || 1,
+        fps: props.estilo === 2 ? 60 : 30,
         guion: props.escenas.map(function (e) {
           return {
             nombre: e.nombre,
@@ -463,11 +484,13 @@
           durs: durs,
           setDurs: setDurs,
           defecto: durDefecto(def),
-          render: modoRender
+          render: modoRender,
+          estilo: def.estilo
         });
       }
     }, /*#__PURE__*/React.createElement(Reel, {
-      escenas: escenas
+      escenas: escenas,
+      estilo: def.estilo
     }));
   }
 

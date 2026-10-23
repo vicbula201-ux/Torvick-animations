@@ -1,13 +1,15 @@
 /* ============================================================
    grabar.js — exporta un reel de reels.html a MP4 listo para subir
 
-       node herramientas/grabar.js <id> [carpeta-salida]
+       node herramientas/grabar.js <id> [carpeta-salida] [--con-musica]
 
    Deja en la carpeta (por defecto ./videos):
-     <id>.mp4              video + musica + efectos (sin voz: la voz la grabas vos)
-     <id>-sin-musica.mp4   video + efectos, para poner otra musica
+     <id>.mp4              video + los sonidos de las X (error) y los vistos ("tin"),
+                           sin musica (pedido del autor); la voz la grabas vos
      <id>-guion.txt        las lineas de la voz con su segundo de inicio
-     <id>-cues.json        los momentos de cada efecto (X, visto, cambios de escena)
+     <id>-cues.json        los momentos de esos sonidos
+   Con --con-musica deja ademas <id>-con-musica.mp4 (musica original + todos los efectos).
+   Los videos de estilo 2 se graban a 60 cuadros por segundo (mas fluidos); los demas a 30.
 
    Necesita: Node, Playwright (npm i -g playwright && npx playwright install chromium),
    ffmpeg y python3 con numpy. No es parte de la app: es una herramienta de escritorio.
@@ -32,12 +34,13 @@ function fmtT(s) {
 }
 
 (async () => {
-  const [id, dirSalida = 'videos'] = process.argv.slice(2);
+  const args = process.argv.slice(2);
+  const conMusica = args.includes('--con-musica');
+  const [id, dirSalida = 'videos'] = args.filter(a => !a.startsWith('--'));
   if (!id) { console.error('uso: node herramientas/grabar.js <id> [carpeta]'); process.exit(1); }
   const raiz = path.resolve(__dirname, '..');
   const salida = path.resolve(dirSalida);
   fs.mkdirSync(salida, { recursive: true });
-  const fps = 30;
 
   const { chromium } = cargarPlaywright();
   const b = await chromium.launch();
@@ -59,6 +62,7 @@ function fmtT(s) {
   await p.evaluate(() => window.REEL.setPlaying(false));
   await p.waitForTimeout(300);
   const total = await p.evaluate(() => window.REEL.total);
+  const fps = await p.evaluate(() => window.REEL.fps || 30);
   const n = Math.round(total * fps);
 
   const mudo = path.join(salida, id + '.mudo.mp4');
@@ -80,8 +84,11 @@ function fmtT(s) {
   const guion = await p.evaluate(() => window.REEL.guion);
   await b.close();
 
+  // solo suenan las X y los vistos; con --con-musica tambien los cambios de escena
   const fCues = path.join(salida, id + '-cues.json');
-  fs.writeFileSync(fCues, JSON.stringify(cues, null, 1));
+  fs.writeFileSync(fCues, JSON.stringify(cues.filter(c => c.tipo === 'error' || c.tipo === 'bien'), null, 1));
+  const fCuesTodos = path.join(salida, id + '.cues-todos.json');
+  fs.writeFileSync(fCuesTodos, JSON.stringify(cues, null, 1));
   let acc = 0;
   const lineas = guion.map((e) => {
     const l = '[' + fmtT(acc) + ' - ' + fmtT(acc + e.dur) + ']  ' + e.nombre.toUpperCase() + '\n' + e.vo + '\n';
@@ -93,14 +100,16 @@ function fmtT(s) {
     'Lee cada linea dentro de su tramo; el video ya esta cortado a ese ritmo.\n\n' + lineas.join('\n'));
 
   const audio = path.join(raiz, 'herramientas', 'audio.py');
-  const variantes = [[id + '.mp4', []], [id + '-sin-musica.mp4', ['--sin-musica']]];
-  for (const [nombre, extra] of variantes) {
+  const variantes = [[id + '.mp4', fCues, ['--sin-musica']]];
+  if (conMusica) variantes.push([id + '-con-musica.mp4', fCuesTodos, []]);
+  for (const [nombre, cuesArchivo, extra] of variantes) {
     const wav = path.join(salida, nombre + '.wav');
-    execFileSync('python3', [audio, '--dur', String(total), '--cues', fCues, '--out', wav].concat(extra), { stdio: 'inherit' });
+    execFileSync('python3', [audio, '--dur', String(total), '--cues', cuesArchivo, '--out', wav].concat(extra), { stdio: 'inherit' });
     execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-i', mudo, '-i', wav, '-c:v', 'copy', '-c:a', 'aac',
       '-b:a', '192k', '-shortest', '-movflags', '+faststart', path.join(salida, nombre)], { stdio: 'inherit' });
     fs.unlinkSync(wav);
   }
   fs.unlinkSync(mudo);
-  console.log('listo:', path.join(salida, id + '.mp4'), '·', total.toFixed(1), 's ·', cues.length, 'efectos');
+  fs.unlinkSync(fCuesTodos);
+  console.log('listo:', path.join(salida, id + '.mp4'), '·', total.toFixed(1), 's ·', fps, 'fps');
 })().catch(e => { console.error(e); process.exit(1); });

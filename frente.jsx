@@ -33,6 +33,7 @@
                 claves: pec delt bic ante abd obl serr trap cuad aduct sart tfl
                 con 0 el musculo no se dibuja; el tinte entra con opacidad = valor
      short      fraccion del muslo que tapa la manga (0.34; < 0.2 deja ver el tfl)
+     parpadeo   0..1 cierra los ojos (1 = dos lineas): para que la figura parpadee
      boca       true dibuja una linea de boca (por defecto: ojos y nariz);
                 'sonrisa' o 'triste' la curvan
      sinPiso    sin la linea gris del piso (vista de frente)
@@ -665,8 +666,14 @@
         <ellipse cx={-72} cy={10} rx={17} ry={28} fill={BLANCO} stroke={INK} strokeWidth={12} />
         <ellipse cx={72} cy={10} rx={17} ry={28} fill={BLANCO} stroke={INK} strokeWidth={12} />
         <ellipse cx={0} cy={0} rx={70} ry={84} fill={BLANCO} stroke={INK} strokeWidth={15} />
-        <circle cx={-26} cy={-2} r={8} fill={INK} />
-        <circle cx={26} cy={-2} r={8} fill={INK} />
+        {(props.parpadeo || 0) > 0.6 ? (
+          <path d="M -35 -2 L -17 -2 M 17 -2 L 35 -2" stroke={INK} strokeWidth={7} strokeLinecap="round" />
+        ) : (
+          <g>
+            <ellipse cx={-26} cy={-2} rx={8} ry={8 * (1 - 0.8 * (props.parpadeo || 0))} fill={INK} />
+            <ellipse cx={26} cy={-2} rx={8} ry={8 * (1 - 0.8 * (props.parpadeo || 0))} fill={INK} />
+          </g>
+        )}
         <path d="M 0 14 L 0 34" {...LINEA} />
         {props.boca === 'sonrisa' ? <path d="M -24 46 Q 0 68 24 46" {...LINEA} />
           : props.boca === 'triste' ? <path d="M -20 62 Q 0 46 20 62" {...LINEA} />
@@ -893,7 +900,7 @@
         })}
         <path d={faja} fill={GRY} stroke={INK} strokeWidth={13} strokeLinejoin="round" />
 
-        <Cabeza g={g} boca={props.boca} />
+        <Cabeza g={g} boca={props.boca} parpadeo={props.parpadeo} />
 
         {/* brazos (en cenital el antebrazo va encima del deltoides: apunta a camara) */}
         {brazos('trazo', cen ? 'brazo' : 'todo')}

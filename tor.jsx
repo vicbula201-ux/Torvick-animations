@@ -84,7 +84,7 @@
     // con el brazo flexionado el biceps lo dibuja el pico entero
     var sinBic = function (m) { return h > 2 && m ? Object.assign({}, m, { bic: 0 }) : m; };
     return (
-      <B.Frente s={props.s} pose={p} boca={props.boca} sinPiso={props.sinPiso}
+      <B.Frente s={props.s} pose={p} boca={props.boca} sinPiso={props.sinPiso} parpadeo={props.parpadeo}
         musc={sinBic(props.musc)} muscGris={props.muscGris} muscRojo={sinBic(props.muscRojo)}
         fondo={props.fondo} agarre={props.agarre}
         children={function (g) {

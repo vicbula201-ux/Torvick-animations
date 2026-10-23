@@ -22,6 +22,8 @@ nutricion.jsx     window.N: comida, plato, balanza y dial (videos de nutrición)
 marca.jsx         window.MARCA: firma de Torvick (nombre, redes, sello, cierre)
 reel.jsx          window.REELS: armazón común de los reels verticales
 plantillas.jsx    window.PL: escenas armadas con datos para los videos con Tor
+vivo.jsx          window.V: el estilo 2 (cámara viva, parpadeo, efectos, rótulos)
+marca/torvick.jpg la foto de Torvick para el cierre del estilo 2
 reels.html        abre los reels: lienzo 9:16 + guion + selector de video
 face-pull.jsx, sentadilla-sumo.jsx, elevacion-piernas.jsx,
 press-banca.jsx, dominadas.jsx   un archivo por video (solo escenas)
@@ -30,6 +32,7 @@ encogimientos.jsx, jalon.jsx, curl-barra.jsx, fondos-banco.jsx,
 pantorrilla.jsx                  reels cortos de ejercicios (formato actual, ~30 s)
 proteinas.jsx, hierro.jsx, grasas.jsx, carbohidratos.jsx,
 minerales.jsx, objetivos.jsx     reels cortos con Tor (nutrición y temas de entreno)
+curl-mancuernas.jsx              primer reel del ESTILO 2 (el formato de ahora en adelante)
 identidad.jsx/.html  foto de perfil y portadas de destacadas (PNG en identidad/)
 face-pull.html    redirige a reels.html#face-pull
 largo.html        videos largos de YouTube (16:9): el video con cortes + capas encima
@@ -255,7 +258,39 @@ Los logos están dibujados con la paleta de cinco (YouTube rojo, Instagram
 amarillo, TikTok negro con eco rojo). El nombre, la arroba y el número de
 `B.Cuenta` son el único texto del lienzo además de `P.Rotulo`.
 
-**Formato corto (el de ahora en adelante):** 30 a 35 s *con* el cierre
+**Estilo 2 (de ahora en adelante, `estilo: 2` en `REELS.registrar`):** la
+misma esencia (lienzo blanco, trazo INK, paleta de cinco, Tor, rótulos, X y
+vistos) con más fluidez, inspirada en los reels que el autor tomó de
+referencia. Lo que cambia, todo desde `vivo.jsx` y `reel.jsx`:
+
+- **Sin música.** Solo suenan las X (error) y los vistos ("tin"); tampoco
+  hay whoosh entre escenas. `grabar.js` ya exporta así (`--con-musica`
+  deja además la versión vieja).
+- **60 cuadros por segundo** al exportar (`REEL.fps`).
+- **Cámara viva** (`V.Camara`): cada escena encadena tomas (plano general
+  → primer plano del músculo o del agarre → general) sin cortes, con
+  deriva de cámara en mano, temblor cuando sale una X (`golpes`) y golpe
+  de zoom en los momentos fuertes (`pulsos`). Los tiempos son fracciones.
+- **Tor vivo:** parpadea (`parpadeo` en `B.Frente`, `B.Perfil` y `TOR.Tor`,
+  con `V.parpadeo(T)`), sombra en el piso (`V.Sombra`).
+- **Efectos:** `V.Brillo` (aros que salen del músculo que trabaja),
+  `V.Chispa` (estallido amarillo al llegar arriba), `V.Lineas` (líneas de
+  velocidad detrás de lo que se mueve), `V.Gotas` (sudor en los errores).
+- **Rótulos** con `V.Rot`: entran deslizando con rebote.
+- **Transición** de zoom entre escenas (la que sale crece y se funde, la
+  que entra llega desde un poco más cerca), en vez del empuje lateral.
+- **Sello de dos filas** (`MARCA.Esquina2`): TORVICK con YouTube,
+  Instagram y TikTok, y ENTRENA CON TOR con Instagram y TikTok.
+- **Cierre de 3,5 s** (`MARCA.EscMarca2`): Torvick con su foto
+  (`marca/torvick.jpg`), las tres redes y @eltorvick; abajo Tor sacando
+  bíceps con "ENTRENA / CON TOR" (misma tipografía, sin arroba) e
+  Instagram y TikTok; "SÍGUEME PARA MÁS". Los videos con Tor se suben al
+  YouTube de Torvick y al Instagram/TikTok de Entrena con Tor.
+
+`curl-mancuernas.jsx` es la referencia del estilo 2. Los videos anteriores
+siguen con el estilo 1 (no llevan `estilo`).
+
+**Formato corto:** 30 a 35 s *con* el cierre
 de 3 s; la retención de Shorts/Reels está en 20-25 s, así que nada
 redundante. Siete escenas de 2,5 a 5,5 s: Gancho, Posición, Ejecución,
 Músculos, Error 1, Error 2, Cierre. Los cinco primeros videos (face pull a
@@ -294,14 +329,11 @@ automatizado. Eso hace la herramienta de escritorio:
 node herramientas/grabar.js <id> [carpeta]   # por defecto ./videos (ignorada por git)
 ```
 
-Deja `<id>.mp4` (video + música + efectos, listo para ponerle la voz),
-`<id>-sin-musica.mp4` (solo efectos), `<id>-guion.txt` (cada línea de voz
-con su tramo de tiempo) y `<id>-cues.json`. La música es original,
-sintetizada por `herramientas/audio.py` (sin derechos de terceros); para
-usar otra pista, `python3 herramientas/audio.py --dur <s> --cues
-<id>-cues.json --musica tema.wav --out pista.wav` (trae los efectos) y
-reemplazar con ella el audio del MP4 (`ffmpeg -i <id>.mp4 -i pista.wav
--map 0:v -map 1:a -c:v copy -c:a aac salida.mp4`). Necesita Node, Playwright, ffmpeg y
+Deja `<id>.mp4` (video + los sonidos de las X y los vistos, sin música,
+listo para ponerle la voz), `<id>-guion.txt` (cada línea de voz con su
+tramo de tiempo) y `<id>-cues.json`. Con `--con-musica` deja además
+`<id>-con-musica.mp4` con la música original sintetizada por
+`herramientas/audio.py` (sin derechos de terceros). Necesita Node, Playwright, ffmpeg y
 python3 con numpy. Sin eso, grabá la pantalla con el reel en reproducción.
 
 **Videos de nutrición:** mismo formato corto, misma música y sonidos, y
