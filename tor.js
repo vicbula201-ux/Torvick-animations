@@ -8,7 +8,7 @@
        al costado -> 1 doble biceps (brazos afuera, puños a la altura de la
        cabeza). El brazo sube y el antebrazo gira por afuera, sin cruzar el
        torso.
-   <TOR.Tor s flex musc muscGris muscRojo boca pose sinPiso fondo agarre extra ropa />
+   <TOR.Tor s flex musc muscGris muscRojo boca pose sinPiso fondo agarre extra ropa ojos />
        B.Frente + el pico del biceps (se abomba con flex; amarillo con
        musc.bic). extra(g) se dibuja encima de todo, como children.
    ============================================================ */
@@ -133,6 +133,7 @@
       sinPiso: props.sinPiso,
       parpadeo: props.parpadeo,
       ropa: props.ropa,
+      ojos: props.ojos,
       musc: sinBic(props.musc),
       muscGris: props.muscGris,
       muscRojo: sinBic(props.muscRojo),

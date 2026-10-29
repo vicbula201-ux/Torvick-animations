@@ -6,7 +6,8 @@ audio.py — arma la pista de un reel: musica original + efectos en los momentos
                                   [--musica mi-tema.wav] [--bpm 118] [--semilla 3]
 
 cues.json = [{"tipo": "error"|"bien"|"paso"|"marca"|"golpe"|"siu", "t": segundos, "g": ganancia}, ...]
-("siu": el festejo "¡siuuu!" sintetizado, para el video de Cristiano)
+("siu": el festejo "¡siuuu!" sintetizado, para el video de Cristiano;
+ "publico": la tribuna que estalla, para el de LeBron)
 (lo escribe herramientas/grabar.js a partir de window.REEL.cues()).
 
 Para los videos largos (herramientas/grabar-largo.js):
@@ -350,6 +351,34 @@ def fx_siu(rng):
     return out / (np.abs(out).max() + 1e-9) * 0.85
 
 
+def fx_publico(rng):
+    """la tribuna que estalla: un murmullo de muchas voces que crece y se apaga, con
+    gritos sueltos ("oh", "eh") encima. Sintetizado, sin grabaciones ajenas."""
+    dur = 3.2
+    n = seg(dur)
+    t = np.arange(n) / SR
+    ruido = rng.standard_normal(n)
+    banda = pasabajos(ruido, 2600) - pasabajos(ruido, 260)
+    mod = 1 + 0.25 * np.sin(2 * np.pi * 3.1 * t) * np.sin(2 * np.pi * 0.7 * t)
+    env = np.clip(t / 0.35, 0, 1) ** 1.5 * np.where(t < 1.9, 1.0, np.exp(-(t - 1.9) / 0.5))
+    base = banda * mod * env
+    gritos = np.zeros(n)
+    for _ in range(7):
+        t0, d = 0.1 + rng.uniform(0, 1.4), rng.uniform(0.5, 1.1)
+        i0, m = seg(t0), seg(d)
+        tt = np.arange(m) / SR
+        f0 = rng.uniform(180, 340) * (1 + 0.12 * np.sin(np.pi * tt / d))
+        fuente = 2 * ((np.cumsum(f0) / SR) % 1) - 1
+        f1, f2 = rng.choice([500.0, 650.0]), rng.choice([900.0, 1100.0, 1700.0])
+        v = resonador(fuente, np.full(m, f1), np.full(m, 90.0)) + 0.5 * resonador(fuente, np.full(m, f2), np.full(m, 140.0))
+        v = v / (np.abs(v).max() + 1e-9) * np.sin(np.pi * tt / d) ** 0.5
+        j1 = min(n, i0 + m)
+        gritos[i0:j1] += v[:j1 - i0] * rng.uniform(0.25, 0.45)
+    x = base / (np.abs(base).max() + 1e-9) + gritos * env
+    out = np.stack([x, np.roll(x, seg(0.013))], axis=1)
+    return out / (np.abs(out).max() + 1e-9) * 0.8
+
+
 def poner2(buf, x, t, g=1.0):
     """como poner, pero x ya es estereo"""
     i = seg(t)
@@ -453,9 +482,10 @@ def main():
 
     efectos = {'error': fx_error(), 'bien': fx_bien(), 'ding': fx_bien(), 'paso': fx_paso(rng),
                'marca': fx_marca(), 'golpe': fx_golpe(rng), 'pop': fx_pop(), 'whoosh': fx_whoosh(rng),
-               'click': fx_click(), 'campana': fx_campana(), 'subida': fx_subida(rng), 'siu': fx_siu(rng)}
+               'click': fx_click(), 'campana': fx_campana(), 'subida': fx_subida(rng), 'siu': fx_siu(rng),
+               'publico': fx_publico(rng)}
     ganancia = {'error': 0.85, 'bien': 0.75, 'ding': 0.6, 'paso': 0.5, 'marca': 0.7, 'golpe': 0.6,
-                'pop': 0.55, 'whoosh': 0.7, 'click': 0.6, 'campana': 0.6, 'subida': 0.5, 'siu': 0.9}
+                'pop': 0.55, 'whoosh': 0.7, 'click': 0.6, 'campana': 0.6, 'subida': 0.5, 'siu': 0.9, 'publico': 0.75}
     if voz is not None:
         # en los largos los efectos acompanan a la voz: quedan unos dB por debajo
         ganancia.update({'error': 0.3, 'golpe': 0.35, 'ding': 0.45, 'bien': 0.45, 'pop': 0.6, 'whoosh': 0.8,

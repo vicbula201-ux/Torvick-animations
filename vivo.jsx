@@ -24,6 +24,12 @@
    V.Lineas({ c, dir, v, largo })    lineas de velocidad detras de algo que se mueve
    V.Chispa({ T, c, cuando, r })     estallido amarillo corto
    V.Sombra({ c, rx })               sombra gris en el piso
+   V.Humo({ T, c, v, alto, viento })  humo que sube (un bareto)
+   V.Polvo({ T, c, cuando, n, fuerza, dura })   estallido de tiza que sube y cae
+   V.Confeti({ T, desde, n, v })     papelitos de la paleta cayendo (festejo)
+   V.Ondas({ T, c, v, r, color })    ondas de sonido a los dos lados
+   HTML:
+   V.Estela({ T, dibujar(Tx, fantasma), n, paso, opacidad })   la figura y su estela de movimiento
    V.escena({ fig, figura, comparar, tomas, lienzo, mal, bien, r1, r2 })   escena armada
    V.Mitad({ cmp, y, e })   franja de comparacion      V.fase / V.ida   ritmo de repeticiones
    ============================================================ */
@@ -202,6 +208,112 @@
     return <ellipse cx={c[0]} cy={c[1]} rx={rx} ry={rx * 0.12} fill={C.GRY} />;
   }
 
+  function frac(x) { return x - Math.floor(x); }
+  // tres numeros pseudoaleatorios fijos para la particula i (siempre los mismos)
+  function azar(i) {
+    return [frac(Math.sin(i * 12.9898) * 43758.5453), frac(Math.sin(i * 78.233) * 12345.678), frac(Math.sin(i * 39.425) * 24634.6345)];
+  }
+
+  // estela de movimiento: la misma figura unos instantes antes, cada vez mas transparente.
+  // dibujar(Tx, fantasma) -> elemento; con fantasma = true no conviene dibujar los extras
+  function Estela(props) {
+    var n = props.n || 3, paso = props.paso || 0.06, op = props.opacidad == null ? 0.2 : props.opacidad;
+    var capas = [];
+    for (var i = n; i >= 1; i--) {
+      capas.push(
+        <div key={i} style={{ position: 'absolute', left: 0, top: 0, opacity: op * (1 - (i - 1) / n) }}>
+          {props.dibujar(props.T - i * paso, true)}
+        </div>
+      );
+    }
+    return <div style={{ position: 'relative' }}>{capas}{props.dibujar(props.T, false)}</div>;
+  }
+
+  // humo que sube desde c (un bareto): bocanadas grises que crecen y se van, y una voluta
+  function Humo(props) {
+    var T = props.T, c = props.c, v = clamp(props.v == null ? 1 : props.v, 0, 1), alto = props.alto || 240;
+    if (v < 0.02) return null;
+    var bocanadas = [];
+    for (var i = 0; i < 5; i++) {
+      var u = ((T / 1.6) + i / 5) % 1;
+      var x = c[0] + 26 * Math.sin(T * 1.7 + i * 1.9) * u + (props.viento || 0) * u;
+      bocanadas.push(<circle key={i} cx={x.toFixed(1)} cy={(c[1] - alto * u).toFixed(1)} r={(10 + 30 * u).toFixed(1)}
+        fill={C.GRY} opacity={(v * 0.75 * (1 - u) * Math.min(1, u * 6)).toFixed(3)} />);
+    }
+    var pts = [];
+    for (var k = 0; k <= 10; k++) {
+      var w = k / 10;
+      pts.push((c[0] + 18 * Math.sin(T * 3 + w * 6) * w + (props.viento || 0) * 0.5 * w).toFixed(1) + ' ' + (c[1] - alto * 0.55 * w).toFixed(1));
+    }
+    return (
+      <g>
+        {bocanadas}
+        <path d={'M ' + pts.join(' L ')} fill="none" stroke={C.GRY} strokeWidth={7} strokeLinecap="round" opacity={0.8 * v} />
+      </g>
+    );
+  }
+
+  // polvo (la tiza de LeBron): particulas que salen de c en 'cuando', suben y caen, y una nube que se abre
+  function Polvo(props) {
+    var dura = props.dura || 1.6, d = props.T - props.cuando;
+    if (d < 0 || d > dura) return null;
+    var c = props.c, n = props.n || 44, fuerza = props.fuerza || 560, u = d / dura;
+    var nubes = [], parts = [];
+    for (var j = 0; j < 6; j++) {
+      var a = (-90 + (j - 2.5) * 34) * Math.PI / 180, rr = 60 + 150 * Easing.easeOutCubic(Math.min(1, d / 0.7));
+      nubes.push(<circle key={'n' + j} cx={(c[0] + Math.cos(a) * rr * 0.7).toFixed(1)} cy={(c[1] + Math.sin(a) * rr * 0.7 - 50 * u).toFixed(1)}
+        r={(50 + 80 * Math.min(1, d / 0.6)).toFixed(1)} fill={C.GRY} opacity={(0.42 * (1 - u)).toFixed(3)} />);
+    }
+    for (var i = 0; i < n; i++) {
+      var h = azar(i);
+      var ang = (-165 + 150 * h[0]) * Math.PI / 180, vel = fuerza * (0.4 + 0.8 * h[1]);
+      var x = c[0] + Math.cos(ang) * vel * d, y = c[1] + Math.sin(ang) * vel * d + 350 * d * d;
+      var r = (4 + 10 * h[2]) * (1 - 0.5 * u);
+      parts.push(<circle key={i} cx={x.toFixed(1)} cy={y.toFixed(1)} r={r.toFixed(1)} fill={h[2] > 0.5 ? C.GRY : BLANCO}
+        stroke={C.GRY} strokeWidth={h[2] > 0.5 ? 0 : 3} opacity={(1 - u).toFixed(3)} />);
+    }
+    return <g>{nubes}{parts}</g>;
+  }
+
+  // confeti que cae desde arriba (festejo): papelitos de la paleta que giran
+  function Confeti(props) {
+    var d = props.T - props.desde;
+    if (d < 0) return null;
+    var n = props.n || 46, colores = [C.YEL, C.RED, C.GRN, C.YEL, C.GRY];
+    var v = clamp(props.v == null ? 1 : props.v, 0, 1);
+    var ps = [];
+    for (var i = 0; i < n; i++) {
+      var h = azar(i + 7);
+      var y = -60 + (260 + 300 * h[1]) * d - 420 * h[2];
+      if (y < -80 || y > ALTO + 40) continue;
+      var x = 40 + 1000 * h[0] + 40 * Math.sin(d * (2 + 2 * h[2]) + i);
+      var rot = (d * (180 + 240 * h[1]) + i * 40) % 360;
+      var w = 16 + 12 * h[2], hh = 26 + 10 * h[0];
+      var sx = Math.max(0.15, Math.abs(Math.cos(d * (3 + 3 * h[0]) + i)));
+      ps.push(<rect key={i} x={(-w / 2).toFixed(1)} y={(-hh / 2).toFixed(1)} width={w.toFixed(1)} height={hh.toFixed(1)} rx={3}
+        fill={colores[i % colores.length]} stroke={C.INK} strokeWidth={3} opacity={v}
+        transform={'translate(' + x.toFixed(1) + ' ' + y.toFixed(1) + ') rotate(' + rot.toFixed(1) + ') scale(' + sx.toFixed(3) + ' 1)'} />);
+    }
+    return <g>{ps}</g>;
+  }
+
+  // ondas de sonido a los dos lados de c (ruido, un grito, la tribuna)
+  function Ondas(props) {
+    var T = props.T, c = props.c, v = clamp(props.v == null ? 1 : props.v, 0, 1), r0 = props.r || 80;
+    if (v < 0.02) return null;
+    var arcos = [];
+    for (var i = 0; i < 3; i++) {
+      var u = ((T / 0.9) + i / 3) % 1, r = r0 + 130 * u;
+      [-1, 1].forEach(function (l) {
+        var a0 = (l > 0 ? -40 : 140) * Math.PI / 180, a1 = (l > 0 ? 40 : 220) * Math.PI / 180;
+        arcos.push(<path key={i + '_' + l} d={'M ' + (c[0] + r * Math.cos(a0)).toFixed(1) + ' ' + (c[1] + r * Math.sin(a0)).toFixed(1) +
+          ' A ' + r.toFixed(1) + ' ' + r.toFixed(1) + ' 0 0 1 ' + (c[0] + r * Math.cos(a1)).toFixed(1) + ' ' + (c[1] + r * Math.sin(a1)).toFixed(1)}
+          fill="none" stroke={props.color || C.INK} strokeWidth={12} strokeLinecap="round" opacity={(v * (1 - u)).toFixed(3)} />);
+      });
+    }
+    return <g>{arcos}</g>;
+  }
+
   /* ---------------- escenas armadas (estilo 2) ---------------- */
 
   // franja de una comparacion (mal arriba / bien abajo): recorta la figura y entra desde su centro
@@ -313,6 +425,7 @@
   global.V = {
     Camara: Camara, tomaEn: tomaEn, parpadeo: parpadeo, respira: respira, Rot: Rot,
     Brillo: Brillo, Gotas: Gotas, Lineas: Lineas, Chispa: Chispa, Sombra: Sombra,
-    Mitad: Mitad, escena: escena, fase: fase, ida: ida
+    Mitad: Mitad, escena: escena, fase: fase, ida: ida,
+    Estela: Estela, Humo: Humo, Polvo: Polvo, Confeti: Confeti, Ondas: Ondas, azar: azar
   };
 })(window);

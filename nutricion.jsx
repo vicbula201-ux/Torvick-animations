@@ -12,7 +12,9 @@
      N.ICONOS = { hueso, gota, escudo, termometro, hormona, capsula (color),
                   globulo (o2 0..4), glucosa, zapatilla, calendario, barras (p 0..1),
                   vial (color), jeringa (color), raton, adn, estetoscopio, luna,
-                  balon (giro), arco, copa, mundo }
+                  balon (giro), arco, copa, mundo, balonOro, camiseta (color, cuello,
+                  numero, colorNumero, rayas), bareto (encendido), pulmones (humo, color),
+                  persona (color), receta, basket (giro), aro, corona, anillo, billete }
    N.Plato    plato visto de arriba (viewBox 420x420); children van encima
    N.Bola     aminoacido: una bolita de color (r, color) para armar cadenas
    N.Balanza  balanza de baño vista de frente; va debajo de los pies de Tor
@@ -639,6 +641,175 @@
     );
   }
 
+  // balon de oro: la pelota dorada sobre su pie
+  function BalonOro(props) {
+    return (
+      <Svg s={props.s}>
+        <path d="M 96 168 L 144 168 L 150 184 L 90 184 Z" fill={C.YEL} {...T0} strokeWidth={11} />
+        <path d="M 70 190 L 170 190 L 182 226 L 58 226 Z" fill={C.GRY} {...T0} />
+        <circle cx={120} cy={96} r={74} fill={C.YEL} {...T0} />
+        <path d="M 120 64 L 150 86 L 139 120 L 101 120 L 90 86 Z" fill="none" stroke={C.INK} strokeWidth={8} strokeLinejoin="round" />
+        <path d="M 120 64 L 120 26 M 150 86 L 188 74 M 139 120 L 160 154 M 101 120 L 80 154 M 90 86 L 52 74" stroke={C.INK} strokeWidth={8} strokeLinecap="round" />
+        <path d="M 74 70 Q 84 46 108 38" fill="none" stroke={BLANCO} strokeWidth={10} strokeLinecap="round" />
+      </Svg>
+    );
+  }
+
+  // camiseta de futbol vista de frente, con su numero
+  var CAMISETA = 'M 80 26 L 40 44 L 12 98 L 50 118 L 66 94 L 66 216 L 174 216 L 174 94 L 190 118 L 228 98 L 200 44 L 160 26 Q 120 58 80 26 Z';
+  function Camiseta(props) {
+    var color = props.color || BLANCO;
+    return (
+      <Svg s={props.s}>
+        <path d={CAMISETA} fill={color} />
+        {props.rayas ? (
+          <g>
+            <defs><clipPath id="n-camiseta"><path d={CAMISETA} /></clipPath></defs>
+            <g clipPath="url(#n-camiseta)">
+              {[44, 92, 140, 188].map(function (x) { return <rect key={x} x={x} y={20} width={24} height={200} fill={props.rayas} />; })}
+            </g>
+          </g>
+        ) : null}
+        <path d={CAMISETA} fill="none" {...T0} />
+        <path d="M 80 26 Q 120 58 160 26" fill="none" stroke={C.INK} strokeWidth={24} strokeLinecap="round" />
+        <path d="M 80 26 Q 120 58 160 26" fill="none" stroke={props.cuello || BLANCO} strokeWidth={10} strokeLinecap="round" />
+        <path d="M 22 92 L 48 106 M 218 92 L 192 106" stroke={props.cuello || BLANCO} strokeWidth={9} strokeLinecap="round" />
+        {props.numero != null ? (
+          <text x={120} y={176} textAnchor="middle" fontFamily="'Archivo Black', sans-serif" fontSize={86}
+            fill={props.colorNumero || BLANCO} stroke={C.INK} strokeWidth={7} strokeLinejoin="round" paintOrder="stroke">{props.numero}</text>
+        ) : null}
+      </Svg>
+    );
+  }
+
+  // bareto: el cono de papel, el filtro y la brasa (encendido 0..1)
+  function Bareto(props) {
+    var e = props.encendido == null ? 1 : props.encendido;
+    return (
+      <Svg s={props.s}>
+        <path d="M 30 128 L 186 104 Q 204 108 204 130 Q 204 152 186 156 L 30 140 Z" fill={BLANCO} {...T0} strokeWidth={10} />
+        <path d="M 30 128 L 66 123 L 66 145 L 30 140 Z" fill={C.GRY} stroke={C.INK} strokeWidth={9} strokeLinejoin="round" />
+        <path d="M 96 126 L 150 120 M 100 140 L 140 142" stroke={C.GRY} strokeWidth={6} strokeLinecap="round" />
+        {e > 0 ? (
+          <g opacity={e}>
+            <ellipse cx={200} cy={130} rx={13} ry={24} fill={C.RED} stroke={C.INK} strokeWidth={8} />
+            <ellipse cx={203} cy={130} rx={6} ry={12} fill={C.YEL} />
+          </g>
+        ) : null}
+      </Svg>
+    );
+  }
+
+  // pulmones: humo 0..1 los llena de manchas grises; color tine los lobulos (irritacion)
+  function Pulmones(props) {
+    var h = props.humo || 0, fill = props.color || BLANCO;
+    var izq = 'M 104 72 C 70 62 30 104 28 160 C 26 208 62 224 96 212 C 112 206 112 182 112 160 L 112 96 C 112 82 110 74 104 72 Z';
+    var der = 'M 136 72 C 170 62 210 104 212 160 C 214 208 178 224 144 212 C 128 206 128 182 128 160 L 128 96 C 128 82 130 74 136 72 Z';
+    var manchas = [[70, 130, 16], [60, 176, 13], [92, 186, 11], [168, 128, 15], [182, 172, 13], [150, 190, 10], [86, 150, 9], [160, 154, 9]];
+    return (
+      <Svg s={props.s}>
+        <path d={izq} fill={fill} {...T0} />
+        <path d={der} fill={fill} {...T0} />
+        {h > 0 ? manchas.map(function (m, i) {
+          return <circle key={i} cx={m[0]} cy={m[1]} r={m[2] * (0.6 + 0.4 * h)} fill={C.GRY} opacity={Math.min(1, h * 1.4)} />;
+        }) : null}
+        <path d="M 120 14 L 120 98 M 120 98 L 98 124 M 120 98 L 142 124" fill="none" {...T0} strokeWidth={14} />
+      </Svg>
+    );
+  }
+
+  // una persona (para contar "3 de cada 10")
+  function Persona(props) {
+    var color = props.color || BLANCO;
+    return (
+      <Svg s={props.s}>
+        <circle cx={120} cy={64} r={38} fill={color} {...T0} />
+        <path d="M 58 218 Q 58 118 120 114 Q 182 118 182 218 Z" fill={color} {...T0} />
+      </Svg>
+    );
+  }
+
+  // receta medica: la hoja con la cruz verde
+  function Receta(props) {
+    return (
+      <Svg s={props.s}>
+        <rect x={50} y={20} width={140} height={200} rx={14} fill={BLANCO} {...T0} />
+        <path d="M 108 48 L 132 48 L 132 66 L 150 66 L 150 90 L 132 90 L 132 108 L 108 108 L 108 90 L 90 90 L 90 66 L 108 66 Z"
+          fill={C.GRN} stroke={C.INK} strokeWidth={8} strokeLinejoin="round" />
+        <path d="M 76 136 L 164 136 M 76 162 L 164 162 M 76 188 L 136 188" stroke={C.GRY} strokeWidth={10} strokeLinecap="round" />
+      </Svg>
+    );
+  }
+
+  // pelota de basquet (amarilla, con sus costuras); giro rota las costuras
+  function Basket(props) {
+    return (
+      <Svg s={props.s}>
+        <circle cx={120} cy={120} r={94} fill={C.YEL} {...T0} />
+        <g transform={'rotate(' + (props.giro || 0) + ' 120 120)'}>
+          <path d="M 120 26 L 120 214 M 26 120 L 214 120" stroke={C.INK} strokeWidth={9} strokeLinecap="round" />
+          <path d="M 54 54 Q 96 120 54 186 M 186 54 Q 144 120 186 186" fill="none" stroke={C.INK} strokeWidth={9} strokeLinecap="round" />
+        </g>
+        <circle cx={120} cy={120} r={94} fill="none" {...T0} />
+      </Svg>
+    );
+  }
+
+  // aro de basquet: tablero, aro y red
+  function Aro(props) {
+    return (
+      <Svg s={props.s}>
+        <rect x={36} y={14} width={168} height={110} rx={8} fill={BLANCO} {...T0} />
+        <rect x={92} y={60} width={56} height={44} fill="none" stroke={C.INK} strokeWidth={9} />
+        <path d="M 78 140 L 92 214 L 106 150 L 120 214 L 134 150 L 148 214 L 162 140" fill="none" stroke={C.GRY} strokeWidth={7} strokeLinejoin="round" />
+        <path d="M 92 214 L 148 214" stroke={C.GRY} strokeWidth={7} strokeLinecap="round" />
+        <ellipse cx={120} cy={138} rx={50} ry={11} fill="none" stroke={C.INK} strokeWidth={22} />
+        <ellipse cx={120} cy={138} rx={50} ry={11} fill="none" stroke={C.RED} strokeWidth={10} />
+      </Svg>
+    );
+  }
+
+  // corona (el "Rey")
+  function Corona(props) {
+    return (
+      <Svg s={props.s}>
+        <path d="M 30 176 L 36 70 L 84 120 L 120 44 L 156 120 L 204 70 L 210 176 Z" fill={C.YEL} {...T0} />
+        <rect x={28} y={172} width={184} height={36} rx={10} fill={C.YEL} {...T0} />
+        <circle cx={36} cy={66} r={13} fill={C.RED} {...T0} strokeWidth={9} />
+        <circle cx={120} cy={40} r={14} fill={C.GRN} {...T0} strokeWidth={9} />
+        <circle cx={204} cy={66} r={13} fill={C.RED} {...T0} strokeWidth={9} />
+        <circle cx={120} cy={190} r={9} fill={C.RED} stroke={C.INK} strokeWidth={6} />
+      </Svg>
+    );
+  }
+
+  // anillo de campeon
+  function Anillo(props) {
+    return (
+      <Svg s={props.s}>
+        <circle cx={120} cy={150} r={62} fill="none" stroke={C.INK} strokeWidth={38} />
+        <circle cx={120} cy={150} r={62} fill="none" stroke={C.YEL} strokeWidth={20} />
+        <path d="M 66 46 L 174 46 L 186 86 L 162 122 L 78 122 L 54 86 Z" fill={C.YEL} {...T0} />
+        <path d="M 120 58 L 130 80 L 154 82 L 136 98 L 142 120 L 120 108 L 98 120 L 104 98 L 86 82 L 110 80 Z"
+          fill={BLANCO} stroke={C.INK} strokeWidth={7} strokeLinejoin="round" />
+      </Svg>
+    );
+  }
+
+  // billetes (dinero)
+  function Billete(props) {
+    var uno = function (dx, dy) {
+      return (
+        <g transform={'translate(' + dx + ' ' + dy + ')'}>
+          <rect x={14} y={70} width={196} height={104} rx={12} fill={C.GRN} {...T0} />
+          <rect x={30} y={86} width={164} height={72} rx={8} fill="none" stroke={BLANCO} strokeWidth={6} />
+          <circle cx={112} cy={122} r={24} fill={BLANCO} stroke={C.INK} strokeWidth={8} />
+        </g>
+      );
+    };
+    return <Svg s={props.s}>{uno(16, -26)}{uno(0, 0)}{uno(16, 30)}</Svg>;
+  }
+
   var COMIDA = {
     pollo: Pollo, pescado: Pescado, huevo: Huevo, leche: Leche,
     legumbres: Legumbres, frutosSecos: FrutosSecos, semillas: Semillas,
@@ -650,7 +821,9 @@
     hueso: Hueso, gota: Gota, escudo: Escudo, termometro: Termometro, hormona: Hormona, capsula: Capsula,
     globulo: Globulo, glucosa: Glucosa, zapatilla: Zapatilla, calendario: Calendario, barras: Barras,
     vial: Vial, jeringa: Jeringa, raton: Raton, adn: Adn, estetoscopio: Estetoscopio, luna: Luna,
-    balon: Balon, arco: Arco, copa: Copa, mundo: Mundo
+    balon: Balon, arco: Arco, copa: Copa, mundo: Mundo,
+    balonOro: BalonOro, camiseta: Camiseta, bareto: Bareto, pulmones: Pulmones, persona: Persona,
+    receta: Receta, basket: Basket, aro: Aro, corona: Corona, anillo: Anillo, billete: Billete
   };
 
   /* ---------------- plato, aminoacidos, balanza ---------------- */

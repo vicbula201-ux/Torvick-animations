@@ -39,9 +39,12 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
      boca       true dibuja una linea de boca (por defecto: ojos y nariz);
                 'sonrisa' o 'triste' la curvan
      sinPiso    sin la linea gris del piso (vista de frente)
-     ropa       { camiseta, cuello, short, numero }: camiseta de color (tapa el
-                torso y los hombros, con cuello y punos de color 'cuello' y el
-                numero en el pecho) y color del short (por defecto GRY)
+     ropa       { camiseta, cuello, short, numero, colorNumero, escudo, mangas }:
+                camiseta de color (tapa el torso y los hombros, con cuello y punos
+                de color 'cuello' y el numero en el pecho, blanco o colorNumero),
+                color del short (por defecto GRY); escudo 'cruz' (blanco con la
+                cruz roja, en el pecho); mangas false = musculosa (basquet)
+     ojos       'rojos': ojos rojos y entrecerrados (fumado)
      sinBanco   sin el banco (vista cenital)
      fondo(g) agarre(g) children(g)   funciones -> SVG en coordenadas del viewBox
 
@@ -954,7 +957,38 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
       fill: BLANCO,
       stroke: INK,
       strokeWidth: 15
-    }), (props.parpadeo || 0) > 0.6 ? /*#__PURE__*/React.createElement("path", {
+    }), props.ojos === 'rojos' ? [-28, 28].map(function (x) {
+      // rojos y con el parpado caido (la mitad de arriba la tapa el parpado), con ojeras
+      var lid = 'M ' + (x - 23) + ' 0 A 23 16 0 0 1 ' + (x + 23) + ' 0 Z';
+      return /*#__PURE__*/React.createElement("g", {
+        key: x
+      }, /*#__PURE__*/React.createElement("ellipse", {
+        cx: x,
+        cy: 0,
+        rx: 23,
+        ry: 16,
+        fill: RED,
+        stroke: INK,
+        strokeWidth: 6
+      }), /*#__PURE__*/React.createElement("circle", {
+        cx: x,
+        cy: 5,
+        r: 7,
+        fill: INK
+      }), /*#__PURE__*/React.createElement("path", {
+        d: lid,
+        fill: BLANCO,
+        stroke: INK,
+        strokeWidth: 7,
+        strokeLinejoin: "round"
+      }), /*#__PURE__*/React.createElement("path", {
+        d: 'M ' + (x - 18) + ' 24 Q ' + x + ' 34 ' + (x + 18) + ' 24',
+        fill: "none",
+        stroke: GRY,
+        strokeWidth: 6,
+        strokeLinecap: "round"
+      }));
+    }) : (props.parpadeo || 0) > 0.6 ? /*#__PURE__*/React.createElement("path", {
       d: "M -35 -2 L -17 -2 M 17 -2 L 35 -2",
       stroke: INK,
       strokeWidth: 7,
@@ -1142,7 +1176,7 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
       var dir = lb > 24 ? q.codo : suma(q.hombro, [q.lado * 60, 100]);
       var dl = deltoide(q.hombro, dir, clamp(lb * 0.56, 58, 112));
       var m = tDelt[i];
-      if (cam) {
+      if (cam && ropa.mangas !== false) {
         // manga corta: tubo hasta la mitad del brazo, el hombro del color de la camiseta y el puno
         var u = unidad(resta(dir, q.hombro)),
           nn = [-u[1], u[0]];
@@ -1226,12 +1260,30 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
         textAnchor: "middle",
         fontFamily: "'Archivo Black', sans-serif",
         fontSize: 150,
-        fill: C_NUM,
+        fill: ropa.colorNumero || C_NUM,
         stroke: INK,
         strokeWidth: 10,
         strokeLinejoin: "round",
         paintOrder: "stroke"
-      }, ropa.numero) : null);
+      }, ropa.numero) : null, ropa.escudo === 'cruz' ? function () {
+        var e = fr.a([82, -296]);
+        return /*#__PURE__*/React.createElement("g", {
+          transform: 'translate(' + pt(e).replace(' ', ',') + ') rotate(' + ang.toFixed(2) + ')'
+        }, /*#__PURE__*/React.createElement("path", {
+          d: "M -26 -30 L 26 -30 L 26 4 Q 26 28 0 38 Q -26 28 -26 4 Z",
+          fill: BLANCO
+        }), /*#__PURE__*/React.createElement("path", {
+          d: "M -22 -4 L 22 -4 M 0 -26 L 0 32",
+          stroke: RED,
+          strokeWidth: 10
+        }), /*#__PURE__*/React.createElement("path", {
+          d: "M -26 -30 L 26 -30 L 26 4 Q 26 28 0 38 Q -26 28 -26 4 Z",
+          fill: "none",
+          stroke: INK,
+          strokeWidth: 8,
+          strokeLinejoin: "round"
+        }));
+      }() : null);
     }() : null;
     var punos = lad.map(function (q, i) {
       return /*#__PURE__*/React.createElement("g", {
@@ -1360,7 +1412,8 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
     }), /*#__PURE__*/React.createElement(Cabeza, {
       g: g,
       boca: props.boca,
-      parpadeo: props.parpadeo
+      parpadeo: props.parpadeo,
+      ojos: props.ojos
     }), brazos('trazo', cen ? 'brazo' : 'todo'), brazos('relleno', cen ? 'brazo' : 'todo'), lad.map(function (q, i) {
       return musculosBrazo(q, i, 'brazo');
     }), cen ? null : lad.map(function (q, i) {

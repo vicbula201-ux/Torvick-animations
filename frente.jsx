@@ -37,9 +37,12 @@
      boca       true dibuja una linea de boca (por defecto: ojos y nariz);
                 'sonrisa' o 'triste' la curvan
      sinPiso    sin la linea gris del piso (vista de frente)
-     ropa       { camiseta, cuello, short, numero }: camiseta de color (tapa el
-                torso y los hombros, con cuello y punos de color 'cuello' y el
-                numero en el pecho) y color del short (por defecto GRY)
+     ropa       { camiseta, cuello, short, numero, colorNumero, escudo, mangas }:
+                camiseta de color (tapa el torso y los hombros, con cuello y punos
+                de color 'cuello' y el numero en el pecho, blanco o colorNumero),
+                color del short (por defecto GRY); escudo 'cruz' (blanco con la
+                cruz roja, en el pecho); mangas false = musculosa (basquet)
+     ojos       'rojos': ojos rojos y entrecerrados (fumado)
      sinBanco   sin el banco (vista cenital)
      fondo(g) agarre(g) children(g)   funciones -> SVG en coordenadas del viewBox
 
@@ -672,7 +675,18 @@
         <ellipse cx={-72} cy={10} rx={17} ry={28} fill={BLANCO} stroke={INK} strokeWidth={12} />
         <ellipse cx={72} cy={10} rx={17} ry={28} fill={BLANCO} stroke={INK} strokeWidth={12} />
         <ellipse cx={0} cy={0} rx={70} ry={84} fill={BLANCO} stroke={INK} strokeWidth={15} />
-        {(props.parpadeo || 0) > 0.6 ? (
+        {props.ojos === 'rojos' ? [-28, 28].map(function (x) {
+          // rojos y con el parpado caido (la mitad de arriba la tapa el parpado), con ojeras
+          var lid = 'M ' + (x - 23) + ' 0 A 23 16 0 0 1 ' + (x + 23) + ' 0 Z';
+          return (
+            <g key={x}>
+              <ellipse cx={x} cy={0} rx={23} ry={16} fill={RED} stroke={INK} strokeWidth={6} />
+              <circle cx={x} cy={5} r={7} fill={INK} />
+              <path d={lid} fill={BLANCO} stroke={INK} strokeWidth={7} strokeLinejoin="round" />
+              <path d={'M ' + (x - 18) + ' 24 Q ' + x + ' 34 ' + (x + 18) + ' 24'} fill="none" stroke={GRY} strokeWidth={6} strokeLinecap="round" />
+            </g>
+          );
+        }) : (props.parpadeo || 0) > 0.6 ? (
           <path d="M -35 -2 L -17 -2 M 17 -2 L 35 -2" stroke={INK} strokeWidth={7} strokeLinecap="round" />
         ) : (
           <g>
@@ -820,7 +834,7 @@
       var dir = lb > 24 ? q.codo : suma(q.hombro, [q.lado * 60, 100]);
       var dl = deltoide(q.hombro, dir, clamp(lb * 0.56, 58, 112));
       var m = tDelt[i];
-      if (cam) {
+      if (cam && ropa.mangas !== false) {
         // manga corta: tubo hasta la mitad del brazo, el hombro del color de la camiseta y el puno
         var u = unidad(resta(dir, q.hombro)), nn = [-u[1], u[0]];
         var fin = suma(q.hombro, por(u, clamp(lb * 0.5, 60, 104)));
@@ -858,9 +872,19 @@
           <path d={cuello} fill="none" stroke={ropa.cuello || BLANCO} strokeWidth={16} strokeLinecap="round" />
           {ropa.numero != null ? (
             <text x={c[0]} y={c[1]} transform={'rotate(' + ang.toFixed(2) + ' ' + c[0].toFixed(1) + ' ' + c[1].toFixed(1) + ')'}
-              textAnchor="middle" fontFamily="'Archivo Black', sans-serif" fontSize={150} fill={C_NUM}
+              textAnchor="middle" fontFamily="'Archivo Black', sans-serif" fontSize={150} fill={ropa.colorNumero || C_NUM}
               stroke={INK} strokeWidth={10} strokeLinejoin="round" paintOrder="stroke">{ropa.numero}</text>
           ) : null}
+          {ropa.escudo === 'cruz' ? (function () {
+            var e = fr.a([82, -296]);
+            return (
+              <g transform={'translate(' + pt(e).replace(' ', ',') + ') rotate(' + ang.toFixed(2) + ')'}>
+                <path d="M -26 -30 L 26 -30 L 26 4 Q 26 28 0 38 Q -26 28 -26 4 Z" fill={BLANCO} />
+                <path d="M -22 -4 L 22 -4 M 0 -26 L 0 32" stroke={RED} strokeWidth={10} />
+                <path d="M -26 -30 L 26 -30 L 26 4 Q 26 28 0 38 Q -26 28 -26 4 Z" fill="none" stroke={INK} strokeWidth={8} strokeLinejoin="round" />
+              </g>
+            );
+          })() : null}
         </g>
       );
     })() : null;
@@ -947,7 +971,7 @@
         })}
         <path d={faja} fill={colShort} stroke={INK} strokeWidth={13} strokeLinejoin="round" />
 
-        <Cabeza g={g} boca={props.boca} parpadeo={props.parpadeo} />
+        <Cabeza g={g} boca={props.boca} parpadeo={props.parpadeo} ojos={props.ojos} />
 
         {/* brazos (en cenital el antebrazo va encima del deltoides: apunta a camara) */}
         {brazos('trazo', cen ? 'brazo' : 'todo')}

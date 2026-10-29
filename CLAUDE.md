@@ -37,8 +37,12 @@ triceps-polea.jsx, bulgara.jsx,
 abduccion.jsx, plancha.jsx,
 hip-thrust.jsx, remo-bajo.jsx,
 elevacion-lateral.jsx,
-triceps-frances.jsx              reels de ejercicios en estilo 2 (con V.escena)
-peptidos.jsx, cristiano.jsx      reels con Tor en estilo 2 (con PL.escena2)
+triceps-frances.jsx,
+sentadilla-maquina.jsx,
+prensa-piernas.jsx               reels de ejercicios en estilo 2 (con V.escena)
+peptidos.jsx, cristiano.jsx,
+kane.jsx, lebron.jsx,
+marihuana.jsx                    reels con Tor en estilo 2 (con PL.escena2)
 identidad.jsx/.html  foto de perfil y portadas de destacadas (PNG en identidad/)
 face-pull.html    redirige a reels.html#face-pull
 largo.html        videos largos de YouTube (16:9): el video con cortes + capas encima
@@ -321,13 +325,32 @@ dibuja la cabeza delante de los brazos (brazos arriba, como en el tríceps
 francés).
 
 **Tor disfrazado:** `ropa` en `B.Frente`, `TOR.Tor` y el `tor` de `PL`
-(`{ camiseta, cuello, short, numero }`) le pone una camiseta de color con
-cuello y puños, el número en el pecho y el short de color; siempre con la
-paleta de cinco. `cristiano.jsx` lo viste con la de Portugal (roja, verde,
-el 7) y termina con el festejo "¡siuuu!": el sonido es el tipo `siu` de
-`herramientas/audio.py` (sintetizado, sin la voz real), que `grabar.js`
-deja sonar igual que las X y los vistos. Íconos de fútbol en `N.ICONOS`:
-`balon` (con `giro`), `arco`, `copa`, `mundo`.
+(`{ camiseta, cuello, short, numero, colorNumero, escudo, mangas }`) le pone
+una camiseta de color con cuello y puños, el número en el pecho (blanco o
+`colorNumero`), el short de color, el escudo `'cruz'` (Inglaterra) y, con
+`mangas: false`, una musculosa de básquet; siempre con la paleta de cinco.
+`ojos: 'rojos'` le pone los ojos rojos y entrecerrados (marihuana).
+`cristiano.jsx` lo viste con la de Portugal y termina con el festejo
+"¡siuuu!"; `kane.jsx` con la de Inglaterra (y los rivales van como
+camisetas, `N.ICONOS.camiseta`, con `rayas` para el Barcelona); `lebron.jsx`
+con una musculosa blanca y, con Bronny, la amarilla de los Lakers, y cierra
+con la tiza al aire y la tribuna. Los sonidos especiales son tipos de
+`herramientas/audio.py`, sintetizados (sin grabaciones ajenas): `siu`
+(Cristiano) y `publico` (la tribuna); `grabar.js` deja sonar, además de las
+X y los vistos, los efectos que una escena marca a propósito con
+`sonido()` (`siu`, `publico`, `golpe`, `whoosh`, `campana`, `pop`).
+
+Íconos para los videos con Tor en `N.ICONOS`: fútbol (`balon` con `giro`,
+`arco`, `copa`, `mundo`, `balonOro`, `camiseta`), básquet (`basket` con
+`giro`, `aro`, `corona`, `anillo`, `billete`) y salud (`bareto` con
+`encendido`, `pulmones` con `humo`, `persona` con `color`, `receta`).
+Efectos de `V` para darles más vida: `V.Estela` (la figura con su estela de
+movimiento: en las ejecuciones de los ejercicios), `V.Humo`, `V.Polvo` (la
+tiza), `V.Confeti` (festejos) y `V.Ondas` (ruido, la tribuna). En los
+ejercicios nuevos (`sentadilla-maquina.jsx`, `prensa-piernas.jsx`) los
+errores van con una sola figura grande que pasa de mal a bien (X que se
+retira con `hasta`, luego el visto) y la ejecución lleva un contador de
+repeticiones (`B.Cuenta` en `encima`).
 
 **Formato corto:** 30 a 35 s *con* el cierre
 de 3 s; la retención de Shorts/Reels está en 20-25 s, así que nada

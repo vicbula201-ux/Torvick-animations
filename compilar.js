@@ -31,6 +31,7 @@ const FUENTES = [
   'hierro.jsx', 'grasas.jsx', 'carbohidratos.jsx', 'minerales.jsx', 'objetivos.jsx',
   'curl-mancuernas.jsx', 'peptidos.jsx', 'triceps-polea.jsx', 'bulgara.jsx', 'abduccion.jsx', 'plancha.jsx',
   'cristiano.jsx', 'hip-thrust.jsx', 'remo-bajo.jsx', 'elevacion-lateral.jsx', 'triceps-frances.jsx',
+  'kane.jsx', 'sentadilla-maquina.jsx', 'marihuana.jsx', 'prensa-piernas.jsx', 'lebron.jsx',
   'largo.jsx', 'largo-iconos.jsx', 'largo-plantillas.jsx'
 ];
 
