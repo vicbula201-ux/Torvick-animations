@@ -339,7 +339,12 @@
 
   function Video(props) {
     var def = props.def, modoRender = props.render;
-    var _d = useState(function () { return modoRender ? durDefecto(def) : cargarDur(def); });
+    var _d = useState(function () {
+      if (!modoRender) return cargarDur(def);
+      // grabar.js --voz pasa las duraciones calzadas con la voz en el hash
+      var d = props.durs;
+      return (d && d.length === conMarca(def).length) ? d : durDefecto(def);
+    });
     var durs = _d[0], setDurs = _d[1];
 
     useEffect(function () {
@@ -361,11 +366,18 @@
     );
   }
 
-  // hash: #face-pull  o  #face-pull/render
+  // hash: #face-pull  o  #face-pull/render  o  #face-pull/render/2.6,5.1,...
+  // (la tercera parte son las duraciones de cada escena, cierre incluido: las pone
+  // herramientas/grabar.js --voz para que el video calce con la voz grabada)
   function leerHash() {
     var h = String(global.location.hash || '').replace(/^#/, '');
     var partes = h.split('/');
-    return { id: partes[0] || (REGISTRO[0] && REGISTRO[0].id), render: partes[1] === 'render' };
+    var durs = null;
+    if (partes[2]) {
+      durs = partes[2].split(',').map(parseFloat);
+      if (!durs.every(function (x) { return x > 0 && x < 120; })) durs = null;
+    }
+    return { id: partes[0] || (REGISTRO[0] && REGISTRO[0].id), render: partes[1] === 'render', durs: durs };
   }
 
   function App() {
@@ -382,7 +394,7 @@
     if (ruta.render) {
       return (
         <div className="fp-render">
-          <Video key={def.id + ':r'} def={def} render />
+          <Video key={def.id + ':r:' + (ruta.durs || []).join(',')} def={def} render durs={ruta.durs} />
         </div>
       );
     }

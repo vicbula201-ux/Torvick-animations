@@ -54,11 +54,16 @@ largos/perfil.jpg     foto de perfil del botón de suscripción
 LARGOS.md         guía de estilo y flujo de los videos largos
 compilar.js       regenera los .js desde los .jsx
 prueba-piezas.html  verificación: motor + las 21 piezas + las piezas de B
-herramientas/     grabar.js (exporta MP4 con música y efectos), audio.py
-                  (sintetiza la música y los efectos), imagenes.js (exporta
-                  los PNG de identidad.html) y las de los largos: transcribir.py,
-                  recortar.py, revisar-largo.js, grabar-largo.js, tramos.py;
-                  no son parte de la app
+herramientas/     grabar.js (exporta MP4 con música y efectos; con --voz,
+                  calzado y mezclado con la voz grabada), voz.py (encuentra
+                  cada línea en la grabación), lote.js (una carpeta de voces
+                  -> varios reels), audio.py (sintetiza la música y los
+                  efectos), imagenes.js (exporta los PNG de identidad.html)
+                  y las de los largos: transcribir.py, recortar.py,
+                  revisar-largo.js, grabar-largo.js, tramos.py; no son parte
+                  de la app
+trabajo/          para el autor: tablero de piezas y cómo pasar de la voz al
+                  video (sin datos personales: el repositorio es público)
 ```
 
 **Los .jsx son la fuente; los .js son generados.** `index.html` carga
@@ -377,15 +382,46 @@ como un "whoosh"; no hace falta hacer transiciones a mano.
 y el borde derecho entre y 1000-1700 los tapan el texto y los botones de
 Instagram/TikTok: ahí no va nada importante.
 
-**Calzar el video con la voz grabada:** cambiá la duración de cada escena
-hasta que coincida con lo que dura esa frase en tu grabación. Como todas
-las escenas usan `f(fracción)`, la coreografía se estira sola. Para que
-el cambio quede fijo, pasá los números a `ESCENAS` en el `.jsx` del video.
+**Calzar el video con la voz grabada (automático):** el autor graba UNA
+toma por reel con todas las líneas del guion en orden (el cierre incluido)
+y medio segundo de silencio entre línea y línea, y la nombra con el id del
+reel (`plancha.m4a`). Después:
+
+```
+node herramientas/grabar.js plancha --voz voces/plancha.m4a   # un reel
+node herramientas/lote.js voces                               # todos los de la carpeta
+```
+
+`herramientas/voz.py` busca las pausas y elige las que mejor reparten la
+grabación entre las líneas según sus sílabas (programación dinámica; sin
+reconocimiento de voz, sin internet, solo numpy y ffmpeg). Cada escena pasa
+a durar lo que dura su línea, la escena nueva entra 0,2 s antes de que
+arranque su línea, el cierre de marca nunca baja de su duración y la voz
+no se toca (ni se acelera ni se corta por dentro). Como todas las escenas
+usan `f(fracción)`, la coreografía se estira sola. Sale `<id>-con-voz.mp4`
+(voz + X + vistos, efectos a −6 dB; `--nivel-efectos` lo cambia) y
+`<id>-voz.txt`, el informe: qué tramo cayó en cada escena y avisos cuando
+algo no cuadra (una línea con un ritmo muy distinto al resto, pocas pausas
+claras, una escena que quedó en menos de la mitad de lo pensado). Si la
+grabación casi no tiene pausas y los ritmos no cuadran, para antes de grabar
+el video. `lote.js` acepta nombres con mayúsculas, tildes o espacios y avisa
+si un archivo no corresponde a ningún reel. Las voces van en `voces/`
+(ignorada por git: es la voz del autor y el repositorio es público).
+
+Probado con voces sintéticas (espeak-ng) sobre los guiones de los 36 reels:
+ninguna escena corrida y el peor borde a 0,15 s; detecta líneas saltadas o
+repetidas. Falta probarlo con la voz real del autor.
+
+A mano sigue funcionando como antes: en `reels.html` cambiá la duración de
+cada escena hasta que coincida con la grabación. Para que quede fijo, pasá
+los números a `ESCENAS` (`grabar.js --voz` los imprime al terminar).
 
 **Exportar:** `reels.html#<id>/render` muestra solo el lienzo a 1080x1920,
 sin controles, y deja `window.REEL` (`seek`, `setPlaying`, `total`,
 `cues`, `guion`) para grabar cuadro por cuadro con un navegador
-automatizado. Eso hace la herramienta de escritorio:
+automatizado. `reels.html#<id>/render/2.6,6.5,…` usa esas duraciones (una
+por escena, cierre incluido; si no son tantas como escenas, se ignoran):
+así las pasa `grabar.js --voz`. Eso hace la herramienta de escritorio:
 
 ```
 node herramientas/grabar.js <id> [carpeta]   # por defecto ./videos (ignorada por git)
@@ -395,8 +431,10 @@ Deja `<id>.mp4` (video + los sonidos de las X y los vistos, sin música,
 listo para ponerle la voz), `<id>-guion.txt` (cada línea de voz con su
 tramo de tiempo) y `<id>-cues.json`. Con `--con-musica` deja además
 `<id>-con-musica.mp4` con la música original sintetizada por
-`herramientas/audio.py` (sin derechos de terceros). Necesita Node, Playwright, ffmpeg y
-python3 con numpy. Sin eso, grabá la pantalla con el reel en reproducción.
+`herramientas/audio.py` (sin derechos de terceros). Si el id no existe,
+avisa y muestra la lista (antes grababa el primer reel sin decir nada).
+Necesita Node, Playwright, ffmpeg y python3 con numpy. Sin eso, grabá la
+pantalla con el reel en reproducción.
 
 **Videos de nutrición:** mismo formato corto, misma música y sonidos, y
 el protagonista es **Tor**, el avatar de la marca (`TOR.Tor`: la figura
