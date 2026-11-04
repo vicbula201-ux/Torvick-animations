@@ -2,6 +2,7 @@
    grabar.js — exporta un reel de reels.html a MP4 listo para subir
 
        node herramientas/grabar.js <id> [carpeta-salida] [--con-musica]
+       node herramientas/grabar.js <id> [carpeta-salida] --voz [--musica tema.wav]
 
    Deja en la carpeta (por defecto ./videos):
      <id>.mp4              video + los sonidos de las X (error) y los vistos ("tin"),
@@ -9,6 +10,10 @@
      <id>-guion.txt        las lineas de la voz con su segundo de inicio
      <id>-cues.json        los momentos de esos sonidos
    Con --con-musica deja ademas <id>-con-musica.mp4 (musica original + todos los efectos).
+   Con --voz (doblaje automatico, herramientas/locutor.py): genera la voz de cada linea,
+   alarga cada escena a lo que dura su linea (las escenas usan f(fraccion), la
+   coreografia se estira sola) y deja <id>-voz.mp4 con voz + musica + efectos; la
+   musica baja sola cuando se habla. --musica usa ese tema en vez del sintetizado.
    Los videos de estilo 2 se graban a 60 cuadros por segundo (mas fluidos); los demas a 30.
 
    Necesita: Node, Playwright (npm i -g playwright && npx playwright install chromium),
@@ -36,7 +41,10 @@ function fmtT(s) {
 (async () => {
   const args = process.argv.slice(2);
   const conMusica = args.includes('--con-musica');
-  const [id, dirSalida = 'videos'] = args.filter(a => !a.startsWith('--'));
+  const conVoz = args.includes('--voz');
+  const iMus = args.indexOf('--musica');
+  const tema = iMus >= 0 ? path.resolve(args[iMus + 1]) : null;
+  const [id, dirSalida = 'videos'] = args.filter((a, i) => !a.startsWith('--') && (iMus < 0 || i !== iMus + 1));
   if (!id) { console.error('uso: node herramientas/grabar.js <id> [carpeta]'); process.exit(1); }
   const raiz = path.resolve(__dirname, '..');
   const salida = path.resolve(dirSalida);
@@ -56,11 +64,35 @@ function fmtT(s) {
       return r.continue();
     });
   }
-  await p.goto('file://' + path.join(raiz, 'reels.html') + '#' + id + '/render');
-  await p.waitForFunction(() => window.REEL && document.fonts && document.fonts.status === 'loaded', null, { timeout: 60000 });
-  await p.evaluate(() => document.fonts.ready);
-  await p.evaluate(() => window.REEL.setPlaying(false));
-  await p.waitForTimeout(300);
+  const abrir = async (durs) => {
+    await p.goto('file://' + path.join(raiz, 'reels.html') + '#' + id + '/render' + (durs ? '/' + durs.join(',') : ''));
+    await p.waitForFunction(() => window.REEL && document.fonts && document.fonts.status === 'loaded', null, { timeout: 60000 });
+    await p.evaluate(() => document.fonts.ready);
+    await p.evaluate(() => window.REEL.setPlaying(false));
+    await p.waitForTimeout(300);
+  };
+  await abrir(null);
+
+  // doblaje: la voz de cada linea manda la duracion de su escena
+  const locutor = path.join(raiz, 'herramientas', 'locutor.py');
+  const dirVoz = path.join(salida, id + '-voz');
+  let voces = null, durs = null;
+  if (conVoz) {
+    const g0 = await p.evaluate(() => window.REEL.guion);
+    fs.mkdirSync(dirVoz, { recursive: true });
+    const fLin = path.join(dirVoz, 'pedido.json');
+    fs.writeFileSync(fLin, JSON.stringify(g0.map((e, i) => ({ i: i, texto: e.vo || '' })), null, 1));
+    execFileSync('python3', [locutor, 'decir', fLin, dirVoz], { stdio: 'inherit' });
+    voces = JSON.parse(fs.readFileSync(path.join(dirVoz, 'lineas.json'), 'utf8'));
+    const ultima = g0.length - 1;
+    durs = g0.map((e, i) => {
+      const v = voces[i] && voces[i].dur ? voces[i].dur : 0;
+      // la linea entra 0,2 s despues del corte y deja un respiro antes del siguiente
+      return Math.round(Math.max(i === ultima ? 3.5 : 2.0, v + (i === ultima ? 0.6 : 0.55)) * 100) / 100;
+    });
+    console.log('duraciones con la voz:', durs.join(' '));
+    await abrir(durs);
+  }
   const total = await p.evaluate(() => window.REEL.total);
   const fps = await p.evaluate(() => window.REEL.fps || 30);
   const n = Math.round(total * fps);
@@ -104,6 +136,16 @@ function fmtT(s) {
   const audio = path.join(raiz, 'herramientas', 'audio.py');
   const variantes = [[id + '.mp4', fCues, ['--sin-musica']]];
   if (conMusica) variantes.push([id + '-con-musica.mp4', fCuesTodos, []]);
+  if (conVoz) {
+    // pista de voz: cada linea 0,2 s despues del comienzo de su escena
+    let t = 0;
+    const plan = { dur: total, lineas: guion.map((e, i) => { const l = { archivo: voces[i] && voces[i].archivo, t: t + 0.2 }; t += e.dur; return l; }) };
+    const fPlan = path.join(dirVoz, 'plan.json');
+    fs.writeFileSync(fPlan, JSON.stringify(plan, null, 1));
+    const fVoz = path.join(dirVoz, 'voz.wav');
+    execFileSync('python3', [locutor, 'pista', fPlan, fVoz], { stdio: 'inherit' });
+    variantes.push([id + '-voz.mp4', fCues, ['--base', fVoz, '--nivel-efectos', '4'].concat(tema ? ['--musica', tema] : [])]);
+  }
   for (const [nombre, cuesArchivo, extra] of variantes) {
     const wav = path.join(salida, nombre + '.wav');
     execFileSync('python3', [audio, '--dur', String(total), '--cues', cuesArchivo, '--out', wav].concat(extra), { stdio: 'inherit' });

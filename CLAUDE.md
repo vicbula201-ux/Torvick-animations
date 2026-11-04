@@ -39,7 +39,7 @@ hip-thrust.jsx, remo-bajo.jsx,
 elevacion-lateral.jsx,
 triceps-frances.jsx,
 sentadilla-maquina.jsx,
-prensa-piernas.jsx               reels de ejercicios en estilo 2 (con V.escena)
+prensa-piernas.jsx, abdominal.jsx  reels de ejercicios en estilo 2 (con V.escena)
 peptidos.jsx, cristiano.jsx,
 kane.jsx, lebron.jsx,
 marihuana.jsx                    reels con Tor en estilo 2 (con PL.escena2)
@@ -54,7 +54,8 @@ largos/perfil.jpg     foto de perfil del botón de suscripción
 LARGOS.md         guía de estilo y flujo de los videos largos
 compilar.js       regenera los .js desde los .jsx
 prueba-piezas.html  verificación: motor + las 21 piezas + las piezas de B
-herramientas/     grabar.js (exporta MP4 con música y efectos), audio.py
+herramientas/     grabar.js (exporta MP4 con música y efectos; --voz dobla), locutor.py
+                  (la voz de Torvick: perfil y líneas), audio.py
                   (sintetiza la música y los efectos), imagenes.js (exporta
                   los PNG de identidad.html) y las de los largos: transcribir.py,
                   recortar.py, revisar-largo.js, grabar-largo.js, tramos.py;
@@ -351,6 +352,24 @@ ejercicios nuevos (`sentadilla-maquina.jsx`, `prensa-piernas.jsx`) los
 errores van con una sola figura grande que pasa de mal a bien (X que se
 retira con `hasta`, luego el visto) y la ejecución lleva un contador de
 repeticiones (`B.Cuenta` en `encima`).
+
+**Doblaje automático (la voz de Torvick):** `herramientas/locutor.py` y
+`grabar.js --voz`. Una vez, `python3 herramientas/locutor.py preparar
+<videos terminados con su voz>` separa la voz de la música (UVR) y guarda en
+`~/.torvick/voz/` (fuera de git: es la voz del autor) las fuentes y el
+perfil (espectro medio, tono, palabras por segundo). Después,
+`node herramientas/grabar.js <id> --voz [--musica tema.wav]` dice cada `vo`
+con esa voz, **alarga cada escena a lo que dura su línea** (como todo va con
+`f(fracción)`, la coreografía se estira sola), graba y deja `<id>-voz.mp4`
+con voz + música (baja sola cuando se habla) + X y vistos. El cierre dice
+`cierreVo` del `registrar` (el llamado a seguir, por defecto el de la marca).
+El render acepta duraciones en el hash: `reels.html#<id>/render/2.6,5.1,...`.
+Motor local: Supertonic 3 (MIT) con la voz masculina más parecida (sid 9),
+al ritmo del perfil y ecualizado con el espectro de la voz real; **no es un
+clon** (parecido 0,74 contra 0,94 de la voz real consigo misma, WeSpeaker).
+Para el timbre real hace falta un conversor de voz (kNN-VC) o un servicio
+de clonación; ver la conversación del abdominal. `abdominal.jsx` es el
+primer reel armado para esto.
 
 **Formato corto:** 30 a 35 s *con* el cierre
 de 3 s; la retención de Shorts/Reels está en 20-25 s, así que nada

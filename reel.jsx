@@ -240,8 +240,11 @@
   }
 
   // escenas propias + el cierre de marca: va SIEMPRE, en todos los videos (pedido del autor)
+  // el cierre de marca va al final; def.cierreVo cambia lo que dice la voz ahi (el llamado a seguir)
   function conMarca(def) {
-    return def.escenas.concat([def.estilo === 2 ? MARCA.escena2 : MARCA.escena]);
+    var cierre = def.estilo === 2 ? MARCA.escena2 : MARCA.escena;
+    if (def.cierreVo) cierre = Object.assign({}, cierre, { vo: def.cierreVo });
+    return def.escenas.concat([cierre]);
   }
 
   /* =========================================================
@@ -339,7 +342,12 @@
 
   function Video(props) {
     var def = props.def, modoRender = props.render;
-    var _d = useState(function () { return modoRender ? durDefecto(def) : cargarDur(def); });
+    // en render las duraciones pueden venir en el hash (#id/render/2.6,5.1,...): las usa el doblaje
+    var _d = useState(function () {
+      var dd = durDefecto(def), h = props.durs;
+      if (modoRender && h && h.length === dd.length && h.every(function (x) { return x > 0; })) return h;
+      return modoRender ? dd : cargarDur(def);
+    });
     var durs = _d[0], setDurs = _d[1];
 
     useEffect(function () {
@@ -361,11 +369,12 @@
     );
   }
 
-  // hash: #face-pull  o  #face-pull/render
+  // hash: #face-pull  o  #face-pull/render  o  #face-pull/render/2.6,5.1,... (duraciones)
   function leerHash() {
     var h = String(global.location.hash || '').replace(/^#/, '');
     var partes = h.split('/');
-    return { id: partes[0] || (REGISTRO[0] && REGISTRO[0].id), render: partes[1] === 'render' };
+    var durs = partes[2] ? partes[2].split(',').map(parseFloat) : null;
+    return { id: partes[0] || (REGISTRO[0] && REGISTRO[0].id), render: partes[1] === 'render', durs: durs };
   }
 
   function App() {
@@ -382,7 +391,7 @@
     if (ruta.render) {
       return (
         <div className="fp-render">
-          <Video key={def.id + ':r'} def={def} render />
+          <Video key={def.id + ':r:' + (ruta.durs || []).join(',')} def={def} render durs={ruta.durs} />
         </div>
       );
     }
