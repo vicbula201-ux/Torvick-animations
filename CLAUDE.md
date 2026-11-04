@@ -52,6 +52,11 @@ largo-plantillas.jsx  LARGOS.X: escenas armadas con datos para los largos
 largos/<id>/      un video largo: plan.jsx + transcripcion.* (+ media/, fuera de git)
 largos/perfil.jpg     foto de perfil del botón de suscripción
 LARGOS.md         guía de estilo y flujo de los videos largos
+clips.html        los shorts que salen de los largos: guion de cada uno + su cierre
+clip-cierre.jsx   window.CLIPS: el cierre de esos shorts, igual al original y con
+                  YouTube, Instagram, TikTok y @eltorvick
+largos/<id>/clips.jsx  los shorts de un largo (guion, subtítulos del cierre, `desde`);
+                  clips.md el mismo guion en texto y el estilo de esos shorts
 compilar.js       regenera los .js desde los .jsx
 prueba-piezas.html  verificación: motor + las 21 piezas + las piezas de B
 herramientas/     grabar.js (exporta MP4 con música y efectos; con --voz,
@@ -60,7 +65,8 @@ herramientas/     grabar.js (exporta MP4 con música y efectos; con --voz,
                   -> varios reels), audio.py (sintetiza la música y los
                   efectos), imagenes.js (exporta los PNG de identidad.html)
                   y las de los largos: transcribir.py, recortar.py,
-                  revisar-largo.js, grabar-largo.js, tramos.py; no son parte
+                  revisar-largo.js, grabar-largo.js, tramos.py; cierre-clip.js
+                  (le pone el cierre con la firma a un short); no son parte
                   de la app
 trabajo/          para el autor: tablero de piezas y cómo pasar de la voz al
                   video (sin datos personales: el repositorio es público)
@@ -532,6 +538,29 @@ del plan. Lo esencial:
   recrea cada animación vieja, tapa los insertos (`fuente-tramos.json`,
   `p.mantener`) y esconde las placas viejas con primeros planos. Para videos
   nuevos no hace falta.
+
+## Shorts de los videos largos — `clips.html`
+
+Los shorts que salen de cada largo llegan hechos en **otro estilo** (ilustración
+plana: contorno azul marino, el chico de camiseta naranja, círculos celestes,
+subtítulos palabra por palabra en Montserrat Black con la palabra que suena en
+amarillo; detalle en `largos/concentracion/clips.md`). No usan la paleta de
+cinco ni el pizarrón, y llegan **sin voz** (solo efectos).
+
+Su cierre ("mira el video completo") no traía la firma. `clip-cierre.jsx` lo
+rearma igual que el original, medido cuadro a cuadro, y pone arriba la pastilla
+**YouTube · Instagram · TikTok · @eltorvick**; la tarjeta lleva un recorte de la
+original o, con `--miniatura`, la miniatura final del largo. El resto del short
+y el audio no se tocan:
+
+```
+node herramientas/cierre-clip.js concentracion-1 --video "Short 1 - 5 a 50 minutos.mp4" [--miniatura mini.jpg]
+```
+
+Cada short se registra en `largos/<id>/clips.jsx` con `desde` (primer cuadro del
+cierre), los subtítulos del cierre con el segundo de cada palabra y el guion
+completo (voz + lo que se ve), que `clips.html` muestra al lado del cierre. Los
+MP4 originales no van a git: se pasan con `--video`.
 
 ## Verificación
 

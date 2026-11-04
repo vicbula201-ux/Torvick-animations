@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clips — Torvick</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Barlow+Semi+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: #171614;
+    color: #F2EFE9;
+    font-family: 'Barlow Semi Condensed', system-ui, sans-serif;
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .cl-pagina { padding: 20px; }
+  .cl-botones { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+  .cl-botones a {
+    color: #F2EFE9; text-decoration: none; padding: 7px 12px; border-radius: 7px;
+    background: #201F1C; border: 1px solid #3A362F; font-weight: 600;
+  }
+  .cl-botones a.activo { background: #FFD400; color: #14110F; border-color: #FFD400; }
+  .cl-cuerpo { display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap; }
+  .cl-lienzo { width: min(420px, 100%); flex: none; }
+  .cl-guion { flex: 1; min-width: 280px; background: #201F1C; border: 1px solid #3A362F; border-radius: 9px; padding: 16px 20px; }
+  .cl-guion h2 { margin: 0 0 6px; font-size: 22px; }
+  .cl-guion ol { padding-left: 22px; margin: 12px 0 0; }
+  .cl-guion li { margin-bottom: 12px; line-height: 1.35; }
+  .cl-t { color: #8C867C; font-family: 'Courier Prime', monospace; margin-right: 10px; font-size: 14px; }
+  .cl-voz { font-size: 19px; font-weight: 600; }
+  .cl-pant { display: block; color: #8C867C; font-size: 15px; }
+  .cl-tenue { color: #8C867C; margin: 0; }
+  code { font-family: 'Courier Prime', monospace; color: #FFD400; }
+
+  /* controles del Stage de motor.js */
+  .motor-mesa { display: flex; flex-direction: column; gap: 8px; }
+  .motor-controles { display: flex; align-items: center; gap: 10px; }
+  .motor-play { background: #201F1C; color: #F2EFE9; border: 1px solid #3A362F; border-radius: 7px; width: 38px; height: 32px; cursor: pointer; }
+  .motor-scrub { flex: 1; accent-color: #FFD400; }
+  .motor-tiempo { font-family: 'Courier Prime', monospace; color: #8C867C; font-size: 13px; }
+
+  /* modo render: solo el lienzo a tamano real */
+  body.render { background: #ffffff; }
+  body.render .cl-pagina { padding: 0; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+<script src="motor.js"></script>
+<script src="clip-cierre.js"></script>
+<script src="largos/concentracion/clips.js"></script>
+<script>
+  if (/\/render$/.test(location.hash)) document.body.className = 'render';
+  CLIPS.montar(document.getElementById('root'));
+</script>
+</body>
+</html>
