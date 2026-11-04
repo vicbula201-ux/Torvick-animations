@@ -14,6 +14,7 @@
 
   var reg = global.CLIPS.registrar;
   var TARJETA = '¿NO TE|PUEDES|CONCENTRAR?';
+  var MINI = 'largos/concentracion/miniatura.webp'; // la miniatura del video largo ("Por esto pierdes el foco")
   var PANT_CIERRE = '@eltorvick con YouTube, Instagram y TikTok; tarjeta "VIDEO COMPLETO · ¿NO TE PUEDES CONCENTRAR?" (la miniatura); botón "MIRA EL VIDEO COMPLETO"';
   reg({
     id: 'concentracion-1',
@@ -22,6 +23,7 @@
     desde: 26.2,
     fin: 31.2,
     tituloTarjeta: TARJETA,
+    miniatura: MINI,
     subs: [{
       fin: 27.567,
       palabras: [[26.367, 'EN'], [26.6, 'MI'], [26.8, 'CANAL'], [27.133, 'EXPLICO']]
@@ -87,6 +89,7 @@
     desde: 26.2,
     fin: 31.2,
     tituloTarjeta: TARJETA,
+    miniatura: MINI,
     subs: [{
       fin: 27.267,
       palabras: [[26.367, 'SI'], [26.567, 'QUIERES'], [27.033, 'MÁS']]
@@ -162,6 +165,7 @@
     desde: 25.4,
     fin: 30.4,
     tituloTarjeta: TARJETA,
+    miniatura: MINI,
     subs: [{
       fin: 26.3,
       palabras: [[25.567, '¿QUIERES'], [26.1, 'MÁS']]

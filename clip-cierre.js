@@ -270,7 +270,25 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
           fontSize: 62,
           fill: i === tit.length - 1 ? C.YEL : C.BLANCO
         }, l);
-      }), barra, /*#__PURE__*/React.createElement("rect", {
+      }), barra, mini ?
+      /*#__PURE__*/
+      // con la miniatura de verdad la insignia va abajo a la derecha: arriba a la izquierda tapa el titulo
+      React.createElement("g", null, /*#__PURE__*/React.createElement("rect", {
+        x: 697,
+        y: 880,
+        width: 236,
+        height: 46,
+        rx: 10,
+        fill: C.RED
+      }), /*#__PURE__*/React.createElement("text", {
+        x: 815,
+        y: 912,
+        textAnchor: "middle",
+        fontFamily: MONT,
+        fontWeight: 800,
+        fontSize: 24,
+        fill: C.BLANCO
+      }, "VIDEO COMPLETO")) : /*#__PURE__*/React.createElement("g", null, /*#__PURE__*/React.createElement("rect", {
         x: 146,
         y: 510,
         width: 296,
@@ -285,7 +303,7 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
         fontWeight: 800,
         fontSize: 30,
         fill: C.BLANCO
-      }, "VIDEO COMPLETO"));
+      }, "VIDEO COMPLETO")));
     }
     return /*#__PURE__*/React.createElement("g", {
       transform: escalar(cx, cy, s, rot)

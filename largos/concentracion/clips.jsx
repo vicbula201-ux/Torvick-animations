@@ -12,6 +12,7 @@
   'use strict';
   var reg = global.CLIPS.registrar;
   var TARJETA = '¿NO TE|PUEDES|CONCENTRAR?';
+  var MINI = 'largos/concentracion/miniatura.webp';   // la miniatura del video largo ("Por esto pierdes el foco")
   var PANT_CIERRE = '@eltorvick con YouTube, Instagram y TikTok; tarjeta "VIDEO COMPLETO · ¿NO TE PUEDES CONCENTRAR?" (la miniatura); botón "MIRA EL VIDEO COMPLETO"';
 
   reg({
@@ -19,7 +20,7 @@
     titulo: 'Short 1 · 5 a 50 minutos',
     video: 'Short 1 - 5 a 50 minutos.mp4',
     desde: 26.2, fin: 31.2,
-    tituloTarjeta: TARJETA,
+    tituloTarjeta: TARJETA, miniatura: MINI,
     subs: [
       { fin: 27.567, palabras: [[26.367, 'EN'], [26.6, 'MI'], [26.8, 'CANAL'], [27.133, 'EXPLICO']] },
       { fin: 28.567, palabras: [[27.6, 'CÓMO'], [27.867, 'RECUPERAR'], [28.4, 'TU']] },
@@ -50,7 +51,7 @@
     titulo: 'Short 3 · Diseña tu entorno',
     video: 'Short 3 - Diseña tu entorno.mp4',
     desde: 26.2, fin: 31.2,
-    tituloTarjeta: TARJETA,
+    tituloTarjeta: TARJETA, miniatura: MINI,
     subs: [
       { fin: 27.267, palabras: [[26.367, 'SI'], [26.567, 'QUIERES'], [27.033, 'MÁS']] },
       { fin: 28.0, palabras: [[27.3, 'CONSEJOS,']] },
@@ -85,7 +86,7 @@
     titulo: 'Short 4 · La regla de 25 minutos',
     video: 'Short 4 - La regla de 25 minutos.mp4',
     desde: 25.4, fin: 30.4,
-    tituloTarjeta: TARJETA,
+    tituloTarjeta: TARJETA, miniatura: MINI,
     subs: [
       { fin: 26.3, palabras: [[25.567, '¿QUIERES'], [26.1, 'MÁS']] },
       { fin: 27.1, palabras: [[26.3, 'TÉCNICAS?']] },

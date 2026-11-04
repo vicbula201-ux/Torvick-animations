@@ -178,8 +178,16 @@
                 fontSize={62} fill={i === tit.length - 1 ? C.YEL : C.BLANCO}>{l}</text>;
             })}
           {barra}
-          <rect x={146} y={510} width={296} height={56} rx={12} fill={C.RED} />
-          <text x={294} y={549} textAnchor="middle" fontFamily={MONT} fontWeight={800} fontSize={30} fill={C.BLANCO}>VIDEO COMPLETO</text>
+          {mini ?
+            // con la miniatura de verdad la insignia va abajo a la derecha: arriba a la izquierda tapa el titulo
+            <g>
+              <rect x={697} y={880} width={236} height={46} rx={10} fill={C.RED} />
+              <text x={815} y={912} textAnchor="middle" fontFamily={MONT} fontWeight={800} fontSize={24} fill={C.BLANCO}>VIDEO COMPLETO</text>
+            </g> :
+            <g>
+              <rect x={146} y={510} width={296} height={56} rx={12} fill={C.RED} />
+              <text x={294} y={549} textAnchor="middle" fontFamily={MONT} fontWeight={800} fontSize={30} fill={C.BLANCO}>VIDEO COMPLETO</text>
+            </g>}
         </g>
       );
     }

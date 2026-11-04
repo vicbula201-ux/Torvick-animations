@@ -6,7 +6,8 @@ solo efectos (whoosh, pops, ticks, el clic del final). El guion de abajo es lo
 que dicen los subtítulos, para grabar la voz encima. Los tiempos son los del
 short (cada línea arranca cuando aparece su primera palabra).
 
-Para ver el guion junto al cierre: `clips.html` (doble clic).
+Para ver el guion junto al cierre: `clips.html` (doble clic). La lista de
+shorts sugeridos y los que faltan está en `shorts.md`.
 
 ---
 
@@ -110,11 +111,10 @@ node herramientas/cierre-clip.js concentracion-3 --video "Short 3 - Diseña tu e
 node herramientas/cierre-clip.js concentracion-4 --video "Short 4 - La regla de 25 minutos.mp4"
 ```
 
-Con la miniatura final del video largo (16:9):
-
-```
-node herramientas/cierre-clip.js concentracion-1 --video "Short 1 - 5 a 50 minutos.mp4" --miniatura miniatura.jpg
-```
+La tarjeta usa la miniatura del largo (`miniatura.webp`, la del registro);
+`--miniatura otra.jpg` la cambia y `--sin-miniatura` vuelve al recorte de la
+tarjeta original. Con la miniatura la insignia "VIDEO COMPLETO" va abajo a la
+derecha, para no tapar el título.
 
 Sale `videos/<id>.mp4`. `--comparar 26.6,28.9,30.5` deja además una imagen con
 el original y el nuevo lado a lado en esos segundos.

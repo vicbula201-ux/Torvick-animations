@@ -12,9 +12,10 @@
    pastilla de redes. El audio del original no se toca: el pop del boton
    y el clic siguen cayendo en su lugar.
 
-   Sin --miniatura la tarjeta lleva un recorte de la del original (igual
-   que ahora). Con --miniatura (la miniatura final del video largo, 16:9)
-   la tarjeta la muestra con la insignia VIDEO COMPLETO y la barra roja.
+   La tarjeta muestra la miniatura del registro (`miniatura` en clips.jsx)
+   o la de --miniatura (16:9), con la insignia VIDEO COMPLETO y la barra
+   roja. Sin ninguna (o con --sin-miniatura) lleva un recorte de la tarjeta
+   del short original.
 
    Deja <salida>/<id>.mp4. Con --comparar deja ademas <id>-comparar.png:
    el original y el nuevo lado a lado en esos segundos, para revisar.
@@ -44,6 +45,7 @@ function args() {
     if (a[i] === '--video') o.video = a[++i];
     else if (a[i] === '--miniatura') o.miniatura = a[++i];
     else if (a[i] === '--salida') o.salida = a[++i];
+    else if (a[i] === '--sin-miniatura') o.sinMiniatura = true;
     else if (a[i] === '--comparar') o.comparar = a[++i].split(',').map(Number);
     else if (!o.id) o.id = a[i];
   }
@@ -97,7 +99,7 @@ async function main() {
   await p.waitForFunction(() => window.CLIPS, null, { timeout: 60000 });
   const def = await p.evaluate((id) => {
     const d = window.CLIPS.buscar(id);
-    return d ? { id: d.id, desde: d.desde, fin: d.fin, titulo: d.titulo } : null;
+    return d ? { id: d.id, desde: d.desde, fin: d.fin, titulo: d.titulo, miniatura: d.miniatura || null } : null;
   }, o.id);
   if (!def) {
     const ids = await p.evaluate(() => window.CLIPS.lista().map(d => d.id + '  (' + d.titulo + ')'));
@@ -115,6 +117,8 @@ async function main() {
   // la imagen de la tarjeta: la miniatura nueva o un recorte de la original apenas se acomoda
   // (sin la barra roja de abajo, que se dibuja aparte porque se va llenando)
   let mini;
+  // --miniatura manda; si no, la que tenga el registro (relativa a la raiz); --sin-miniatura usa el recorte
+  if (!o.miniatura && def.miniatura && !o.sinMiniatura) o.miniatura = path.join(raiz, def.miniatura);
   if (o.miniatura) {
     const m = path.resolve(o.miniatura);
     if (!fs.existsSync(m)) { await b.close(); console.error('No encuentro la miniatura: ' + m); process.exit(1); }

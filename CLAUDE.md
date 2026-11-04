@@ -549,8 +549,10 @@ cinco ni el pizarrón, y llegan **sin voz** (solo efectos).
 
 Su cierre ("mira el video completo") no traía la firma. `clip-cierre.jsx` lo
 rearma igual que el original, medido cuadro a cuadro, y pone arriba la pastilla
-**YouTube · Instagram · TikTok · @eltorvick**; la tarjeta lleva un recorte de la
-original o, con `--miniatura`, la miniatura final del largo. El resto del short
+**YouTube · Instagram · TikTok · @eltorvick**; la tarjeta lleva la miniatura del
+largo (`miniatura` en el registro, o `--miniatura`) o, sin ella, un recorte de la
+original. `largos/<id>/shorts.md` guarda la lista de shorts por hacer de cada largo
+con su fragmento del guion. El resto del short
 y el audio no se tocan:
 
 ```
