@@ -61,6 +61,7 @@
   var SOMBRA_TX = '0 3px 0 rgba(20,17,15,0.88), 0 6px 22px rgba(0,0,0,0.42)';
   var SOMBRA_GIGANTE = '0 8px 0 rgba(20,17,15,0.30), 0 18px 60px rgba(0,0,0,0.35)';
   var SOMBRA_TARJETA = '0 2px 4px rgba(20,17,15,0.16), 0 18px 48px rgba(20,17,15,0.34)';
+  var FOTO = 'marca/torvick.jpg';
   function col(c, def) {
     return COLOR[c] || c || def;
   }
@@ -125,6 +126,17 @@
         p: p,
         op: clamp(p * 3.2, 0, 1),
         esc: p <= 0 ? 0.3 : 0.3 + 0.7 * back(p, 1.6),
+        blur: 0,
+        dy: 0
+      };
+    }
+    if (tipo === 'tapa') {
+      dur = dur || 0.16;
+      var pt = k01(T, c, dur);
+      return {
+        p: pt,
+        op: T >= c ? 1 : 0,
+        esc: 0.9 + 0.1 * back(pt, 1.6),
         blur: 0,
         dy: 0
       };
@@ -452,8 +464,9 @@
       return {
         ws: ws,
         ini: ws[0].ini,
+        desde: ws[0].ini - 0.05,
         fin: fin,
-        hasta: sig ? Math.min(sig[0].ini, fin + 0.7) : fin + 0.7
+        hasta: sig ? Math.min(sig[0].ini - 0.05, fin + 0.7) : fin + 0.7
       };
     });
   }
@@ -465,13 +478,46 @@
       r = -1;
     while (lo <= hi) {
       var mid = lo + hi >> 1;
-      if (bloques[mid].ini - 0.05 <= T) {
+      if (bloques[mid].desde <= T) {
         r = mid;
         lo = mid + 1;
       } else hi = mid - 1;
     }
     if (r < 0) return -1;
     return T < bloques[r].hasta ? r : -1;
+  }
+
+  // REEDICION: subtitulos viejos quemados en el video (subs.tapar = [[ini, fin, x0, x1], ...] en px
+  // del lienzo). Mientras hay uno viejo a la vista siempre se ve un bloque nuevo (se estira el
+  // anterior o se adelanta el siguiente) y la barra negra se ensancha hasta taparlo.
+  function taparViejos(bloques, tapar) {
+    if (!tapar || !tapar.length || !bloques.length) return;
+    var paso = 1 / 30;
+    tapar.forEach(function (r) {
+      for (var t = r[0]; t < r[1]; t += paso) {
+        var ib = bloqueEn(bloques, t);
+        if (ib >= 0) continue;
+        var prev = -1;
+        for (var i = 0; i < bloques.length; i++) if (bloques[i].hasta <= t + 1e-6) prev = i;
+        var sig = prev + 1 < bloques.length ? prev + 1 : -1;
+        if (prev >= 0 && t - bloques[prev].hasta < 1.6) {
+          bloques[prev].hasta = Math.min(sig >= 0 ? bloques[sig].desde : 1e9, Math.max(bloques[prev].hasta, r[1] + 0.04));
+        } else if (sig >= 0) {
+          bloques[sig].desde = Math.min(bloques[sig].desde, t);
+        }
+      }
+    });
+    bloques.forEach(function (b) {
+      var x0 = 1e9,
+        x1 = -1e9;
+      tapar.forEach(function (r) {
+        if (r[1] > b.desde && r[0] < b.hasta) {
+          x0 = Math.min(x0, r[2]);
+          x1 = Math.max(x1, r[3]);
+        }
+      });
+      if (x1 > x0) b.cubre = [x0, x1];
+    });
   }
   function esMarcada(txt, def) {
     if (/\d/.test(txt)) return def.subs.numeros !== false;
@@ -488,9 +534,12 @@
     if (ib < 0) return null;
     var bl = def.bloques[ib],
       prev = def.bloques[ib - 1];
-    var e = Easing.easeOutCubic(k01(T, bl.ini - 0.05, 0.1));
+    var e = Easing.easeOutCubic(k01(T, bl.desde, 0.1));
     // pegado al bloque anterior: cambia en seco (como en las referencias), sin un cuadro vacio en el medio
-    var seguido = !!prev && prev.hasta >= bl.ini - 0.08;
+    var seguido = !!prev && prev.hasta >= bl.desde - 0.08;
+    // con barra (o tapando subtitulos viejos) el bloque esta entero desde el primer cuadro
+    var fijo = !!o.fondo || !!bl.cubre;
+    if (fijo) e = 1;
     var op = seguido ? 0.85 + 0.15 * e : e;
     var activo = -1;
     bl.ws.forEach(function (w, i) {
@@ -500,9 +549,37 @@
     var ancho = medir(bl.ws.map(function (w) {
       return w.txt;
     }).join(''), '800 ' + fs + 'px ' + F) + bl.ws.length * fs * 0.42;
-    if (ancho > o.ancho) fs = Math.floor(fs * o.ancho / ancho);
+    if (ancho > o.ancho) {
+      fs = Math.floor(fs * o.ancho / ancho);
+      ancho = o.ancho;
+    }
     var y = typeof o.y === 'function' ? o.y(T) : o.y;
-    return /*#__PURE__*/React.createElement("div", {
+    var barra = null;
+    if (fijo) {
+      var bx0 = 540 - ancho / 2 - 30,
+        bx1 = 540 + ancho / 2 + 30;
+      if (bl.cubre) {
+        bx0 = Math.min(bx0, bl.cubre[0] - 30);
+        bx1 = Math.max(bx1, bl.cubre[1] + 30);
+      }
+      bx0 = Math.max(8, bx0);
+      bx1 = Math.min(ANCHO - 8, bx1);
+      var alto = Math.max(fs * 1.36, o.altoBarra || 0);
+      barra = /*#__PURE__*/React.createElement("div", {
+        style: {
+          position: 'absolute',
+          left: bx0,
+          top: y - alto / 2,
+          width: bx1 - bx0,
+          height: alto,
+          background: NEGRO,
+          borderRadius: Math.min(34, alto / 2),
+          boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
+          zIndex: 39
+        }
+      });
+    }
+    return /*#__PURE__*/React.createElement(React.Fragment, null, barra, /*#__PURE__*/React.createElement("div", {
       style: {
         position: 'absolute',
         left: 0,
@@ -548,12 +625,13 @@
         style: {
           position: 'relative',
           letterSpacing: '-0.025em',
-          color: act ? NEGRO : esMarcada(w.txt, def) ? AMARILLO : BLANCO,
-          textShadow: act ? 'none' : SOMBRA_TX,
+          // la letra pasa a negro cuando la caja amarilla ya esta (sobre la barra negra no se perderia)
+          color: act && pp * 3 >= 0.5 ? NEGRO : esMarcada(w.txt, def) ? AMARILLO : BLANCO,
+          textShadow: act || fijo ? 'none' : SOMBRA_TX,
           whiteSpace: 'pre'
         }
       }, w.txt));
-    }));
+    })));
   }
 
   /* =========================================================
@@ -850,6 +928,77 @@
         width: '100%',
         height: '100%'
       }
+    }));
+  }
+
+  // PARCHE: un rectangulo del video, borroneado. En la reedicion de un video que ya traia memes o
+  // textos quemados va debajo de lo que los tapa: si algo asoma (la entrada, una esquina), asoma
+  // borroso. r = [x0, y0, x1, y1] en px del lienzo (se dibuja dentro de la camara: sigue al zoom).
+  function Parche(props) {
+    var ref = useRef(null);
+    var R = props.R,
+      r = props.r,
+      m = 40;
+    var kx = R.w / ANCHO,
+      ky = R.h / ALTO;
+    var x = (r[0] - m) * kx,
+      y = (r[1] - m) * ky,
+      w = (r[2] - r[0] + 2 * m) * kx,
+      h = (r[3] - r[1] + 2 * m) * ky;
+    var dpr = global.devicePixelRatio || 1;
+    var cw = Math.max(1, Math.round(w * dpr)),
+      ch = Math.max(1, Math.round(h * dpr));
+    useLayoutEffect(function () {
+      var cv = ref.current,
+        fuente = props.medioRef.current;
+      if (!cv || !fuente) return;
+      var ctx = cv.getContext('2d');
+      ctx.clearRect(0, 0, cv.width, cv.height);
+      var fw = fuente.videoWidth || fuente.naturalWidth,
+        fh = fuente.videoHeight || fuente.naturalHeight;
+      if (!fw || !fh) return;
+      var sf = cubrir(fw, fh, R.w, R.h);
+      var k = sf[2] / R.w;
+      try {
+        ctx.filter = 'blur(' + Math.round(16 * dpr * Math.max(kx, 0.3)) + 'px) brightness(0.92)';
+        ctx.drawImage(fuente, sf[0] + x * k, sf[1] + y * k, w * k, h * k, 0, 0, cv.width, cv.height);
+        ctx.filter = 'none';
+      } catch (e) {/* el cuadro todavia no esta */}
+    });
+    return /*#__PURE__*/React.createElement("canvas", {
+      ref: ref,
+      width: cw,
+      height: ch,
+      style: {
+        position: 'absolute',
+        left: x,
+        top: y,
+        width: w,
+        height: h,
+        clipPath: 'inset(' + (m * ky).toFixed(1) + 'px ' + (m * kx).toFixed(1) + 'px round ' + (22 * kx).toFixed(1) + 'px)'
+      }
+    });
+  }
+  function Parches(props) {
+    var T = props.T,
+      def = props.def;
+    var activos = def.parches.filter(function (b) {
+      return T >= b.ini - 0.001 && T < b.fin;
+    });
+    if (!activos.length) return null;
+    return /*#__PURE__*/React.createElement(MarcoCamara, {
+      R: props.R,
+      st: props.st,
+      ex: props.ex,
+      filtro: filtroCamara(props.st, 0),
+      z: 2
+    }, activos.map(function (b, i) {
+      return /*#__PURE__*/React.createElement(Parche, {
+        key: i,
+        r: b.r,
+        R: props.R,
+        medioRef: props.medioRef
+      });
     }));
   }
 
@@ -1208,7 +1357,8 @@
         fontSize: props.tam || 50,
         letterSpacing: '-0.02em',
         lineHeight: 1.1,
-        color: NEGRO
+        color: props.color || NEGRO,
+        textAlign: props.alinear
       }
     }, String(props.txt).split(' ').map(function (w, i, arr) {
       var m = marc[norm(w)];
@@ -1232,37 +1382,76 @@
         }
       }) : null, /*#__PURE__*/React.createElement("span", {
         style: {
-          position: 'relative'
+          position: 'relative',
+          color: m && props.color ? NEGRO : undefined
         }
       }, w), i < arr.length - 1 ? ' ' : '');
     }));
   }
 
-  // tarjeta blanca: emoji o signo + texto (+ linea chica)
+  // la caja que cubre un rectangulo [x0, y0, x1, y1] con margen: { p, ancho, alto }
+  function cajaTapa(r, margen) {
+    var m = margen == null ? 34 : margen;
+    return {
+      p: [(r[0] + r[2]) / 2, (r[1] + r[3]) / 2, 'c'],
+      ancho: r[2] - r[0] + 2 * m,
+      alto: r[3] - r[1] + 2 * m
+    };
+  }
+
+  // tarjeta blanca (o negra): emoji, signo o logo + titulo / numero grande / texto (+ linea chica).
+  // o.tapa = [x0, y0, x1, y1]: se para encima de eso (reedicion de un video que ya traia memes)
   function TarjetaBeat(props) {
     var T = props.T,
       b = props.b;
     if (!vivo(T, b, 0.25)) return null;
     var p = posicion(b.pos || 'abajo');
-    var e = junta(entra(T, b.ini, 'pop', 0.3), sale(T, b.fin, 0.2));
+    var ancho = b.ancho,
+      alto = b.alto;
+    if (b.tapa) {
+      var ct = cajaTapa(b.tapa, b.margen);
+      p = ct.p;
+      ancho = ancho || ct.ancho;
+      alto = alto || ct.alto;
+    }
+    var e = junta(entra(T, b.ini, b.tapa ? 'tapa' : 'pop', b.tapa ? 0.16 : 0.3), sale(T, b.fin, 0.2));
     var pi = k01(T, b.ini + 0.12, 0.4);
-    var dy = deriva(T, hash(b.texto) * 6, 4);
+    var dy = b.tapa ? 0 : deriva(T, hash(b.texto || b.titulo || b.grande) * 6, 4);
+    var negra = b.estilo === 'negro';
+    var vertical = !!b.vertical;
+    var lado = vertical && ancho && alto ? Math.min(ancho * 0.6, alto * 0.48) : 96;
+    var tamIcono = b.tamIcono || (vertical ? lado : 96);
+    var crece = 0.4 + 0.6 * back(k01(T, b.ini + 0.06, 0.3), 2);
     var icono = b.icono === 'check' || b.icono === 'bien' ? /*#__PURE__*/React.createElement(Signo, {
-      tam: 84,
+      tam: tamIcono * 0.88,
       p: pi,
       bien: true
     }) : b.icono === 'equis' || b.icono === 'mal' ? /*#__PURE__*/React.createElement(Signo, {
-      tam: 84,
+      tam: tamIcono * 0.88,
       p: pi,
       bien: false
-    }) : b.emoji ? /*#__PURE__*/React.createElement("div", {
+    }) : b.logo ? /*#__PURE__*/React.createElement("div", {
       style: {
-        transform: 'scale(' + (0.4 + 0.6 * back(k01(T, b.ini + 0.08, 0.3), 2)).toFixed(3) + ')'
+        transform: 'scale(' + crece.toFixed(3) + ')'
+      }
+    }, /*#__PURE__*/React.createElement(Logo, {
+      red: b.logo,
+      r: tamIcono / 2
+    })) : b.emoji ? /*#__PURE__*/React.createElement("div", {
+      style: {
+        transform: 'scale(' + crece.toFixed(3) + ') rotate(' + M.life(T, 2.4, 5, hash(b.emoji) * 6).toFixed(2) + 'deg)'
       }
     }, /*#__PURE__*/React.createElement(Emoji, {
       n: b.emoji,
-      tam: 96
+      tam: tamIcono
     })) : null;
+    var tinta = negra ? BLANCO : NEGRO;
+    var tenue = negra ? 'rgba(255,255,255,0.62)' : 'rgba(20,17,15,0.55)';
+    var anchoTexto = (ancho || 820) - (vertical ? 60 : 160);
+    var fsTitulo = b.titulo ? Math.min.apply(null, [b.tamTitulo || 84].concat(String(b.titulo).toUpperCase().split('\n').map(function (l) {
+      return ajustar(l, F_IMPACTO, 400, anchoTexto, 120, 0);
+    }))) : 0;
+    var fsGrande = b.grande != null ? Math.min(b.tamGrande || 190, ajustar(String(b.grande), F_IMPACTO, 400, anchoTexto, 220, -0.02)) : 0;
     return /*#__PURE__*/React.createElement(Caja, {
       p: p,
       e: e,
@@ -1272,44 +1461,288 @@
     }, /*#__PURE__*/React.createElement("div", {
       style: {
         display: 'flex',
+        flexDirection: vertical ? 'column' : 'row',
         alignItems: 'center',
-        gap: 26,
-        background: BLANCO,
-        borderRadius: 34,
-        padding: icono ? '24px 40px 24px 26px' : '26px 40px',
+        justifyContent: 'center',
+        gap: vertical ? 14 : 26,
+        background: negra ? NEGRO : BLANCO,
+        borderRadius: b.radio || 40,
+        padding: vertical ? '22px 28px' : icono ? '24px 40px 24px 26px' : '26px 40px',
+        boxSizing: 'border-box',
         boxShadow: SOMBRA_TARJETA,
-        maxWidth: b.ancho || 820,
-        minWidth: b.minimo || 0
+        width: ancho,
+        height: alto,
+        maxWidth: ancho ? undefined : 820,
+        minWidth: b.minimo || 0,
+        textAlign: vertical ? 'center' : 'left'
       }
     }, icono, /*#__PURE__*/React.createElement("div", {
       style: {
         display: 'flex',
         flexDirection: 'column',
-        gap: 6
+        gap: 6,
+        alignItems: vertical ? 'center' : 'flex-start'
       }
     }, b.etiqueta ? /*#__PURE__*/React.createElement("span", {
       style: {
         fontFamily: F_MONO,
         fontWeight: 600,
-        fontSize: 26,
+        fontSize: 28,
         letterSpacing: '0.08em',
         textTransform: 'uppercase',
-        color: 'rgba(20,17,15,0.55)'
+        color: tenue
       }
-    }, b.etiqueta) : null, /*#__PURE__*/React.createElement(TextoTinta, {
+    }, b.etiqueta) : null, b.grande != null ? /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontFamily: F_IMPACTO,
+        fontSize: fsGrande,
+        lineHeight: 0.92,
+        letterSpacing: '-0.02em',
+        color: negra ? AMARILLO : NEGRO
+      }
+    }, b.grande) : null, b.titulo ? /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontFamily: F_IMPACTO,
+        fontSize: fsTitulo,
+        lineHeight: 0.95,
+        color: tinta,
+        whiteSpace: 'pre'
+      }
+    }, String(b.titulo).toUpperCase()) : null, b.texto ? /*#__PURE__*/React.createElement(TextoTinta, {
       txt: b.texto,
       tam: b.tam || 52,
       marcadas: b.marcadas,
+      color: negra ? BLANCO : null,
+      alinear: vertical ? 'center' : null,
       p: k01(T, b.ini + 0.25, 0.35)
-    }), b.sub ? /*#__PURE__*/React.createElement("span", {
+    }) : null, b.sub ? /*#__PURE__*/React.createElement("span", {
       style: {
         fontFamily: F,
         fontWeight: 600,
         fontSize: 34,
-        color: 'rgba(20,17,15,0.62)',
+        color: tenue,
         lineHeight: 1.15
       }
     }, b.sub) : null)));
+  }
+
+  // contador de repeticiones: la placa amarilla con el numero (cuenta sola con o.tiempos) y el nombre debajo
+  function ContadorBeat(props) {
+    var T = props.T,
+      b = props.b;
+    if (!vivo(T, b, 0.25)) return null;
+    var p = posicion(b.pos || [540, 245]);
+    var e = junta(entra(T, b.ini, 'tapa', 0.16), sale(T, b.fin, 0.2));
+    var n = 0,
+      ult = -1e9;
+    b.tiempos.forEach(function (t) {
+      if (T >= t) {
+        n++;
+        ult = t;
+      }
+    });
+    var txt = b.final != null && T >= b.cFinal ? String(b.final) : String(n + (b.desde || 0));
+    if (b.final != null && T >= b.cFinal) ult = b.cFinal;
+    var salto = 1 + 0.2 * Math.sin(Math.PI * k01(T, ult, 0.24));
+    var w = b.ancho || 300,
+      h = b.alto || 270;
+    var fs = Math.min(176, ajustar(txt, F_IMPACTO, 400, w - 44, 190, -0.03));
+    var en = junta(entra(T, b.ini + 0.1, 'pop', 0.28), sale(T, b.fin, 0.2));
+    return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(Caja, {
+      p: p,
+      e: e,
+      z: 31
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        width: w,
+        height: h,
+        background: AMARILLO,
+        borderRadius: 48,
+        boxShadow: '0 6px 0 rgba(20,17,15,0.9), 0 18px 44px rgba(0,0,0,0.3)',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontFamily: F_MONO,
+        fontWeight: 600,
+        fontSize: 26,
+        letterSpacing: '0.14em',
+        color: 'rgba(20,17,15,0.7)',
+        marginBottom: -4
+      }
+    }, b.etiqueta || 'REPS'), /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontFamily: F_IMPACTO,
+        fontSize: fs,
+        lineHeight: 1,
+        color: NEGRO,
+        letterSpacing: '-0.03em',
+        transform: 'scale(' + salto.toFixed(3) + ')'
+      }
+    }, txt))), b.nombre ? /*#__PURE__*/React.createElement(Caja, {
+      p: [p[0], p[1] + h / 2 + 46, 'c'],
+      e: en,
+      rot: -2,
+      z: 31
+    }, /*#__PURE__*/React.createElement(Pastilla, {
+      txt: b.nombre,
+      estilo: "negro",
+      tam: 42,
+      emoji: b.emoji
+    })) : null);
+  }
+
+  // suscribete en el estilo P4: foto + nombre + YouTube + el boton que el cursor aprieta (SUSCRITO) y la campana
+  function SuscribeteBeat(props) {
+    var T = props.T,
+      b = props.b;
+    if (!vivo(T, b, 0.25)) return null;
+    var p = posicion(b.pos || [540, 1350]);
+    var w = b.ancho || 980,
+      h = b.alto || 210;
+    if (b.tapa) {
+      var ct = cajaTapa(b.tapa, b.margen == null ? 22 : b.margen);
+      p = ct.p;
+      w = ct.ancho;
+      h = ct.alto;
+    }
+    var e = junta(entra(T, b.ini, b.tapa ? 'tapa' : 'pop', b.tapa ? 0.16 : 0.3), sale(T, b.fin, 0.2));
+    var clic = b.clic == null ? b.ini + Math.min(0.8, (b.fin - b.ini) * 0.5) : b.clic;
+    var hecho = T >= clic;
+    var apriete = 1 - 0.08 * Math.sin(Math.PI * k01(T, clic - 0.06, 0.16));
+    var foto = h - 44;
+    // el cursor entra desde abajo a la derecha y llega al boton justo en el clic
+    var kc = Easing.easeInOutCubic(k01(T, clic - 0.45, 0.42));
+    var bx = w - 300,
+      by = h / 2;
+    var cx = lerp(w + 60, bx + 80, kc),
+      cy = lerp(h + 140, by + 26, kc);
+    var campana = hecho ? Math.sin((T - clic) * 34) * 18 * (1 - k01(T, clic, 0.6)) : 0;
+    return /*#__PURE__*/React.createElement(Caja, {
+      p: p,
+      e: e,
+      z: 33
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        position: 'relative',
+        width: w,
+        height: h,
+        background: BLANCO,
+        borderRadius: h / 2,
+        boxShadow: SOMBRA_TARJETA,
+        display: 'flex',
+        alignItems: 'center',
+        padding: '0 26px 0 22px',
+        boxSizing: 'border-box',
+        gap: 22
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        width: foto,
+        height: foto,
+        borderRadius: '50%',
+        overflow: 'hidden',
+        flex: 'none',
+        background: GRIS,
+        border: '5px solid ' + AMARILLO,
+        boxSizing: 'border-box'
+      }
+    }, /*#__PURE__*/React.createElement("img", {
+      src: FOTO,
+      alt: "",
+      style: {
+        width: '100%',
+        height: '100%',
+        objectFit: 'cover',
+        display: 'block'
+      }
+    })), /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: 'flex',
+        flexDirection: 'column',
+        flex: 1,
+        minWidth: 0
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontFamily: F_IMPACTO,
+        fontSize: 50,
+        color: NEGRO,
+        lineHeight: 1
+      }
+    }, "TORVICK"), /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontFamily: F,
+        fontWeight: 700,
+        fontSize: 30,
+        color: 'rgba(20,17,15,0.55)',
+        marginTop: 6
+      }
+    }, "@eltorvick")), /*#__PURE__*/React.createElement("div", {
+      style: {
+        flex: 'none',
+        height: 92,
+        borderRadius: 46,
+        padding: '0 34px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 12,
+        background: hecho ? '#EDEAE4' : '#FF0000',
+        transform: 'scale(' + apriete.toFixed(3) + ')',
+        fontFamily: F_IMPACTO,
+        fontSize: 36,
+        color: hecho ? NEGRO : BLANCO,
+        letterSpacing: '0.01em'
+      }
+    }, hecho ? /*#__PURE__*/React.createElement(Signo, {
+      tam: 44,
+      p: k01(T, clic, 0.3),
+      fondo: NEGRO,
+      tinta: AMARILLO
+    }) : null, /*#__PURE__*/React.createElement("span", null, hecho ? 'SUSCRITO' : 'SUSCRÍBETE')), /*#__PURE__*/React.createElement("svg", {
+      width: 70,
+      height: 70,
+      viewBox: "-35 -35 70 70",
+      style: {
+        flex: 'none',
+        overflow: 'visible'
+      }
+    }, /*#__PURE__*/React.createElement("g", {
+      transform: 'rotate(' + campana.toFixed(2) + ' 0 -24)',
+      fill: hecho ? AMARILLO : 'none',
+      stroke: NEGRO,
+      strokeWidth: 5,
+      strokeLinejoin: "round"
+    }, /*#__PURE__*/React.createElement("path", {
+      d: "M -18 12 C -18 -6 -16 -22 0 -24 C 16 -22 18 -6 18 12 L 24 18 L -24 18 Z"
+    }), /*#__PURE__*/React.createElement("circle", {
+      cx: 0,
+      cy: 24,
+      r: 5,
+      fill: NEGRO,
+      stroke: "none"
+    }))), T < clic + 0.5 ? /*#__PURE__*/React.createElement("svg", {
+      width: 64,
+      height: 78,
+      viewBox: "0 0 32 39",
+      style: {
+        position: 'absolute',
+        left: cx,
+        top: cy,
+        overflow: 'visible',
+        transform: 'scale(' + (T >= clic - 0.06 && T < clic + 0.12 ? 0.86 : 1) + ')',
+        opacity: 1 - k01(T, clic + 0.25, 0.25)
+      }
+    }, /*#__PURE__*/React.createElement("path", {
+      d: "M 2 2 L 2 30 L 9 23 L 14 35 L 19 33 L 14 21 L 24 21 Z",
+      fill: BLANCO,
+      stroke: NEGRO,
+      strokeWidth: 2.6,
+      strokeLinejoin: "round"
+    })) : null));
   }
 
   // lista que se arma mientras se nombra cada cosa (pastillas blancas con check)
@@ -2275,6 +2708,31 @@
         fin: fin
       }, o || {});
     },
+    // contador de repeticiones: { tiempos: [segundo de cada rep], nombre, pos, final, cFinal, etiqueta }
+    contador: function (ini, fin, o) {
+      return Object.assign({
+        tipo: 'contador',
+        ini: ini,
+        fin: fin
+      }, o || {});
+    },
+    // suscribete en el estilo P4 (foto, YouTube, el boton que se aprieta): { clic, pos, tapa }
+    suscribete: function (ini, fin, o) {
+      return Object.assign({
+        tipo: 'suscribete',
+        ini: ini,
+        fin: fin
+      }, o || {});
+    },
+    // reedicion: borronea un rectangulo [x0, y0, x1, y1] del video (lo viejo que asoma)
+    parche: function (ini, fin, r) {
+      return {
+        tipo: 'parche',
+        ini: ini,
+        fin: fin,
+        r: r
+      };
+    },
     sonido: function (t, tipo, g) {
       return {
         tipo: 'sonido',
@@ -2301,9 +2759,10 @@
     }
   };
   var DETRAS = ['detras', 'dia'];
-  var ENCIMA = ['titulo', 'numero', 'tarjeta', 'lista', 'emoji', 'imagen', 'etiqueta', 'progreso', 'cta'];
+  var ENCIMA = ['titulo', 'numero', 'tarjeta', 'lista', 'emoji', 'imagen', 'etiqueta', 'progreso', 'cta', 'contador', 'suscribete'];
   function zonaDe(b) {
-    if (b.tipo === 'emoji' || b.tipo === 'etiqueta') return null;
+    // lo que tapa algo del video viejo no se acorta nunca
+    if (b.tipo === 'emoji' || b.tipo === 'etiqueta' || b.tipo === 'contador' || b.tapa) return null;
     var p = posicion(b.pos || (b.tipo === 'titulo' || b.tipo === 'numero' || b.tipo === 'imagen' ? 'arriba' : b.tipo === 'lista' ? 'arriba-izq' : b.tipo === 'cta' ? 'arriba' : 'abajo'));
     return Math.round(p[0] / 120) + ':' + Math.round(p[1] / 200);
   }
@@ -2327,6 +2786,7 @@
     });
     d.dur = crudo.dur || tr.dur || 30;
     d.bloques = armarBloques(tr.palabras, d.subs);
+    taparViejos(d.bloques, d.subs.tapar);
     var beats = (crudo.plan || []).filter(Boolean).map(function (b) {
       return Object.assign({}, b);
     });
@@ -2352,6 +2812,18 @@
         t: b.ini,
         fuerza: b.fuerza
       };
+    });
+    // parches: los sueltos y uno debajo de cada cosa que tapa (o.tapa), mientras esta
+    d.parches = beats.filter(function (b) {
+      return b.tipo === 'parche';
+    });
+    beats.forEach(function (b) {
+      if (b.tapa && b.parche !== false) d.parches.push({
+        tipo: 'parche',
+        ini: b.ini,
+        fin: b.finTapa == null ? b.fin + 0.2 : b.finTapa,
+        r: b.tapa
+      });
     });
     d.flashes = beats.filter(function (b) {
       return b.tipo === 'flash';
@@ -2412,12 +2884,13 @@
     // lo que ocupa la parte de arriba esconde el sello de la serie mientras esta
     d.tapanSello = [];
     beats.forEach(function (b) {
-      var arriba = b.tipo === 'dia' || b.tipo === 'detras' || b.tipo === 'capitulo' || b.tipo === 'comparar' || b.tipo === 'cta' || ENCIMA.indexOf(b.tipo) >= 0 && b.tipo !== 'emoji' && posicion(b.pos || (b.tipo === 'tarjeta' || b.tipo === 'progreso' ? 'abajo' : b.tipo === 'lista' ? 'arriba-izq' : 'arriba'))[1] < 760;
+      var arriba = b.tipo === 'dia' || b.tipo === 'detras' || b.tipo === 'capitulo' || b.tipo === 'comparar' || b.tipo === 'cta' || b.tipo === 'contador' || ENCIMA.indexOf(b.tipo) >= 0 && b.tipo !== 'emoji' && posicion(b.pos || (b.tipo === 'tarjeta' || b.tipo === 'progreso' ? 'abajo' : b.tipo === 'lista' ? 'arriba-izq' : 'arriba'))[1] < 760;
       if (arriba) d.tapanSello.push([b.ini - (b.tipo === 'capitulo' ? T_MARCO : 0), b.fin + (b.tipo === 'capitulo' ? T_MARCO * 0.5 : 0.2)]);
     });
     // nada de lo de arriba se cruza con la firma (la firma va en y 330-450)
     d.encima.concat(d.detras).forEach(function (b) {
-      var y = b.tipo === 'dia' || b.tipo === 'detras' ? 0 : posicion(b.pos || (b.tipo === 'tarjeta' || b.tipo === 'progreso' ? 'abajo' : 'arriba'))[1];
+      if (b.tapa) return;
+      var y = b.tipo === 'dia' || b.tipo === 'detras' ? 0 : posicion(b.pos || (b.tipo === 'tarjeta' || b.tipo === 'progreso' || b.tipo === 'suscribete' ? 'abajo' : 'arriba'))[1];
       if (b.tipo === 'cta' && b.y != null) y = b.y;
       if (y < 900 && b.ini < d.iniFirma && b.fin > d.iniFirma - 0.1) b.fin = Math.max(b.ini + 0.3, d.iniFirma - 0.12);
     });
@@ -2453,6 +2926,17 @@
       } else if (b.tipo === 'progreso') {
         cue('pop', b.ini, 0.45);
         cue('subida', b.ini + 0.2, 0.3);
+      } else if (b.tipo === 'contador') {
+        cue('pop', b.ini, 0.35);
+        b.tiempos.forEach(function (t) {
+          if (t > b.ini + 0.05 && t < b.fin) cue('ding', t, 0.3);
+        });
+        if (b.final != null) cue('golpe', b.cFinal, 0.4);
+      } else if (b.tipo === 'suscribete') {
+        var clic = b.clic == null ? b.ini + Math.min(0.8, (b.fin - b.ini) * 0.5) : b.clic;
+        cue('whoosh', b.ini - 0.05, 0.35);
+        cue('click', clic, 0.8);
+        cue('campana', clic + 0.12, 0.45);
       } else if (b.tipo === 'cta') {
         cue('whoosh', b.ini, 0.4);
         for (var i = 0; i < String(b.palabra).length; i++) cue('click', b.ini + 0.6 + i * 0.09, 0.22);
@@ -2560,6 +3044,16 @@
         T: T,
         b: b
       });
+      if (b.tipo === 'contador') return /*#__PURE__*/React.createElement(ContadorBeat, {
+        key: i,
+        T: T,
+        b: b
+      });
+      if (b.tipo === 'suscribete') return /*#__PURE__*/React.createElement(SuscribeteBeat, {
+        key: i,
+        T: T,
+        b: b
+      });
       return null;
     };
     return /*#__PURE__*/React.createElement("div", {
@@ -2592,6 +3086,13 @@
       ex: ex,
       atenuar: atenuar,
       render: props.render,
+      medioRef: props.medioRef
+    }), /*#__PURE__*/React.createElement(Parches, {
+      T: T,
+      def: def,
+      R: R,
+      st: st,
+      ex: ex,
       medioRef: props.medioRef
     }), detras.length ? /*#__PURE__*/React.createElement(React.Fragment, null, detras.map(dibujar), /*#__PURE__*/React.createElement(Frente, {
       T: T,
@@ -2736,7 +3237,7 @@
           return img.decode ? img.decode().catch(function () {}) : Promise.resolve();
         },
         precargar: function () {
-          var srcs = [];
+          var srcs = [FOTO];
           def.encima.concat(def.detras).forEach(function (b) {
             if (b.tipo === 'emoji') srcs.push(rutaEmoji(b.n));
             if (b.emoji) srcs.push(rutaEmoji(b.emoji));
@@ -2899,7 +3400,7 @@
         }
       }, /*#__PURE__*/React.createElement("span", {
         className: "t"
-      }, fmt(b.ini)), " ", /*#__PURE__*/React.createElement("b", null, b.tipo), " ", b.txt || b.texto || b.titulo || b.n || b.palabra || (b.items ? b.items.map(function (x) {
+      }, fmt(b.ini)), " ", /*#__PURE__*/React.createElement("b", null, b.tipo), " ", b.txt || b.texto || b.titulo || b.grande || b.nombre || b.n || b.palabra || (b.items ? b.items.map(function (x) {
         return x.texto;
       }).join(', ') : '') || (b.valor != null ? b.valor + ' ' + (b.unidad || '') : ''));
     }))));

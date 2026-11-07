@@ -185,6 +185,35 @@ primera vez); antes, en la vista previa, se ve por encima.
 Las pruebas con videos ajenos (por ejemplo, los de referencia) van en una
 carpeta que empiece con guion bajo, `cambios/_prueba/`: git la ignora entera.
 
+## Reeditar un video viejo (con textos y memes quemados)
+
+Si el video ya trae su edición quemada (subtítulos, contadores, memes, barras
+de suscripción) y no está el crudo, no se puede borrar: se **tapa con piezas
+nuevas en el mismo lugar y en el mismo segundo**. Fue el caso del reto de
+dominadas en el parque (noviembre de 2026). Con el crudo nada de esto hace falta
+y la calidad es otra: pídelo siempre primero.
+
+1. **Subtítulos y contador viejos, automático:**
+   `python3 herramientas/viejos.py video.mp4 --banda 0.52-0.57 --contador 0.25,0.02,0.75,0.2 --out viejos.json`
+   (la franja y la caja salen de una foto con grilla). `tapar` va en
+   `subs: { fondo: true, y: <centro de la franja>, tapar }`; los tiempos del
+   contador, en `p.contador`.
+2. **Memes y barras, a ojo:** fotos a 10 cuadros por segundo alrededor de cada
+   uno (cuándo entra y cuándo sale) y una foto con grilla para la caja. Cada
+   uno se tapa con `p.tarjeta({ tapa, vertical: true, emoji, titulo })`,
+   `p.suscribete({ tapa })` o un emoji grande + `p.parche`. Lo que tapa entra
+   casi entero desde el primer cuadro y lleva debajo un parche borroso solo.
+3. **La transcripción**: los subtítulos viejos dicen lo que de verdad se
+   dijo; corregir en el `.json` lo que el modelo oyó mal y rehacer el `.js`
+   con `transcribir.py --solo-js`.
+4. **Nada de zoom ni de marco de capítulo** mientras haya algo viejo a la vista
+   (lo viejo se movería y las piezas no): el capítulo va en un hueco limpio y
+   el énfasis, con sacudida o con piezas.
+5. El audio viejo trae música y efectos: los efectos nuevos van más bajos
+   (`grabar-cambio.js <id> --nivel-efectos -12`).
+6. Revisar la franja de subtítulos y la entrada y salida de cada tapa cuadro a
+   cuadro antes de entregar.
+
 ## El plan
 
 ```jsx
@@ -222,7 +251,7 @@ carpeta que empiece con guion bajo, `cambios/_prueba/`: git la ignora entera.
 | `detras(ini, fin, txt, o)` | gigante detrás de la persona (`'\n'` = dos líneas): `color`, `y`, `tam`, `arriba`, `abajo` |
 | `titulo(ini, fin, txt, o)` | `arriba` (línea chica), `color`, `pos`, `detras: true`, `mano: true` (la chica a mano) |
 | `numero(ini, fin, o)` | `valor`, `desde` (cuenta), `dec`, `unidad`, `etiqueta`, `antes` (tachado), `signo`, `pos`, `detras` |
-| `tarjeta(ini, fin, o)` | `texto`, `emoji` o `icono: 'check'/'equis'`, `sub`, `etiqueta`, `marcadas`, `pos` |
+| `tarjeta(ini, fin, o)` | `texto`, `emoji` o `icono: 'check'/'equis'` o `logo: 'youtube'`, `titulo` (Archivo Black), `grande` (número enorme), `sub`, `etiqueta`, `marcadas`, `pos`; `vertical`, `ancho`, `alto`, `estilo: 'negro'`; `tapa: [x0, y0, x1, y1]` (se para encima de eso) |
 | `lista(ini, fin, o)` | `titulo`, `items: ['pollo', { texto, emoji, mal, t, busca }]` (cada uno cuando se dice), `pos` |
 | `emoji(ini, fin, nombre, o)` | `'pollo'` o `'🍗'`; `pos`, `tam`, `rot`. Lista: `CAMBIOS.EMOJI` |
 | `imagen(ini, fin, src, o)` | foto polaroid: `pos`, `ancho`, `alto`, `rot`, `pie` |
@@ -231,13 +260,19 @@ carpeta que empiece con guion bajo, `cambios/_prueba/`: git la ignora entera.
 | `capitulo(ini, fin, o)` | marco sobre amarillo: `n`, `titulo`, `sub`, `oscuro` (fondo negro) |
 | `comparar(ini, fin, o)` | `antes`, `ahora` (fotos), `etiquetas`, `titulo` |
 | `cta(ini, fin, palabra, o)` | "comenta" + la palabra + la caja que se escribe: `texto`, `y` |
+| `contador(ini, fin, o)` | placa amarilla de repeticiones: `tiempos` (segundo de cada rep), `nombre`, `pos`, `final` + `cFinal` |
+| `suscribete(ini, fin, o)` | tu foto + TORVICK + el botón que el cursor aprieta (SUSCRITO) y la campana: `clic`, `pos`, `tapa` |
+| `parche(ini, fin, r)` | borronea el rectángulo `r` del video (reedición: lo viejo que asoma) |
 | `camara(ini, fin, o)` | `zoom`, `foco` [x, y], `mov` golpe/suave/empuje/corte, `bn`, `oscuro`, `desenfoque` |
 | `sonido(t, tipo)` · `flash(t)` · `sacudida(t)` | sueltos |
 
 `subs`: `y` (alto de la línea; si el encuadre deja el pecho más arriba o más
 abajo), `tam`, `palabras` (máximo por bloque, 3), `caracteres` (18),
 `marcadas`, `numeros: false` (que los números no vayan en amarillo),
-`corregir` y `ocultar: [[ini, fin]]` (tramos sin subtítulos).
+`corregir` y `ocultar: [[ini, fin]]` (tramos sin subtítulos). Para la
+reedición: `fondo: true` (cada bloque en una barra negra), `altoBarra` y
+`tapar: [[ini, fin, x0, x1]]` (los subtítulos viejos: la barra se ensancha
+hasta taparlos y nunca queda uno viejo a la vista sin uno nuevo encima).
 
 `pos`: `arriba`, `arriba-izq`, `arriba-der`, `izq`, `der`, `centro`, `abajo`,
 `abajo-izq`, o `[x, y]`. Lo que va en la misma zona no se pisa (el anterior se

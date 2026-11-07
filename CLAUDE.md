@@ -74,7 +74,8 @@ herramientas/     grabar.js (exporta MP4 con música y efectos; con --voz,
                   y las de los largos: transcribir.py, recortar.py,
                   revisar-largo.js, grabar-largo.js, tramos.py; cierre-clip.js
                   (le pone el cierre con la firma a un short); grabar-cambio.js
-                  (graba los verticales del P4); no son parte de la app
+                  (graba los verticales del P4) y viejos.py (detecta subtítulos
+                  y contadores quemados para reeditar); no son parte de la app
 trabajo/          para el autor: tablero de piezas y cómo pasar de la voz al
                   video (sin datos personales: el repositorio es público)
 ```
@@ -603,6 +604,11 @@ esencial:
   efectos debajo; sin música salvo `--musica`.
 - `cambio.html#<id>` carga sola la carpeta `cambios/<id>/`; las pruebas locales
   van en `cambios/_<algo>/` (ignoradas por git: nunca subir videos ajenos).
+- **Reeditar un video viejo con edición quemada** (sin el crudo): se tapa lo
+  viejo con piezas nuevas en el mismo lugar y segundo (`subs.tapar` + barra
+  negra, `p.contador`, `p.tarjeta({ tapa })`, `p.suscribete({ tapa })`,
+  `p.parche`); `herramientas/viejos.py` detecta los subtítulos y el contador
+  viejos. Receta en `CAMBIO.md`, "Reeditar un video viejo".
 
 ```
 python3 herramientas/transcribir.py cambios/<id>/media/fuente.mp4 --out cambios/<id>/transcripcion.json
