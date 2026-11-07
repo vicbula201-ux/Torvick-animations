@@ -125,6 +125,12 @@ golpe (palabras detrás, números, golpe de zoom), whoosh (títulos, capítulos)
 clic (etiquetas, la caja de comentario). Debajo de la voz. Sin música por
 defecto (como el estilo 2 de los reels); `--musica` la agrega.
 
+**Fondo claro** (pared blanca): las palabras detrás y los títulos en negro
+(`color: 'negro'`, `colorArriba: 'negro'`), los subtítulos con barra
+(`subs.fondo: true`). Si el video trae fotos propias montadas encima (las
+radiografías del video de la escoliosis), se dejan y `subs.y` puede ser una
+función del segundo para que los subtítulos las esquiven.
+
 **Zonas que tapan las apps** (`cambio.html` las muestra con "zonas que tapan
 las apps"): arriba hasta y 230, abajo desde y 1560, y a la derecha de x 900
 entre y 1000 y 1560. Los subtítulos van en y 1230.
@@ -249,7 +255,7 @@ y la calidad es otra: pídelo siempre primero.
 |---|---|
 | `dia(ini, fin, o)` | apertura: `n`, `arriba` ('DÍA'), `abajo` ('de cambio físico'), `y`, `tam`, `color` |
 | `detras(ini, fin, txt, o)` | gigante detrás de la persona (`'\n'` = dos líneas): `color`, `y`, `tam`, `arriba`, `abajo` |
-| `titulo(ini, fin, txt, o)` | `arriba` (línea chica), `color`, `pos`, `detras: true`, `mano: true` (la chica a mano) |
+| `titulo(ini, fin, txt, o)` | `arriba` (línea chica), `color`, `colorArriba` (`'negro'` sobre pared clara), `pos`, `detras: true`, `mano: true` (la chica a mano) |
 | `numero(ini, fin, o)` | `valor`, `desde` (cuenta), `dec`, `unidad`, `etiqueta`, `antes` (tachado), `signo`, `pos`, `detras` |
 | `tarjeta(ini, fin, o)` | `texto`, `emoji` o `icono: 'check'/'equis'` o `logo: 'youtube'`, `titulo` (Archivo Black), `grande` (número enorme), `sub`, `etiqueta`, `marcadas`, `pos`; `vertical`, `ancho`, `alto`, `estilo: 'negro'`; `tapa: [x0, y0, x1, y1]` (se para encima de eso) |
 | `lista(ini, fin, o)` | `titulo`, `items: ['pollo', { texto, emoji, mal, t, busca }]` (cada uno cuando se dice), `pos` |

@@ -712,7 +712,7 @@
     (props.marcadas || []).forEach(function (m) { marc[norm(m)] = true; });
     var fs = props.tam || 66;
     return (
-      <div style={{ fontFamily: props.fuente || F, fontWeight: 800, fontSize: fs, letterSpacing: '-0.02em', lineHeight: 1.05, color: col(props.color, BLANCO), textShadow: SOMBRA_TX, whiteSpace: 'pre', textAlign: props.alinear || 'center' }}>
+      <div style={{ fontFamily: props.fuente || F, fontWeight: 800, fontSize: fs, letterSpacing: '-0.02em', lineHeight: 1.05, color: col(props.color, BLANCO), textShadow: props.color === 'negro' ? 'none' : SOMBRA_TX, whiteSpace: 'pre', textAlign: props.alinear || 'center' }}>
         {String(props.txt).split(' ').map(function (w, i, arr) {
           var m = marc[norm(w)] || (/\d/.test(w) && props.numeros !== false);
           return <span key={i} style={{ color: m ? AMARILLO : undefined }}>{w + (i < arr.length - 1 ? ' ' : '')}</span>;
@@ -790,7 +790,7 @@
       <React.Fragment>
         {b.arriba ? (
           <Caja p={[p[0], p[1] - alto / 2 - 44, p[2]]} e={ea} z={b.detras ? 8 : 30} dy={dy}>
-            <TextoChico txt={b.arriba} tam={b.tamArriba || 62} fuente={b.mano ? F_MANO : F} />
+            <TextoChico txt={b.arriba} tam={b.tamArriba || 62} fuente={b.mano ? F_MANO : F} color={b.colorArriba} />
           </Caja>
         ) : null}
         <Caja p={p} e={eg} z={b.detras ? 8 : 30} dy={dy}>
@@ -825,7 +825,7 @@
       <React.Fragment>
         {b.etiqueta ? (
           <Caja p={[p[0], p[1] - fs * 0.5 - 50, p[2]]} e={eu} dy={dy} z={b.detras ? 8 : 30}>
-            <TextoChico txt={b.etiqueta} tam={56} fuente={b.mano ? F_MANO : F} />
+            <TextoChico txt={b.etiqueta} tam={56} fuente={b.mano ? F_MANO : F} color={b.colorEtiqueta} />
           </Caja>
         ) : null}
         <Caja p={p} e={e} dy={dy} z={b.detras ? 8 : 30}>

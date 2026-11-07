@@ -1080,7 +1080,7 @@
         letterSpacing: '-0.02em',
         lineHeight: 1.05,
         color: col(props.color, BLANCO),
-        textShadow: SOMBRA_TX,
+        textShadow: props.color === 'negro' ? 'none' : SOMBRA_TX,
         whiteSpace: 'pre',
         textAlign: props.alinear || 'center'
       }
@@ -1195,7 +1195,8 @@
     }, /*#__PURE__*/React.createElement(TextoChico, {
       txt: b.arriba,
       tam: b.tamArriba || 62,
-      fuente: b.mano ? F_MANO : F
+      fuente: b.mano ? F_MANO : F,
+      color: b.colorArriba
     })) : null, /*#__PURE__*/React.createElement(Caja, {
       p: p,
       e: eg,
@@ -1239,7 +1240,8 @@
     }, /*#__PURE__*/React.createElement(TextoChico, {
       txt: b.etiqueta,
       tam: 56,
-      fuente: b.mano ? F_MANO : F
+      fuente: b.mano ? F_MANO : F,
+      color: b.colorEtiqueta
     })) : null, /*#__PURE__*/React.createElement(Caja, {
       p: p,
       e: e,
