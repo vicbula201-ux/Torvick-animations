@@ -57,6 +57,13 @@ clip-cierre.jsx   window.CLIPS: el cierre de esos shorts, igual al original y co
                   YouTube, Instagram, TikTok y @eltorvick
 largos/<id>/clips.jsx  los shorts de un largo (guion, subtítulos del cierre, `desde`);
                   clips.md el mismo guion en texto y el estilo de esos shorts
+cambio.html       P4 · Cambio Físico: videos verticales del autor hablando a cámara
+cambio.jsx        window.CAMBIOS: subtítulos, DÍA N detrás de la persona, títulos,
+                  números, tarjetas, listas, emojis 3D, capítulos, firma
+cambio/emoji/     211 emojis 3D (Fluent Emoji de Microsoft, MIT) por nombre en español
+cambios/<id>/     un video vertical: plan.jsx + transcripcion.* (+ media/, fuera de git);
+                  cambios/lista.js los pone en los botones de cambio.html
+CAMBIO.md         análisis de los 5 reels de referencia, estilo y flujo del P4
 compilar.js       regenera los .js desde los .jsx
 prueba-piezas.html  verificación: motor + las 21 piezas + las piezas de B
 herramientas/     grabar.js (exporta MP4 con música y efectos; con --voz,
@@ -66,8 +73,8 @@ herramientas/     grabar.js (exporta MP4 con música y efectos; con --voz,
                   efectos), imagenes.js (exporta los PNG de identidad.html)
                   y las de los largos: transcribir.py, recortar.py,
                   revisar-largo.js, grabar-largo.js, tramos.py; cierre-clip.js
-                  (le pone el cierre con la firma a un short); no son parte
-                  de la app
+                  (le pone el cierre con la firma a un short); grabar-cambio.js
+                  (graba los verticales del P4); no son parte de la app
 trabajo/          para el autor: tablero de piezas y cómo pasar de la voz al
                   video (sin datos personales: el repositorio es público)
 ```
@@ -227,7 +234,8 @@ lienzo. El reel la usa para el guion y para exponer `window.REEL`.
   ejercicios son la excepción: van en 1080x1920 y ahí la comparación
   mal/bien se apila arriba/abajo.
 - No usar degradados, sombras internas, glassmorphism ni estética futurista.
-- No usar emoji en el lienzo.
+- No usar emoji en el lienzo. (La excepción es el P4, `cambio.html`: ahí sí,
+  pero solo los emojis 3D de `cambio/emoji/`, nunca los del sistema.)
 - No tapar piezas con rectángulos opacos para "recortarlas": eso borra el
   trazo de abajo.
 - No agregar un bundler, ni TypeScript, ni un paso de compilación.
@@ -563,6 +571,44 @@ Cada short se registra en `largos/<id>/clips.jsx` con `desde` (primer cuadro del
 cierre), los subtítulos del cierre con el segundo de cada palabra y el guion
 completo (voz + lo que se ve), que `clips.html` muestra al lado del cierre. Los
 MP4 originales no van a git: se pasan con `--video`.
+
+## P4 · Cambio Físico — `cambio.html`
+
+La serie vertical del cambio físico del autor ("Día 12 de cambio físico: hoy
+hago el mercado…"), honesta y desde el aprendizaje, para Instagram, TikTok y
+YouTube Shorts. El autor graba vertical, **corta en Premiere** y manda el corte;
+encima se ponen subtítulos, palabras gigantes, números, listas, emojis y la
+firma. Todo está en **`CAMBIO.md`**: el análisis de los 5 reels de referencia,
+el estilo, la fórmula de un episodio, el flujo y la referencia del plan. Lo
+esencial:
+
+- Mismo mecanismo que los largos (el video manda el tiempo, `t('frase')` de la
+  transcripción, máscaras de `recortar.py` para lo que va detrás), pero en
+  **1080x1920** y con otro estilo: base del reel "día 302 de 365" (números
+  gigantes detrás de la cabeza, tarjetas blancas) + la mecánica del reel de la
+  creadora en rosa (subtítulos con la palabra que suena en caja, listas que se
+  arman, capítulos en un marco sobre color, antes/ahora).
+- **Blanco, amarillo y negro** (rojo y verde solo para la X/tachado y el visto).
+  Inter Tight 800 (subtítulos y tarjetas), Archivo Black (lo gigante), Permanent
+  Marker (notas a mano), IBM Plex Mono (etiquetas de datos).
+- **Subtítulos siempre**: 1 a 3 palabras en y 1230, blancos con sombra negra
+  dura, la que suena en caja amarilla con letra negra, números y `marcadas` en
+  amarillo.
+- **En el P4 sí van emojis** (pedido del autor): solo los 3D de
+  `cambio/emoji/`, nunca los del sistema; uno a la vez, cuando se nombra la cosa.
+- La firma va sola al final de todos (YouTube · Instagram · TikTok ·
+  @eltorvick + "SÍGUEME PARA EL DÍA N+1"); con `serie` también el sello
+  "DÍA 12 · CAMBIO FÍSICO" arriba a la izquierda.
+- Audio: la voz del video a ~-14 LUFS (lo que esperan Reels/TikTok) con los
+  efectos debajo; sin música salvo `--musica`.
+- `cambio.html#<id>` carga sola la carpeta `cambios/<id>/`; las pruebas locales
+  van en `cambios/_<algo>/` (ignoradas por git: nunca subir videos ajenos).
+
+```
+python3 herramientas/transcribir.py cambios/<id>/media/fuente.mp4 --out cambios/<id>/transcripcion.json
+node compilar.js && node herramientas/grabar-cambio.js <id> --cuadros 1,5.5,12
+node herramientas/grabar-cambio.js <id> [--fuente master.mp4 --4k]
+```
 
 ## Verificación
 

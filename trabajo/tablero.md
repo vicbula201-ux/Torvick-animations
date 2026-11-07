@@ -1,6 +1,6 @@
 # Tablero Torvick
 
-Actualizado: 4 de noviembre de 2026.
+Actualizado: 7 de noviembre de 2026.
 **Reserva (solo lo revisado y listo para publicar): 0.** Un reel con la animación hecha pero
 sin voz no cuenta.
 
@@ -14,6 +14,7 @@ Códigos: P1 largo · P2 humor · P3 Tor · P4 cambio físico · P5 reviews/vlog
 | Video de concentración | P1 | Concentración | edición (~95 %) | Verlo de corrido: lista «impide publicar / opcional» | — | Publicado o con fecha: dom 8 nov |
 | Clips de concentración (2-3) | P6 | Concentración | idea | Marcar con «C» mientras revisas el largo | — | Después del largo |
 | Prueba de voz real | P3 | `plancha` | voz/material | Grabar la voz de un reel y pasarla por `grabar.js --voz` | — | Vie 13 nov |
+| Serie «Cambio Físico» | P4 | Estilo y motor de edición vertical | edición (estilo listo) | Mandar un video de prueba ya cortado (cualquier tema, 30-60 s, vertical) | — | Cuando lo mandes |
 | Lote 1 (propuesta) | P3 | `sentadilla-maquina`, `prensa-piernas`, `marihuana` y `kane` o `lebron` (el que siga vigente) | voz/material | Grabar las cuatro voces seguidas y correr `lote.js` | — | Vie 13 - dom 15 nov |
 
 ## Inventario de reels de Tor (36, todos en este repositorio)
@@ -76,5 +77,10 @@ grabación de voz (`plancha.m4a`).
   su línea de voz y mezclan la voz con los efectos. Probado con voces sintéticas en los
   guiones de los 36 reels: ninguna escena corrida y el peor desfase en un borde fue de 0,15 s.
   **Pendiente: probarlo con tu voz real.** Cómo usarlo: `trabajo/voz-a-video.md`.
+- **7 nov · P4, estilo de la serie Cambio Físico:** analizados los 5 reels de referencia (los cinco
+  sin silencios, a 200-270 palabras/min, con subtítulos siempre y algo nuevo cada 2-3 s). Elegido:
+  la base del reel «día 302 de 365» + la mecánica del reel de la creadora en rosa, en blanco, amarillo
+  y negro. Motor listo (`cambio.html`, `grabar-cambio.js`), probado sobre un reel de referencia.
+  Detalle y flujo: `CAMBIO.md`. **Pendiente: tu video de prueba.**
 - **Pendiente de ti:** qué le falta al video de concentración, dónde publicas y cuáles de
   los 36 reels ya están publicados.

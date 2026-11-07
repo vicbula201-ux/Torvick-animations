@@ -21,6 +21,7 @@ const path = require('path');
 const URL_BABEL = 'https://cdn.jsdelivr.net/npm/@babel/standalone@7.26.4/babel.min.js';
 // orden de carga: motor -> primitivas -> cuerpo -> piezas extra -> marca -> reel -> videos
 // (los videos largos: motor -> primitivas -> marca -> largo -> largo-iconos -> largo-plantillas -> largos/<id>/)
+// (los verticales P4: motor -> primitivas -> cambio -> cambios/<id>/)
 const FUENTES = [
   'primitivas.jsx', 'app.jsx',
   'cuerpo.jsx', 'perfil.jsx', 'frente.jsx', 'equipo.jsx', 'tor.jsx',
@@ -32,17 +33,19 @@ const FUENTES = [
   'curl-mancuernas.jsx', 'peptidos.jsx', 'triceps-polea.jsx', 'bulgara.jsx', 'abduccion.jsx', 'plancha.jsx',
   'cristiano.jsx', 'hip-thrust.jsx', 'remo-bajo.jsx', 'elevacion-lateral.jsx', 'triceps-frances.jsx',
   'kane.jsx', 'sentadilla-maquina.jsx', 'marihuana.jsx', 'prensa-piernas.jsx', 'lebron.jsx',
-  'largo.jsx', 'largo-iconos.jsx', 'largo-plantillas.jsx', 'clip-cierre.jsx'
+  'largo.jsx', 'largo-iconos.jsx', 'largo-plantillas.jsx', 'clip-cierre.jsx', 'cambio.jsx'
 ];
 
-// videos largos: cada largos/<id>/*.jsx se compila solo, sin anotarlo aca
+// videos largos y verticales: cada largos/<id>/*.jsx y cambios/<id>/*.jsx se compila solo, sin anotarlo aca
 function fuentesLargos() {
-  if (!fs.existsSync('largos')) return [];
   const out = [];
-  for (const d of fs.readdirSync('largos')) {
-    const dir = path.join('largos', d);
-    if (!fs.statSync(dir).isDirectory()) continue;
-    for (const f of fs.readdirSync(dir)) if (f.endsWith('.jsx')) out.push(path.join(dir, f));
+  for (const base of ['largos', 'cambios']) {
+    if (!fs.existsSync(base)) continue;
+    for (const d of fs.readdirSync(base)) {
+      const dir = path.join(base, d);
+      if (!fs.statSync(dir).isDirectory()) continue;
+      for (const f of fs.readdirSync(dir)) if (f.endsWith('.jsx')) out.push(path.join(dir, f));
+    }
   }
   return out.sort();
 }

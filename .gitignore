@@ -3,3 +3,5 @@ node_modules/
 videos/
 largos/*/media/
 voces/
+cambios/*/media/
+cambios/_*/

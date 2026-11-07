@@ -463,11 +463,13 @@ def main():
     ap.add_argument('--nivel-musica', type=float, default=-21.0, help='dB RMS del fondo')
     ap.add_argument('--base', default=None, help='wav de la voz (videos largos): va a volumen original')
     ap.add_argument('--nivel-efectos', type=float, default=0.0, help='dB de los efectos')
+    ap.add_argument('--nivel-voz', type=float, default=-19.0,
+                    help='dBFS RMS de la voz donde se habla (-19 los largos; ~-14.5 los verticales, que suenan a -14 LUFS)')
     a = ap.parse_args()
 
     rng = np.random.default_rng(a.semilla)
     total = np.zeros((seg(a.dur), 2))
-    voz = normalizar_voz(leer_wav(a.base, a.dur, fundido=False)) if a.base else None
+    voz = normalizar_voz(leer_wav(a.base, a.dur, fundido=False), a.nivel_voz) if a.base else None
 
     if not a.sin_musica:
         fondo = leer_wav(a.musica, a.dur) if a.musica else musica(a.dur, a.bpm, a.semilla)
