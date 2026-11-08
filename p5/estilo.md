@@ -11,7 +11,9 @@ el análisis completo de cada categoría está en `reviews.md`, `entrevistas.md`
 música**, con una línea que diga la categoría («review», «entrevista», «reto» o
 «divagando») y, si quiere, qué resaltar. Se edita con el motor del P4
 (`cambio.html`, `cambio.jsx`, `herramientas/grabar-cambio.js`): transcripción →
-plan → exportación en 1080×1920.
+plan → exportación en 1080×1920. **Si llega sin cortar** (las tomas en bruto), el
+corte lo arma `herramientas/montar.py` (ver `CAMBIO.md`, «¿Y si mando el video sin
+cortar?»).
 
 ## La base: va en todas las categorías
 

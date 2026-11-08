@@ -165,12 +165,29 @@ Una idea por video. Si un día hay dos cosas, son dos días.
 5. **Ajustes** por chat ("la tarjeta de la proteína más tarde", "sin el
    emoji del fuego").
 
-**¿Y si mando el video sin cortar?** Se puede: con la transcripción (el tiempo
-de cada palabra) se encuentran los silencios, las tomas repetidas y los
-arranques en falso y se cortan solos. Para los primeros videos conviene que
-cortes tú: el corte es lo que decide qué historia cuentas, y así medimos cuánto
-tiempo ahorra la edición. Cuando el estilo esté afinado, probamos el corte
-automático con un video.
+**¿Y si mando el video sin cortar?** Se puede, y ya se hizo (la primera
+divagación del P5, noviembre de 2026: dos tomas de 5:15 y 2:34 → 2:48). Se
+transcribe cada toma, se eligen las frases que quedan (sin repeticiones ni
+arranques en falso; el corte decide qué historia se cuenta) y
+`herramientas/montar.py` arma `fuente.mp4` desde una lista de tramos
+(`cambios/<id>/corte.json`; el formato está en la cabecera de la herramienta):
+
+- colchón de 0,12 s en cada tramo sin comerse la palabra vecina, y el final
+  recortado donde de verdad termina la voz;
+- los silencios internos de más de 0,4 s (por nivel del audio y por los huecos de
+  la transcripción) quedan en 0,24 s, sin cortar nunca dentro de una palabra;
+- el mismo volumen de voz en todas las tomas, el encuadre (`encuadre`: recorte
+  de la toma; útil si te grabaste en plano general) y una cola de imagen para la
+  firma;
+- la transcripción del corte ya trasladada (en minúscula), lista para el plan.
+
+```
+python3 herramientas/transcribir.py cambios/<id>/media/toma1.mp4 --out cambios/<id>/media/t1/transcripcion.json
+python3 herramientas/montar.py cambios/<id>/corte.json
+```
+
+Los cortes de la toma quedan en `fuente.mp4.txt`: en el plan se alternan dos
+encuadres en cada uno (`camara` con `mov: 'corte'`) para que el salto no se note.
 
 ## Comandos
 

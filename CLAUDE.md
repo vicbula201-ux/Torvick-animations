@@ -78,7 +78,8 @@ herramientas/     grabar.js (exporta MP4 con música y efectos; con --voz,
                   revisar-largo.js, grabar-largo.js, tramos.py; cierre-clip.js
                   (le pone el cierre con la firma a un short); grabar-cambio.js
                   (graba los verticales del P4) y viejos.py (detecta subtítulos
-                  y contadores quemados para reeditar); no son parte de la app
+                  y contadores quemados para reeditar); montar.py (arma el corte
+                  desde las tomas en bruto); no son parte de la app
 trabajo/          para el autor: tablero de piezas y cómo pasar de la voz al
                   video (sin datos personales: el repositorio es público)
 ```
