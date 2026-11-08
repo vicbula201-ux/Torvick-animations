@@ -408,7 +408,7 @@ No hace falta un motor nuevo. El del P4 (`cambio.html`, `cambio.jsx`,
 
 ## Siguiente
 
-Las reviews están completas. Las entrevistas están en `entrevistas.md` y los
-retos en `retos.md`; sigue **divagaciones**. Cuando estén los cuatro se decide qué piezas
-se suman al motor del P4, porque algunas (los acercamientos automáticos, el
-inserto) van a servir para todos.
+Las reviews están completas. Las entrevistas están en `entrevistas.md`, los
+retos en `retos.md`, las divagaciones en `divagaciones.md` y lo común a los
+cuatro tipos en `resumen.md`, con la lista de piezas que hay que sumarle al
+motor del P4.

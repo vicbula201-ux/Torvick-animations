@@ -272,6 +272,6 @@ firma. Para las entrevistas faltaría:
 
 ## Siguiente
 
-Los retos están en `retos.md`; sigue divagaciones. Con los cuatro
-tipos vistos se decide qué piezas se suman al motor del P4: el inserto a
-pantalla completa ya lo piden las reviews y las entrevistas.
+Los retos están en `retos.md`, las divagaciones en `divagaciones.md` y lo común
+a los cuatro tipos en `resumen.md`, con la lista de piezas que hay que sumarle
+al motor del P4.

@@ -167,5 +167,5 @@ firma. Faltaría:
 
 ## Siguiente
 
-Si tienes más retos, mándalos y amplío este archivo. Si no, sigue
-**divagaciones**, el último tipo del P5.
+Si llegan más retos, se amplía este archivo. Las divagaciones están en
+`divagaciones.md`, y lo común a los cuatro tipos, en `resumen.md`.

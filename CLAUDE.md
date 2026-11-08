@@ -65,7 +65,8 @@ cambios/<id>/     un video vertical: plan.jsx + transcripcion.* (+ media/, fuera
                   cambios/lista.js los pone en los botones de cambio.html
 CAMBIO.md         análisis de los 5 reels de referencia, estilo y flujo del P4
 p5/               P5 (reviews, entrevistas, retos, divagaciones): el estilo
-                  de edición de las referencias, un archivo por tipo
+                  de edición de las referencias, un archivo por tipo, y
+                  resumen.md con lo común y lo que le falta al motor del P4
 compilar.js       regenera los .js desde los .jsx
 prueba-piezas.html  verificación: motor + las 21 piezas + las piezas de B
 herramientas/     grabar.js (exporta MP4 con música y efectos; con --voz,
