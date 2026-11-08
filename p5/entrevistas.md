@@ -31,8 +31,8 @@ corte, sino la curiosidad por la próxima respuesta.
 | **Un personaje** | 1, 2 | **su respuesta más fuerte primero**: «una sola comida al día» (con el título arriba), «los calisténicos son más fuertes que los del gimnasio» | preguntas cortas y concretas (edad, años entrenando, qué come, cómo entrena, a qué se dedica), la prueba en video (la full planche, las dominadas) y su consejo final | su @ en pantalla (2) o un remate de humor (1) |
 | **Reto en la calle** | 3 | la persona + el aparato de medir en la mano | **el número**: el dinamómetro en primer plano con el resultado (27,2 kg), su lugar en la tabla del día («eres la número uno»), el premio (una barra de proteína de la marca) | un pedido de like por la persona |
 
-El reto en la calle se cruza con el tipo siguiente (retos): ahí se va a ver si
-es un subtipo de entrevista o un formato aparte.
+El reto en la calle es también un reto: está analizado junto a los otros en
+`retos.md`.
 
 ## La fórmula: lo que se repite
 
@@ -272,6 +272,6 @@ firma. Para las entrevistas faltaría:
 
 ## Siguiente
 
-Retos y divagaciones, cada uno en su archivo de esta carpeta. Con los cuatro
+Los retos están en `retos.md`; sigue divagaciones. Con los cuatro
 tipos vistos se decide qué piezas se suman al motor del P4: el inserto a
 pantalla completa ya lo piden las reviews y las entrevistas.
