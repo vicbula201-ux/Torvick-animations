@@ -5,7 +5,7 @@ Actualizado: 7 de noviembre de 2026.
 sin voz no cuenta.
 
 Estados: idea · guion · voz/material · edición · revisión · listo · publicado.
-Códigos: P1 largo · P2 humor · P3 Tor · P4 cambio físico · P5 reviews/vlogs · P6 clips.
+Códigos: P1 largo · P2 humor · P3 Tor · P4 cambio físico · P5 reviews, entrevistas, retos y divagaciones (`p5/`) · P6 clips.
 
 ## Lo activo
 
