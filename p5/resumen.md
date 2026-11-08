@@ -20,8 +20,8 @@ cambio físico (P4): **reviews, entrevistas, retos y divagaciones.** Se estudiar
    que importa en otro tamaño o color**. En los cuatro tipos aparece la misma
    idea: una capa para lo que se dice, otra para lo que hay que recordar.
 3. **−14 LUFS** (23 de los 24 con audio) y **sin silencios**, salvo los que son
-   a propósito (el chiste de una entrevista, el «2 horas después»). Música suave
-   debajo en la mayoría.
+   a propósito (el chiste de una entrevista, el «2 horas después»). Las
+   referencias llevan música suave debajo; los videos del autor, no.
 4. **Un número o un dato concreto** en reviews, entrevistas y retos; una imagen
    concreta en las divagaciones.
 5. **Un cierre de una línea** que pide algo: comentar una palabra, guardar,
@@ -29,16 +29,18 @@ cambio físico (P4): **reviews, entrevistas, retos y divagaciones.** Se estudiar
 6. **El patrocinio entra en el contenido, no aparte:** el premio del reto, el
    gimnasio de la entrevista, el código de descuento de la review (6 de 25).
 
-## Las decisiones que faltan (tuyas)
+## Las decisiones
 
-1. **Subtítulos:** los del P4 (1-3 palabras en minúscula, la que suena en la caja
-   amarilla) más la palabra clave o el número en grande. Propuesta: sí, en los
-   cuatro tipos, para que todos tus videos a cámara se reconozcan.
-2. **Emojis:** en el P4 van los 3D de `cambio/emoji/`; en los largos, ninguno.
-   Propuesta: los mismos del P4, uno a la vez y poco.
-3. **Memes:** propuesta: no; en su lugar, **reacciones de Tor** (ver
-   `entrevistas.md`). Son tuyas, sin derechos de terceros, y ponen a Tor en tus
-   videos con personas.
+**La guía que se aplica a cada video está en `estilo.md`.** Lo que interesa de
+las referencias es el estilo de edición (subtítulos, letras grandes,
+animaciones, efectos, zooms), no el guion ni la música.
+
+1. **Sin música** (decisión del autor). Solo la voz y los efectos.
+2. **Subtítulos:** los del P4 (1-3 palabras en minúscula, la que suena en la caja
+   amarilla) más la palabra clave o el número en grande. Valor por defecto.
+3. **Emojis:** los 3D de `cambio/emoji/`, uno a la vez y pocos. Valor por defecto.
+4. **Memes:** no; en su lugar, **reacciones de Tor** (ver `entrevistas.md`).
+   Valor por defecto.
 
 ## Lo que hay que sumarle al motor del P4
 

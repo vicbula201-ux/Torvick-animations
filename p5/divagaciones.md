@@ -1,5 +1,8 @@
 # P5 · Divagaciones: el estilo de edición de las referencias
 
+> **Para editar un video, la guía es `estilo.md`.** Este archivo es el análisis
+> de las referencias. Los videos del autor van **sin música**.
+
 El último de los cuatro tipos del P5 (reviews, entrevistas, retos y
 **divagaciones**). **Estado: 4 videos.** Lo marcado como «propuesta» es lo que
 todavía falta que decidas.

@@ -1,5 +1,8 @@
 # P5 · Entrevistas: el estilo de edición de las referencias
 
+> **Para editar un video, la guía es `estilo.md`.** Este archivo es el análisis
+> de las referencias. Los videos del autor van **sin música**.
+
 El segundo de los cuatro tipos del P5 (reviews, **entrevistas**, retos y
 divagaciones). **Estado: 5 videos.** Lo marcado como «propuesta» es lo que
 todavía falta que decidas.

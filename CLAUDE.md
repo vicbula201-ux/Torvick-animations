@@ -64,9 +64,9 @@ cambio/emoji/     211 emojis 3D (Fluent Emoji de Microsoft, MIT) por nombre en e
 cambios/<id>/     un video vertical: plan.jsx + transcripcion.* (+ media/, fuera de git);
                   cambios/lista.js los pone en los botones de cambio.html
 CAMBIO.md         análisis de los 5 reels de referencia, estilo y flujo del P4
-p5/               P5 (reviews, entrevistas, retos, divagaciones): el estilo
-                  de edición de las referencias, un archivo por tipo, y
-                  resumen.md con lo común y lo que le falta al motor del P4
+p5/               P5 (reviews, entrevistas, retos, divagaciones): estilo.md, la
+                  guía de edición; un análisis por tipo; resumen.md con lo común
+                  y lo que le falta al motor del P4
 compilar.js       regenera los .js desde los .jsx
 prueba-piezas.html  verificación: motor + las 21 piezas + las piezas de B
 herramientas/     grabar.js (exporta MP4 con música y efectos; con --voz,
@@ -618,6 +618,20 @@ python3 herramientas/transcribir.py cambios/<id>/media/fuente.mp4 --out cambios/
 node compilar.js && node herramientas/grabar-cambio.js <id> --cuadros 1,5.5,12
 node herramientas/grabar-cambio.js <id> [--fuente master.mp4 --4k]
 ```
+
+## P5 · Reviews, entrevistas, retos y divagaciones — `p5/`
+
+Videos verticales del autor hablando a cámara que no son el cambio físico: una
+review (un producto, una comida, un suplemento), una entrevista, un reto o una
+divagación (habla de un tema). El autor graba, **corta en Premiere** y manda el
+corte con la categoría; la edición se hace con el **motor del P4**
+(`cambio.html`, mismo flujo y comandos). **`p5/estilo.md` es la guía que se
+aplica**: la base común (subtítulos de 1-3 palabras con la palabra que suena en
+la caja amarilla, la palabra o el número grande encima, golpes de zoom,
+desenfoque, un efecto de sonido por cada cosa que entra) y lo que suma cada
+categoría. **Sin música** (pedido del autor). Sin memes ni clips con derechos de
+terceros. Los análisis de los 25 videos de referencia están en el resto de
+`p5/`; los videos de referencia no van al repositorio.
 
 ## Verificación
 
