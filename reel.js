@@ -328,7 +328,9 @@
     if (def.cierreVo) cierre = Object.assign({}, cierre, {
       vo: def.cierreVo
     });
-    return def.escenas.concat([cierre]);
+    // accion: la escena de comenta / comparte / guarda va justo antes del cierre
+    var antes = def.accion ? [MARCA.escenaAccion(def.accion === true ? {} : def.accion)] : [];
+    return def.escenas.concat(antes, [cierre]);
   }
 
   /* =========================================================

@@ -8,6 +8,8 @@
    - Estilo 2 (los videos con estilo: 2): Esquina2 suma "ENTRENA CON TOR" con
      Instagram y TikTok, y EscMarca2 muestra las dos cuentas: Torvick con su foto
      (marca/torvick.jpg) y Entrena con Tor con Tor sacando biceps
+   - Accion (estilo 2, con accion: true o { pregunta, vo, dur } en registrar): antes
+     del cierre, Tor senala comentar / compartir / guardar y una mano los toca
    ============================================================ */
 (function (global) {
   'use strict';
@@ -15,7 +17,7 @@
   var React = global.React;
   var P = global.P, M = global.M;
   var animate = global.animate, Easing = global.Easing, clamp = global.clamp;
-  var INK = P.C.INK, YEL = P.C.YEL, RED = P.C.RED, GRY = P.C.GRY;
+  var INK = P.C.INK, YEL = P.C.YEL, RED = P.C.RED, GRN = P.C.GRN, GRY = P.C.GRY;
   var BLANCO = '#ffffff';
 
   var NOMBRE = 'TORVICK';
@@ -299,10 +301,208 @@
     );
   }
 
+  /* ---------------- accion: comenta, comparte, guarda (antes del cierre) ---------------- */
+
+  function Boton(props) {
+    // un boton redondo como los de Instagram/TikTok, con su icono adentro
+    var r = props.r || 118;
+    return (
+      <svg width={2 * r + 40} height={2 * r + 40} viewBox={(-r - 20) + ' ' + (-r - 20) + ' ' + (2 * r + 40) + ' ' + (2 * r + 40)}
+        style={{ display: 'block', overflow: 'visible' }}>
+        <circle cx={0} cy={0} r={r} fill={BLANCO} stroke={INK} strokeWidth={14} />
+        <g transform={'scale(' + (r / 118).toFixed(3) + ')'}>{props.children}</g>
+      </svg>
+    );
+  }
+  // globo de comentario; puntos 0..1 hace saltar los tres puntitos (escribiendo)
+  function IcoComentario(props) {
+    var T = props.T || 0, k = props.puntos || 0;
+    return (
+      <g>
+        <path d="M -62 -46 Q -62 -66 -42 -66 L 42 -66 Q 62 -66 62 -46 L 62 18 Q 62 38 42 38 L -10 38 L -38 64 L -32 38 L -42 38 Q -62 38 -62 18 Z"
+          fill={BLANCO} stroke={INK} strokeWidth={13} strokeLinejoin="round" />
+        {[-28, 0, 28].map(function (x, i) {
+          var dy = k > 0 ? -10 * Math.max(0, Math.sin(T * 10 - i * 0.9)) * k : 0;
+          return <circle key={i} cx={x} cy={-14 + dy} r={9} fill={k > 0 ? YEL : INK} stroke={INK} strokeWidth={k > 0 ? 5 : 0} />;
+        })}
+      </g>
+    );
+  }
+  // avion de papel (compartir); vuela 0..1 lo manda afuera y vuelve
+  function IcoCompartir(props) {
+    var v = props.vuela || 0;
+    var dx = 140 * Math.sin(Math.PI * v), dy = -120 * Math.sin(Math.PI * v), sc = 1 - 0.4 * Math.sin(Math.PI * v);
+    return (
+      <g transform={'translate(' + dx.toFixed(1) + ' ' + dy.toFixed(1) + ') scale(' + sc.toFixed(3) + ')'}>
+        <path d="M -66 -4 L 68 -60 L 30 66 L 4 18 Z" fill={BLANCO} stroke={INK} strokeWidth={13} strokeLinejoin="round" />
+        <path d="M 4 18 L 68 -60" stroke={INK} strokeWidth={11} strokeLinecap="round" />
+      </g>
+    );
+  }
+  // marcador (guardar); lleno 0..1 lo pinta de amarillo de abajo hacia arriba
+  function IcoGuardar(props) {
+    var k = clamp(props.lleno || 0, 0, 1);
+    var forma = 'M -46 -66 L 46 -66 Q 54 -66 54 -58 L 54 66 L 0 34 L -54 66 L -54 -58 Q -54 -66 -46 -66 Z';
+    return (
+      <g>
+        <defs><clipPath id="marca-guardar"><path d={forma} /></clipPath></defs>
+        <path d={forma} fill={BLANCO} />
+        {k > 0 ? <rect x={-60} y={70 - 140 * k} width={120} height={140 * k} fill={YEL} clipPath="url(#marca-guardar)" /> : null}
+        <path d={forma} fill="none" stroke={INK} strokeWidth={13} strokeLinejoin="round" />
+      </g>
+    );
+  }
+  // la mano que toca (indice estirado)
+  function Mano(props) {
+    var s = props.s == null ? 1 : props.s;
+    return (
+      <svg width={180 * s} height={220 * s} viewBox="0 0 180 220" style={{ display: 'block', overflow: 'visible' }}>
+        <path d="M 62 112 L 62 26 Q 62 6 80 6 Q 98 6 98 26 L 98 92 Q 110 82 124 90 Q 136 80 150 90 Q 166 86 170 104 L 170 160 Q 170 210 118 212 L 84 212 Q 52 210 40 180 L 18 132 Q 10 114 26 108 Q 42 102 52 118 Z"
+          fill={BLANCO} stroke={INK} strokeWidth={13} strokeLinejoin="round" />
+        <path d="M 98 92 L 98 124 M 124 90 L 124 124 M 150 90 L 150 122" stroke={INK} strokeWidth={9} strokeLinecap="round" />
+      </svg>
+    );
+  }
+
+  // el amigo al que le llega el video: un circulo con una persona; llega 0..1 lo
+  // pinta de amarillo y le pone el visto verde
+  function Amigo(props) {
+    var k = clamp(props.llega || 0, 0, 1);
+    return (
+      <svg width={220} height={220} viewBox="-110 -110 220 220" style={{ display: 'block', overflow: 'visible' }}>
+        <circle cx={0} cy={0} r={86} fill={k > 0 ? YEL : BLANCO} stroke={INK} strokeWidth={13} />
+        <circle cx={0} cy={-24} r={28} fill={BLANCO} stroke={INK} strokeWidth={11} />
+        <path d="M -50 52 Q -50 12 0 12 Q 50 12 50 52 Z" fill={BLANCO} stroke={INK} strokeWidth={11} strokeLinejoin="round" />
+        {k > 0 ? (
+          <g transform={'translate(64 60) scale(' + Easing.easeOutBack(k).toFixed(3) + ')'}>
+            <circle cx={0} cy={0} r={32} fill={GRN} stroke={INK} strokeWidth={9} />
+            <path d="M -14 1 L -3 12 L 15 -10" fill="none" stroke={BLANCO} strokeWidth={9} strokeLinecap="round" strokeLinejoin="round" />
+          </g>
+        ) : null}
+      </svg>
+    );
+  }
+  // punto de una curva cuadratica y su angulo (para el avion que vuela)
+  function curva(a, c, b, u) {
+    var v = 1 - u;
+    var x = v * v * a[0] + 2 * v * u * c[0] + u * u * b[0];
+    var y = v * v * a[1] + 2 * v * u * c[1] + u * u * b[1];
+    var dx = 2 * v * (c[0] - a[0]) + 2 * u * (b[0] - c[0]);
+    var dy = 2 * v * (c[1] - a[1]) + 2 * u * (b[1] - c[1]);
+    return { x: x, y: y, ang: Math.atan2(dy, dx) * 180 / Math.PI };
+  }
+
+  // la escena: Tor saca biceps arriba, abajo tres botones que una mano toca en
+  // orden (cada toque suena); al compartir sale un avion de papel que vuela hasta
+  // un amigo, y al guardar el marcador se llena de amarillo
+  function EscAccion(props) {
+    var T = props.T, at = props.at, dur = props.dur;
+    var f = function (v) { return at + dur * v; };
+    var V = global.V, A = global.REELS.ayudas, TOR = global.TOR;
+    var B3 = [[230, 1190], [540, 1190], [850, 1190]];
+    var AMIGO = [880, 650];
+    var toques = [0.27, 0.46, 0.74];
+    var vuelo = [0.46, 0.6];
+    A.sonido('pop', f(toques[0]));
+    A.sonido('pop', f(toques[1]));
+    A.sonido('whoosh', f(toques[1] + 0.01));
+    A.sonido('pop', f(vuelo[1]));
+    A.sonido('bien', f(toques[2]));
+    // la mano: entra desde abajo y va de boton en boton; se queda quieta mientras toca
+    var paradas = [[700, 1760]].concat(B3.map(function (b) { return [b[0] + 30, b[1] + 40]; }));
+    var tramos = [[0.08, 0.24], [0.31, 0.43], [0.51, 0.71]];
+    var mano = paradas[0];
+    tramos.forEach(function (tr, i) {
+      if (T <= f(tr[0])) return;
+      var k = Easing.easeInOutCubic(clamp((T - f(tr[0])) / (f(tr[1]) - f(tr[0])), 0, 1));
+      mano = [paradas[i][0] + (paradas[i + 1][0] - paradas[i][0]) * k, paradas[i][1] + (paradas[i + 1][1] - paradas[i][1]) * k];
+    });
+    var golpe = function (c) { var d = (T - f(c)) / 0.18; return d > 0 && d < 1 ? Math.sin(Math.PI * d) : 0; };
+    var aprieta = Math.max(golpe(toques[0]), golpe(toques[1]), golpe(toques[2]));
+    var flex = 0.5 + 0.5 * Easing.easeOutBack(animate({ from: 0, to: 1, start: f(0.02), end: f(0.2) })(T));
+    // el avion que sale del boton de compartir y llega al amigo
+    var u = Easing.easeInOutCubic(clamp((T - f(vuelo[0])) / (f(vuelo[1]) - f(vuelo[0])), 0, 1));
+    var CTRL = [1010, 1080];
+    var av = curva(B3[1], CTRL, AMIGO, u);
+    var estela = [];
+    for (var j = 0; j <= 24; j++) {
+      var q = curva(B3[1], CTRL, AMIGO, u * j / 24);
+      estela.push(q.x.toFixed(1) + ' ' + q.y.toFixed(1));
+    }
+    var llega = clamp((T - f(vuelo[1])) / 0.25, 0, 1);
+    var botones = [
+      <IcoComentario T={T} puntos={clamp((T - f(toques[0])) / 0.2, 0, 1)} />,
+      // el avion sale del boton (vuela hasta el amigo) y despues vuelve a aparecer
+      u <= 0 ? <IcoCompartir /> : u < 1 ? null : (
+        <g transform={'scale(' + Easing.easeOutBack(clamp((T - f(vuelo[1])) / 0.3, 0, 1)).toFixed(3) + ')'}><IcoCompartir /></g>
+      ),
+      <IcoGuardar lleno={animate({ from: 0, to: 1, start: f(toques[2]), end: f(toques[2] + 0.1) })(T)} />
+    ];
+    return (
+      <div style={{ position: 'absolute', inset: 0 }}>
+        <V.Camara T={T} at={at} dur={dur} tomas={[[0, { zoom: 1.05, foco: [540, 860] }], [1, { zoom: 1.0, foco: [540, 960] }]]}
+          pulsos={toques}>
+          <svg width={1080} height={1920} style={{ position: 'absolute', left: 0, top: 0, overflow: 'visible' }}>
+            <V.Sombra c={[470, 1058]} rx={170} />
+          </svg>
+          <A.Pos x={170} y={300} e={M.pop(T, at - 0.6, 0.5)} dy={M.life(T, 3.6, 4) - 16 * aprieta}>
+            <TOR.Tor s={0.5} flex={flex} boca="sonrisa" sinPiso musc={{ bic: 1 }} parpadeo={V.parpadeo(T)} />
+          </A.Pos>
+          <A.Pos x={AMIGO[0] - 110} y={AMIGO[1] - 110} e={M.pop(T, f(0.34), 0.42)} dy={M.life(T, 3, 6, 0.6)}
+            esc={1 + 0.14 * Math.sin(Math.PI * clamp((T - f(vuelo[1])) / 0.3, 0, 1))}>
+            <Amigo llega={llega} />
+          </A.Pos>
+          {B3.map(function (b, j) {
+            var e = M.pop(T, f(0.04 + j * 0.06), 0.42);
+            var sq = 1 - 0.12 * golpe(toques[j]);
+            return (
+              <A.Pos key={j} x={b[0] - 138} y={b[1] - 138} e={{ opacity: e.opacity, scale: e.scale * sq }} dy={M.life(T, 2.8, 6, j * 0.3)}>
+                <Boton>{botones[j]}</Boton>
+              </A.Pos>
+            );
+          })}
+          <svg width={1080} height={1920} style={{ position: 'absolute', left: 0, top: 0, overflow: 'visible' }}>
+            {u > 0 && llega < 1 ? (
+              <path d={'M ' + estela.join(' L ')} fill="none" stroke={INK} strokeWidth={9} strokeLinecap="round"
+                strokeDasharray="2 24" opacity={1 - llega} />
+            ) : null}
+            {u > 0 && u < 1 ? (
+              <g transform={'translate(' + av.x.toFixed(1) + ' ' + av.y.toFixed(1) + ') rotate(' + (av.ang + 41).toFixed(1) + ') scale(0.8)'}>
+                <path d="M -66 -4 L 68 -60 L 30 66 L 4 18 Z" fill={BLANCO} stroke={INK} strokeWidth={13} strokeLinejoin="round" />
+                <path d="M 4 18 L 68 -60" stroke={INK} strokeWidth={11} strokeLinecap="round" />
+              </g>
+            ) : null}
+            {B3.map(function (b, j) {
+              return <V.Brillo key={j} T={T} c={b} r={120} v={clamp(1 - (T - f(toques[j])) / 0.6, 0, 1) * (T > f(toques[j]) ? 1 : 0)} />;
+            })}
+            <V.Brillo T={T} c={AMIGO} r={90} v={T > f(vuelo[1]) ? clamp(1 - (T - f(vuelo[1])) / 0.7, 0, 1) : 0} />
+            <V.Chispa T={T} c={AMIGO} cuando={f(vuelo[1])} r={120} />
+            <V.Chispa T={T} c={B3[2]} cuando={f(toques[2])} r={150} />
+          </svg>
+          <A.Pos x={mano[0]} y={mano[1]} e={M.pop(T, f(0.08), 0.3)} esc={1 - 0.1 * aprieta}>
+            <Mano s={0.9} />
+          </A.Pos>
+        </V.Camara>
+        <V.Rot T={T} text={props.pregunta || '¿ESTÁS DE ACUERDO?'} y={280} s={1.15} cuando={at - 0.6} />
+        <V.Rot T={T} text="COMPÁRTELO Y GUÁRDALO" y={1450} s={1.05} cuando={f(0.46)} fase={0.4} />
+      </div>
+    );
+  }
+  function escenaAccion(op) {
+    op = op || {};
+    return {
+      nombre: 'Comenta y comparte', dur: op.dur || 4.5,
+      vo: op.vo || '¿Estás de acuerdo? Déjalo en los comentarios, compártelo con un amigo y guarda este video.',
+      C: function (props) { return <EscAccion T={props.T} at={props.at} dur={props.dur} pregunta={op.pregunta} />; }
+    };
+  }
+
   global.MARCA = {
     NOMBRE: NOMBRE, ARROBA: ARROBA, REDES: REDES, TOR_NOMBRE: TOR_NOMBRE, TOR_REDES: TOR_REDES, FOTO: FOTO,
     Nombre: Nombre, Red: Red, Glifo: Glifo, Esquina: Esquina, EscMarca: EscMarca,
     Esquina2: Esquina2, EscMarca2: EscMarca2,
+    // escena de accion (comenta, comparte, guarda): la suma reel.jsx antes del cierre con accion: true
+    EscAccion: EscAccion, escenaAccion: escenaAccion, Mano: Mano, Boton: Boton,
     // escena lista para sumar al final de cualquier reel
     escena: {
       nombre: 'Torvick', dur: 3, C: EscMarca, marca: true,

@@ -7,10 +7,11 @@
 
    PL.escena(o) -> componente de escena ({ T, at, dur }) con:
      o.tor     { x, y, s, flex, boca, musc, muscGris, muscRojo, balanza,
-                 vibra, cuando, extra(g, T, f), ropa, pose, ojos } o una lista de varios
+                 vibra, cuando, extra(g, T, f), fondo(g, T, f), ropa, pose, ojos } o una lista de varios
+                 (fondo: SVG detras de Tor en sus coordenadas, como la cabecera de una cama)
                  (ropa: la de B.Frente, por ejemplo una camiseta; pose: de B.Frente;
                  ojos: 'rojos').
-                 flex/boca/musc/... pueden ser numeros/objetos o funciones (T, f).
+                 flex/boca/musc/x/y/... pueden ser numeros/objetos o funciones (T, f).
                  Sin cuando, Tor es el elemento principal (ya esta en pantalla).
      o.camara  { zoom, foco, mira } (zoom suma 0.04 * t solo)
      o.piezas  [{ C, p (props u (T, f) => props), x, y, cuando, hasta, vibra, plato, s, fase, quieto }]
@@ -19,13 +20,15 @@
                Sin cuando la pieza es principal (ya esta en pantalla).
      o.lienzo  (T, f) => SVG en coordenadas del lienzo (flechas, lineas)
      o.mal / o.bien  [{ x, y, cuando, s }]  X con sonido de error / visto con "tin"
-     o.r1 / o.r2     { text, y, cuando, s }  rotulos (maximo dos)
+     o.r1 / o.r2     { text, y, cuando, s, x }  rotulos (maximo dos; x solo en estilo 2)
    PL.escena2(o)  lo mismo en ESTILO 2: camara viva (o.tomas, o.pulsos; las X la
-     sacuden), Tor que parpadea y rotulos que entran deslizando
+     sacuden), Tor que parpadea y rotulos que entran deslizando; o.encima(T, f)
+     va encima de todo, rotulos incluidos (la X que tacha el rotulo de un mito)
    PL.grilla(lista, opciones) -> piezas: comida en filas (3, 2, 2...) que
      aparecen cuando la voz las nombra. lista = [[tipo de N.COMIDA, fraccion], ...]
    PL.sangre(T, f, op)   vaso sanguineo con globulos que llevan oxigeno (para o.lienzo)
-   PL.alBiceps(g, p, forma)   oxigeno ('bola') o glucosa ('hex') volando a los biceps
+   PL.alBiceps(g, p, forma)   oxigeno ('bola'), glucosa ('hex') o agua ('gota') volando a los biceps
+   PL.versus(T, f, op)   pantalla dividida: linea del medio y el VS (para o.lienzo)
    PL.FIG  encuadre de Tor de cuerpo entero (como en proteinas.jsx)
    ============================================================ */
 (function (global) {
@@ -72,8 +75,8 @@
     var e = o.cuando == null ? M.pop(T, at - 0.6, 0.5) : M.pop(T, f(o.cuando), 0.45);
     if (o.hasta != null) e = junta(e, sale(T, f(o.hasta)));
     return /*#__PURE__*/React.createElement(Pos, {
-      x: o.x == null ? FIG.x : o.x,
-      y: o.y == null ? FIG.y : o.y,
+      x: o.x == null ? FIG.x : valor(o.x, T, f),
+      y: o.y == null ? FIG.y : valor(o.y, T, f),
       e: e,
       dx: o.vibra ? M.vibra(T, 30, 3) : 0,
       dy: M.life(T, 3.6, 4, props.i * 0.5)
@@ -87,7 +90,9 @@
       muscGris: valor(o.muscGris, T, f),
       muscRojo: valor(o.muscRojo, T, f),
       piso: o.balanza ? PISO_BALANZA : undefined,
-      fondo: o.balanza ? balanza : undefined,
+      fondo: o.fondo ? function (g) {
+        return o.fondo(g, T, f);
+      } : o.balanza ? balanza : undefined,
       ropa: valor(o.ropa, T, f),
       pose: valor(o.pose, T, f),
       ojos: valor(o.ojos, T, f),
@@ -232,6 +237,7 @@
         key: 'r' + i,
         T: T,
         text: r.text,
+        x: r.x,
         y: r.y == null ? i ? 1490 : 270 : r.y,
         s: r.s,
         fase: i * 0.4,
@@ -303,7 +309,7 @@
         s: b.s,
         fase: i * 0.4
       });
-    }), rot(o.r1, 0), rot(o.r2, 1));
+    }), rot(o.r1, 0), rot(o.r2, 1), o.encima ? o.encima(T, f) : null);
   }
   function escena2(o) {
     return escena(Object.assign({}, o, {
@@ -398,7 +404,17 @@
         if (u <= 0 || u >= 1) return;
         var c = U.lerpP(desde, dest, Easing.easeInCubic(u));
         var r = 30 * (1 - 0.4 * u);
-        if (forma === 'hex') {
+        if (forma === 'gota') {
+          var w = r * 0.95;
+          piezas.push(/*#__PURE__*/React.createElement("path", {
+            key: k + j,
+            d: 'M ' + c[0].toFixed(1) + ' ' + (c[1] - r * 1.4).toFixed(1) + ' C ' + (c[0] + w).toFixed(1) + ' ' + (c[1] - r * 0.3).toFixed(1) + ' ' + (c[0] + w).toFixed(1) + ' ' + (c[1] + r).toFixed(1) + ' ' + c[0].toFixed(1) + ' ' + (c[1] + r).toFixed(1) + ' C ' + (c[0] - w).toFixed(1) + ' ' + (c[1] + r).toFixed(1) + ' ' + (c[0] - w).toFixed(1) + ' ' + (c[1] - r * 0.3).toFixed(1) + ' ' + c[0].toFixed(1) + ' ' + (c[1] - r * 1.4).toFixed(1) + ' Z',
+            fill: "#ffffff",
+            stroke: P.C.INK,
+            strokeWidth: 9,
+            strokeLinejoin: "round"
+          }));
+        } else if (forma === 'hex') {
           var pts = [];
           for (var i = 0; i < 6; i++) {
             var a = (60 * i - 30) * Math.PI / 180;
@@ -427,12 +443,51 @@
     });
     return /*#__PURE__*/React.createElement("g", null, piezas);
   }
+
+  // pantalla dividida (para o.lienzo): la linea del medio que se dibuja y el VS que
+  // late; op = { x, y0, y1, yVs }. Ya esta en pantalla al empezar la escena.
+  function versus(T, f, op) {
+    op = op || {};
+    var x = op.x == null ? 540 : op.x,
+      y0 = op.y0 == null ? 360 : op.y0,
+      y1 = op.y1 == null ? 1460 : op.y1;
+    var yv = op.yVs == null ? 1140 : op.yVs;
+    var d = M.draw(T, f(0) - 0.6, 0.5),
+      e = M.pop(T, f(0) - 0.6, 0.5);
+    var late = 1 + 0.06 * Math.sin(T * 5);
+    return /*#__PURE__*/React.createElement("g", null, /*#__PURE__*/React.createElement("path", {
+      d: 'M ' + x + ' ' + y0 + ' L ' + x + ' ' + y1,
+      stroke: P.C.INK,
+      strokeWidth: 8,
+      strokeLinecap: "round",
+      strokeDasharray: y1 - y0,
+      strokeDashoffset: (y1 - y0) * (1 - d)
+    }), /*#__PURE__*/React.createElement("g", {
+      opacity: e.opacity,
+      transform: 'translate(' + x + ' ' + (yv + M.life(T, 3, 6)).toFixed(1) + ') scale(' + (e.scale * late).toFixed(3) + ')'
+    }, /*#__PURE__*/React.createElement("circle", {
+      cx: 0,
+      cy: 0,
+      r: 66,
+      fill: P.C.YEL,
+      stroke: P.C.INK,
+      strokeWidth: 13
+    }), /*#__PURE__*/React.createElement("text", {
+      x: 0,
+      y: 21,
+      textAnchor: "middle",
+      fontFamily: "'Archivo Black', sans-serif",
+      fontSize: 58,
+      fill: P.C.INK
+    }, "VS")));
+  }
   global.PL = {
     escena: escena,
     escena2: escena2,
     grilla: grilla,
     sangre: sangre,
     alBiceps: alBiceps,
+    versus: versus,
     FIG: FIG,
     PISO_BALANZA: PISO_BALANZA
   };

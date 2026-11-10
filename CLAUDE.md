@@ -18,6 +18,7 @@ perfil.jsx        B.Perfil: figura de perfil articulada + poses
 frente.jsx        B.Frente: figura de frente + poses
 equipo.jsx        mancuerna, banco, barra, barra libre con discos, colchoneta, sombra
 tor.jsx           window.TOR: Tor, el avatar de la marca (pose de doble bíceps)
+novia.jsx         window.NOVIA: la novia de Tor (de frente, y capas para B.Perfil)
 nutricion.jsx     window.N: comida, plato, balanza y dial (videos de nutrición)
 marca.jsx         window.MARCA: firma de Torvick (nombre, redes, sello, cierre)
 reel.jsx          window.REELS: armazón común de los reels verticales
@@ -42,7 +43,12 @@ sentadilla-maquina.jsx,
 prensa-piernas.jsx, abdominal.jsx  reels de ejercicios en estilo 2 (con V.escena)
 peptidos.jsx, cristiano.jsx,
 kane.jsx, lebron.jsx,
-marihuana.jsx                    reels con Tor en estilo 2 (con PL.escena2)
+marihuana.jsx, creatina.jsx,
+porno.jsx                        reels con Tor en estilo 2 (con PL.escena2)
+biceps-top3.jsx                  top 3 de bíceps (perfil, estilo 2, ~15 s + acción)
+novato-avanzado.jsx,
+calistenia-gym.jsx               pantalla dividida: los dos Tors en paralelo
+gluteos.jsx                      con la novia de Tor (público femenino)
 identidad.jsx/.html  foto de perfil y portadas de destacadas (PNG en identidad/)
 face-pull.html    redirige a reels.html#face-pull
 largo.html        videos largos de YouTube (16:9): el video con cortes + capas encima
@@ -325,6 +331,36 @@ el banco y fuera de vista). En `B.Perfil`, `cabezaEncima: true` en la pose
 dibuja la cabeza delante de los brazos (brazos arriba, como en el tríceps
 francés).
 
+**Escena de acción (comenta, comparte, guarda):** con `accion` en
+`REELS.registrar` (`true` o `{ dur, pregunta, vo }`) `reel.jsx` suma, justo
+antes del cierre, `MARCA.EscAccion`: arriba la pregunta (`pregunta`, por
+defecto "¿ESTÁS DE ACUERDO?"), Tor sacando bíceps y abajo tres botones
+(comentar, compartir, guardar) que una mano toca en orden; cada toque suena
+(`pop`, y el guardar con el "tin"), al compartir sale un avión de papel que
+vuela hasta un amigo (se pinta de amarillo con su visto) y al guardar el
+marcador se llena. Va en todos los videos nuevos (pedido del autor).
+
+**Pantalla dividida (comparaciones):** `novato-avanzado.jsx` y
+`calistenia-gym.jsx` arman cada escena con un `duelo({...})` local sobre
+`PL.escena2`: dos Tors (`tor` acepta una lista), uno por mitad (centros x 270
+y 810), con ropa distinta (`ropa`) y un ícono propio sobre la cabeza, la
+línea del medio y el VS de `PL.versus(T, f, op)` (en `lienzo`), las piezas de
+cada lado arriba y el visto para quien gana el tema. Los rótulos pueden ir a
+un costado (`r1.x`).
+
+**La novia de Tor** (`novia.jsx`, para el público femenino): de frente,
+`<NOVIA.Novia s pose k parpadeo boca />` (pelo negro largo, top amarillo,
+calzas grises; poses `'abajo'`, `'cadera'`, `'saludo'`, `'flex'`); de perfil,
+`NOVIA.perfil(g, T, { glu })` devuelve las capas `fondo` (cola de caballo que
+cuelga con la gravedad), `agarre` (top deportivo y glúteo más redondo, en
+amarillo con `glu`) y `encima` (pelo y pestañas) para sumar a un `B.Perfil`
+(ver `Ella` en `gluteos.jsx`). Siempre deportiva y con buen gusto.
+
+**Temas sensibles:** en `porno.jsx` el gancho no muestra nada sexual (ni
+erección ni movimientos): TikTok e Instagram bajan o castigan los videos que
+muestran o sugieren estimulación sexual aunque sean animados. Se cuenta con
+Tor de noche en la cama, el dorso del celular y un globo "18+".
+
 **Tor disfrazado:** `ropa` en `B.Frente`, `TOR.Tor` y el `tor` de `PL`
 (`{ camiseta, cuello, short, numero, colorNumero, escudo, mangas }`) le pone
 una camiseta de color con cuello y puños, el número en el pecho (blanco o
@@ -343,8 +379,14 @@ X y los vistos, los efectos que una escena marca a propósito con
 
 Íconos para los videos con Tor en `N.ICONOS`: fútbol (`balon` con `giro`,
 `arco`, `copa`, `mundo`, `balonOro`, `camiseta`), básquet (`basket` con
-`giro`, `aro`, `corona`, `anillo`, `billete`) y salud (`bareto` con
-`encendido`, `pulmones` con `humo`, `persona` con `color`, `receta`).
+`giro`, `aro`, `corona`, `anillo`, `billete`), salud (`bareto` con
+`encendido`, `pulmones` con `humo`, `persona` con `color`, `receta`) y
+suplementos (`bote` con `color` en la etiqueta, `cuchara` con `lleno`,
+`rinones` con `color`, `bateria` con `p`, `vaso` con `p`, `cabeza` con pelo,
+`brote`). `PL.escena2` acepta además `encima(T, f)` (encima de los rótulos:
+la X que tacha el rótulo de un mito), `fondo(g, T, f)` en cada Tor (detrás
+de él, como la cabecera de una cama), `x`/`y` animados y `PL.alBiceps(g, p,
+'gota')` (agua que entra al músculo).
 Efectos de `V` para darles más vida: `V.Estela` (la figura con su estela de
 movimiento: en las ejecuciones de los ejercicios), `V.Humo`, `V.Polvo` (la
 tiza), `V.Confeti` (festejos) y `V.Ondas` (ruido, la tribuna). En los

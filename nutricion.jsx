@@ -14,7 +14,8 @@
                   vial (color), jeringa (color), raton, adn, estetoscopio, luna,
                   balon (giro), arco, copa, mundo, balonOro, camiseta (color, cuello,
                   numero, colorNumero, rayas), bareto (encendido), pulmones (humo, color),
-                  persona (color), receta, basket (giro), aro, corona, anillo, billete }
+                  persona (color), receta, basket (giro), aro, corona, anillo, billete,
+                  bote (color), cuchara (lleno), rinones (color), bateria (p), vaso (p), cabeza, brote }
    N.Plato    plato visto de arriba (viewBox 420x420); children van encima
    N.Bola     aminoacido: una bolita de color (r, color) para armar cadenas
    N.Balanza  balanza de baño vista de frente; va debajo de los pies de Tor
@@ -817,13 +818,114 @@
     fritas: Fritas, hamburguesa: Hamburguesa, pan: Pan, arroz: Arroz, banana: Banana, manzana: Manzana,
     brocoli: Brocoli, papa: Papa
   };
+  /* ---------------- suplementos y salud (creatina y otros) ---------------- */
+
+  // bote de suplemento: tapa gris, etiqueta de color con un rayo
+  function Bote(props) {
+    var color = props.color || C.YEL;
+    return (
+      <Svg s={props.s}>
+        <rect x={58} y={66} width={124} height={156} rx={22} fill={BLANCO} {...T0} />
+        <rect x={58} y={110} width={124} height={74} fill={color} stroke={C.INK} strokeWidth={11} />
+        <path d="M 130 118 L 98 154 L 120 154 L 108 180 L 144 140 L 122 140 L 134 118 Z" fill={BLANCO} stroke={C.INK} strokeWidth={8} strokeLinejoin="round" />
+        <rect x={50} y={30} width={140} height={44} rx={12} fill={C.GRY} {...T0} />
+        <path d="M 78 42 L 78 62 M 102 42 L 102 62 M 126 42 L 126 62 M 150 42 L 150 62" stroke={C.INK} strokeWidth={6} strokeLinecap="round" />
+      </Svg>
+    );
+  }
+  // cucharita medidora de lado con su monticulo de polvo; lleno 0..1
+  function Cuchara(props) {
+    var k = props.lleno == null ? 1 : clamp(props.lleno, 0, 1);
+    return (
+      <Svg s={props.s}>
+        <path d="M 150 128 L 224 98" stroke={C.INK} strokeWidth={24} strokeLinecap="round" />
+        <path d="M 150 128 L 224 98" stroke={C.GRY} strokeWidth={8} strokeLinecap="round" />
+        {k > 0.02 ? <path d={'M 42 116 Q 96 ' + (116 - 110 * k).toFixed(1) + ' 150 116 Z'} fill={BLANCO} stroke={C.INK} strokeWidth={10} strokeLinejoin="round" /> : null}
+        <path d="M 34 110 L 158 110 L 148 178 Q 145 198 124 198 L 68 198 Q 47 198 44 178 Z" fill={C.GRY} {...T0} />
+      </Svg>
+    );
+  }
+  // los dos rinones con sus ureteres; color el relleno
+  function Rinones(props) {
+    var color = props.color || BLANCO;
+    var uno = (
+      <g>
+        <path d="M 102 118 Q 112 166 116 222" fill="none" stroke={C.INK} strokeWidth={10} strokeLinecap="round" />
+        <path d="M 78 30 C 38 30 22 78 24 110 C 26 150 46 190 82 190 C 106 190 116 172 112 156 C 108 142 96 132 96 112 C 96 92 108 82 112 68 C 116 48 104 30 78 30 Z"
+          fill={color} {...T0} />
+        <path d="M 56 70 Q 46 110 60 148" fill="none" stroke={C.GRY} strokeWidth={9} strokeLinecap="round" />
+      </g>
+    );
+    return (
+      <Svg s={props.s}>
+        {uno}
+        <g transform="translate(240 0) scale(-1 1)">{uno}</g>
+      </Svg>
+    );
+  }
+  // pila vertical; p 0..1 la carga (verde; roja si queda poca)
+  function Bateria(props) {
+    var p = clamp(props.p == null ? 1 : props.p, 0, 1);
+    var alto = 150 * p;
+    return (
+      <Svg s={props.s}>
+        <rect x={98} y={18} width={44} height={22} rx={6} fill={C.GRY} {...T0} strokeWidth={11} />
+        <rect x={66} y={36} width={108} height={188} rx={18} fill={BLANCO} {...T0} />
+        {p > 0.01 ? <rect x={82} y={210 - alto} width={76} height={alto} rx={8} fill={p < 0.25 ? C.RED : C.GRN} /> : null}
+        <path d="M 128 74 L 100 132 L 122 132 L 110 180 L 144 116 L 122 116 L 134 74 Z" fill={BLANCO} stroke={C.INK} strokeWidth={8} strokeLinejoin="round" />
+      </Svg>
+    );
+  }
+  // vaso de agua; p 0..1 el nivel
+  function Vaso(props) {
+    var p = clamp(props.p == null ? 0.7 : props.p, 0, 1);
+    var y = 212 - 160 * p, xi = 64 + 16 * (y - 40) / 172, xd = 176 - 16 * (y - 40) / 172;
+    return (
+      <Svg s={props.s}>
+        <path d="M 64 40 L 176 40 L 160 212 L 80 212 Z" fill={BLANCO} {...T0} />
+        {p > 0.01 ? <path d={'M ' + xi.toFixed(1) + ' ' + y.toFixed(1) + ' L ' + xd.toFixed(1) + ' ' + y.toFixed(1) + ' L 160 212 L 80 212 Z'} fill={C.GRY} stroke={C.INK} strokeWidth={9} strokeLinejoin="round" /> : null}
+        <path d="M 64 40 L 176 40 L 160 212 L 80 212 Z" fill="none" {...T0} />
+        <path d="M 92 70 L 86 150" stroke={C.GRY} strokeWidth={9} strokeLinecap="round" />
+      </Svg>
+    );
+  }
+  // cabeza con pelo (para el mito de la caida del pelo)
+  function Cabeza(props) {
+    return (
+      <Svg s={props.s}>
+        <circle cx={44} cy={138} r={18} fill={BLANCO} {...T0} strokeWidth={11} />
+        <circle cx={196} cy={138} r={18} fill={BLANCO} {...T0} strokeWidth={11} />
+        <circle cx={120} cy={132} r={78} fill={BLANCO} {...T0} />
+        <path d="M 44 128 C 36 62 84 40 122 42 C 168 44 206 70 196 128 C 188 106 170 92 150 90 C 140 104 120 108 104 98 C 92 108 66 108 44 128 Z"
+          fill={C.INK} stroke={C.INK} strokeWidth={10} strokeLinejoin="round" />
+        <circle cx={94} cy={144} r={8} fill={C.INK} />
+        <circle cx={146} cy={144} r={8} fill={C.INK} />
+        <path d="M 96 178 Q 120 196 144 178" fill="none" stroke={C.INK} strokeWidth={10} strokeLinecap="round" />
+      </Svg>
+    );
+  }
+
+  // brote en su maceta (el que recien empieza)
+  function Brote(props) {
+    return (
+      <Svg s={props.s}>
+        <path d="M 120 150 L 120 92" stroke={C.INK} strokeWidth={12} strokeLinecap="round" />
+        <path d="M 120 112 C 80 114 54 90 50 52 C 92 50 116 74 120 112 Z" fill={C.GRN} {...T0} strokeWidth={11} />
+        <path d="M 120 98 C 152 100 180 78 186 40 C 146 40 122 62 120 98 Z" fill={C.GRN} {...T0} strokeWidth={11} />
+        <path d="M 70 150 L 170 150 L 158 218 L 82 218 Z" fill={C.GRY} {...T0} />
+        <rect x={56} y={136} width={128} height={28} rx={8} fill={C.GRY} {...T0} strokeWidth={11} />
+      </Svg>
+    );
+  }
+
   var ICONOS = {
     hueso: Hueso, gota: Gota, escudo: Escudo, termometro: Termometro, hormona: Hormona, capsula: Capsula,
     globulo: Globulo, glucosa: Glucosa, zapatilla: Zapatilla, calendario: Calendario, barras: Barras,
     vial: Vial, jeringa: Jeringa, raton: Raton, adn: Adn, estetoscopio: Estetoscopio, luna: Luna,
     balon: Balon, arco: Arco, copa: Copa, mundo: Mundo,
     balonOro: BalonOro, camiseta: Camiseta, bareto: Bareto, pulmones: Pulmones, persona: Persona,
-    receta: Receta, basket: Basket, aro: Aro, corona: Corona, anillo: Anillo, billete: Billete
+    receta: Receta, basket: Basket, aro: Aro, corona: Corona, anillo: Anillo, billete: Billete,
+    bote: Bote, cuchara: Cuchara, rinones: Rinones, bateria: Bateria, vaso: Vaso, cabeza: Cabeza, brote: Brote
   };
 
   /* ---------------- plato, aminoacidos, balanza ---------------- */
