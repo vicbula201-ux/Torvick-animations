@@ -50,6 +50,8 @@ novato-avanzado.jsx,
 calistenia-gym.jsx               pantalla dividida: los dos Tors en paralelo
 gluteos.jsx                      con la novia de Tor (público femenino)
 identidad.jsx/.html  foto de perfil y portadas de destacadas (PNG en identidad/)
+tienda/           landing de Entrena con Tor para vender los productos digitales
+                  (HTML estático; links de pago y redes en ENLACES, al final del index.html)
 face-pull.html    redirige a reels.html#face-pull
 largo.html        videos largos de YouTube (16:9): el video con cortes + capas encima
 largo.jsx         window.LARGOS: cámara, texto detrás de la persona, escenas, textos, tarjetas, CTA, sonidos
@@ -517,6 +519,20 @@ función `(g) => <g>…</g>`: `g` trae las articulaciones en coordenadas del
 viewBox, así las flechas, guías y mancuernas siguen al cuerpo. Músculos:
 `musc` amarillo (principal), `muscGris` gris (secundario), `muscRojo` rojo
 (error) en `B.Perfil` y `B.Frente`.
+
+## Landing de la tienda — `tienda/`
+
+`tienda/index.html` es una página estática (sin React ni compilación) para el
+link de la bio: portada con Tor, antes/después, el pack y las guías con
+portadas dibujadas en CSS, un test de 2 preguntas, el regalo a cambio del
+correo, la calculadora de proteína, quién está detrás, la garantía, preguntas
+y cierre. Misma identidad que los videos (blanco, trazo INK, paleta de cinco,
+Archivo Black + Barlow Semi Condensed, rótulos negros con punta, sombras
+duras). Los dibujos de `tienda/img/` son SVG exportados de `TOR.Tor`,
+`NOVIA.Novia` y las piezas de `N`/`P`: si cambia Tor, hay que volver a
+exportarlos. Los cobros van por Hotmart: cada botón toma su link de
+`ENLACES.checkout`; sin link, lleva a la sección de guías. No poner
+testimonios ni cifras de ventas inventadas.
 
 ## Videos largos de YouTube — `largo.html`
 
