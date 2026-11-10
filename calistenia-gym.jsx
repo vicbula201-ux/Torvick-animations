@@ -205,7 +205,7 @@
         r2: { text: 'GIMNASIO', x: 590, y: 420, s: 1.05, cuando: 0.16 }
       }) },
 
-    { nombre: 'Cuerpo', dur: 4, vo: 'Los dos construyen músculo; en el gimnasio es más fácil sumar peso, sobre todo en piernas.',
+    { nombre: 'Cuerpo', dur: 4.6, vo: 'Los dos construyen músculo; en el gimnasio es más fácil sumar peso, sobre todo en piernas.',
       C: duelo({
         grande: true,
         cal: { musc: { pec: 1, delt: 1, bic: 1, abd: 1, serr: 0.8 } },
@@ -220,7 +220,7 @@
         r2: { text: 'PIERNAS: GIMNASIO', cuando: 0.56 }
       }) },
 
-    { nombre: 'Fuerza', dur: 4, vo: 'El gimnasio te da más fuerza máxima; la calistenia, más fuerza relativa: mover tu cuerpo.',
+    { nombre: 'Fuerza', dur: 4.6, vo: 'El gimnasio te da más fuerza máxima; la calistenia, más fuerza relativa: mover tu cuerpo.',
       C: duelo({
         grande: true,
         pulsos: [0.3, 0.75],
@@ -233,7 +233,7 @@
         r2: { text: 'RELATIVA VS MÁXIMA', cuando: 0.3 }
       }) },
 
-    { nombre: 'Costo', dur: 3.8, vo: 'La calistenia es casi gratis: un parque y una barra. El gimnasio se paga cada mes.',
+    { nombre: 'Costo', dur: 4.8, vo: 'La calistenia es casi gratis: un parque y una barra. El gimnasio se paga cada mes.',
       C: duelo({
         piezas: [
           { C: IcoBarra, s: 1.1, x: IZQ - 260, y: 420, cuando: 0.06 },

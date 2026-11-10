@@ -426,7 +426,7 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
     })
   }, {
     nombre: 'Cuerpo',
-    dur: 4,
+    dur: 4.6,
     vo: 'Los dos construyen músculo; en el gimnasio es más fácil sumar peso, sobre todo en piernas.',
     C: duelo({
       grande: true,
@@ -500,7 +500,7 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
     })
   }, {
     nombre: 'Fuerza',
-    dur: 4,
+    dur: 4.6,
     vo: 'El gimnasio te da más fuerza máxima; la calistenia, más fuerza relativa: mover tu cuerpo.',
     C: duelo({
       grande: true,
@@ -546,7 +546,7 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
     })
   }, {
     nombre: 'Costo',
-    dur: 3.8,
+    dur: 4.8,
     vo: 'La calistenia es casi gratis: un parque y una barra. El gimnasio se paga cada mes.',
     C: duelo({
       piezas: [{
