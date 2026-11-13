@@ -97,7 +97,7 @@
 
   var FIG = { x: -55, y: 270, s: 0.85 };
   function en(p) { return [FIG.x + p[0] * FIG.s, FIG.y + p[1] * FIG.s]; }
-  var GEN = { zoom: 1, foco: en([690, 820]), mira: [540, 900] };
+  var GEN = { zoom: 1, foco: en([690, 820]), mira: [540, 1000] };
 
   function reps(T, a, b, n, va) { return V.ida(V.fase(T, a, b, n), va == null ? 0.42 : va, 0.14); }
 
@@ -105,7 +105,7 @@
     { nombre: 'Gancho', dur: 2.5, vo: 'Estás haciendo mal tu peso muerto.',
       C: V.escena({
         fig: FIG, vibra: true,
-        tomas: [[0, { zoom: 1.12, foco: en([700, 860]), mira: [540, 1060] }], [1, { zoom: 1.0, foco: en([690, 820]), mira: [540, 920] }]],
+        tomas: [[0, { zoom: 1.12, foco: en([700, 860]), mira: [540, 1060] }], [1, { zoom: 1.0, foco: en([690, 820]), mira: [540, 1020] }]],
         figura: function (T, f, t, s) {
           var k = 0.7 * reps(T, f(0), f(1), 2, 0.4);
           return <Muerto T={T} s={s} k={k} curva={1} muscRojo={{ erec: 1, dor: 0.6 }}
@@ -118,8 +118,8 @@
     { nombre: 'Posición', dur: 5.5, vo: 'Pies al ancho de los hombros, la barra pegada a las espinillas, y agárrala con la espalda neutra.',
       C: V.escena({
         fig: FIG,
-        tomas: [[0, GEN], [0.16, { zoom: 1.6, foco: en([620, 1150]), mira: [540, 1000] }], [0.44, { zoom: 1.6, foco: en([620, 1150]), mira: [540, 1000] }],
-          [0.6, { zoom: 1.4, foco: en([700, 800]), mira: [540, 920] }], [0.86, { zoom: 1.4, foco: en([700, 800]), mira: [540, 920] }], [1, GEN]],
+        tomas: [[0, GEN], [0.16, { zoom: 1.35, foco: en([620, 1150]), mira: [540, 1110] }], [0.44, { zoom: 1.35, foco: en([620, 1150]), mira: [540, 1110] }],
+          [0.6, { zoom: 1.4, foco: en([700, 800]), mira: [540, 1020] }], [0.86, { zoom: 1.4, foco: en([700, 800]), mira: [540, 1020] }], [1, GEN]],
         figura: function (T, f, t, s) {
           var esp = M.draw(T, f(0.58), 0.5);
           var pie = animate({ from: 0, to: 1, start: f(0.14), end: f(0.26) })(T);
@@ -141,7 +141,7 @@
     { nombre: 'Ejecución', dur: 6, vo: 'Empuja el piso y extiende la cadera y las rodillas a la vez, con la barra cerca del cuerpo. Baja igual.',
       C: V.escena({
         fig: FIG, pulsos: [0.27, 0.73],
-        tomas: [[0, GEN], [0.3, { zoom: 1.12, foco: en([690, 820]), mira: [540, 900] }], [0.8, { zoom: 1.12, foco: en([690, 820]), mira: [540, 900] }], [1, GEN]],
+        tomas: [[0, GEN], [0.3, { zoom: 1.06, foco: en([690, 820]), mira: [540, 1030] }], [0.8, { zoom: 1.06, foco: en([690, 820]), mira: [540, 1030] }], [1, GEN]],
         figura: function (T, f, t, s) {
           return (
             <V.Estela T={T} n={3} paso={0.07} dibujar={function (Tx, fantasma) {
@@ -177,7 +177,7 @@
     { nombre: 'Músculos', dur: 4.5, vo: 'Trabaja el glúteo mayor, con ayuda de isquios y cuádriceps; la espalda estabiliza.',
       C: V.escena({
         fig: FIG,
-        tomas: [[0, { zoom: 1.24, foco: en([760, 860]), mira: [540, 1080] }], [0.6, { zoom: 1.3, foco: en([760, 880]), mira: [540, 1090] }], [1, { zoom: 1.1, foco: en([700, 820]), mira: [540, 920] }]],
+        tomas: [[0, { zoom: 1.24, foco: en([760, 860]), mira: [540, 1080] }], [0.6, { zoom: 1.3, foco: en([760, 880]), mira: [540, 1090] }], [1, { zoom: 1.1, foco: en([700, 820]), mira: [540, 1020] }]],
         figura: function (T, f, t, s) {
           var m = animate({ from: 0, to: 1, start: f(0.04), end: f(0.18) })(T);
           var sec = animate({ from: 0, to: 1, start: f(0.56), end: f(0.68) })(T);
@@ -191,7 +191,7 @@
     { nombre: 'Error 1', dur: 4.5, vo: 'Error uno: curvar la espalda. Mantén la columna neutra todo el recorrido.',
       C: V.escena({
         fig: FIG,
-        tomas: [[0, { zoom: 1.3, foco: en([720, 820]), mira: [540, 940] }], [1, { zoom: 1.25, foco: en([720, 840]), mira: [540, 940] }]],
+        tomas: [[0, { zoom: 1.3, foco: en([720, 820]), mira: [540, 1030] }], [1, { zoom: 1.25, foco: en([720, 840]), mira: [540, 1030] }]],
         figura: function (T, f, t, s) {
           var bien = animate({ from: 0, to: 1, start: f(0.44), end: f(0.56), ease: Easing.easeInOutCubic })(T);
           var k = 0.75 * reps(T, f(0), f(1), 2, 0.45);
@@ -226,7 +226,7 @@
     { nombre: 'Cierre', dur: 3, vo: 'Así se hace: espalda neutra y la barra cerca.',
       C: V.escena({
         fig: FIG, pulsos: [0.42],
-        tomas: [[0, { zoom: 1.15, foco: en([700, 840]), mira: [540, 920] }], [1, GEN]],
+        tomas: [[0, { zoom: 1.1, foco: en([700, 840]), mira: [540, 1040] }], [1, GEN]],
         figura: function (T, f, t, s) {
           var k = animate({ from: 0, to: 1, start: f(0.04), end: f(0.42), ease: Easing.easeInOutSine })(T);
           return <Muerto T={T} s={s} k={k} musc={{ glu: 1 }}

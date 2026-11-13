@@ -115,7 +115,7 @@
 
   var FIG = { x: -46, y: 273, s: 0.82 };
   function en(p) { return [FIG.x + p[0] * FIG.s, FIG.y + p[1] * FIG.s]; }
-  var GEN = { zoom: 1, foco: en([720, 820]), mira: [540, 900] };
+  var GEN = { zoom: 1, foco: en([720, 820]), mira: [540, 1050] };
   var FF = { x: 72, y: 166, s: 0.78 };
   function enF(p) { return [FF.x + p[0] * FF.s, FF.y + p[1] * FF.s]; }
 
@@ -125,7 +125,7 @@
     { nombre: 'Gancho', dur: 2.5, vo: 'Estás haciendo mal tu zancada.',
       C: V.escena({
         fig: FIG, vibra: true,
-        tomas: [[0, { zoom: 1.25, foco: en([700, 860]), mira: [540, 960] }], [1, { zoom: 1.03, foco: en([700, 820]), mira: [540, 900] }]],
+        tomas: [[0, { zoom: 1.12, foco: en([700, 860]), mira: [540, 1060] }], [1, { zoom: 1.03, foco: en([700, 820]), mira: [540, 1050] }]],
         figura: function (T, f, t, s) {
           return <Zancada T={T} s={s} paso={1} baja={0.7 + 0.2 * Math.sin(T * 5)} tambalea={16 * Math.sin(T * 6.5)} muscRojo={{ cuad: 1 }}
             extra={function (g) { return <V.Gotas T={T} c={g.centroCabeza} v={1} />; }} />;
@@ -137,8 +137,8 @@
     { nombre: 'Posición', dur: 5, vo: 'De pie, con los pies al ancho de los hombros y una mancuerna en cada mano, al lado del cuerpo.',
       C: V.escena({
         fig: FIG,
-        tomas: [[0, GEN], [0.16, { zoom: 1.15, foco: en([880, 1120]), mira: [540, 1160] }], [0.44, { zoom: 1.15, foco: en([880, 1120]), mira: [540, 1160] }],
-          [0.6, { zoom: 1.12, foco: en([850, 980]), mira: [540, 1060] }], [0.86, { zoom: 1.12, foco: en([850, 980]), mira: [540, 1060] }], [1, GEN]],
+        tomas: [[0, GEN], [0.16, { zoom: 1.04, foco: en([880, 1000]), mira: [540, 1200] }], [0.44, { zoom: 1.04, foco: en([880, 1000]), mira: [540, 1200] }],
+          [0.6, { zoom: 1.04, foco: en([850, 900]), mira: [540, 1110] }], [0.86, { zoom: 1.04, foco: en([850, 900]), mira: [540, 1110] }], [1, GEN]],
         figura: function (T, f, t, s) {
           var pie = animate({ from: 0, to: 1, start: f(0.16), end: f(0.28) })(T);
           var mc = animate({ from: 0, to: 1, start: f(0.6), end: f(0.7) })(T);
@@ -160,7 +160,7 @@
     { nombre: 'Ejecución', dur: 6, vo: 'Da un paso adelante y baja hasta que el muslo quede paralelo al piso; empuja y vuelve.',
       C: V.escena({
         fig: FIG, pulsos: [0.27, 0.77],
-        tomas: [[0, GEN], [0.3, { zoom: 1.1, foco: en([700, 880]), mira: [540, 920] }], [0.8, { zoom: 1.1, foco: en([700, 880]), mira: [540, 920] }], [1, GEN]],
+        tomas: [[0, GEN], [0.3, { zoom: 1.04, foco: en([700, 880]), mira: [540, 1100] }], [0.8, { zoom: 1.04, foco: en([700, 880]), mira: [540, 1100] }], [1, GEN]],
         figura: function (T, f, t, s) {
           return (
             <V.Estela T={T} n={3} paso={0.06} dibujar={function (Tx, fantasma) {
@@ -195,7 +195,7 @@
     { nombre: 'Músculos', dur: 4.5, vo: 'Trabajan el cuádriceps y el glúteo, con ayuda de los isquios y los gemelos.',
       C: V.escena({
         fig: FIG,
-        tomas: [[0, { zoom: 1.4, foco: en([620, 1040]), mira: [540, 1040] }], [0.6, { zoom: 1.45, foco: en([620, 1060]), mira: [540, 1040] }], [1, { zoom: 1.15, foco: en([680, 960]), mira: [540, 960] }]],
+        tomas: [[0, { zoom: 1.3, foco: en([620, 1040]), mira: [540, 1090] }], [0.6, { zoom: 1.34, foco: en([620, 1060]), mira: [540, 1135] }], [1, { zoom: 1.15, foco: en([680, 960]), mira: [540, 1000] }]],
         figura: function (T, f, t, s) {
           var m = animate({ from: 0, to: 1, start: f(0.04), end: f(0.18) })(T);
           var sec = animate({ from: 0, to: 1, start: f(0.56), end: f(0.68) })(T);
@@ -209,7 +209,7 @@
     { nombre: 'Error 1', dur: 4.5, vo: 'Error uno: perder el equilibrio. Tronco firme y la mirada al frente.',
       C: V.escena({
         fig: FIG,
-        tomas: [[0, { zoom: 1.15, foco: en([700, 860]), mira: [540, 940] }], [1, { zoom: 1.1, foco: en([700, 860]), mira: [540, 940] }]],
+        tomas: [[0, { zoom: 1.04, foco: en([700, 860]), mira: [540, 1080] }], [1, { zoom: 1.03, foco: en([700, 860]), mira: [540, 1080] }]],
         figura: function (T, f, t, s) {
           var bien = animate({ from: 0, to: 1, start: f(0.44), end: f(0.56), ease: Easing.easeInOutCubic })(T);
           var tb = (1 - bien) * 18 * Math.sin(T * 6.5);
@@ -250,7 +250,7 @@
     { nombre: 'Cierre', dur: 3, vo: 'Así se hace: paso firme y el muslo paralelo.',
       C: V.escena({
         fig: FIG, pulsos: [0.42],
-        tomas: [[0, { zoom: 1.12, foco: en([720, 860]), mira: [540, 920] }], [1, GEN]],
+        tomas: [[0, { zoom: 1.04, foco: en([720, 860]), mira: [540, 1090] }], [1, GEN]],
         figura: function (T, f, t, s) {
           var k = animate({ from: 0, to: 1, start: f(0.04), end: f(0.42), ease: Easing.easeInOutSine })(T);
           return <Zancada T={T} s={s} paso={Math.min(1, k * 2)} baja={Math.max(0, k * 2 - 1)} musc={{ cuad: 1, glu: 1 }}

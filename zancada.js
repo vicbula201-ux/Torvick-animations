@@ -202,7 +202,7 @@
   var GEN = {
     zoom: 1,
     foco: en([720, 820]),
-    mira: [540, 900]
+    mira: [540, 1050]
   };
   var FF = {
     x: 72,
@@ -223,13 +223,13 @@
       fig: FIG,
       vibra: true,
       tomas: [[0, {
-        zoom: 1.25,
+        zoom: 1.12,
         foco: en([700, 860]),
-        mira: [540, 960]
+        mira: [540, 1060]
       }], [1, {
         zoom: 1.03,
         foco: en([700, 820]),
-        mira: [540, 900]
+        mira: [540, 1050]
       }]],
       figura: function (T, f, t, s) {
         return /*#__PURE__*/React.createElement(Zancada, {
@@ -274,21 +274,21 @@
     C: V.escena({
       fig: FIG,
       tomas: [[0, GEN], [0.16, {
-        zoom: 1.15,
-        foco: en([880, 1120]),
-        mira: [540, 1160]
+        zoom: 1.04,
+        foco: en([880, 1000]),
+        mira: [540, 1200]
       }], [0.44, {
-        zoom: 1.15,
-        foco: en([880, 1120]),
-        mira: [540, 1160]
+        zoom: 1.04,
+        foco: en([880, 1000]),
+        mira: [540, 1200]
       }], [0.6, {
-        zoom: 1.12,
-        foco: en([850, 980]),
-        mira: [540, 1060]
+        zoom: 1.04,
+        foco: en([850, 900]),
+        mira: [540, 1110]
       }], [0.86, {
-        zoom: 1.12,
-        foco: en([850, 980]),
-        mira: [540, 1060]
+        zoom: 1.04,
+        foco: en([850, 900]),
+        mira: [540, 1110]
       }], [1, GEN]],
       figura: function (T, f, t, s) {
         var pie = animate({
@@ -351,13 +351,13 @@
       fig: FIG,
       pulsos: [0.27, 0.77],
       tomas: [[0, GEN], [0.3, {
-        zoom: 1.1,
+        zoom: 1.04,
         foco: en([700, 880]),
-        mira: [540, 920]
+        mira: [540, 1100]
       }], [0.8, {
-        zoom: 1.1,
+        zoom: 1.04,
         foco: en([700, 880]),
-        mira: [540, 920]
+        mira: [540, 1100]
       }], [1, GEN]],
       figura: function (T, f, t, s) {
         return /*#__PURE__*/React.createElement(V.Estela, {
@@ -435,17 +435,17 @@
     C: V.escena({
       fig: FIG,
       tomas: [[0, {
-        zoom: 1.4,
+        zoom: 1.3,
         foco: en([620, 1040]),
-        mira: [540, 1040]
+        mira: [540, 1090]
       }], [0.6, {
-        zoom: 1.45,
+        zoom: 1.34,
         foco: en([620, 1060]),
-        mira: [540, 1040]
+        mira: [540, 1135]
       }], [1, {
         zoom: 1.15,
         foco: en([680, 960]),
-        mira: [540, 960]
+        mira: [540, 1000]
       }]],
       figura: function (T, f, t, s) {
         var m = animate({
@@ -506,13 +506,13 @@
     C: V.escena({
       fig: FIG,
       tomas: [[0, {
-        zoom: 1.15,
+        zoom: 1.04,
         foco: en([700, 860]),
-        mira: [540, 940]
+        mira: [540, 1080]
       }], [1, {
-        zoom: 1.1,
+        zoom: 1.03,
         foco: en([700, 860]),
-        mira: [540, 940]
+        mira: [540, 1080]
       }]],
       figura: function (T, f, t, s) {
         var bien = animate({
@@ -657,9 +657,9 @@
       fig: FIG,
       pulsos: [0.42],
       tomas: [[0, {
-        zoom: 1.12,
+        zoom: 1.04,
         foco: en([720, 860]),
-        mira: [540, 920]
+        mira: [540, 1090]
       }], [1, GEN]],
       figura: function (T, f, t, s) {
         var k = animate({
