@@ -118,7 +118,8 @@ function fmtT(s) {
 
   // solo suenan las X, los vistos y los efectos que una escena marca a proposito (el "siuuu",
   // la tribuna, un golpe...); los cambios de escena y la marca solo con --con-musica
-  const SUENAN = ['error', 'bien', 'siu', 'publico', 'golpe', 'whoosh', 'campana', 'pop'];
+  const SUENAN = ['error', 'bien', 'siu', 'publico', 'golpe', 'whoosh', 'campana', 'pop',
+    'hipo', 'eructo', 'vomito', 'llanto', 'sirena', 'crunch', 'tos'];
   const fCues = path.join(salida, id + '-cues.json');
   fs.writeFileSync(fCues, JSON.stringify(cues.filter(c => SUENAN.indexOf(c.tipo) >= 0), null, 1));
   const fCuesTodos = path.join(salida, id + '.cues-todos.json');

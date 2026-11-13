@@ -44,7 +44,17 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
                 de color 'cuello' y el numero en el pecho, blanco o colorNumero),
                 color del short (por defecto GRY); escudo 'cruz' (blanco con la
                 cruz roja, en el pecho); mangas false = musculosa (basquet)
-     ojos       'rojos': ojos rojos y entrecerrados (fumado)
+     ojos       'rojos': ojos rojos y entrecerrados (fumado); 'borracho' (cada ojo para
+                un lado, parpados caidos), 'espiral' (hipnotizado; gesto.giroOjos los gira),
+                'corazon' (gesto.latido la escala), 'grandes' (redondos, pupila chica),
+                'llanto' (apretados: > <), 'x' (noqueado)
+     boca       tambien 'abierta' (gesto.boca la escala), 'o', 'ondulada' (mareo),
+                'llena' (cachetes inflados, masticando) y 'dientes' (apretados)
+     gesto      { cejas: 'enojo' | 'triste' | 'alzadas', cara: color o { color, v } (tine
+                la cara: verde de nauseas), mejillas 0..1 (rubor), nariz: 'roja',
+                mirada: [dx, dy] o [[izq], [der]] (pupilas de 'borracho' y 'grandes'),
+                giroOjos, latido, giro (inclina solo la cabeza, en grados), boca, pupila }
+     panza      0..1: barriga que crece sobre el elastico del short
      sinBanco   sin el banco (vista cenital)
      fondo(g) agarre(g) children(g)   funciones -> SVG en coordenadas del viewBox
 
@@ -928,17 +938,270 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
     }));
   }
 
-  // cabeza de frente: ovalo, orejas, dos ojos y la nariz (boca opcional)
+  // parpado: la parte de la elipse del ojo que queda por encima de la altura h
+  function parpado(x, y, rx, ry, h) {
+    h = clamp(h, -ry + 1, ry - 1);
+    var a = rx * Math.sqrt(1 - h * h / (ry * ry));
+    return 'M ' + (x - a).toFixed(1) + ' ' + (y + h).toFixed(1) + ' A ' + rx + ' ' + ry + ' 0 ' + (h > 0 ? 1 : 0) + ' 1 ' + (x + a).toFixed(1) + ' ' + (y + h).toFixed(1) + ' Z';
+  }
+  function espiralOjo(x, y, r, giro, sentido) {
+    var pts = [];
+    for (var i = 0; i <= 44; i++) {
+      var t = i / 44,
+        a = (giro * GRAD + t * 2.5 * 2 * Math.PI) * sentido;
+      pts.push((x + Math.cos(a) * r * t).toFixed(1) + ' ' + (y + Math.sin(a) * r * t).toFixed(1));
+    }
+    return 'M ' + pts.join(' L ');
+  }
+  function corazonOjo(x, y, k) {
+    var f = function (v) {
+      return v.toFixed(1);
+    };
+    return 'M ' + f(x) + ' ' + f(y + 21 * k) + ' C ' + f(x - 32 * k) + ' ' + f(y - 2 * k) + ' ' + f(x - 20 * k) + ' ' + f(y - 26 * k) + ' ' + f(x) + ' ' + f(y - 9 * k) + ' C ' + f(x + 20 * k) + ' ' + f(y - 26 * k) + ' ' + f(x + 32 * k) + ' ' + f(y - 2 * k) + ' ' + f(x) + ' ' + f(y + 21 * k) + ' Z';
+  }
+  // mezcla de dos colores #rrggbb (para tenir la cara: verde de mareo)
+  function mezclaColor(a, b, t) {
+    var h = function (c, i) {
+      return parseInt(c.slice(1 + 2 * i, 3 + 2 * i), 16);
+    };
+    var out = '#';
+    for (var i = 0; i < 3; i++) {
+      var v = Math.round(h(a, i) + (h(b, i) - h(a, i)) * clamp(t, 0, 1)).toString(16);
+      out += v.length < 2 ? '0' + v : v;
+    }
+    return out;
+  }
+
+  // cabeza de frente: ovalo, orejas, dos ojos y la nariz (boca opcional).
+  // ojos: 'rojos' | 'borracho' | 'espiral' | 'corazon' | 'grandes' | 'llanto' | 'x'
+  // boca: true | 'sonrisa' | 'triste' | 'abierta' | 'o' | 'ondulada' | 'llena' | 'dientes'
+  // gesto: { cejas: 'enojo' | 'triste' | 'alzadas', cara: color | { color, v }, mejillas 0..1,
+  //          nariz: 'roja', mirada: [dx, dy] | [[dx, dy], [dx, dy]], giroOjos, latido, giro, boca (escala) }
   function Cabeza(props) {
-    var g = props.g;
+    var g = props.g,
+      ge = props.gesto || {};
+    var par = props.parpadeo || 0;
+    var cara = typeof ge.cara === 'string' ? {
+      color: ge.cara,
+      v: 1
+    } : ge.cara;
+    var piel = cara && cara.v > 0.01 ? mezclaColor(BLANCO, cara.color, 0.55 * cara.v) : BLANCO;
+    var mir = function (i, def) {
+      var m = ge.mirada;
+      if (!m) return def;
+      return typeof m[0] === 'number' ? m : m[i] || def;
+    };
+    var ojos = props.ojos,
+      dib;
+    if (ojos === 'rojos') {
+      dib = [-28, 28].map(function (x) {
+        // rojos y con el parpado caido (la mitad de arriba la tapa el parpado), con ojeras
+        var lid = 'M ' + (x - 23) + ' 0 A 23 16 0 0 1 ' + (x + 23) + ' 0 Z';
+        return /*#__PURE__*/React.createElement("g", {
+          key: x
+        }, /*#__PURE__*/React.createElement("ellipse", {
+          cx: x,
+          cy: 0,
+          rx: 23,
+          ry: 16,
+          fill: RED,
+          stroke: INK,
+          strokeWidth: 6
+        }), /*#__PURE__*/React.createElement("circle", {
+          cx: x,
+          cy: 5,
+          r: 7,
+          fill: INK
+        }), /*#__PURE__*/React.createElement("path", {
+          d: lid,
+          fill: piel,
+          stroke: INK,
+          strokeWidth: 7,
+          strokeLinejoin: "round"
+        }), /*#__PURE__*/React.createElement("path", {
+          d: 'M ' + (x - 18) + ' 24 Q ' + x + ' 34 ' + (x + 18) + ' 24',
+          fill: "none",
+          stroke: GRY,
+          strokeWidth: 6,
+          strokeLinecap: "round"
+        }));
+      });
+    } else if (ojos === 'borracho') {
+      // cada ojo mira para un lado y cada parpado cae a distinta altura
+      dib = [-27, 27].map(function (x, i) {
+        var m = mir(i, i ? [7, 4] : [-6, 9]);
+        var h = i ? -5 : 3;
+        return /*#__PURE__*/React.createElement("g", {
+          key: x
+        }, /*#__PURE__*/React.createElement("ellipse", {
+          cx: x,
+          cy: 0,
+          rx: 21,
+          ry: 18,
+          fill: BLANCO,
+          stroke: INK,
+          strokeWidth: 6
+        }), /*#__PURE__*/React.createElement("circle", {
+          cx: x + clamp(m[0], -11, 11),
+          cy: clamp(m[1], h + 6, 11),
+          r: 7,
+          fill: INK
+        }), /*#__PURE__*/React.createElement("path", {
+          d: parpado(x, 0, 21, 18, h),
+          fill: piel,
+          stroke: INK,
+          strokeWidth: 7,
+          strokeLinejoin: "round"
+        }));
+      });
+    } else if (ojos === 'espiral') {
+      dib = [-28, 28].map(function (x, i) {
+        return /*#__PURE__*/React.createElement("g", {
+          key: x
+        }, /*#__PURE__*/React.createElement("circle", {
+          cx: x,
+          cy: 0,
+          r: 22,
+          fill: BLANCO,
+          stroke: INK,
+          strokeWidth: 6
+        }), /*#__PURE__*/React.createElement("path", {
+          d: espiralOjo(x, 0, 17, ge.giroOjos || 0, i ? -1 : 1),
+          fill: "none",
+          stroke: INK,
+          strokeWidth: 5,
+          strokeLinecap: "round",
+          strokeLinejoin: "round"
+        }));
+      });
+    } else if (ojos === 'corazon') {
+      dib = [-29, 29].map(function (x) {
+        return /*#__PURE__*/React.createElement("path", {
+          key: x,
+          d: corazonOjo(x, 0, ge.latido == null ? 1 : ge.latido),
+          fill: RED,
+          stroke: INK,
+          strokeWidth: 6,
+          strokeLinejoin: "round"
+        });
+      });
+    } else if (ojos === 'grandes') {
+      dib = [-28, 28].map(function (x, i) {
+        var m = mir(i, [0, 0]);
+        return /*#__PURE__*/React.createElement("g", {
+          key: x
+        }, /*#__PURE__*/React.createElement("circle", {
+          cx: x,
+          cy: -2,
+          r: 21,
+          fill: BLANCO,
+          stroke: INK,
+          strokeWidth: 6
+        }), /*#__PURE__*/React.createElement("circle", {
+          cx: x + clamp(m[0], -12, 12),
+          cy: -2 + clamp(m[1], -12, 12),
+          r: ge.pupila || 6,
+          fill: INK
+        }));
+      });
+    } else if (ojos === 'llanto') {
+      dib = /*#__PURE__*/React.createElement("path", {
+        d: "M -40 -13 L -15 -2 L -40 9 M 40 -13 L 15 -2 L 40 9",
+        fill: "none",
+        stroke: INK,
+        strokeWidth: 9,
+        strokeLinecap: "round",
+        strokeLinejoin: "round"
+      });
+    } else if (ojos === 'x') {
+      dib = /*#__PURE__*/React.createElement("path", {
+        d: "M -38 -13 L -16 9 M -16 -13 L -38 9 M 16 -13 L 38 9 M 38 -13 L 16 9",
+        fill: "none",
+        stroke: INK,
+        strokeWidth: 8,
+        strokeLinecap: "round"
+      });
+    } else if (par > 0.6) {
+      dib = /*#__PURE__*/React.createElement("path", {
+        d: "M -35 -2 L -17 -2 M 17 -2 L 35 -2",
+        stroke: INK,
+        strokeWidth: 7,
+        strokeLinecap: "round"
+      });
+    } else {
+      dib = /*#__PURE__*/React.createElement("g", null, /*#__PURE__*/React.createElement("ellipse", {
+        cx: -26,
+        cy: -2,
+        rx: 8,
+        ry: 8 * (1 - 0.8 * par),
+        fill: INK
+      }), /*#__PURE__*/React.createElement("ellipse", {
+        cx: 26,
+        cy: -2,
+        rx: 8,
+        ry: 8 * (1 - 0.8 * par),
+        fill: INK
+      }));
+    }
+    var cejas = ge.cejas === 'enojo' ? 'M -46 -38 L -12 -24 M 46 -38 L 12 -24' : ge.cejas === 'triste' ? 'M -46 -26 L -14 -40 M 46 -26 L 14 -40' : ge.cejas === 'alzadas' ? 'M -42 -34 Q -27 -46 -12 -34 M 42 -34 Q 27 -46 12 -34' : null;
+    var boca = props.boca,
+      kb = ge.boca == null ? 1 : ge.boca;
+    var llena = boca === 'llena';
+    var dibBoca = boca === 'sonrisa' ? /*#__PURE__*/React.createElement("path", _extends({
+      d: "M -24 46 Q 0 68 24 46"
+    }, LINEA)) : boca === 'triste' ? /*#__PURE__*/React.createElement("path", _extends({
+      d: "M -20 62 Q 0 46 20 62"
+    }, LINEA)) : boca === 'abierta' ? /*#__PURE__*/React.createElement("g", {
+      transform: 'translate(0 58) scale(' + kb.toFixed(3) + ') translate(0 -58)'
+    }, /*#__PURE__*/React.createElement("path", {
+      d: "M -21 46 Q 0 38 21 46 Q 23 80 0 80 Q -23 80 -21 46 Z",
+      fill: INK,
+      stroke: INK,
+      strokeWidth: 7,
+      strokeLinejoin: "round"
+    }), /*#__PURE__*/React.createElement("ellipse", {
+      cx: 0,
+      cy: 71,
+      rx: 10,
+      ry: 5.5,
+      fill: RED
+    })) : boca === 'o' ? /*#__PURE__*/React.createElement("circle", {
+      cx: 0,
+      cy: 57,
+      r: 9 * kb,
+      fill: INK
+    }) : boca === 'ondulada' ? /*#__PURE__*/React.createElement("path", _extends({
+      d: "M -25 55 Q -17 44 -9 55 T 8 55 T 25 55"
+    }, LINEA, {
+      strokeWidth: 9
+    })) : boca === 'dientes' ? /*#__PURE__*/React.createElement("g", null, /*#__PURE__*/React.createElement("rect", {
+      x: -24,
+      y: 45,
+      width: 48,
+      height: 20,
+      rx: 5,
+      fill: BLANCO,
+      stroke: INK,
+      strokeWidth: 7
+    }), /*#__PURE__*/React.createElement("path", {
+      d: "M -12 46 L -12 64 M 0 46 L 0 64 M 12 46 L 12 64",
+      stroke: INK,
+      strokeWidth: 5
+    })) : llena ? /*#__PURE__*/React.createElement("path", _extends({
+      d: "M -9 56 Q 0 62 9 56"
+    }, LINEA, {
+      strokeWidth: 8
+    })) : boca ? /*#__PURE__*/React.createElement("path", _extends({
+      d: "M -16 54 L 16 54"
+    }, LINEA)) : null;
     return /*#__PURE__*/React.createElement("g", {
-      transform: 'translate(' + pt(g.cabeza).replace(' ', ',') + ') rotate(' + g.inclinacion.toFixed(2) + ')'
+      transform: 'translate(' + pt(g.cabeza).replace(' ', ',') + ') rotate(' + (g.inclinacion + (ge.giro || 0)).toFixed(2) + ')'
     }, /*#__PURE__*/React.createElement("ellipse", {
       cx: -72,
       cy: 10,
       rx: 17,
       ry: 28,
-      fill: BLANCO,
+      fill: piel,
       stroke: INK,
       strokeWidth: 12
     }), /*#__PURE__*/React.createElement("ellipse", {
@@ -946,74 +1209,68 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
       cy: 10,
       rx: 17,
       ry: 28,
-      fill: BLANCO,
+      fill: piel,
       stroke: INK,
       strokeWidth: 12
-    }), /*#__PURE__*/React.createElement("ellipse", {
+    }), llena ? /*#__PURE__*/React.createElement("g", {
+      fill: piel,
+      stroke: INK,
+      strokeWidth: 13
+    }, /*#__PURE__*/React.createElement("circle", {
+      cx: -50,
+      cy: 40,
+      r: 25
+    }), /*#__PURE__*/React.createElement("circle", {
+      cx: 50,
+      cy: 40,
+      r: 25
+    })) : null, /*#__PURE__*/React.createElement("ellipse", {
       cx: 0,
       cy: 0,
       rx: 70,
       ry: 84,
-      fill: BLANCO,
+      fill: piel,
       stroke: INK,
       strokeWidth: 15
-    }), props.ojos === 'rojos' ? [-28, 28].map(function (x) {
-      // rojos y con el parpado caido (la mitad de arriba la tapa el parpado), con ojeras
-      var lid = 'M ' + (x - 23) + ' 0 A 23 16 0 0 1 ' + (x + 23) + ' 0 Z';
-      return /*#__PURE__*/React.createElement("g", {
-        key: x
-      }, /*#__PURE__*/React.createElement("ellipse", {
-        cx: x,
-        cy: 0,
-        rx: 23,
-        ry: 16,
-        fill: RED,
-        stroke: INK,
-        strokeWidth: 6
-      }), /*#__PURE__*/React.createElement("circle", {
-        cx: x,
-        cy: 5,
-        r: 7,
-        fill: INK
-      }), /*#__PURE__*/React.createElement("path", {
-        d: lid,
-        fill: BLANCO,
-        stroke: INK,
-        strokeWidth: 7,
-        strokeLinejoin: "round"
-      }), /*#__PURE__*/React.createElement("path", {
-        d: 'M ' + (x - 18) + ' 24 Q ' + x + ' 34 ' + (x + 18) + ' 24',
-        fill: "none",
-        stroke: GRY,
-        strokeWidth: 6,
-        strokeLinecap: "round"
-      }));
-    }) : (props.parpadeo || 0) > 0.6 ? /*#__PURE__*/React.createElement("path", {
-      d: "M -35 -2 L -17 -2 M 17 -2 L 35 -2",
-      stroke: INK,
-      strokeWidth: 7,
-      strokeLinecap: "round"
-    }) : /*#__PURE__*/React.createElement("g", null, /*#__PURE__*/React.createElement("ellipse", {
-      cx: -26,
-      cy: -2,
-      rx: 8,
-      ry: 8 * (1 - 0.8 * (props.parpadeo || 0)),
-      fill: INK
+    }), llena ? /*#__PURE__*/React.createElement("g", {
+      fill: piel
+    }, /*#__PURE__*/React.createElement("circle", {
+      cx: -50,
+      cy: 40,
+      r: 19
+    }), /*#__PURE__*/React.createElement("circle", {
+      cx: 50,
+      cy: 40,
+      r: 19
+    })) : null, ge.mejillas ? /*#__PURE__*/React.createElement("g", {
+      fill: RED,
+      opacity: 0.6 * clamp(ge.mejillas, 0, 1)
+    }, /*#__PURE__*/React.createElement("ellipse", {
+      cx: -45,
+      cy: 30,
+      rx: 15,
+      ry: 10
     }), /*#__PURE__*/React.createElement("ellipse", {
-      cx: 26,
-      cy: -2,
-      rx: 8,
-      ry: 8 * (1 - 0.8 * (props.parpadeo || 0)),
-      fill: INK
-    })), /*#__PURE__*/React.createElement("path", _extends({
+      cx: 45,
+      cy: 30,
+      rx: 15,
+      ry: 10
+    })) : null, dib, cejas ? /*#__PURE__*/React.createElement("path", {
+      d: cejas,
+      fill: "none",
+      stroke: INK,
+      strokeWidth: 9,
+      strokeLinecap: "round"
+    }) : null, ge.nariz === 'roja' ? /*#__PURE__*/React.createElement("circle", {
+      cx: 0,
+      cy: 26,
+      r: 12,
+      fill: RED,
+      stroke: INK,
+      strokeWidth: 6
+    }) : /*#__PURE__*/React.createElement("path", _extends({
       d: "M 0 14 L 0 34"
-    }, LINEA)), props.boca === 'sonrisa' ? /*#__PURE__*/React.createElement("path", _extends({
-      d: "M -24 46 Q 0 68 24 46"
-    }, LINEA)) : props.boca === 'triste' ? /*#__PURE__*/React.createElement("path", _extends({
-      d: "M -20 62 Q 0 46 20 62"
-    }, LINEA)) : props.boca ? /*#__PURE__*/React.createElement("path", _extends({
-      d: "M -16 54 L 16 54"
-    }, LINEA)) : null);
+    }, LINEA)), dibBoca);
   }
   function Frente(props) {
     var s = props.s == null ? 1 : props.s;
@@ -1030,6 +1287,39 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
     var ropa = props.ropa || {};
     var cam = ropa.camiseta,
       colShort = ropa.short || GRY;
+
+    // panza 0..1: la barriga que crece y cuelga sobre el elastico (cerveza, comida chatarra, sedentarismo)
+    var kp = clamp(props.panza || 0, 0, 1);
+    var panza = kp > 0.02 ? function () {
+      var c = fr.a([0, -150 + 14 * kp]),
+        rx = lerp(104, 182, kp),
+        ry = lerp(84, 132, kp);
+      var a0 = 205 * GRAD,
+        a1 = -25 * GRAD; // el contorno solo por los costados y abajo
+      var p0 = [rx * Math.cos(a0), -ry * Math.sin(a0)],
+        p1 = [rx * Math.cos(a1), -ry * Math.sin(a1)];
+      return /*#__PURE__*/React.createElement("g", {
+        transform: 'translate(' + pt(c).replace(' ', ',') + ') rotate(' + g.inclinacion.toFixed(2) + ')'
+      }, /*#__PURE__*/React.createElement("ellipse", {
+        cx: 0,
+        cy: 0,
+        rx: rx,
+        ry: ry,
+        fill: cam || BLANCO
+      }), /*#__PURE__*/React.createElement("path", {
+        d: 'M ' + pt(p0) + ' A ' + rx.toFixed(1) + ' ' + ry.toFixed(1) + ' 0 1 0 ' + pt(p1),
+        fill: "none",
+        stroke: INK,
+        strokeWidth: 15,
+        strokeLinecap: "round"
+      }), /*#__PURE__*/React.createElement("path", {
+        d: 'M -10 ' + (ry * 0.42).toFixed(1) + ' Q 0 ' + (ry * 0.42 + 13).toFixed(1) + ' 10 ' + (ry * 0.42).toFixed(1),
+        fill: "none",
+        stroke: INK,
+        strokeWidth: 9,
+        strokeLinecap: "round"
+      }));
+    }() : null;
     var llamar = function (x) {
       return typeof x === 'function' ? x(g) : x;
     };
@@ -1409,11 +1699,12 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
       stroke: INK,
       strokeWidth: 13,
       strokeLinejoin: "round"
-    }), /*#__PURE__*/React.createElement(Cabeza, {
+    }), panza, /*#__PURE__*/React.createElement(Cabeza, {
       g: g,
       boca: props.boca,
       parpadeo: props.parpadeo,
-      ojos: props.ojos
+      ojos: props.ojos,
+      gesto: props.gesto
     }), brazos('trazo', cen ? 'brazo' : 'todo'), brazos('relleno', cen ? 'brazo' : 'todo'), lad.map(function (q, i) {
       return musculosBrazo(q, i, 'brazo');
     }), cen ? null : lad.map(function (q, i) {

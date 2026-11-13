@@ -24,7 +24,7 @@ const URL_BABEL = 'https://cdn.jsdelivr.net/npm/@babel/standalone@7.26.4/babel.m
 const FUENTES = [
   'primitivas.jsx', 'app.jsx',
   'cuerpo.jsx', 'perfil.jsx', 'frente.jsx', 'equipo.jsx', 'tor.jsx', 'novia.jsx',
-  'nutricion.jsx', 'marca.jsx', 'reel.jsx', 'plantillas.jsx', 'vivo.jsx', 'identidad.jsx',
+  'nutricion.jsx', 'muebles.jsx', 'marca.jsx', 'reel.jsx', 'plantillas.jsx', 'vivo.jsx', 'identidad.jsx',
   'face-pull.jsx', 'sentadilla-sumo.jsx', 'elevacion-piernas.jsx', 'press-banca.jsx', 'dominadas.jsx',
   'silla-extensora.jsx', 'fondos.jsx', 'flexiones.jsx', 'remo-t.jsx', 'encogimientos.jsx',
   'proteinas.jsx', 'curl-barra.jsx', 'fondos-banco.jsx', 'pantorrilla.jsx', 'jalon.jsx',
@@ -34,6 +34,7 @@ const FUENTES = [
   'kane.jsx', 'sentadilla-maquina.jsx', 'marihuana.jsx', 'prensa-piernas.jsx', 'lebron.jsx',
   'abdominal.jsx',
   'biceps-top3.jsx', 'creatina.jsx', 'porno.jsx', 'novato-avanzado.jsx', 'calistenia-gym.jsx', 'gluteos.jsx',
+  'cerveza.jsx', 'ex.jsx', 'gta6.jsx', 'vape.jsx', 'chatarra.jsx',
   'largo.jsx', 'largo-iconos.jsx', 'largo-plantillas.jsx'
 ];
 

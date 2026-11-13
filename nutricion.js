@@ -8,7 +8,7 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
    Comida (viewBox 240x240, centrada en 120,120):
      N.COMIDA = { pollo, pescado, huevo, leche, legumbres, frutosSecos, semillas,
                   carne, espinaca, tofu, cereal, aguacate, aceite, fritas, hamburguesa,
-                  pan, arroz, banana, manzana, brocoli, papa }
+                  pan, arroz, banana, manzana, brocoli, papa, pizza, gaseosa, dona }
      (las primeras siete tambien sueltas: N.Pollo N.Pescado N.Huevo ...)
    Conceptos (viewBox 240x240):
      N.ICONOS = { hueso, gota, escudo, termometro, hormona, capsula (color),
@@ -17,7 +17,9 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
                   balon (giro), arco, copa, mundo, balonOro, camiseta (color, cuello,
                   numero, colorNumero, rayas), bareto (encendido), pulmones (humo, color),
                   persona (color), receta, basket (giro), aro, corona, anillo, billete,
-                  bote (color), cuchara (lleno), rinones (color), bateria (p), vaso (p), cabeza, brote }
+                  bote (color), cuchara (lleno), rinones (color), bateria (p), vaso (p), cabeza, brote,
+                  jarra (p, espuma), lata (color), vape (color), cajetilla, helado, control,
+                  panuelos, corazonRoto (k, color), estrella (on), fuego }
    N.Plato    plato visto de arriba (viewBox 420x420); children van encima
    N.Bola     aminoacido: una bolita de color (r, color) para armar cadenas
    N.Balanza  balanza de baño vista de frente; va debajo de los pies de Tor
@@ -1743,7 +1745,10 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
     banana: Banana,
     manzana: Manzana,
     brocoli: Brocoli,
-    papa: Papa
+    papa: Papa,
+    pizza: Pizza,
+    gaseosa: Gaseosa,
+    dona: Dona
   };
   /* ---------------- suplementos y salud (creatina y otros) ---------------- */
 
@@ -1983,6 +1988,461 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
       strokeWidth: 11
     })));
   }
+
+  /* ---------------- vicios y antojos (cerveza, vape, chatarra, videojuegos, despecho) ---------------- */
+
+  // jarra de cerveza: p 0..1 el nivel; la espuma arriba (espuma={false} la saca)
+  function Jarra(props) {
+    var p = clamp(props.p == null ? 0.86 : props.p, 0, 1);
+    var y = 208 - 124 * p;
+    var xl = 63 + 8 * (y - 72) / 144,
+      xr = 157 - 8 * (y - 72) / 144;
+    return /*#__PURE__*/React.createElement(Svg, {
+      s: props.s
+    }, /*#__PURE__*/React.createElement("path", {
+      d: "M 164 104 Q 216 104 216 146 Q 216 190 162 190",
+      fill: "none",
+      stroke: C.INK,
+      strokeWidth: 28,
+      strokeLinecap: "round"
+    }), /*#__PURE__*/React.createElement("path", {
+      d: "M 164 104 Q 216 104 216 146 Q 216 190 162 190",
+      fill: "none",
+      stroke: BLANCO,
+      strokeWidth: 8,
+      strokeLinecap: "round"
+    }), /*#__PURE__*/React.createElement("path", _extends({
+      d: "M 54 72 L 166 72 L 158 208 Q 157 220 146 220 L 74 220 Q 63 220 62 208 Z",
+      fill: BLANCO
+    }, T0)), p > 0.02 ? /*#__PURE__*/React.createElement("path", {
+      d: 'M ' + xl.toFixed(1) + ' ' + y.toFixed(1) + ' L ' + xr.toFixed(1) + ' ' + y.toFixed(1) + ' L 149 208 L 71 208 Z',
+      fill: C.YEL
+    }) : null, /*#__PURE__*/React.createElement("path", {
+      d: "M 86 104 L 89 190 M 110 104 L 111 190",
+      stroke: BLANCO,
+      strokeWidth: 8,
+      strokeLinecap: "round",
+      opacity: 0.75
+    }), /*#__PURE__*/React.createElement("path", _extends({
+      d: "M 54 72 L 166 72 L 158 208 Q 157 220 146 220 L 74 220 Q 63 220 62 208 Z",
+      fill: "none"
+    }, T0)), props.espuma === false ? null : /*#__PURE__*/React.createElement("g", null, /*#__PURE__*/React.createElement("path", _extends({
+      d: "M 46 82 Q 32 58 58 50 Q 62 24 92 36 Q 106 14 128 34 Q 154 20 162 48 Q 188 52 176 82 Z",
+      fill: BLANCO
+    }, T0)), /*#__PURE__*/React.createElement("path", _extends({
+      d: "M 58 80 Q 54 112 67 114 Q 79 112 76 80",
+      fill: BLANCO
+    }, T0, {
+      strokeWidth: 10
+    }))));
+  }
+  // lata (energizante o gaseosa): color del cuerpo
+  function Lata(props) {
+    return /*#__PURE__*/React.createElement(Svg, {
+      s: props.s
+    }, /*#__PURE__*/React.createElement("rect", _extends({
+      x: 72,
+      y: 40,
+      width: 96,
+      height: 180,
+      rx: 16,
+      fill: props.color || C.RED
+    }, T0)), /*#__PURE__*/React.createElement("rect", {
+      x: 72,
+      y: 106,
+      width: 96,
+      height: 56,
+      fill: BLANCO,
+      stroke: C.INK,
+      strokeWidth: 9
+    }), /*#__PURE__*/React.createElement("path", {
+      d: "M 128 110 L 104 138 L 120 138 L 112 158 L 138 128 L 122 128 L 130 110 Z",
+      fill: C.YEL,
+      stroke: C.INK,
+      strokeWidth: 7,
+      strokeLinejoin: "round"
+    }), /*#__PURE__*/React.createElement("rect", _extends({
+      x: 66,
+      y: 28,
+      width: 108,
+      height: 22,
+      rx: 9,
+      fill: C.GRY
+    }, T0, {
+      strokeWidth: 11
+    })), /*#__PURE__*/React.createElement("ellipse", {
+      cx: 120,
+      cy: 38,
+      rx: 16,
+      ry: 5,
+      fill: C.INK
+    }));
+  }
+  // vape desechable: el cuerpo de color y la boquilla
+  function Vape(props) {
+    return /*#__PURE__*/React.createElement(Svg, {
+      s: props.s
+    }, /*#__PURE__*/React.createElement("path", {
+      d: "M 102 74 L 106 30 Q 107 20 117 20 L 123 20 Q 133 20 134 30 L 138 74 Z",
+      fill: C.INK,
+      stroke: C.INK,
+      strokeWidth: 10,
+      strokeLinejoin: "round"
+    }), /*#__PURE__*/React.createElement("rect", _extends({
+      x: 88,
+      y: 70,
+      width: 64,
+      height: 152,
+      rx: 22,
+      fill: props.color || C.RED
+    }, T0)), /*#__PURE__*/React.createElement("rect", {
+      x: 88,
+      y: 96,
+      width: 64,
+      height: 22,
+      fill: BLANCO,
+      stroke: C.INK,
+      strokeWidth: 8
+    }), /*#__PURE__*/React.createElement("path", {
+      d: "M 106 140 L 106 190",
+      stroke: BLANCO,
+      strokeWidth: 9,
+      strokeLinecap: "round",
+      opacity: 0.8
+    }), /*#__PURE__*/React.createElement("circle", {
+      cx: 120,
+      cy: 204,
+      r: 7,
+      fill: BLANCO,
+      stroke: C.INK,
+      strokeWidth: 5
+    }));
+  }
+  // cajetilla de cigarros con tres asomando
+  function Cajetilla(props) {
+    return /*#__PURE__*/React.createElement(Svg, {
+      s: props.s
+    }, [84, 110, 136].map(function (x, i) {
+      return /*#__PURE__*/React.createElement("g", {
+        key: x
+      }, /*#__PURE__*/React.createElement("rect", {
+        x: x,
+        y: i === 1 ? 36 : 48,
+        width: 20,
+        height: 64,
+        rx: 5,
+        fill: BLANCO,
+        stroke: C.INK,
+        strokeWidth: 9
+      }), /*#__PURE__*/React.createElement("rect", {
+        x: x,
+        y: i === 1 ? 36 : 48,
+        width: 20,
+        height: 18,
+        rx: 5,
+        fill: C.YEL,
+        stroke: C.INK,
+        strokeWidth: 9
+      }));
+    }), /*#__PURE__*/React.createElement("rect", _extends({
+      x: 62,
+      y: 92,
+      width: 116,
+      height: 130,
+      rx: 10,
+      fill: BLANCO
+    }, T0)), /*#__PURE__*/React.createElement("path", {
+      d: "M 62 126 L 178 126",
+      stroke: C.INK,
+      strokeWidth: 10
+    }), /*#__PURE__*/React.createElement("rect", {
+      x: 84,
+      y: 146,
+      width: 72,
+      height: 52,
+      rx: 8,
+      fill: C.RED,
+      stroke: C.INK,
+      strokeWidth: 9
+    }));
+  }
+  // pote de helado con la cuchara clavada y una cereza
+  function Helado(props) {
+    return /*#__PURE__*/React.createElement(Svg, {
+      s: props.s
+    }, /*#__PURE__*/React.createElement("path", {
+      d: "M 150 84 L 200 22",
+      stroke: C.INK,
+      strokeWidth: 20,
+      strokeLinecap: "round"
+    }), /*#__PURE__*/React.createElement("path", {
+      d: "M 150 84 L 200 22",
+      stroke: C.GRY,
+      strokeWidth: 7,
+      strokeLinecap: "round"
+    }), /*#__PURE__*/React.createElement("path", _extends({
+      d: "M 52 118 Q 44 80 80 74 Q 90 44 122 56 Q 152 40 164 76 Q 196 82 188 118 Z",
+      fill: BLANCO
+    }, T0)), /*#__PURE__*/React.createElement("path", {
+      d: "M 78 92 Q 84 82 94 86 M 128 78 Q 136 70 146 76",
+      fill: "none",
+      stroke: C.GRY,
+      strokeWidth: 8,
+      strokeLinecap: "round"
+    }), /*#__PURE__*/React.createElement("circle", {
+      cx: 104,
+      cy: 52,
+      r: 15,
+      fill: C.RED,
+      stroke: C.INK,
+      strokeWidth: 8
+    }), /*#__PURE__*/React.createElement("path", {
+      d: "M 106 38 Q 112 22 124 20",
+      fill: "none",
+      stroke: C.INK,
+      strokeWidth: 7,
+      strokeLinecap: "round"
+    }), /*#__PURE__*/React.createElement("path", _extends({
+      d: "M 56 114 L 184 114 L 170 212 Q 168 222 158 222 L 82 222 Q 72 222 70 212 Z",
+      fill: BLANCO
+    }, T0)), /*#__PURE__*/React.createElement("path", {
+      d: "M 60 142 L 180 142 L 174 184 L 66 184 Z",
+      fill: C.YEL,
+      stroke: C.INK,
+      strokeWidth: 9,
+      strokeLinejoin: "round"
+    }));
+  }
+  // control de videojuegos
+  function Control(props) {
+    return /*#__PURE__*/React.createElement(Svg, {
+      s: props.s
+    }, /*#__PURE__*/React.createElement("path", _extends({
+      d: "M 40 104 Q 40 68 78 68 L 162 68 Q 200 68 200 104 L 212 172 Q 216 208 186 208 Q 166 208 152 174 L 88 174 Q 74 208 54 208 Q 24 208 28 172 Z",
+      fill: props.color || BLANCO
+    }, T0)), /*#__PURE__*/React.createElement("path", {
+      d: "M 78 96 L 78 132 M 60 114 L 96 114",
+      stroke: C.INK,
+      strokeWidth: 13,
+      strokeLinecap: "round"
+    }), /*#__PURE__*/React.createElement("circle", {
+      cx: 166,
+      cy: 100,
+      r: 11,
+      fill: C.YEL,
+      stroke: C.INK,
+      strokeWidth: 7
+    }), /*#__PURE__*/React.createElement("circle", {
+      cx: 184,
+      cy: 122,
+      r: 11,
+      fill: C.RED,
+      stroke: C.INK,
+      strokeWidth: 7
+    }), /*#__PURE__*/React.createElement("circle", {
+      cx: 148,
+      cy: 122,
+      r: 11,
+      fill: C.GRN,
+      stroke: C.INK,
+      strokeWidth: 7
+    }), /*#__PURE__*/React.createElement("circle", {
+      cx: 104,
+      cy: 150,
+      r: 10,
+      fill: C.GRY,
+      stroke: C.INK,
+      strokeWidth: 7
+    }), /*#__PURE__*/React.createElement("circle", {
+      cx: 138,
+      cy: 150,
+      r: 10,
+      fill: C.GRY,
+      stroke: C.INK,
+      strokeWidth: 7
+    }));
+  }
+  // porcion de pizza con pepperoni
+  function Pizza(props) {
+    return /*#__PURE__*/React.createElement(Svg, {
+      s: props.s
+    }, /*#__PURE__*/React.createElement("path", _extends({
+      d: "M 40 74 Q 120 40 200 74 L 126 220 Q 120 230 114 220 Z",
+      fill: C.YEL
+    }, T0)), /*#__PURE__*/React.createElement("path", _extends({
+      d: "M 30 70 Q 120 22 210 70 Q 216 86 200 88 Q 120 50 40 88 Q 24 86 30 70 Z",
+      fill: C.GRY
+    }, T0)), /*#__PURE__*/React.createElement("circle", {
+      cx: 96,
+      cy: 112,
+      r: 15,
+      fill: C.RED,
+      stroke: C.INK,
+      strokeWidth: 7
+    }), /*#__PURE__*/React.createElement("circle", {
+      cx: 142,
+      cy: 124,
+      r: 14,
+      fill: C.RED,
+      stroke: C.INK,
+      strokeWidth: 7
+    }), /*#__PURE__*/React.createElement("circle", {
+      cx: 118,
+      cy: 168,
+      r: 12,
+      fill: C.RED,
+      stroke: C.INK,
+      strokeWidth: 7
+    }));
+  }
+  // vaso de gaseosa con tapa y pitillo
+  function Gaseosa(props) {
+    return /*#__PURE__*/React.createElement(Svg, {
+      s: props.s
+    }, /*#__PURE__*/React.createElement("path", {
+      d: "M 132 66 L 148 18 L 178 12",
+      fill: "none",
+      stroke: C.INK,
+      strokeWidth: 18,
+      strokeLinecap: "round",
+      strokeLinejoin: "round"
+    }), /*#__PURE__*/React.createElement("path", {
+      d: "M 132 66 L 148 18 L 178 12",
+      fill: "none",
+      stroke: BLANCO,
+      strokeWidth: 6,
+      strokeLinecap: "round",
+      strokeLinejoin: "round"
+    }), /*#__PURE__*/React.createElement("path", _extends({
+      d: "M 66 86 L 174 86 L 158 212 Q 156 222 146 222 L 94 222 Q 84 222 82 212 Z",
+      fill: props.color || C.RED
+    }, T0)), /*#__PURE__*/React.createElement("path", {
+      d: "M 82 138 Q 101 124 120 138 Q 139 152 158 138 L 155 166 Q 138 178 120 166 Q 102 154 85 166 Z",
+      fill: BLANCO,
+      stroke: C.INK,
+      strokeWidth: 8,
+      strokeLinejoin: "round"
+    }), /*#__PURE__*/React.createElement("rect", _extends({
+      x: 56,
+      y: 66,
+      width: 128,
+      height: 24,
+      rx: 10,
+      fill: BLANCO
+    }, T0)));
+  }
+  // dona glaseada
+  function Dona(props) {
+    var gl = [];
+    for (var i = 0; i < 60; i++) {
+      var a = i * Math.PI / 30,
+        r = 65 + 7 * Math.sin(a * 6);
+      gl.push((120 + r * Math.cos(a)).toFixed(1) + ' ' + (120 + r * Math.sin(a)).toFixed(1));
+    }
+    return /*#__PURE__*/React.createElement(Svg, {
+      s: props.s
+    }, /*#__PURE__*/React.createElement("circle", _extends({
+      cx: 120,
+      cy: 120,
+      r: 92,
+      fill: C.YEL
+    }, T0)), /*#__PURE__*/React.createElement("path", {
+      d: 'M ' + gl.join(' L ') + ' Z',
+      fill: C.RED,
+      stroke: C.INK,
+      strokeWidth: 8,
+      strokeLinejoin: "round"
+    }), /*#__PURE__*/React.createElement("circle", _extends({
+      cx: 120,
+      cy: 120,
+      r: 26,
+      fill: BLANCO
+    }, T0, {
+      strokeWidth: 11
+    })), /*#__PURE__*/React.createElement("path", {
+      d: "M 82 78 L 92 70 M 150 74 L 162 80 M 170 128 L 172 142 M 142 164 L 130 172 M 84 150 L 74 140 M 64 108 L 70 96",
+      stroke: BLANCO,
+      strokeWidth: 8,
+      strokeLinecap: "round"
+    }));
+  }
+  // caja de panuelos (para el despecho)
+  function Panuelos(props) {
+    return /*#__PURE__*/React.createElement(Svg, {
+      s: props.s
+    }, /*#__PURE__*/React.createElement("rect", _extends({
+      x: 40,
+      y: 122,
+      width: 160,
+      height: 96,
+      rx: 12,
+      fill: C.GRY
+    }, T0)), /*#__PURE__*/React.createElement("path", _extends({
+      d: "M 58 98 L 182 98 L 200 126 L 40 126 Z",
+      fill: BLANCO
+    }, T0)), /*#__PURE__*/React.createElement("ellipse", {
+      cx: 120,
+      cy: 112,
+      rx: 42,
+      ry: 8,
+      fill: C.INK
+    }), /*#__PURE__*/React.createElement("path", _extends({
+      d: "M 96 112 Q 82 62 110 44 Q 124 72 138 40 Q 162 70 146 112 Z",
+      fill: BLANCO
+    }, T0, {
+      strokeWidth: 11
+    })));
+  }
+  // corazon roto: k 0..1 separa las dos mitades
+  function CorazonRoto(props) {
+    var k = clamp(props.k == null ? 1 : props.k, 0, 1),
+      color = props.color || C.RED;
+    var izq = 'M 120 208 C 30 146 14 86 52 52 C 86 24 120 44 120 76 L 102 104 L 134 130 L 106 160 Z';
+    var der = 'M 120 208 C 210 146 226 86 188 52 C 154 24 120 44 120 76 L 102 104 L 134 130 L 106 160 Z';
+    return /*#__PURE__*/React.createElement(Svg, {
+      s: props.s
+    }, /*#__PURE__*/React.createElement("g", {
+      transform: 'translate(' + (-12 * k).toFixed(1) + ' 0) rotate(' + (-7 * k).toFixed(1) + ' 120 208)'
+    }, /*#__PURE__*/React.createElement("path", _extends({
+      d: izq,
+      fill: color
+    }, T0))), /*#__PURE__*/React.createElement("g", {
+      transform: 'translate(' + (12 * k).toFixed(1) + ' 0) rotate(' + (7 * k).toFixed(1) + ' 120 208)'
+    }, /*#__PURE__*/React.createElement("path", _extends({
+      d: der,
+      fill: color
+    }, T0))));
+  }
+  // estrella: on la pinta de amarillo
+  function Estrella(props) {
+    var pts = [];
+    for (var i = 0; i < 10; i++) {
+      var a = -Math.PI / 2 + i * Math.PI / 5,
+        r = i % 2 ? 44 : 100;
+      pts.push((120 + r * Math.cos(a)).toFixed(1) + ' ' + (124 + r * Math.sin(a)).toFixed(1));
+    }
+    return /*#__PURE__*/React.createElement(Svg, {
+      s: props.s
+    }, /*#__PURE__*/React.createElement("path", _extends({
+      d: 'M ' + pts.join(' L ') + ' Z',
+      fill: props.on ? props.color || C.YEL : BLANCO
+    }, T0)));
+  }
+  // llama (la rabia que sirve de pre-entreno)
+  function Fuego(props) {
+    return /*#__PURE__*/React.createElement(Svg, {
+      s: props.s
+    }, /*#__PURE__*/React.createElement("path", _extends({
+      d: "M 120 18 C 150 70 202 100 192 160 C 186 206 152 226 120 226 C 88 226 54 206 48 160 C 42 118 80 110 84 68 C 100 86 110 60 120 18 Z",
+      fill: C.RED
+    }, T0)), /*#__PURE__*/React.createElement("path", {
+      d: "M 120 112 C 136 138 160 152 154 182 C 150 204 136 214 120 214 C 104 214 90 204 86 182 C 84 162 100 152 104 132 C 112 142 116 128 120 112 Z",
+      fill: C.YEL,
+      stroke: C.INK,
+      strokeWidth: 8,
+      strokeLinejoin: "round"
+    }));
+  }
   var ICONOS = {
     hueso: Hueso,
     gota: Gota,
@@ -2022,7 +2482,17 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
     bateria: Bateria,
     vaso: Vaso,
     cabeza: Cabeza,
-    brote: Brote
+    brote: Brote,
+    jarra: Jarra,
+    lata: Lata,
+    vape: Vape,
+    cajetilla: Cajetilla,
+    helado: Helado,
+    control: Control,
+    panuelos: Panuelos,
+    corazonRoto: CorazonRoto,
+    estrella: Estrella,
+    fuego: Fuego
   };
 
   /* ---------------- plato, aminoacidos, balanza ---------------- */

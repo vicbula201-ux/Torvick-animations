@@ -379,6 +379,121 @@ def fx_publico(rng):
     return out / (np.abs(out).max() + 1e-9) * 0.8
 
 
+def _sierra(f0):
+    """fuente de voz: diente de sierra con la frecuencia f0 (array)"""
+    return 2 * ((np.cumsum(f0) / SR) % 1) - 1
+
+
+def _norm(x, pico):
+    return x / (np.abs(x).max() + 1e-9) * pico
+
+
+def fx_hipo(rng):
+    """'¡hip!': una vocal corta que salta de tono hacia arriba y se corta en seco"""
+    n = seg(0.2)
+    t = np.arange(n) / SR
+    f0 = 215 + 340 * np.clip(t / 0.07, 0, 1) ** 2
+    fuente = pasabajos(_sierra(f0), 4200)
+    v = resonador(fuente, np.full(n, 340.0), np.full(n, 80.0)) + 0.6 * resonador(fuente, np.full(n, 2200.0), np.full(n, 130.0))
+    env = np.clip(t / 0.012, 0, 1) * np.clip((0.118 - t) / 0.012, 0, 1)
+    return _norm(v, 1.0) * env * 0.8
+
+
+def fx_eructo(rng):
+    """eructo de caricatura: voz muy grave y rasposa, con temblor"""
+    dur = 0.5
+    n = seg(dur)
+    t = np.arange(n) / SR
+    jit = _norm(pasabajos(rng.standard_normal(n), 30), 1.0)
+    f0 = 84 * (1 - 0.3 * t / dur) * (1 + 0.14 * jit)
+    fuente = pasabajos(_sierra(f0), 2600) + 0.12 * rng.standard_normal(n)
+    v = (resonador(fuente, np.full(n, 470.0), np.full(n, 100.0)) + 0.6 * resonador(fuente, np.full(n, 880.0), np.full(n, 140.0))
+         + 0.15 * resonador(fuente, np.full(n, 2400.0), np.full(n, 220.0)))
+    temblor = 0.6 + 0.4 * np.abs(np.sin(2 * np.pi * 23 * t))
+    env = np.clip(t / 0.02, 0, 1) * np.clip((dur - t) / 0.12, 0, 1)
+    return _norm(v, 1.0) * temblor * env * 0.8
+
+
+def fx_vomito(rng):
+    """'bluaaj' de caricatura: una voz grave que se abre de 'u' a 'a' con gorgoteo, y el
+    chapoteo del liquido al final. Sintetizado."""
+    dur = 1.3
+    n = seg(dur)
+    t = np.arange(n) / SR
+    k = np.clip(t / 0.35, 0, 1)
+    jit = _norm(pasabajos(rng.standard_normal(n), 25), 1.0)
+    f0 = (150 - 62 * np.clip(t / 0.9, 0, 1)) * (1 + 0.1 * jit)
+    fuente = pasabajos(_sierra(f0), 3000) + 0.22 * rng.standard_normal(n)
+    v = resonador(fuente, 320 + 430 * k, np.full(n, 110.0)) + 0.6 * resonador(fuente, 800 + 400 * k, np.full(n, 150.0))
+    gorgoteo = 0.55 + 0.45 * np.sin(2 * np.pi * 17 * t + 2 * np.sin(2 * np.pi * 3 * t))
+    env = np.clip(t / 0.06, 0, 1) * np.where(t < 0.8, 1.0, np.exp(-(t - 0.8) / 0.1))
+    voz = _norm(v, 1.0) * gorgoteo * env
+    r = rng.standard_normal(n)
+    banda = pasabajos(r, 1900) - pasabajos(r, 320)
+    burbujas = 0.5 + 0.5 * np.repeat(rng.random(n // 700 + 1), 700)[:n]
+    env_l = np.clip((t - 0.22) / 0.3, 0, 1) * np.where(t < 0.95, 1.0, np.exp(-(t - 0.95) / 0.12))
+    liquido = _norm(banda, 1.0) * burbujas * env_l
+    return _norm(0.8 * voz + 0.55 * liquido, 0.8)
+
+
+def fx_llanto(rng):
+    """llanto de caricatura ('buaaa-ja-ja'): tres sollozos que caen de tono"""
+    out = np.zeros(seg(1.5))
+    for t0, d, f_ini in ((0.0, 0.62, 520.0), (0.66, 0.3, 470.0), (1.0, 0.44, 430.0)):
+        m = seg(d)
+        tt = np.arange(m) / SR
+        f0 = f_ini * (1 - 0.32 * tt / d) * (1 + 0.035 * np.sin(2 * np.pi * 7.5 * tt))
+        fuente = pasabajos(_sierra(f0), 3800)
+        k = np.clip(tt / 0.08, 0, 1)
+        v = (resonador(fuente, 350 + 450 * k, np.full(m, 100.0)) + 0.55 * resonador(fuente, 900 + 400 * k, np.full(m, 140.0))
+             + 0.2 * resonador(fuente, np.full(m, 2700.0), np.full(m, 200.0)))
+        env = np.clip(tt / 0.03, 0, 1) * np.clip((d - tt) / 0.08, 0, 1)
+        i0 = seg(t0)
+        out[i0:i0 + m] += (_norm(v, 1.0) * env)[:len(out) - i0]
+    return _norm(out, 0.7)
+
+
+def fx_sirena():
+    """sirena de patrulla: un tono que sube y baja dos veces"""
+    dur = 1.5
+    n = seg(dur)
+    t = np.arange(n) / SR
+    f = 760 + 380 * np.sin(2 * np.pi * 1.4 * t - np.pi / 2)
+    fase = np.cumsum(f) / SR
+    x = np.sin(2 * np.pi * fase) + 0.35 * np.sign(np.sin(2 * np.pi * fase))
+    x = pasabajos(x, 3200)
+    env = np.clip(t / 0.08, 0, 1) * np.clip((dur - t) / 0.25, 0, 1)
+    return _norm(x, 1.0) * env * 0.5
+
+
+def fx_crunch(rng):
+    """mordiscos crujientes (papas, galletas): tres rafagas de granos de ruido"""
+    out = np.zeros(seg(0.5))
+    for t0 in (0.0, 0.17, 0.31):
+        m = seg(0.09)
+        granos = pasaaltos(rng.standard_normal(m), 1800) * (rng.random(m) > 0.7)
+        x = granos * decae(m, 0.024) * rng.uniform(0.7, 1.0)
+        i0 = seg(t0)
+        out[i0:i0 + m] += x
+    return _norm(out, 0.75)
+
+
+def fx_tos(rng):
+    """tos seca de caricatura: dos golpes de aire con un poco de voz"""
+    out = np.zeros(seg(0.5))
+    for t0, g in ((0.0, 1.0), (0.2, 0.8)):
+        m = seg(0.16)
+        tt = np.arange(m) / SR
+        r = rng.standard_normal(m)
+        aire = pasabajos(r, 3200) - pasabajos(r, 450)
+        f0 = 170 * (1 - 0.3 * tt / 0.16)
+        voz = resonador(pasabajos(_sierra(f0), 2500), np.full(m, 620.0), np.full(m, 160.0))
+        x = (_norm(aire, 1.0) + 0.5 * _norm(voz, 1.0)) * decae(m, 0.04) * np.clip(tt / 0.006, 0, 1)
+        i0 = seg(t0)
+        out[i0:i0 + m] += x * g
+    return _norm(out, 0.8)
+
+
 def poner2(buf, x, t, g=1.0):
     """como poner, pero x ya es estereo"""
     i = seg(t)
@@ -483,9 +598,11 @@ def main():
     efectos = {'error': fx_error(), 'bien': fx_bien(), 'ding': fx_bien(), 'paso': fx_paso(rng),
                'marca': fx_marca(), 'golpe': fx_golpe(rng), 'pop': fx_pop(), 'whoosh': fx_whoosh(rng),
                'click': fx_click(), 'campana': fx_campana(), 'subida': fx_subida(rng), 'siu': fx_siu(rng),
-               'publico': fx_publico(rng)}
+               'publico': fx_publico(rng), 'hipo': fx_hipo(rng), 'eructo': fx_eructo(rng), 'vomito': fx_vomito(rng),
+               'llanto': fx_llanto(rng), 'sirena': fx_sirena(), 'crunch': fx_crunch(rng), 'tos': fx_tos(rng)}
     ganancia = {'error': 0.85, 'bien': 0.75, 'ding': 0.6, 'paso': 0.5, 'marca': 0.7, 'golpe': 0.6,
-                'pop': 0.55, 'whoosh': 0.7, 'click': 0.6, 'campana': 0.6, 'subida': 0.5, 'siu': 0.9, 'publico': 0.75}
+                'pop': 0.55, 'whoosh': 0.7, 'click': 0.6, 'campana': 0.6, 'subida': 0.5, 'siu': 0.9, 'publico': 0.75,
+                'hipo': 0.7, 'eructo': 0.75, 'vomito': 0.8, 'llanto': 0.6, 'sirena': 0.45, 'crunch': 0.75, 'tos': 0.75}
     if voz is not None:
         # en los largos los efectos acompanan a la voz: quedan unos dB por debajo
         ganancia.update({'error': 0.3, 'golpe': 0.35, 'ding': 0.45, 'bien': 0.45, 'pop': 0.6, 'whoosh': 0.8,

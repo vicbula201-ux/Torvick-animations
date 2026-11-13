@@ -15,7 +15,7 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
    NOVIA.perfil(g, T, op) -> { fondo, agarre, encima }: capas para B.Perfil
        que la convierten en ella: cola de caballo que cuelga con la gravedad
        (fondo), top deportivo y gluteo mas redondo (agarre; op.glu 0..1 lo pinta
-       de amarillo como musc), pelo y pestanas (encima). Se suman a lo que ya
+       de amarillo como musc; op.top cambia el color del top), pelo y pestanas (encima). Se suman a lo que ya
        dibuje cada escena en esas capas.
    ============================================================ */
 (function (global) {
@@ -354,7 +354,7 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
         strokeLinecap: "round"
       }), /*#__PURE__*/React.createElement("path", _extends({
         d: top,
-        fill: C.YEL
+        fill: op.top || C.YEL
       }, LN, {
         strokeWidth: 13
       }))),

@@ -19,6 +19,7 @@ frente.jsx        B.Frente: figura de frente + poses
 equipo.jsx        mancuerna, banco, barra, barra libre con discos, colchoneta, sombra
 tor.jsx           window.TOR: Tor, el avatar de la marca (pose de doble bíceps)
 novia.jsx         window.NOVIA: la novia de Tor (de frente, y capas para B.Perfil)
+muebles.jsx       window.MU: escenografía (farol, cama, sofá, tele, tacho, despertador)
 nutricion.jsx     window.N: comida, plato, balanza y dial (videos de nutrición)
 marca.jsx         window.MARCA: firma de Torvick (nombre, redes, sello, cierre)
 reel.jsx          window.REELS: armazón común de los reels verticales
@@ -49,6 +50,9 @@ biceps-top3.jsx                  top 3 de bíceps (perfil, estilo 2, ~15 s + acc
 novato-avanzado.jsx,
 calistenia-gym.jsx               pantalla dividida: los dos Tors en paralelo
 gluteos.jsx                      con la novia de Tor (público femenino)
+cerveza.jsx, ex.jsx, gta6.jsx,
+vape.jsx, chatarra.jsx           la fórmula del de la marihuana: tema tabú + Tor en un
+                                 estado ridículo + cierre de parodia (para compartir)
 identidad.jsx/.html  foto de perfil y portadas de destacadas (PNG en identidad/)
 tienda/           landing de Entrena con Tor para vender los productos digitales
                   (HTML estático; links de pago y redes en ENLACES, al final del index.html)
@@ -363,6 +367,44 @@ erección ni movimientos): TikTok e Instagram bajan o castigan los videos que
 muestran o sugieren estimulación sexual aunque sean animados. Se cuenta con
 Tor de noche en la cama, el dorso del celular y un globo "18+".
 
+**La fórmula que más se comparte** (pedido del autor, por cómo funcionó el
+de la marihuana): un tema tabú o un vicio, Tor en un estado ridículo y fácil
+de reconocer, las razones con evidencia y un cierre de parodia; se manda con
+un "jajaja, este eres tú". `cerveza.jsx` (borracho en el farol, el vómito en
+el balde, "¿la última?" "¡no, gracias!"), `ex.jsx` (llorando en el sofá con
+helado; apaga el celular y se va a entrenar), `gta6.jsx` (viciado; "Lucía no
+es real", misiones del día), `vape.jsx` (la nube que lo tapa; al tacho) y
+`chatarra.jsx` (las 2 AM visto desde adentro de la nevera). Reglas:
+
+- El gancho dice la frase del autor ("Deja de tomar cerveza") y la escena de
+  acción pregunta a quién mandárselo (`accion.pregunta`).
+- **No exagerar la evidencia**: en `vape.jsx` no se dice que sea peor que el
+  cigarro (probablemente es menos tóxico que fumar); sí que engancha igual o
+  más y que ninguno es sano. Las cifras llevan su estudio en la cabecera.
+- **Nada explícito** (ni sexual ni asqueroso de más): el vómito es un chorro
+  amarillo de caricatura y el chiste de "Lucía" y "el club" es un personaje
+  que camina y un cartel de neón.
+- **Juegos y marcas:** se nombran (GTA 6) pero no se copia su logo, su arte
+  ni sus personajes; lo que se ve en la tele es un dibujo genérico propio.
+
+**Caras de Tor** (`B.Frente`, `TOR.Tor` y el `tor` de `PL`): `ojos`
+`'borracho'` (cada ojo para un lado), `'espiral'` (hipnotizado), `'corazon'`,
+`'grandes'`, `'llanto'` (> <), `'x'` y `'rojos'`; `boca` `'abierta'`, `'o'`,
+`'ondulada'` (mareo), `'llena'` (cachetes inflados) y `'dientes'`; `gesto`
+`{ cejas: 'enojo' | 'triste' | 'alzadas', cara: { color, v } (verde de
+náuseas, rojo de rabia, amarillo de la luz de una pantalla), mejillas,
+nariz: 'roja', mirada, giroOjos, latido, giro, boca, pupila }`; y `panza`
+0..1 (la barriga que crece). En `PL`, `giro` inclina a todo Tor desde los
+pies (el tambaleo del borracho) y `detras(T, f)` dibuja detrás de él.
+
+**Escenografía** (`muebles.jsx`, `window.MU`): en coordenadas de Tor
+`MU.cama()`, `MU.manta()`, `MU.sofa()`, `MU.mantaSofa()`, `MU.balde(c,
+nivel)` y la pose `MU.poseSentado()` (de frente, sentado: la cadera baja 250);
+piezas sueltas `MU.Farol`, `MU.Tacho`, `MU.Tele` (con `children` para la
+pantalla), `MU.Despertador` (`hora`, `gira`, `suena`), `MU.Mesita` y
+`MU.Ventana`. Sonidos nuevos de `audio.py` (sintetizados): `hipo`, `eructo`,
+`vomito`, `llanto`, `sirena`, `crunch` y `tos`.
+
 **Tor disfrazado:** `ropa` en `B.Frente`, `TOR.Tor` y el `tor` de `PL`
 (`{ camiseta, cuello, short, numero, colorNumero, escudo, mangas }`) le pone
 una camiseta de color con cuello y puños, el número en el pecho (blanco o
@@ -385,7 +427,9 @@ X y los vistos, los efectos que una escena marca a propósito con
 `encendido`, `pulmones` con `humo`, `persona` con `color`, `receta`) y
 suplementos (`bote` con `color` en la etiqueta, `cuchara` con `lleno`,
 `rinones` con `color`, `bateria` con `p`, `vaso` con `p`, `cabeza` con pelo,
-`brote`). `PL.escena2` acepta además `encima(T, f)` (encima de los rótulos:
+`brote`) y vicios (`jarra` con `p`, `lata`, `vape`, `cajetilla`, `helado`,
+`control`, `panuelos`, `corazonRoto` con `k`, `estrella` con `on`, `fuego`;
+en `N.COMIDA`, `pizza`, `gaseosa` y `dona`). `PL.escena2` acepta además `encima(T, f)` (encima de los rótulos:
 la X que tacha el rótulo de un mito), `fondo(g, T, f)` en cada Tor (detrás
 de él, como la cabecera de una cama), `x`/`y` animados y `PL.alBiceps(g, p,
 'gota')` (agua que entra al músculo).

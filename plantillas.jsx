@@ -6,7 +6,9 @@
 
    PL.escena(o) -> componente de escena ({ T, at, dur }) con:
      o.tor     { x, y, s, flex, boca, musc, muscGris, muscRojo, balanza,
-                 vibra, cuando, extra(g, T, f), fondo(g, T, f), ropa, pose, ojos } o una lista de varios
+                 vibra, cuando, extra(g, T, f), fondo(g, T, f), agarre(g, T, f), ropa, pose, ojos,
+                 gesto, panza, giro } o una lista de varios (gesto y panza: los de B.Frente;
+                 giro: grados que se inclina todo Tor, para el tambaleo)
                  (fondo: SVG detras de Tor en sus coordenadas, como la cabecera de una cama)
                  (ropa: la de B.Frente, por ejemplo una camiseta; pose: de B.Frente;
                  ojos: 'rojos').
@@ -18,10 +20,12 @@
                caja de arriba a la izquierda en el lienzo; plato: N.Plato detras.
                Sin cuando la pieza es principal (ya esta en pantalla).
      o.lienzo  (T, f) => SVG en coordenadas del lienzo (flechas, lineas)
-     o.mal / o.bien  [{ x, y, cuando, s }]  X con sonido de error / visto con "tin"
+     o.mal / o.bien  [{ x, y, cuando, s, hasta }]  X con sonido de error / visto con "tin"
+                     (hasta: fraccion en que se retira; solo en estilo 2)
      o.r1 / o.r2     { text, y, cuando, s, x }  rotulos (maximo dos; x solo en estilo 2)
    PL.escena2(o)  lo mismo en ESTILO 2: camara viva (o.tomas, o.pulsos; las X la
-     sacuden), Tor que parpadea y rotulos que entran deslizando; o.encima(T, f)
+     sacuden, y o.golpes suma otras sacudidas), Tor que parpadea y rotulos que entran
+     deslizando; o.detras(T, f) es SVG del lienzo DETRAS de Tor (el farol, la nevera); o.encima(T, f)
      va encima de todo, rotulos incluidos (la X que tacha el rotulo de un mito)
    PL.grilla(lista, opciones) -> piezas: comida en filas (3, 2, 2...) que
      aparecen cuando la voz las nombra. lista = [[tipo de N.COMIDA, fraccion], ...]
@@ -53,13 +57,15 @@
     if (o.hasta != null) e = junta(e, sale(T, f(o.hasta)));
     return (
       <Pos x={o.x == null ? FIG.x : valor(o.x, T, f)} y={o.y == null ? FIG.y : valor(o.y, T, f)} e={e}
+        rot={o.giro != null ? valor(o.giro, T, f) : 0} origen={o.giro != null ? '50% 92%' : undefined}
         dx={o.vibra ? M.vibra(T, 30, 3) : 0} dy={M.life(T, 3.6, 4, props.i * 0.5)}>
         <TOR.Tor s={s} flex={valor(o.flex, T, f) || 0} boca={valor(o.boca, T, f)} sinPiso
           parpadeo={props.v2 ? global.V.parpadeo(T, props.i * 1.3) : 0}
           musc={valor(o.musc, T, f)} muscGris={valor(o.muscGris, T, f)} muscRojo={valor(o.muscRojo, T, f)}
           piso={o.balanza ? PISO_BALANZA : undefined}
           fondo={o.fondo ? function (g) { return o.fondo(g, T, f); } : (o.balanza ? balanza : undefined)} ropa={valor(o.ropa, T, f)}
-          pose={valor(o.pose, T, f)} ojos={valor(o.ojos, T, f)}
+          pose={valor(o.pose, T, f)} ojos={valor(o.ojos, T, f)} gesto={valor(o.gesto, T, f)} panza={valor(o.panza, T, f)}
+          agarre={o.agarre ? function (g) { return o.agarre(g, T, f); } : undefined}
           extra={o.extra ? function (g) { return o.extra(g, T, f); } : null} />
       </Pos>
     );
@@ -140,7 +146,12 @@
     return (
       <div style={{ position: 'absolute', inset: 0 }}>
         <V.Camara T={T} at={at} dur={dur} tomas={o.tomas || [[0, { zoom: 1 }], [1, { zoom: 1.06 }]]}
-          golpes={mal.map(function (m) { return m.cuando; })} pulsos={o.pulsos}>
+          golpes={mal.map(function (m) { return m.cuando; }).concat(o.golpes || [])} pulsos={o.pulsos}>
+          {o.detras ? (
+            <svg width={1080} height={1920} style={{ position: 'absolute', left: 0, top: 0, overflow: 'visible' }}>
+              {o.detras(T, f)}
+            </svg>
+          ) : null}
           {tors.map(function (to, i) { return <TorEn key={'t' + i} o={to} T={T} f={f} at={at} i={i} v2 />; })}
           {(o.piezas || []).map(function (pz, i) { return <Pieza key={'p' + i} o={pz} T={T} f={f} at={at} i={i} />; })}
           {o.lienzo ? (
@@ -149,8 +160,8 @@
             </svg>
           ) : null}
         </V.Camara>
-        {mal.map(function (m, i) { return <Mal key={'m' + i} T={T} cuando={f(m.cuando)} x={m.x} y={m.y} s={m.s} />; })}
-        {bien.map(function (b, i) { return <Bien key={'b' + i} T={T} cuando={f(b.cuando)} x={b.x} y={b.y} s={b.s} fase={i * 0.4} />; })}
+        {mal.map(function (m, i) { return <Mal key={'m' + i} T={T} cuando={f(m.cuando)} x={m.x} y={m.y} s={m.s} hasta={m.hasta != null ? f(m.hasta) : null} />; })}
+        {bien.map(function (b, i) { return <Bien key={'b' + i} T={T} cuando={f(b.cuando)} x={b.x} y={b.y} s={b.s} fase={i * 0.4} hasta={b.hasta != null ? f(b.hasta) : null} />; })}
         {rot(o.r1, 0)}
         {rot(o.r2, 1)}
         {o.encima ? o.encima(T, f) : null}

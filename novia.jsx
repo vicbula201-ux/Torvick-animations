@@ -13,7 +13,7 @@
    NOVIA.perfil(g, T, op) -> { fondo, agarre, encima }: capas para B.Perfil
        que la convierten en ella: cola de caballo que cuelga con la gravedad
        (fondo), top deportivo y gluteo mas redondo (agarre; op.glu 0..1 lo pinta
-       de amarillo como musc), pelo y pestanas (encima). Se suman a lo que ya
+       de amarillo como musc; op.top cambia el color del top), pelo y pestanas (encima). Se suman a lo que ya
        dibuje cada escena en esas capas.
    ============================================================ */
 (function (global) {
@@ -195,7 +195,7 @@
           <path d={bulto + ' L ' + U.pt(pv(-10, -40)) + ' Z'} fill={C.GRY} />
           {glu > 0 ? <path d={bulto + ' L ' + U.pt(pv(-10, -40)) + ' Z'} fill={C.YEL} opacity={glu} /> : null}
           <path d={bulto} fill="none" stroke={C.INK} strokeWidth={15} strokeLinecap="round" />
-          <path d={top} fill={C.YEL} {...LN} strokeWidth={13} />
+          <path d={top} fill={op.top || C.YEL} {...LN} strokeWidth={13} />
         </g>
       ),
       encima: (
