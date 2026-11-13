@@ -41,7 +41,10 @@ hip-thrust.jsx, remo-bajo.jsx,
 elevacion-lateral.jsx,
 triceps-frances.jsx,
 sentadilla-maquina.jsx,
-prensa-piernas.jsx, abdominal.jsx  reels de ejercicios en estilo 2 (con V.escena)
+prensa-piernas.jsx, abdominal.jsx,
+press-militar.jsx, peso-muerto.jsx,
+zancada.jsx, abdominal-polea.jsx,
+flexion-pecho.jsx                reels de ejercicios en estilo 2 (con V.escena)
 peptidos.jsx, cristiano.jsx,
 kane.jsx, lebron.jsx,
 marihuana.jsx, creatina.jsx,
@@ -335,7 +338,9 @@ no quede debajo del rótulo de arriba. En `B.Frente`, `sinZapato` en un lado
 termina la pierna en el tobillo (el pie de atrás de la búlgara, apoyado en
 el banco y fuera de vista). En `B.Perfil`, `cabezaEncima: true` en la pose
 dibuja la cabeza delante de los brazos (brazos arriba, como en el tríceps
-francés).
+francés). `flexion-pecho.jsx` es la versión en estilo 2 de
+`flexiones.jsx`; `zancada.jsx` pasa a una vista de frente para mostrar la
+rodilla que se va hacia adentro (valgo).
 
 **Escena de acción (comenta, comparte, guarda):** con `accion` en
 `REELS.registrar` (`true` o `{ dur, pregunta, vo }`) `reel.jsx` suma, justo

@@ -35,6 +35,7 @@ const FUENTES = [
   'abdominal.jsx',
   'biceps-top3.jsx', 'creatina.jsx', 'porno.jsx', 'novato-avanzado.jsx', 'calistenia-gym.jsx', 'gluteos.jsx',
   'cerveza.jsx', 'ex.jsx', 'gta6.jsx', 'vape.jsx', 'chatarra.jsx',
+  'press-militar.jsx', 'peso-muerto.jsx', 'zancada.jsx', 'abdominal-polea.jsx', 'flexion-pecho.jsx',
   'largo.jsx', 'largo-iconos.jsx', 'largo-plantillas.jsx'
 ];
 
