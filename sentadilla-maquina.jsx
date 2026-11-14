@@ -277,5 +277,9 @@
       }) }
   ];
 
+  // la figura y su maquina, para otros reels (los top 3)
+  global.PIEZAS = global.PIEZAS || {};
+  global.PIEZAS.smith = { pose: smith, Maquina: Maquina, Figura: Smith };
+
   global.REELS.registrar({ id: 'sentadilla-maquina', titulo: 'Sentadilla en máquina (estilo 2)', estilo: 2, escenas: ESCENAS });
 })(window);

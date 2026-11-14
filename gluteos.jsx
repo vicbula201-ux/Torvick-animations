@@ -284,6 +284,10 @@
       }) }
   ];
 
+  // la figura y su maquina, para otros reels (los top 3)
+  global.PIEZAS = global.PIEZAS || {};
+  global.PIEZAS.gluteos = { Ella: Ella, thrust: thrust, BancoHip: BancoHip, bulgara: bulgara, BancoAtras: BancoAtras, rumano: rumano, hipThrust: hipThrust, bulgaraDibujo: bulgaraDibujo };
+
   global.REELS.registrar({
     id: 'gluteos', titulo: '¿Quieres un culo grande? (estilo 2)', estilo: 2, escenas: ESCENAS,
     accion: { dur: 4.4, pregunta: '¿CUÁL PROBARÁS?', vo: '¿Cuál vas a probar primero? Coméntalo, compártelo con una amiga y guárdalo.' }

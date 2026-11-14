@@ -377,5 +377,9 @@
       vo: 'Así se hace. Técnica antes que peso.' }
   ];
 
+  // la figura y su maquina, para otros reels (los top 3)
+  global.PIEZAS = global.PIEZAS || {};
+  global.PIEZAS.sillaExtensora = { pose: sentado, Maquina: Maquina, Rodillo: Rodillo };
+
   global.REELS.registrar({ id: 'silla-extensora', titulo: 'Silla extensora', escenas: ESCENAS });
 })(window);

@@ -324,5 +324,9 @@
       vo: 'Así se hace. Técnica antes que peso.' }
   ];
 
+  // la figura y su maquina, para otros reels (los top 3)
+  global.PIEZAS = global.PIEZAS || {};
+  global.PIEZAS.fondos = { pose: enParalelas, Paralelas: Paralelas, Figura: Fondo };
+
   global.REELS.registrar({ id: 'fondos', titulo: 'Fondos en paralelas', escenas: ESCENAS });
 })(window);

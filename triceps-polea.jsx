@@ -235,5 +235,9 @@
       }) }
   ];
 
+  // la figura y su maquina, para otros reels (los top 3)
+  global.PIEZAS = global.PIEZAS || {};
+  global.PIEZAS.tricepsPolea = { pose: empuje, Figura: Perfil };
+
   global.REELS.registrar({ id: 'triceps-polea', titulo: 'Tríceps en polea (estilo 2)', estilo: 2, escenas: ESCENAS });
 })(window);

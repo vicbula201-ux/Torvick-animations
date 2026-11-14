@@ -729,6 +729,13 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
       }
     })
   }];
+
+  // la figura y su maquina, para otros reels (los top 3)
+  global.PIEZAS = global.PIEZAS || {};
+  global.PIEZAS.abdominalPolea = {
+    pose: crunch,
+    Figura: Abdominal
+  };
   global.REELS.registrar({
     id: 'abdominal-polea',
     titulo: 'Abdominal en polea (estilo 2)',

@@ -249,5 +249,9 @@
       }) }
   ];
 
+  // la figura y su maquina, para otros reels (los top 3)
+  global.PIEZAS = global.PIEZAS || {};
+  global.PIEZAS.remoBajo = { pose: remo, Maquina: Maquina, Figura: Perfil };
+
   global.REELS.registrar({ id: 'remo-bajo', titulo: 'Remo bajo con triángulo (estilo 2)', estilo: 2, escenas: ESCENAS });
 })(window);

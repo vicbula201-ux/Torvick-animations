@@ -36,6 +36,8 @@ const FUENTES = [
   'biceps-top3.jsx', 'creatina.jsx', 'porno.jsx', 'novato-avanzado.jsx', 'calistenia-gym.jsx', 'gluteos.jsx',
   'cerveza.jsx', 'ex.jsx', 'gta6.jsx', 'vape.jsx', 'chatarra.jsx',
   'press-militar.jsx', 'peso-muerto.jsx', 'zancada.jsx', 'abdominal-polea.jsx', 'flexion-pecho.jsx',
+  'top3.jsx', 'espalda-top3.jsx', 'pecho-top3.jsx', 'triceps-top3.jsx', 'abdominales-top3.jsx',
+  'gluteos-top3.jsx', 'isquios-top3.jsx', 'cuadriceps-top3.jsx',
   'largo.jsx', 'largo-iconos.jsx', 'largo-plantillas.jsx'
 ];
 

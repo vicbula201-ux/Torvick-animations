@@ -278,5 +278,9 @@
       }) }
   ];
 
+  // la figura y su maquina, para otros reels (los top 3)
+  global.PIEZAS = global.PIEZAS || {};
+  global.PIEZAS.prensa = { pose: prensa, Maquina: Maquina, Figura: Prensa };
+
   global.REELS.registrar({ id: 'prensa-piernas', titulo: 'Prensa de piernas (estilo 2)', estilo: 2, escenas: ESCENAS });
 })(window);

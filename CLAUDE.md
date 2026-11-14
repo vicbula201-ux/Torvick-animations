@@ -50,6 +50,11 @@ kane.jsx, lebron.jsx,
 marihuana.jsx, creatina.jsx,
 porno.jsx                        reels con Tor en estilo 2 (con PL.escena2)
 biceps-top3.jsx                  top 3 de bíceps (perfil, estilo 2, ~15 s + acción)
+top3.jsx                         window.TOP3: el formato "top 3 según la ciencia" (gancho + ejercicio)
+espalda-top3.jsx, pecho-top3.jsx,
+triceps-top3.jsx, abdominales-top3.jsx (con Tor),
+gluteos-top3.jsx, isquios-top3.jsx,
+cuadriceps-top3.jsx (con la novia de Tor)   top 3 por músculo, ~16 s + acción
 novato-avanzado.jsx,
 calistenia-gym.jsx               pantalla dividida: los dos Tors en paralelo
 gluteos.jsx                      con la novia de Tor (público femenino)
@@ -343,6 +348,20 @@ dibuja la cabeza delante de los brazos (brazos arriba, como en el tríceps
 francés). `flexion-pecho.jsx` es la versión en estilo 2 de
 `flexiones.jsx`; `zancada.jsx` pasa a una vista de frente para mostrar la
 rodilla que se va hacia adentro (valgo).
+
+**Top 3 por músculo** (formato de `biceps-top3.jsx`, ~16 s con la acción y
+el cierre): `TOP3.gancho({ musculo, fig, figura, tomas })` (el músculo
+encendido, "TOP 3 <MÚSCULO>", "SEGÚN LA CIENCIA" y el 3) y
+`TOP3.ejercicio({ n, fig, centro, foco, zoom, dibujo(T, s, k, extra), musculo(g),
+r1, r2 })`: una repetición con estela, `k` 0 = estirado (el inicio) .. 1 =
+contraído, brillo en el músculo al estirar y chispa al contraer.
+`TOP3.Ella` es la novia de Tor de perfil sobre cualquier pose de `B.Perfil`;
+`TOP3.atras`/`adelante` dan el punto del músculo de un lado del segmento.
+Las figuras con máquina no se copian: los reels de cada ejercicio las exportan
+en **`window.PIEZAS`** (`remoBajo`, `tricepsFrances`, `tricepsPolea`,
+`abdominalPolea`, `smith`, `prensa`, `sillaExtensora`, `fondos`, `gluteos`:
+`{ pose, Maquina, Figura… }`); por eso los `*-top3.js` van al final de
+`reels.html`, después de esos reels.
 
 **Escena de acción (comenta, comparte, guarda):** con `accion` en
 `REELS.registrar` (`true` o `{ dur, pregunta, vo }`) `reel.jsx` suma, justo

@@ -281,6 +281,10 @@
       }) }
   ];
 
+  // la figura y su maquina, para otros reels (los top 3)
+  global.PIEZAS = global.PIEZAS || {};
+  global.PIEZAS.abdominalPolea = { pose: crunch, Figura: Abdominal };
+
   global.REELS.registrar({
     id: 'abdominal-polea', titulo: 'Abdominal en polea (estilo 2)', estilo: 2, escenas: ESCENAS,
     accion: { dur: 4.2, pregunta: '¿LO HACÍAS BIEN?', vo: '¿Lo hacías bien? Coméntalo, compártelo con tu compañero de gym y guárdalo.' }

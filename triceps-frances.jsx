@@ -240,5 +240,9 @@
       }) }
   ];
 
+  // la figura y su maquina, para otros reels (los top 3)
+  global.PIEZAS = global.PIEZAS || {};
+  global.PIEZAS.tricepsFrances = { pose: frances, Figura: Perfil };
+
   global.REELS.registrar({ id: 'triceps-frances', titulo: 'Tríceps francés en polea (estilo 2)', estilo: 2, escenas: ESCENAS });
 })(window);
