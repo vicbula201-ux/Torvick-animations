@@ -572,10 +572,19 @@ viewBox, así las flechas, guías y mancuernas siguen al cuerpo. Músculos:
 ## Landing de la tienda — `tienda/`
 
 `tienda/index.html` es una página estática (sin React ni compilación) para el
-link de la bio: portada con Tor, antes/después, el pack y las guías con
-portadas dibujadas en CSS, un test de 2 preguntas, el regalo a cambio del
-correo, la calculadora de proteína, quién está detrás, la garantía, preguntas
-y cierre. Misma identidad que los videos (blanco, trazo INK, paleta de cinco,
+link de la bio. En la portada Tor saluda (cuadros `tor-saludo-a/b/c`), pregunta
+el objetivo y el nivel, recomienda una guía y hace un **tour** de 4 pasos por
+esa tarjeta hasta el botón de compra (`PRODUCTOS` en el script; el botón
+"¿Te ayudo?" lo vuelve a llamar). Después: un teléfono con 3 reels
+(`tienda/video/`, 540x960 sin audio), antes/después (`comp-sin`/`comp-con`),
+el pack con los libros en un carrusel que se arrastra (cada uno con su valor),
+las guías con portadas dibujadas en CSS, **referidos** (cada quien crea su
+link `?ref=código`; el código viaja al checkout de Hotmart como `sck` y el
+cupón de 25 % se manda a mano), el regalo a cambio del correo, la
+**calculadora** (calorías, proteína, carbohidratos y grasa según peso y
+objetivo, y un plato con porciones de las comidas que elige), quién está
+detrás, la garantía, preguntas y cierre. La palabra "gym" no se usa (pedido
+del autor): se dice ejercicio o entrenar. Misma identidad que los videos (blanco, trazo INK, paleta de cinco,
 Archivo Black + Barlow Semi Condensed, rótulos negros con punta, sombras
 duras). Los dibujos de `tienda/img/` son SVG exportados de `TOR.Tor`,
 `NOVIA.Novia` y las piezas de `N`/`P`: si cambia Tor, hay que volver a

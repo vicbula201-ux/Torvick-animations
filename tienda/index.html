@@ -3,26 +3,29 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Entrena con Tor · Guías de gym y nutrición con ciencia</title>
-<meta name="description" content="Guías ilustradas con Tor: biomecánica de los ejercicios, nutrición para principiantes, plantilla de entrenamiento y rutinas. Pago único, acceso inmediato y garantía de 7 días.">
+<title>Entrena con Tor · Guías de ejercicio y nutrición con ciencia</title>
+<meta name="description" content="Guías ilustradas con Tor: biomecánica de los ejercicios, nutrición para principiantes, plantilla de entrenamiento y rutina para principiantes. Pago único, acceso inmediato y garantía de 7 días.">
 <meta property="og:title" content="Entrena con Tor">
-<meta property="og:description" content="Lo que nadie te explica del gym, explicado simple y con ciencia.">
+<meta property="og:description" content="Lo que nadie te explica del ejercicio, Tor te lo explica fácil.">
 <meta property="og:image" content="img/tor-perfil.png">
 <meta name="theme-color" content="#FFD400">
 <link rel="icon" href="img/tor-perfil.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Barlow+Semi+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Barlow+Semi+Condensed:wght@500;600;700&family=Courier+Prime&display=swap" rel="stylesheet">
 <!--
   LANDING DE ENTRENA CON TOR (tienda/)
   Pagina estatica: se sube tal cual la carpeta tienda/ (Netlify, GitHub Pages, cualquier hosting).
   Lo que tienes que cambiar esta en el bloque ENLACES del <script> de abajo de todo:
-  los links de pago de Hotmart de cada producto, tus redes y el formulario del regalo.
-  Los precios estan en el HTML de cada tarjeta (busca class="precio").
+  los links de pago de Hotmart de cada producto, tus redes, el formulario del regalo
+  y donde se reclama el cupon de referidos.
+  Los precios estan en el HTML de cada tarjeta (busca class="precio") y en PRODUCTOS (el guia de Tor).
+  Los videos de la seccion "Asi explica Tor" estan en video/ (540x960, sin audio).
 -->
 <style>
   :root {
     --ink: #14110F; --yel: #FFD400; --red: #E03A2F; --grn: #16A06A; --gry: #C9C3B8; --blanco: #ffffff;
+    --papel: #F4F1EC;
     --borde: 3px solid var(--ink);
     --sombra: 6px 6px 0 var(--ink);
     --radio: 18px;
@@ -36,10 +39,11 @@
   }
   img { display: block; max-width: 100%; }
   a { color: inherit; }
+  button { font: inherit; color: inherit; }
   .envoltura { width: 100%; max-width: 1120px; margin: 0 auto; padding: 0 16px; }
-  section { padding: 64px 0; }
+  section { padding: 64px 0; position: relative; }
   h1, h2, h3, .impacto { font-family: 'Archivo Black', sans-serif; font-weight: 400; letter-spacing: -0.01em; line-height: 1.04; margin: 0; }
-  h1 { font-size: clamp(40px, 9vw, 76px); }
+  h1 { font-size: clamp(40px, 8.4vw, 72px); }
   h2 { font-size: clamp(32px, 6.4vw, 52px); }
   h3 { font-size: 24px; }
   p { margin: 0; }
@@ -47,15 +51,21 @@
   /* rotulo negro con la punta de flecha, como en los videos */
   .rotulo {
     display: inline-block; background: var(--ink); color: var(--blanco); text-transform: uppercase;
-    font-weight: 700; font-size: 15px; letter-spacing: 0.08em; padding: 7px 26px 7px 14px;
-    clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%);
+    font-weight: 700; font-size: clamp(18px, 2.6vw, 22px); letter-spacing: 0.07em; line-height: 1.2;
+    padding: 9px 38px 9px 18px;
+    clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 50%, calc(100% - 20px) 100%, 0 100%);
   }
+  .entra .rotulo, .rotulo.entra { transform-origin: left center; }
+  .entra.visto .rotulo { animation: rotuloEntra 0.7s cubic-bezier(.34, 1.56, .64, 1) both; }
+  @keyframes rotuloEntra { from { transform: translateX(-24px) scaleX(0.6); opacity: 0; } to { transform: none; opacity: 1; } }
   /* resaltador amarillo detras de una palabra */
   .resalta { position: relative; z-index: 0; white-space: nowrap; }
   .resalta::before {
     content: ''; position: absolute; z-index: -1; left: -0.08em; right: -0.08em; bottom: 0.04em; height: 0.48em;
-    background: var(--yel); transform: skew(-8deg) rotate(-1deg);
+    background: var(--yel); transform: skew(-8deg) rotate(-1deg); transform-origin: left center;
   }
+  .visto .resalta::before, .hero .resalta::before { animation: subraya 0.9s 0.25s cubic-bezier(.2, .9, .3, 1) both; }
+  @keyframes subraya { from { transform: skew(-8deg) rotate(-1deg) scaleX(0); } to { transform: skew(-8deg) rotate(-1deg) scaleX(1); } }
 
   .boton {
     display: inline-flex; align-items: center; justify-content: center; gap: 10px;
@@ -66,42 +76,90 @@
   }
   .boton:hover { transform: translate(-1px, -1px); box-shadow: 6px 6px 0 var(--ink); }
   .boton:active { transform: translate(3px, 3px); box-shadow: 1px 1px 0 var(--ink); }
-  .boton:focus-visible { outline: 4px solid var(--grn); outline-offset: 3px; }
+  .boton:focus-visible, .chip:focus-visible, .opcion:focus-visible { outline: 4px solid var(--grn); outline-offset: 3px; }
   .boton.blanco { background: var(--blanco); }
-  .boton.negro { background: var(--ink); color: var(--yel); box-shadow: 4px 4px 0 var(--yel); }
+  .boton.negro { background: var(--ink); color: var(--yel); box-shadow: 4px 4px 0 var(--yel), 4px 4px 0 3px var(--ink); }
   .boton.ancho { width: 100%; }
-  .confianza { font-size: 15px; font-weight: 600; color: #4a443e; margin-top: 12px; }
+  .boton.chico { padding: 10px 16px; font-size: 15px; border-radius: 11px; box-shadow: 3px 3px 0 var(--ink); }
+  .confianza { font-size: 16px; font-weight: 600; color: #4a443e; margin-top: 12px; }
   .confianza b { color: var(--ink); }
 
+  /* redes con su logo */
+  .redes-mini { display: flex; gap: 10px; margin-top: 22px; flex-wrap: wrap; }
+  .redes-mini a {
+    display: inline-flex; align-items: center; gap: 8px; font-weight: 700; text-decoration: none;
+    border: 2px solid var(--ink); border-radius: 999px; padding: 5px 14px 5px 6px; font-size: 16px; background: var(--blanco);
+    transition: transform 0.15s ease;
+  }
+  .redes-mini a img { width: 28px; height: 28px; }
+  .redes-mini a:hover { background: var(--yel); transform: translateY(-2px) rotate(-2deg); }
+
   /* ---------- cabecera ---------- */
-  .cabecera { position: sticky; top: 0; z-index: 20; background: var(--blanco); border-bottom: var(--borde); }
-  .cabecera .envoltura { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+  .cabecera { position: sticky; top: 0; z-index: 40; background: var(--blanco); border-bottom: var(--borde); }
+  .cabecera .envoltura { display: flex; align-items: center; justify-content: space-between; height: 64px; gap: 10px; }
   .marca { display: flex; align-items: center; gap: 10px; text-decoration: none; }
   .marca img { width: 40px; height: 40px; border-radius: 50%; border: var(--borde); }
   .marca span { font-family: 'Archivo Black', sans-serif; font-size: 18px; white-space: nowrap; }
   .cabecera .boton { padding: 9px 14px; font-size: 14px; border-radius: 10px; box-shadow: 3px 3px 0 var(--ink); white-space: nowrap; }
   @media (max-width: 440px) { .marca span { font-size: 15px; } .marca img { width: 34px; height: 34px; } .cabecera .boton { padding: 8px 10px; font-size: 13px; } }
+  .aviso-ref { background: var(--yel); border-bottom: var(--borde); font-weight: 700; text-align: center; padding: 8px 16px; font-size: 16px; display: none; }
+  .aviso-ref.si { display: block; }
 
-  /* ---------- portada (hero) ---------- */
-  .hero { padding: 36px 0 56px; }
-  .hero .envoltura { display: grid; gap: 28px; align-items: center; }
-  .hero h1 { margin: 18px 0 18px; }
+  /* ---------- portada (hero) con Tor que saluda ---------- */
+  .hero { padding: 30px 0 56px; overflow: hidden; }
+  .hero .envoltura { display: grid; gap: 24px; align-items: center; grid-template-areas: "texto" "guia" "acciones"; }
+  .hero-texto { grid-area: texto; }
+  .hero-acciones { grid-area: acciones; }
+  .hero h1 { margin: 18px 0 16px; }
   .hero .bajada { font-size: 21px; max-width: 34em; }
-  .hero .acciones { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 26px; }
-  .hero-figura { position: relative; width: min(100%, 440px); margin: 0 auto; aspect-ratio: 1 / 1.05; }
-  .hero-figura .disco { position: absolute; inset: 8% 6% 4%; background: var(--yel); border: var(--borde); border-radius: 50%; }
-  .hero-figura .tor { position: absolute; left: 50%; bottom: 2%; width: 76%; transform: translateX(-50%); animation: respira 3.2s ease-in-out infinite; }
-  .hero-figura .marca-x, .hero-figura .marca-v {
-    position: absolute; width: 23%; background: var(--blanco); border: var(--borde); border-radius: 50%; padding: 4%;
+  .hero .acciones { display: flex; flex-wrap: wrap; gap: 14px; }
+  .chispas { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
+  .chispas i { position: absolute; width: 16px; height: 16px; border: 3px solid var(--ink); border-radius: 50%; background: var(--yel); animation: deriva 7s ease-in-out infinite; }
+  .chispas i:nth-child(2n) { background: var(--blanco); width: 12px; height: 12px; animation-duration: 9s; }
+  .chispas i:nth-child(3n) { border-radius: 3px; transform: rotate(45deg); animation-duration: 11s; }
+  @keyframes deriva { 0%, 100% { translate: 0 0; } 50% { translate: 10px -22px; } }
+  .hero .envoltura > * { position: relative; z-index: 1; }
+
+  .guia { grid-area: guia; width: min(100%, 470px); margin: 0 auto; display: flex; flex-direction: column; align-items: stretch; }
+  .burbuja {
+    position: relative; background: var(--blanco); border: var(--borde); border-radius: 20px; box-shadow: var(--sombra);
+    padding: 16px 18px 18px; min-height: 120px; z-index: 2;
+  }
+  .burbuja::after {
+    content: ''; position: absolute; bottom: -19px; left: 58%; width: 30px; height: 30px; background: var(--blanco);
+    border-right: var(--borde); border-bottom: var(--borde); transform: rotate(45deg) skew(8deg, 8deg);
+  }
+  .burbuja .quien { font-weight: 700; font-size: 14px; letter-spacing: 0.08em; text-transform: uppercase; color: #6a6259; }
+  .burbuja .dice { font-size: 21px; font-weight: 600; line-height: 1.3; margin-top: 4px; min-height: 2.6em; }
+  .burbuja .dice b { background: var(--yel); padding: 0 3px; }
+  .cursor { display: inline-block; width: 3px; height: 1em; background: var(--ink); vertical-align: -0.12em; margin-left: 2px; animation: titila 0.8s steps(2) infinite; }
+  @keyframes titila { 50% { opacity: 0; } }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .chip {
+    cursor: pointer; font-weight: 700; font-size: 16px; background: var(--blanco); border: var(--borde); border-radius: 999px;
+    padding: 7px 14px; display: inline-flex; align-items: center; gap: 7px; transition: transform 0.12s ease, background 0.12s ease;
+    animation: chipEntra 0.45s cubic-bezier(.34, 1.56, .64, 1) both;
+  }
+  .chip img { width: 22px; height: 22px; }
+  .chip:hover { background: var(--yel); transform: translateY(-2px); }
+  .chip[aria-pressed="true"] { background: var(--yel); box-shadow: 3px 3px 0 var(--ink); }
+  .chip.principal { background: var(--ink); color: var(--yel); }
+  .chip.principal:hover { background: var(--ink); }
+  @keyframes chipEntra { from { opacity: 0; transform: translateY(8px) scale(0.9); } to { opacity: 1; transform: none; } }
+  .escenario { position: relative; aspect-ratio: 1 / 0.92; margin-top: 8px; }
+  .escenario .disco { position: absolute; left: 10%; right: 10%; top: 10%; bottom: 0; background: var(--yel); border: var(--borde); border-radius: 50% 50% 46% 46%; }
+  .escenario .sombra-piso { position: absolute; left: 30%; right: 30%; bottom: 1%; height: 6%; background: rgba(20, 17, 15, 0.16); border-radius: 50%; }
+  .tor-vivo { position: absolute; left: 50%; bottom: 3%; height: 96%; aspect-ratio: 694 / 1222; transform: translateX(-46%); animation: respiraTor 3.2s ease-in-out infinite; }
+  .tor-vivo img { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; }
+  .tor-vivo img.ve { opacity: 1; }
+  .tor-vivo .b { width: calc(100% * 750 / 694); }
+  @keyframes respiraTor { 0%, 100% { translate: 0 0; scale: 1; } 50% { translate: 0 -6px; scale: 1.01; } }
+  .escenario .marca-x, .escenario .marca-v {
+    position: absolute; width: 19%; background: var(--blanco); border: var(--borde); border-radius: 50%; padding: 3.5%;
     box-shadow: 4px 4px 0 var(--ink); animation: flota 2.8s ease-in-out infinite;
   }
-  .hero-figura .marca-x { left: 0; top: 14%; }
-  .hero-figura .marca-v { right: 0; top: 4%; animation-delay: -1.2s; }
-  .redes-mini { display: flex; gap: 10px; margin-top: 22px; flex-wrap: wrap; }
-  .redes-mini a { font-weight: 700; text-decoration: none; border: 2px solid var(--ink); border-radius: 999px; padding: 4px 12px; font-size: 15px; }
-  .redes-mini a:hover { background: var(--yel); }
-
-  @keyframes respira { 0%, 100% { transform: translateX(-50%) translateY(0) scale(1); } 50% { transform: translateX(-50%) translateY(-8px) scale(1.012); } }
+  .escenario .marca-x { left: 0; top: 30%; }
+  .escenario .marca-v { right: 0; top: 18%; animation-delay: -1.2s; }
   @keyframes flota { 0%, 100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-10px) rotate(3deg); } }
 
   /* ---------- tira de confianza ---------- */
@@ -111,41 +169,56 @@
   .tira-pista span::after { content: '•'; color: var(--yel); margin-left: 34px; }
   @keyframes tira { to { transform: translateX(-50%); } }
 
-  /* ---------- antes / despues ---------- */
-  .titulo-seccion { text-align: center; max-width: 760px; margin: 0 auto 36px; }
+  .titulo-seccion { text-align: center; max-width: 780px; margin: 0 auto 36px; }
   .titulo-seccion p { margin-top: 14px; font-size: 20px; }
-  .comparar { display: grid; gap: 22px; }
   .caja { background: var(--blanco); border: var(--borde); border-radius: var(--radio); box-shadow: var(--sombra); padding: 24px; }
-  .caja h3 { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
-  .caja h3 img { width: 54px; }
-  .caja.mal { border-color: var(--ink); }
-  .caja.mal h3 { color: var(--red); }
-  .caja.bien h3 { color: var(--grn); }
   .lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
   .lista li { display: grid; grid-template-columns: 30px 1fr; gap: 10px; align-items: start; font-size: 19px; }
   .lista li img { width: 26px; margin-top: 2px; }
-  .comparar .figura { height: 150px; width: auto; margin: 0 auto 6px; }
+  .fondo-gris { background: var(--papel); border-top: var(--borde); border-bottom: var(--borde); }
+
+  /* ---------- video ---------- */
+  .video-bloque { display: grid; gap: 30px; align-items: center; }
+  .telefono {
+    position: relative; width: min(78vw, 320px); aspect-ratio: 9 / 18.6; margin: 0 auto; background: var(--ink);
+    border-radius: 44px; padding: 14px; box-shadow: 10px 10px 0 var(--yel), 10px 10px 0 3px var(--ink);
+    animation: flotaTel 5s ease-in-out infinite;
+  }
+  @keyframes flotaTel { 0%, 100% { transform: rotate(-2deg) translateY(0); } 50% { transform: rotate(1deg) translateY(-8px); } }
+  .telefono::before { content: ''; position: absolute; top: 22px; left: 50%; width: 30%; height: 14px; transform: translateX(-50%); background: var(--ink); border-radius: 0 0 10px 10px; z-index: 2; }
+  .telefono video { width: 100%; height: 100%; object-fit: cover; border-radius: 32px; background: var(--blanco); display: block; }
+  .pestanas { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+
+  /* ---------- antes / despues ---------- */
+  .comparar { display: grid; gap: 22px; }
+  .comparar .caja { text-align: left; overflow: hidden; }
+  .comparar .escena { height: 210px; display: flex; align-items: flex-end; justify-content: center; margin: -6px -6px 12px; border-radius: 12px; }
+  .comparar .mal .escena { background: #FBE3E1; }
+  .comparar .bien .escena { background: #DDF3EA; }
+  .comparar .escena img { height: 196px; width: auto; }
+  .comparar .mal .escena img { animation: duda 2.6s ease-in-out infinite; transform-origin: 50% 100%; }
+  .comparar .bien .escena img { animation: orgullo 2.2s ease-in-out infinite; transform-origin: 50% 100%; }
+  @keyframes duda { 0%, 100% { transform: rotate(-1.5deg); } 50% { transform: rotate(1.5deg) translateY(-2px); } }
+  @keyframes orgullo { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.03) translateY(-4px); } }
+  .caja h3 { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+  .caja h3 img { width: 50px; }
+  .caja.mal h3 { color: var(--red); }
+  .caja.bien h3 { color: var(--grn); }
 
   /* ---------- productos ---------- */
-  .fondo-gris { background: #F4F1EC; border-top: var(--borde); border-bottom: var(--borde); }
   .pack {
     display: grid; gap: 24px; align-items: center; background: var(--yel); border: var(--borde); border-radius: 24px;
     box-shadow: 8px 8px 0 var(--ink); padding: 26px; margin-bottom: 36px; position: relative;
   }
-  .sello-oferta { position: absolute; top: -18px; left: 22px; }
+  .sello-oferta { position: absolute; top: -22px; left: 22px; }
   .pack h3 { font-size: clamp(28px, 5vw, 40px); }
   .pack .incluye { margin: 16px 0; }
-  .pila { position: relative; height: 270px; max-width: 380px; width: 100%; margin: 0 auto; }
-  .pila .portada { position: absolute; width: 46%; }
-  .pila .portada:nth-child(1) { left: 0; top: 30px; transform: rotate(-8deg); }
-  .pila .portada:nth-child(2) { left: 18%; top: 6px; transform: rotate(-2deg); }
-  .pila .portada:nth-child(3) { left: 36%; top: 18px; transform: rotate(5deg); }
-  .pila .portada:nth-child(4) { left: 54%; top: 40px; transform: rotate(10deg); }
-
   .grilla { display: grid; gap: 26px; }
-  .producto { display: flex; flex-direction: column; background: var(--blanco); border: var(--borde); border-radius: var(--radio); box-shadow: var(--sombra); overflow: hidden; }
-  .producto .vitrina { background: #F4F1EC; border-bottom: var(--borde); padding: 22px; display: flex; justify-content: center; position: relative; }
-  .producto .vitrina .portada { width: 58%; max-width: 210px; transform: rotate(-3deg); }
+  .producto { display: flex; flex-direction: column; background: var(--blanco); border: var(--borde); border-radius: var(--radio); box-shadow: var(--sombra); overflow: hidden; transition: transform 0.2s ease, box-shadow 0.2s ease; }
+  .producto:hover { transform: translate(-3px, -4px) rotate(-0.4deg); box-shadow: 10px 10px 0 var(--ink); }
+  .producto:hover .vitrina .portada { transform: rotate(2deg) scale(1.04); }
+  .producto .vitrina { background: var(--papel); border-bottom: var(--borde); padding: 22px; display: flex; justify-content: center; position: relative; }
+  .producto .vitrina .portada { width: 58%; max-width: 210px; transform: rotate(-3deg); transition: transform 0.3s cubic-bezier(.34, 1.56, .64, 1); }
   .producto .cuerpo { padding: 20px 20px 22px; display: flex; flex-direction: column; gap: 12px; flex: 1; }
   .producto .formato { font-size: 15px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #5a534b; }
   .producto .lista li { font-size: 17px; grid-template-columns: 24px 1fr; }
@@ -157,6 +230,8 @@
   .precio small { font-family: 'Barlow Semi Condensed', sans-serif; font-weight: 700; font-size: 15px; margin-left: 4px; }
   .ahorro { display: inline-block; background: var(--ink); color: var(--yel); font-weight: 700; padding: 3px 10px; border-radius: 8px; font-size: 15px; }
   .producto .boton { padding: 13px 18px; font-size: 16px; white-space: nowrap; }
+  .duda-final { margin-top: 36px; display: flex; gap: 18px; align-items: center; justify-content: center; flex-wrap: wrap; text-align: center; }
+  .duda-final img { width: 70px; }
 
   /* portadas de las guias, dibujadas con la marca */
   .portada {
@@ -168,6 +243,8 @@
   .portada .p-tag { position: absolute; top: 7%; left: 16%; font-family: 'Archivo Black', sans-serif; font-size: 9px; font-size: 5cqi; letter-spacing: 0.1em; background: var(--ink); color: var(--blanco); padding: 2px 6px; }
   .portada .p-titulo { position: absolute; top: 17%; left: 16%; right: 6%; font-family: 'Archivo Black', sans-serif; font-size: 15px; font-size: 9cqi; line-height: 1; text-transform: uppercase; }
   .portada .p-titulo em { font-style: normal; background: var(--yel); padding: 0 3px; }
+  .portada .p-titulo.largo { font-size: 7.4cqi; line-height: 1.05; }
+  .portada.amarilla .p-titulo em { background: var(--blanco); }
   .portada .p-fig { position: absolute; bottom: 3%; left: 22%; width: 72%; }
   .portada .p-x, .portada .p-v { position: absolute; width: 22%; bottom: 8%; }
   .portada .p-x { left: 14%; }
@@ -178,55 +255,113 @@
   .hoja { position: absolute; left: 18%; right: 8%; bottom: 8%; top: 48%; border: 3px solid var(--ink); border-radius: 6px; background: var(--blanco); display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: 1fr; }
   .hoja i { border-right: 2px solid var(--gry); border-bottom: 2px solid var(--gry); }
   .hoja i.si { background: var(--yel); }
+  /* la portada de los 7 errores: el titulo arriba, Tor y la X abajo sin tocarse */
+  .portada.errores .p-titulo { top: 15%; right: 8%; font-size: 8.6cqi; line-height: 1.04; }
+  .portada.errores .p-fig { left: 44%; width: 46%; bottom: 3%; }
+  .portada.errores .p-x { left: 15%; bottom: 7%; width: 24%; }
 
-  /* el test para elegir */
-  .test { margin-top: 40px; display: grid; gap: 18px; }
-  .test h3 { font-size: 28px; }
-  .opciones { display: flex; flex-wrap: wrap; gap: 10px; }
-  .opcion { font: inherit; font-weight: 700; font-size: 17px; background: var(--blanco); border: var(--borde); border-radius: 12px; padding: 10px 16px; cursor: pointer; }
-  .opcion[aria-pressed="true"] { background: var(--yel); box-shadow: 3px 3px 0 var(--ink); }
-  .resultado { display: none; align-items: center; gap: 18px; flex-wrap: wrap; }
-  .resultado.listo { display: flex; }
-  .resultado p { font-size: 20px; flex: 1 1 260px; }
+  /* el pack: carrusel de libros que se desliza */
+  .carrusel-caja { position: relative; min-width: 0; }
+  .carrusel {
+    display: flex; gap: 18px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 18px 20% 26px;
+    scrollbar-width: none; cursor: grab; user-select: none; -webkit-user-select: none; overscroll-behavior-x: contain;
+  }
+  .carrusel::-webkit-scrollbar { display: none; }
+  .carrusel.arrastra { cursor: grabbing; scroll-snap-type: none; }
+  .libro { flex: 0 0 60%; max-width: 220px; scroll-snap-align: center; text-align: center; }
+  .libro .portada { transform: rotate(-4deg) scale(0.9); transition: transform 0.35s cubic-bezier(.34, 1.56, .64, 1); pointer-events: none; }
+  .libro:nth-child(2n) .portada { transform: rotate(4deg) scale(0.9); }
+  .libro.activo .portada { transform: rotate(0deg) scale(1); }
+  .libro .nombre { font-weight: 700; font-size: 17px; margin-top: 14px; line-height: 1.2; }
+  .libro .valor { display: inline-block; margin-top: 6px; background: var(--blanco); border: 2px solid var(--ink); border-radius: 999px; padding: 2px 12px; font-family: 'Archivo Black', sans-serif; font-size: 15px; }
+  .libro .valor.regalo { background: var(--grn); color: var(--blanco); }
+  .flechas { display: flex; justify-content: center; align-items: center; gap: 14px; }
+  .flecha { width: 46px; height: 46px; border-radius: 50%; border: var(--borde); background: var(--blanco); box-shadow: 3px 3px 0 var(--ink); cursor: pointer; font-family: 'Archivo Black', sans-serif; font-size: 20px; line-height: 1; }
+  .flecha:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ink); }
+  .puntos { display: flex; gap: 6px; }
+  .puntos i { width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--ink); background: var(--blanco); transition: transform 0.2s ease; }
+  .puntos i.si { background: var(--ink); transform: scale(1.2); }
+  .suma-valor { text-align: center; margin-top: 12px; font-weight: 700; }
+  .suma-valor s { color: #6a6259; }
+  .pista-arrastre { text-align: center; font-size: 15px; font-weight: 600; color: #4a443e; margin-top: 4px; }
+
+  /* ---------- referidos ---------- */
+  .referidos { display: grid; gap: 28px; align-items: center; }
+  .pasos { list-style: none; padding: 0; margin: 20px 0 0; display: grid; gap: 14px; counter-reset: paso; }
+  .pasos li { display: grid; grid-template-columns: 46px 1fr; gap: 12px; align-items: center; font-size: 19px; }
+  .pasos li::before { counter-increment: paso; content: counter(paso); width: 46px; height: 46px; border-radius: 50%; background: var(--yel); border: var(--borde); display: flex; align-items: center; justify-content: center; font-family: 'Archivo Black', sans-serif; font-size: 20px; }
+  .cupon { position: relative; display: inline-flex; align-items: center; gap: 12px; background: var(--grn); color: var(--blanco); border: var(--borde); border-radius: 14px; padding: 10px 18px; box-shadow: 4px 4px 0 var(--ink); transform: rotate(-3deg); animation: flota 3s ease-in-out infinite; }
+  .cupon b { font-family: 'Archivo Black', sans-serif; font-size: 34px; line-height: 1; }
+  .link-caja { display: none; margin-top: 14px; }
+  .link-caja.si { display: block; }
+  .link-texto { font-family: 'Courier Prime', ui-monospace, monospace; font-size: 15px; word-break: break-all; background: var(--papel); border: 2px dashed var(--ink); border-radius: 10px; padding: 10px 12px; }
+  .link-botones { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
 
   /* ---------- regalo ---------- */
   .regalo { display: grid; gap: 26px; align-items: center; }
-  .regalo .portada { width: 62%; max-width: 240px; margin: 0 auto; transform: rotate(-4deg); }
+  .regalo .portada { width: 62%; max-width: 250px; margin: 0 auto; transform: rotate(-4deg); animation: flota 4s ease-in-out infinite; }
   .formulario { display: grid; gap: 12px; margin-top: 20px; }
-  .formulario input {
+  .formulario input, .campo-texto {
     font: inherit; font-size: 19px; padding: 15px 16px; border: var(--borde); border-radius: 12px; background: var(--blanco); color: var(--ink); width: 100%;
   }
-  .formulario input:focus { outline: 4px solid var(--yel); outline-offset: 0; }
+  .formulario input:focus, .campo-texto:focus { outline: 4px solid var(--yel); outline-offset: 0; }
   .aviso { font-size: 15px; color: #5a534b; }
   .mensaje { display: none; font-weight: 700; padding: 12px 14px; border: var(--borde); border-radius: 12px; }
   .mensaje.ok { display: block; background: #DDF3EA; }
   .mensaje.pendiente { display: block; background: #FFF4BF; }
 
   /* ---------- calculadora ---------- */
-  .calcu { display: grid; gap: 26px; align-items: center; }
+  .calcu { display: grid; gap: 24px; align-items: start; }
   .calcu .caja { box-shadow: 8px 8px 0 var(--yel), 8px 8px 0 3px var(--ink); }
   .campo { display: grid; gap: 8px; margin-bottom: 18px; }
-  .campo label { font-weight: 700; font-size: 17px; text-transform: uppercase; letter-spacing: 0.05em; }
-  .campo input[type="range"] { width: 100%; accent-color: var(--ink); }
-  .peso-valor { font-family: 'Archivo Black', sans-serif; font-size: 28px; }
-  .cifra { font-family: 'Archivo Black', sans-serif; font-size: clamp(44px, 10vw, 64px); line-height: 1; }
-  .cifra small { font-size: 0.4em; }
-  .platos { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
-  .platos span { display: inline-flex; align-items: center; gap: 6px; border: 2px solid var(--ink); border-radius: 999px; padding: 4px 12px; font-weight: 700; font-size: 16px; }
-  .platos img { width: 26px; }
+  .campo > label, .campo > .etiqueta-campo { font-weight: 700; font-size: 16px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .campo input[type="range"] { width: 100%; accent-color: var(--ink); height: 28px; }
+  .peso-valor { font-family: 'Archivo Black', sans-serif; font-size: 34px; line-height: 1; }
+  .segmento { display: flex; flex-wrap: wrap; gap: 8px; }
+  .kcal { font-family: 'Archivo Black', sans-serif; font-size: clamp(40px, 9vw, 56px); line-height: 1; }
+  .kcal small { font-size: 0.42em; }
+  .macros { display: grid; gap: 12px; margin-top: 16px; }
+  .macro { display: grid; grid-template-columns: 116px 1fr 70px; gap: 10px; align-items: center; font-weight: 700; }
+  .macro .barra { height: 22px; border: var(--borde); border-radius: 999px; overflow: hidden; background: var(--blanco); }
+  .macro .barra i { display: block; height: 100%; width: 0; border-right: var(--borde); transition: width 0.6s cubic-bezier(.34, 1.4, .64, 1); }
+  .macro .num { font-family: 'Archivo Black', sans-serif; text-align: right; }
+  .m-prot i { background: var(--yel); }
+  .m-carb i { background: var(--gry); }
+  .m-gras i { background: var(--grn); }
+  .grupo-comida { margin-top: 14px; }
+  .grupo-comida > p { font-weight: 700; font-size: 15px; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+  .grupo-comida .chip { font-size: 15px; padding: 5px 12px 5px 6px; animation: none; }
+  .grupo-comida .chip img { width: 26px; height: 26px; }
+  .plato-vivo { position: relative; width: min(100%, 300px); aspect-ratio: 1; margin: 6px auto 10px; }
+  .plato-vivo .base { position: absolute; inset: 0; border-radius: 50%; background: var(--blanco); border: 4px solid var(--ink); box-shadow: inset 0 0 0 16px var(--papel), inset 0 0 0 19px var(--ink), 6px 6px 0 var(--ink); }
+  .plato-vivo img { position: absolute; width: 34%; transition: transform 0.4s cubic-bezier(.34, 1.56, .64, 1); }
+  .plato-vivo .c1 { left: 15%; top: 18%; }
+  .plato-vivo .c2 { right: 13%; top: 22%; }
+  .plato-vivo .c3 { left: 34%; bottom: 13%; }
+  .plato-vivo img.salta { animation: salta 0.5s cubic-bezier(.34, 1.56, .64, 1); }
+  @keyframes salta { from { transform: scale(0.3) rotate(-20deg); opacity: 0; } to { transform: none; opacity: 1; } }
+  .sugerencia { font-size: 20px; line-height: 1.4; }
+  .sugerencia b { background: var(--yel); padding: 0 3px; }
+  .porciones { list-style: none; padding: 0; margin: 12px 0 0; display: grid; gap: 8px; }
+  .porciones li { display: grid; grid-template-columns: 34px 1fr; gap: 10px; align-items: center; font-size: 18px; border: 2px solid var(--ink); border-radius: 12px; padding: 6px 10px; background: var(--blanco); }
+  .porciones img { width: 34px; }
+  .porciones li.info { border-style: dashed; font-size: 16px; }
+  .plato-vivo img.apagado { opacity: 0.3; }
+  .nota-calcu { font-size: 14px; color: #5a534b; margin-top: 12px; }
 
   /* ---------- quien esta detras ---------- */
   .autor { display: grid; gap: 26px; align-items: center; }
   .autor .fotos { position: relative; width: min(100%, 360px); margin: 0 auto; aspect-ratio: 1; }
   .autor .foto { position: absolute; left: 0; top: 0; width: 72%; aspect-ratio: 1; border-radius: 50%; overflow: hidden; border: 4px solid var(--ink); box-shadow: var(--sombra); }
   .autor .foto img { width: 100%; height: 100%; object-fit: cover; }
-  .autor .mini-tor { position: absolute; right: 0; bottom: 0; width: 52%; aspect-ratio: 1; border-radius: 50%; background: var(--yel); border: 4px solid var(--ink); display: flex; align-items: flex-end; justify-content: center; overflow: hidden; }
+  .autor .mini-tor { position: absolute; right: 0; bottom: 0; width: 52%; aspect-ratio: 1; border-radius: 50%; background: var(--yel); border: 4px solid var(--ink); display: flex; align-items: flex-end; justify-content: center; overflow: hidden; animation: flota 3.4s ease-in-out infinite; }
   .autor .mini-tor img { width: 82%; transform: translateY(8%); }
   .autor p + p { margin-top: 14px; }
 
   /* ---------- garantia ---------- */
   .garantia { display: flex; gap: 22px; align-items: center; flex-wrap: wrap; justify-content: center; text-align: left; }
-  .escudo { width: 130px; height: 130px; border-radius: 50%; background: var(--grn); border: var(--borde); box-shadow: var(--sombra); color: var(--blanco); display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Archivo Black', sans-serif; line-height: 1; flex: none; }
+  .escudo { width: 130px; height: 130px; border-radius: 50%; background: var(--grn); border: var(--borde); box-shadow: var(--sombra); color: var(--blanco); display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Archivo Black', sans-serif; line-height: 1; flex: none; animation: late 2.4s ease-in-out infinite; }
+  @keyframes late { 0%, 100% { transform: scale(1); } 12% { transform: scale(1.06); } 24% { transform: scale(1); } }
   .escudo b { font-size: 46px; }
   .escudo span { font-size: 15px; letter-spacing: 0.06em; }
   .garantia div:last-child { max-width: 560px; }
@@ -242,18 +377,46 @@
   .faq details p { padding: 0 0 18px; }
 
   /* ---------- cierre y pie ---------- */
-  .cierre { background: var(--yel); border-top: var(--borde); text-align: center; }
+  .cierre { background: var(--yel); border-top: var(--borde); text-align: center; overflow: hidden; }
   .cierre .tor-cierre { width: 150px; margin: 0 auto 10px; animation: flota 3.2s ease-in-out infinite; }
   .cierre h2 { margin-bottom: 14px; }
   .cierre .boton { margin-top: 22px; }
-  .pie-pagina { background: var(--ink); color: var(--blanco); padding: 36px 0; font-size: 16px; }
+  .pie-pagina { background: var(--ink); color: var(--blanco); padding: 36px 0 110px; font-size: 16px; }
   .pie-pagina .envoltura { display: grid; gap: 18px; }
   .pie-pagina a { color: var(--blanco); }
-  .pie-pagina .redes-mini a { border-color: var(--blanco); color: var(--blanco); }
+  .pie-pagina .redes-mini a { border-color: var(--blanco); color: var(--blanco); background: transparent; }
   .pie-pagina .redes-mini a:hover { background: var(--yel); color: var(--ink); }
   .legal { display: flex; flex-wrap: wrap; gap: 16px; color: var(--gry); }
   .legal a { color: var(--gry); }
   .descargo { color: var(--gry); font-size: 14px; }
+
+  /* ---------- Tor acompana: el tour y el boton de ayuda ---------- */
+  .tour {
+    position: fixed; z-index: 60; right: 16px; bottom: 16px; width: min(380px, calc(100% - 32px));
+    display: none; grid-template-columns: 78px 1fr; gap: 10px; align-items: end;
+  }
+  .tour.si { display: grid; animation: tourEntra 0.45s cubic-bezier(.34, 1.56, .64, 1) both; }
+  @keyframes tourEntra { from { opacity: 0; transform: translateY(30px) scale(0.92); } to { opacity: 1; transform: none; } }
+  .tour .mini { width: 78px; height: 120px; position: relative; }
+  .tour .mini img { position: absolute; bottom: 0; left: 0; width: 100%; animation: respiraTor 2.6s ease-in-out infinite; }
+  .tour .tarjeta { background: var(--blanco); border: var(--borde); border-radius: 18px; box-shadow: var(--sombra); padding: 14px 16px 14px; position: relative; }
+  .tour .tarjeta::after { content: ''; position: absolute; left: -12px; bottom: 26px; width: 20px; height: 20px; background: var(--blanco); border-left: var(--borde); border-bottom: var(--borde); transform: rotate(45deg); }
+  .tour .paso { font-weight: 700; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: #6a6259; }
+  .tour .texto { font-size: 18px; font-weight: 600; line-height: 1.3; margin-top: 4px; }
+  .tour .texto b { background: var(--yel); padding: 0 3px; }
+  .tour .acciones { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+  .tour .cerrar { position: absolute; top: 6px; right: 8px; border: 0; background: none; font-family: 'Archivo Black', sans-serif; font-size: 18px; cursor: pointer; padding: 4px 6px; }
+  .foco-tour { position: relative; z-index: 35; outline: 4px solid var(--ink); outline-offset: 6px; box-shadow: 0 0 0 10px var(--yel), 0 0 0 13px var(--ink) !important; border-radius: 14px; animation: focoPulso 1.4s ease-in-out infinite; }
+  @keyframes focoPulso { 0%, 100% { outline-offset: 6px; } 50% { outline-offset: 10px; } }
+  .ayuda {
+    position: fixed; z-index: 55; right: 16px; bottom: 16px; display: none; align-items: center; gap: 10px;
+    background: var(--yel); border: var(--borde); border-radius: 999px; box-shadow: 4px 4px 0 var(--ink);
+    padding: 5px 16px 5px 5px; cursor: pointer; font-family: 'Archivo Black', sans-serif; font-size: 15px; text-transform: uppercase;
+  }
+  .ayuda.si { display: inline-flex; animation: tourEntra 0.45s cubic-bezier(.34, 1.56, .64, 1) both; }
+  .ayuda img { width: 46px; height: 46px; border-radius: 50%; border: 3px solid var(--ink); background: var(--blanco); animation: saludito 3.6s ease-in-out infinite; }
+  @media (max-width: 1039px) { .ayuda { padding: 4px; font-size: 0; gap: 0; } .ayuda img { width: 52px; height: 52px; } }
+  @keyframes saludito { 0%, 80%, 100% { transform: rotate(0); } 85% { transform: rotate(-14deg); } 90% { transform: rotate(10deg); } 95% { transform: rotate(-6deg); } }
 
   /* entradas al hacer scroll: pop con rebote */
   .entra { opacity: 0; transform: translateY(16px) scale(0.96); }
@@ -262,15 +425,24 @@
 
   @media (min-width: 760px) {
     section { padding: 88px 0; }
-    .hero .envoltura { grid-template-columns: 1.1fr 0.9fr; }
+    .hero .envoltura { grid-template-columns: 1.05fr 0.95fr; grid-template-areas: "texto guia" "acciones guia"; row-gap: 26px; }
+    .hero-texto { align-self: end; }
+    .hero-acciones { align-self: start; }
     .comparar { grid-template-columns: 1fr 1fr; }
-    .pack { grid-template-columns: 1.2fr 1fr; padding: 36px; }
+    .pack { grid-template-columns: 1fr 1.1fr; padding: 36px; }
     .grilla { grid-template-columns: repeat(2, 1fr); }
-    .regalo, .calcu, .autor { grid-template-columns: 1fr 1fr; }
+    .regalo, .calcu, .autor, .referidos, .video-bloque { grid-template-columns: 1fr 1fr; }
     .pie-pagina .envoltura { grid-template-columns: 1fr auto; align-items: center; }
+    .libro { flex-basis: 46%; }
   }
   @media (min-width: 1040px) {
     .grilla { grid-template-columns: repeat(3, 1fr); }
+  }
+  @media (max-width: 759px) {
+    .chispas { display: none; }
+    .carrusel-caja { order: -1; margin: 6px -10px 0; }
+    .tour { grid-template-columns: 64px 1fr; }
+    .tour .mini { width: 64px; height: 100px; }
   }
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation: none !important; transition: none !important; }
@@ -287,54 +459,96 @@
     <a class="boton" href="#guias">Ver guías</a>
   </div>
 </header>
+<p class="aviso-ref" id="aviso-ref" role="status"></p>
 
 <main id="inicio">
 
-  <!-- ===================== PORTADA ===================== -->
+  <!-- ===================== PORTADA: Tor saluda y pregunta ===================== -->
   <section class="hero">
+    <div class="chispas" aria-hidden="true">
+      <i style="left:6%;top:14%"></i><i style="left:44%;top:8%;animation-delay:-2s"></i><i style="left:90%;top:12%;animation-delay:-4s"></i>
+      <i style="left:52%;top:88%;animation-delay:-1s"></i><i style="left:3%;top:78%;animation-delay:-3s"></i><i style="left:94%;top:70%;animation-delay:-5s"></i>
+    </div>
     <div class="envoltura">
-      <div>
+      <div class="hero-texto">
         <span class="rotulo">Ciencia + dibujos simples</span>
-        <h1>Lo que nadie te explica del gym, <span class="resalta">explicado</span> simple.</h1>
-        <p class="bajada">Guías ilustradas con Tor: cada ejercicio con su error y su forma correcta, la nutrición sin dietas raras y planes listos para seguir. Todo basado en estudios, nada de opiniones.</p>
+        <h1>Lo que nadie te explica del ejercicio, <span class="resalta">Tor</span> te lo explica fácil.</h1>
+        <p class="bajada">Guías ilustradas: cada ejercicio con su error y su forma correcta, la nutrición sin dietas raras y planes listos para seguir. Todo basado en estudios, nada de opiniones.</p>
+      </div>
+
+      <div class="guia" id="guia" aria-live="polite">
+        <div class="burbuja">
+          <p class="quien">Tor</p>
+          <p class="dice" id="guia-dice"></p>
+          <div class="chips" id="guia-chips"></div>
+        </div>
+        <div class="escenario" aria-hidden="true">
+          <div class="disco"></div>
+          <div class="sombra-piso"></div>
+          <div class="tor-vivo" id="tor-vivo">
+            <img class="a ve" src="img/tor-saludo-a.svg" alt="">
+            <img class="b" src="img/tor-saludo-b.svg" alt="">
+            <img class="c" src="img/tor-saludo-c.svg" alt="">
+          </div>
+          <img class="marca-x" src="img/tacha.svg" alt="">
+          <img class="marca-v" src="img/visto.svg" alt="">
+        </div>
+      </div>
+
+      <div class="hero-acciones">
         <div class="acciones">
           <a class="boton" href="#guias">Ver las guías</a>
           <a class="boton blanco" href="#gratis">Guía gratis</a>
         </div>
         <p class="confianza"><b>Pago único</b> · Acceso inmediato · Garantía de 7 días</p>
         <div class="redes-mini" aria-label="Redes">
-          <a data-red="instagram" href="#">Instagram</a>
-          <a data-red="tiktok" href="#">TikTok</a>
-          <a data-red="youtube" href="#">YouTube</a>
+          <a data-red="instagram" href="#"><img src="img/red-instagram.svg" alt="">Instagram</a>
+          <a data-red="tiktok" href="#"><img src="img/red-tiktok.svg" alt="">TikTok</a>
+          <a data-red="youtube" href="#"><img src="img/red-youtube.svg" alt="">YouTube</a>
         </div>
-      </div>
-      <div class="hero-figura" aria-hidden="true">
-        <div class="disco"></div>
-        <img class="tor" src="img/tor-flex.svg" alt="">
-        <img class="marca-x" src="img/tacha.svg" alt="">
-        <img class="marca-v" src="img/visto.svg" alt="">
       </div>
     </div>
   </section>
 
   <div class="tira" aria-hidden="true">
     <div class="tira-pista">
-      <span>Biomecánica</span><span>Nutrición</span><span>Rutinas</span><span>Plantilla de progreso</span><span>Basado en ciencia</span><span>Acceso inmediato</span>
-      <span>Biomecánica</span><span>Nutrición</span><span>Rutinas</span><span>Plantilla de progreso</span><span>Basado en ciencia</span><span>Acceso inmediato</span>
+      <span>Biomecánica</span><span>Nutrición</span><span>Rutina para principiantes</span><span>Plantilla de progreso</span><span>Basado en ciencia</span><span>Acceso inmediato</span>
+      <span>Biomecánica</span><span>Nutrición</span><span>Rutina para principiantes</span><span>Plantilla de progreso</span><span>Basado en ciencia</span><span>Acceso inmediato</span>
     </div>
   </div>
 
+  <!-- ===================== VIDEO ===================== -->
+  <section id="videos">
+    <div class="envoltura video-bloque">
+      <div class="entra">
+        <span class="rotulo">Así explica Tor</span>
+        <h2 style="margin-top:14px">Cada ejercicio, con su <span class="resalta">error</span> y su forma correcta</h2>
+        <p style="margin-top:14px;font-size:20px">Así son los videos de Tor y así están hechas las guías: ves el error, entiendes por qué pasa y aprendes a corregirlo.</p>
+        <div class="pestanas" id="pestanas" role="tablist" aria-label="Elige un video">
+          <button class="chip" type="button" role="tab" aria-pressed="true" data-video="press-militar">Press militar</button>
+          <button class="chip" type="button" role="tab" aria-pressed="false" data-video="peso-muerto">Peso muerto</button>
+          <button class="chip" type="button" role="tab" aria-pressed="false" data-video="abdominal-polea">Abdominal en polea</button>
+        </div>
+      </div>
+      <div class="entra">
+        <div class="telefono">
+          <video id="video" src="video/press-militar.mp4" poster="video/press-militar.jpg" muted loop playsinline preload="metadata" aria-label="Video de Tor explicando un ejercicio"></video>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- ===================== ANTES / DESPUES ===================== -->
-  <section>
+  <section class="fondo-gris">
     <div class="envoltura">
       <div class="titulo-seccion entra">
         <span class="rotulo">¿Te pasa esto?</span>
         <h2 style="margin-top:14px">Entrenar a ciegas <span class="resalta">no funciona</span></h2>
-        <p>La diferencia no es cuánto sufres en el gym: es entender qué haces y por qué.</p>
+        <p>La diferencia no es cuánto sufres entrenando: es entender qué haces y por qué.</p>
       </div>
       <div class="comparar">
         <div class="caja mal entra">
-          <img class="figura" src="img/tor-triste.svg" alt="Tor triste">
+          <div class="escena"><img src="img/comp-sin.svg" alt="Tor confundido mirando rutinas en el celular"></div>
           <h3><img src="img/tacha.svg" alt="">Sin método</h3>
           <ul class="lista">
             <li><img src="img/tacha.svg" alt="">Copias rutinas de redes sin saber por qué.</li>
@@ -344,7 +558,7 @@
           </ul>
         </div>
         <div class="caja bien entra">
-          <img class="figura" src="img/tor-flex.svg" alt="Tor sacando bíceps">
+          <div class="escena"><img src="img/comp-con.svg" alt="Tor sacando bíceps junto a una gráfica que sube"></div>
           <h3><img src="img/visto.svg" alt="">Con Tor</h3>
           <ul class="lista">
             <li><img src="img/visto.svg" alt="">Sabes qué músculo trabaja y cómo moverlo bien.</li>
@@ -358,7 +572,7 @@
   </section>
 
   <!-- ===================== PRODUCTOS ===================== -->
-  <section id="guias" class="fondo-gris">
+  <section id="guias">
     <div class="envoltura">
       <div class="titulo-seccion entra">
         <span class="rotulo">Las guías de Tor</span>
@@ -366,32 +580,43 @@
         <p>PDF ilustrados y plantillas para el celular. Las descargas apenas pagas.</p>
       </div>
 
-      <!-- el pack: la mejor oferta -->
-      <div class="pack entra">
+      <!-- el pack: la mejor oferta, con los libros que se deslizan -->
+      <div class="pack entra" id="pack">
         <span class="rotulo sello-oferta">Mejor oferta</span>
         <div>
           <h3>PACK TODO TOR</h3>
           <p class="incluye">Las 4 guías juntas y 2 regalos: todo lo que necesitas para entrenar y comer bien desde hoy.</p>
-          <ul class="lista">
-            <li><img src="img/visto.svg" alt="">Biomecánica de los ejercicios del gym</li>
+          <ul class="lista" id="pack-lista">
+            <li><img src="img/visto.svg" alt="">Biomecánica de los ejercicios</li>
             <li><img src="img/visto.svg" alt="">Nutrición para principiantes</li>
             <li><img src="img/visto.svg" alt="">Plantilla de plan de entrenamiento</li>
-            <li><img src="img/visto.svg" alt="">Rutinas de 12 semanas (gym y casa)</li>
+            <li><img src="img/visto.svg" alt="">Rutina para principiantes (12 semanas)</li>
             <li><img src="img/visto.svg" alt=""><span><b>Regalo:</b> guía de suplementos según la ciencia</span></li>
             <li><img src="img/visto.svg" alt=""><span><b>Regalo:</b> recetario alto en proteína</span></li>
           </ul>
-          <div class="pie" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:20px">
+          <div class="pie" id="pack-precio" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:20px">
             <span class="precio">$34.90<small>USD</small></span>
             <span class="ahorro">Ahorras $22.70 frente a comprarlas sueltas</span>
           </div>
-          <a class="boton negro ancho" style="margin-top:18px" data-producto="pack" href="#">Quiero el pack completo</a>
+          <a class="boton negro ancho" id="pack-boton" style="margin-top:18px" data-producto="pack" href="#">Quiero el pack completo</a>
           <p class="confianza">Pago único · Acceso de por vida · Garantía de 7 días</p>
         </div>
-        <div class="pila" aria-hidden="true">
-          <div class="portada"><span class="p-tag">E-BOOK</span><div class="p-titulo"><em>Biomecánica</em> del gym</div><img class="p-fig" src="img/tor-musculos.svg" alt=""></div>
-          <div class="portada amarilla"><span class="p-tag">E-BOOK</span><div class="p-titulo">Nutrición para <em>principiantes</em></div><img class="p-fig" src="img/pollo.svg" alt="" style="width:60%;left:28%"></div>
-          <div class="portada"><span class="p-tag">PLANTILLA</span><div class="p-titulo"><em>Plan</em> de entreno</div><div class="hoja"><i class="si"></i><i></i><i class="si"></i><i></i><i></i><i class="si"></i><i></i><i class="si"></i><i class="si"></i><i></i><i class="si"></i><i></i></div></div>
-          <div class="portada amarilla"><span class="p-tag">PROGRAMA</span><div class="p-titulo">Rutinas <em>12 semanas</em></div><img class="p-fig" src="img/pesa.svg" alt="" style="bottom:16%"></div>
+        <div class="carrusel-caja" id="pack-libros">
+          <div class="carrusel" id="carrusel" tabindex="0" aria-label="Las guías del pack: desliza para verlas">
+            <div class="libro"><div class="portada"><span class="p-tag">E-BOOK</span><div class="p-titulo largo"><em>Biomecánica</em> de los ejercicios</div><img class="p-fig" src="img/tor-musculos.svg" alt="" style="left:30%;width:62%"></div><p class="nombre">Biomecánica de los ejercicios</p><span class="valor">Valor $14.90</span></div>
+            <div class="libro"><div class="portada amarilla"><span class="p-tag">E-BOOK</span><div class="p-titulo">Nutrición para <em>principiantes</em></div><div class="p-plato"><img src="img/plato.svg" alt="" style="inset:0;width:100%"><img src="img/pollo.svg" alt="" style="left:12%;top:14%;width:44%"><img src="img/arroz.svg" alt="" style="left:46%;top:20%;width:40%"><img src="img/brocoli.svg" alt="" style="left:30%;top:48%;width:40%"></div></div><p class="nombre">Nutrición para principiantes</p><span class="valor">Valor $12.90</span></div>
+            <div class="libro"><div class="portada"><span class="p-tag">PLANTILLA</span><div class="p-titulo"><em>Plan</em> de entreno</div><div class="hoja"><i class="si"></i><i></i><i class="si"></i><i></i><i></i><i class="si"></i><i></i><i class="si"></i><i class="si"></i><i></i><i class="si"></i><i></i></div></div><p class="nombre">Plantilla de plan de entrenamiento</p><span class="valor">Valor $9.90</span></div>
+            <div class="libro"><div class="portada amarilla"><span class="p-tag">PROGRAMA</span><div class="p-titulo">Rutina para <em>principiantes</em></div><img class="p-fig" src="img/tor-medio.svg" alt="" style="left:18%;width:78%"></div><p class="nombre">Rutina para principiantes (12 semanas)</p><span class="valor">Valor $19.90</span></div>
+            <div class="libro"><div class="portada"><span class="p-tag">REGALO</span><div class="p-titulo largo"><em>Suplementos</em> según la ciencia</div><img class="p-fig" src="img/bote.svg" alt="" style="left:30%;width:50%;bottom:8%"></div><p class="nombre">Guía de suplementos</p><span class="valor regalo">Regalo</span></div>
+            <div class="libro"><div class="portada amarilla"><span class="p-tag">REGALO</span><div class="p-titulo largo">Recetario <em>alto en proteína</em></div><img class="p-fig" src="img/receta.svg" alt="" style="left:30%;width:50%;bottom:8%"></div><p class="nombre">Recetario alto en proteína</p><span class="valor regalo">Regalo</span></div>
+          </div>
+          <div class="flechas">
+            <button class="flecha" type="button" id="car-ant" aria-label="Anterior">&lsaquo;</button>
+            <div class="puntos" id="car-puntos" aria-hidden="true"></div>
+            <button class="flecha" type="button" id="car-sig" aria-label="Siguiente">&rsaquo;</button>
+          </div>
+          <p class="suma-valor">Por separado: <s>$57.60</s> · En el pack: $34.90</p>
+          <p class="pista-arrastre">Desliza los libros para verlos uno por uno</p>
         </div>
       </div>
 
@@ -400,11 +625,11 @@
         <article class="producto entra" id="p-biomecanica">
           <div class="vitrina">
             <span class="etiqueta">Empieza aquí</span>
-            <div class="portada"><span class="p-tag">E-BOOK</span><div class="p-titulo"><em>Biomecánica</em> del gym</div><img class="p-fig" src="img/tor-musculos.svg" alt=""><img class="p-x" src="img/tacha.svg" alt=""><img class="p-v" src="img/visto.svg" alt=""></div>
+            <div class="portada"><span class="p-tag">E-BOOK</span><div class="p-titulo largo"><em>Biomecánica</em> de los ejercicios</div><img class="p-fig" src="img/tor-musculos.svg" alt="" style="left:30%;width:62%"><img class="p-x" src="img/tacha.svg" alt=""><img class="p-v" src="img/visto.svg" alt=""></div>
           </div>
           <div class="cuerpo">
             <span class="formato">E-book · PDF ilustrado</span>
-            <h3>Biomecánica de los ejercicios del gym</h3>
+            <h3>Biomecánica de los ejercicios</h3>
             <p>Cada ejercicio dibujado con Tor: qué músculo trabaja, cómo moverte y los errores que te frenan.</p>
             <ul class="lista">
               <li><img src="img/visto.svg" alt="">Pecho, espalda, hombro, brazo y pierna</li>
@@ -445,7 +670,7 @@
             <ul class="lista">
               <li><img src="img/visto.svg" alt="">Progresión automática semana a semana</li>
               <li><img src="img/visto.svg" alt="">Series por músculo y gráficas de fuerza</li>
-              <li><img src="img/visto.svg" alt="">Funciona en el celular, en el gym</li>
+              <li><img src="img/visto.svg" alt="">Funciona en el celular mientras entrenas</li>
             </ul>
             <div class="pie"><span class="precio">$9.90<small>USD</small></span><a class="boton" data-producto="plantilla" href="#">Lo quiero</a></div>
           </div>
@@ -453,16 +678,17 @@
 
         <article class="producto entra" id="p-rutinas">
           <div class="vitrina">
-            <div class="portada amarilla"><span class="p-tag">PROGRAMA</span><div class="p-titulo">Rutinas <em>12 semanas</em></div><img class="p-fig" src="img/tor-medio.svg" alt="" style="left:16%;width:80%"></div>
+            <span class="etiqueta">Nuevo</span>
+            <div class="portada amarilla"><span class="p-tag">PROGRAMA</span><div class="p-titulo">Rutina para <em>principiantes</em></div><img class="p-fig" src="img/tor-medio.svg" alt="" style="left:18%;width:78%"></div>
           </div>
           <div class="cuerpo">
-            <span class="formato">Programa · PDF + plantilla</span>
-            <h3>Rutinas de 12 semanas</h3>
-            <p>Tu rutina día por día para ganar músculo, en el gym o en casa, con tres niveles para empezar donde estás.</p>
+            <span class="formato">Programa · PDF de 12 semanas</span>
+            <h3>Rutina para principiantes</h3>
+            <p>Tu plan día por día para empezar con buena técnica y subir el peso semana a semana, sin adivinar.</p>
             <ul class="lista">
-              <li><img src="img/visto.svg" alt="">Full body, torso-pierna y empuje-tirón-pierna</li>
-              <li><img src="img/visto.svg" alt="">Versión gimnasio y versión en casa</li>
-              <li><img src="img/visto.svg" alt="">Cada ejercicio explicado con Tor</li>
+              <li><img src="img/visto.svg" alt="">3 rutinas: pecho y hombro, espalda y bíceps, piernas y glúteos</li>
+              <li><img src="img/visto.svg" alt="">Series, repeticiones y cuánto peso usar</li>
+              <li><img src="img/visto.svg" alt="">Abdominales cada día y versión de 5 o 6 días</li>
             </ul>
             <div class="pie"><span class="precio">$19.90<small>USD</small></span><a class="boton" data-producto="rutinas" href="#">Lo quiero</a></div>
           </div>
@@ -479,7 +705,7 @@
             <p>Hip thrust, búlgara y peso muerto rumano en un plan progresivo para hacer crecer tus glúteos.</p>
             <ul class="lista">
               <li><img src="img/visto.svg" alt="">Los 3 ejercicios con más evidencia</li>
-              <li><img src="img/visto.svg" alt="">Gym y casa, con progresión</li>
+              <li><img src="img/visto.svg" alt="">Con progresión semana a semana</li>
             </ul>
             <div class="pie"><span class="precio" style="font-size:22px">Lista de espera</span><a class="boton blanco" href="#gratis" data-espera="gluteos">Avísame</a></div>
           </div>
@@ -488,7 +714,7 @@
         <article class="producto entra" id="p-asesoria">
           <div class="vitrina">
             <span class="etiqueta">Online</span>
-            <div class="portada amarilla"><span class="p-tag">1 A 1</span><div class="p-titulo">Asesoría <em>personalizada</em></div><img class="p-fig" src="img/tor-flex.svg" alt="" style="left:30%;width:58%"></div>
+            <div class="portada amarilla"><span class="p-tag">1 A 1</span><div class="p-titulo largo">Asesoría <em>personalizada</em></div><img class="p-fig" src="img/tor-flex.svg" alt="" style="left:30%;width:58%"></div>
           </div>
           <div class="cuerpo">
             <span class="formato">Asesoría · online</span>
@@ -503,30 +729,43 @@
         </article>
       </div>
 
-      <!-- test: cual me conviene -->
-      <div class="test caja entra" id="test">
-        <span class="rotulo">¿No sabes cuál elegir?</span>
-        <h3>Responde 2 preguntas</h3>
-        <div>
-          <p style="font-weight:700;margin-bottom:10px">¿Cuál es tu objetivo?</p>
-          <div class="opciones" data-pregunta="objetivo">
-            <button class="opcion" type="button" data-valor="musculo" aria-pressed="false">Ganar músculo</button>
-            <button class="opcion" type="button" data-valor="grasa" aria-pressed="false">Bajar grasa</button>
-            <button class="opcion" type="button" data-valor="tecnica" aria-pressed="false">Aprender técnica</button>
-            <button class="opcion" type="button" data-valor="gluteos" aria-pressed="false">Glúteos</button>
-          </div>
+      <div class="duda-final entra">
+        <img src="img/tor-senala.svg" alt="">
+        <p style="font-size:20px;font-weight:600">¿Todavía no sabes cuál es para ti?</p>
+        <button class="boton blanco" type="button" data-abrir-guia>Pregúntale a Tor</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== REFERIDOS ===================== -->
+  <section id="referidos" class="fondo-gris">
+    <div class="envoltura referidos">
+      <div class="entra">
+        <span class="rotulo">Comparte y gana</span>
+        <h2 style="margin-top:14px">Invita a un amigo y llévate <span class="resalta">25 %</span> de descuento</h2>
+        <p style="margin-top:14px;font-size:20px">Si alguien compra con tu link, te regalamos un cupón para tu próxima guía. Entrenar acompañado también funciona mejor.</p>
+        <ol class="pasos">
+          <li>Escribe tu nombre y crea tu link.</li>
+          <li>Mándalo por WhatsApp o compártelo en tus redes.</li>
+          <li>Cuando tu amigo compre, escríbenos con tu código y te mandamos el cupón.</li>
+        </ol>
+      </div>
+      <div class="caja entra">
+        <span class="cupon" aria-hidden="true"><b>-25 %</b><span>en tu próxima<br>compra</span></span>
+        <div class="campo" style="margin-top:22px">
+          <label for="ref-nombre">Tu nombre</label>
+          <input class="campo-texto" id="ref-nombre" type="text" maxlength="24" placeholder="Ej.: Andrea" autocomplete="given-name">
         </div>
-        <div>
-          <p style="font-weight:700;margin-bottom:10px">¿Cuánto llevas entrenando?</p>
-          <div class="opciones" data-pregunta="nivel">
-            <button class="opcion" type="button" data-valor="cero" aria-pressed="false">Estoy empezando</button>
-            <button class="opcion" type="button" data-valor="poco" aria-pressed="false">Menos de 1 año</button>
-            <button class="opcion" type="button" data-valor="mucho" aria-pressed="false">Más de 1 año</button>
+        <button class="boton ancho" type="button" id="ref-crear">Crear mi link</button>
+        <div class="link-caja" id="ref-caja" aria-live="polite">
+          <p style="font-weight:700;margin-bottom:6px">Tu link (código <span id="ref-codigo"></span>):</p>
+          <p class="link-texto" id="ref-link"></p>
+          <div class="link-botones">
+            <button class="boton chico" type="button" id="ref-copiar">Copiar</button>
+            <a class="boton chico blanco" id="ref-whatsapp" href="#" target="_blank" rel="noopener">WhatsApp</a>
+            <button class="boton chico blanco" type="button" id="ref-compartir">Compartir</button>
           </div>
-        </div>
-        <div class="resultado" id="resultado" aria-live="polite">
-          <p id="resultado-texto"></p>
-          <a class="boton" id="resultado-boton" href="#guias">Ver</a>
+          <p class="aviso" style="margin-top:10px" id="ref-reclamo"></p>
         </div>
       </div>
     </div>
@@ -535,16 +774,16 @@
   <!-- ===================== REGALO ===================== -->
   <section id="gratis">
     <div class="envoltura regalo">
-      <div class="portada amarilla entra" aria-hidden="true">
+      <div class="portada amarilla errores entra" aria-hidden="true">
         <span class="p-tag">GRATIS</span>
         <div class="p-titulo">Los 7 <em>errores</em> que frenan tu progreso</div>
-        <img class="p-fig" src="img/tor-triste.svg" alt="" style="left:34%;width:44%">
-        <img class="p-x" src="img/tacha.svg" alt="" style="left:18%;bottom:30%">
+        <img class="p-fig" src="img/comp-sin.svg" alt="">
+        <img class="p-x" src="img/tacha.svg" alt="">
       </div>
       <div class="entra">
         <span class="rotulo">Regalo</span>
         <h2 style="margin-top:14px">Descarga <span class="resalta">gratis</span> la guía de los 7 errores</h2>
-        <p style="margin-top:14px">Los errores más comunes del gym, dibujados con Tor, y cómo corregirlos hoy mismo. Te la mandamos a tu correo.</p>
+        <p style="margin-top:14px">Los errores más comunes al entrenar, dibujados con Tor, y cómo corregirlos desde mañana. Te la mandamos a tu correo.</p>
         <form class="formulario" id="formulario" novalidate>
           <input type="text" name="nombre" placeholder="Tu nombre" autocomplete="given-name" aria-label="Tu nombre">
           <input type="email" name="email" placeholder="Tu correo" autocomplete="email" required aria-label="Tu correo">
@@ -558,28 +797,63 @@
   </section>
 
   <!-- ===================== CALCULADORA ===================== -->
-  <section class="fondo-gris">
-    <div class="envoltura calcu">
-      <div class="entra">
+  <section id="calculadora" class="fondo-gris">
+    <div class="envoltura">
+      <div class="titulo-seccion entra">
         <span class="rotulo">Calculadora</span>
-        <h2 style="margin-top:14px">¿Cuánta <span class="resalta">proteína</span> necesitas?</h2>
-        <p style="margin-top:14px">Para ganar músculo la evidencia apunta a 1,6 a 2,2 g de proteína por kilo de peso al día. Mueve la barra y mira tu cifra.</p>
+        <h2 style="margin-top:14px">¿Cuánto y <span class="resalta">qué</span> comer?</h2>
+        <p>Mueve tu peso, elige tu objetivo y lo que te gusta: Tor te arma un plato con tu proteína, tus carbohidratos y tu grasa saludable.</p>
       </div>
-      <div class="caja entra">
-        <div class="campo">
-          <label for="peso">Tu peso</label>
-          <span class="peso-valor"><span id="peso-valor">70</span> kg</span>
-          <input type="range" id="peso" min="40" max="140" value="70" step="1">
+      <div class="calcu">
+        <div class="caja entra">
+          <div class="campo">
+            <label for="peso">Tu peso</label>
+            <span class="peso-valor"><span id="peso-valor">70</span> kg</span>
+            <input type="range" id="peso" min="40" max="140" value="70" step="1">
+          </div>
+          <div class="campo">
+            <span class="etiqueta-campo">Tu objetivo</span>
+            <div class="segmento" id="objetivo">
+              <button class="chip" type="button" data-valor="ganar" aria-pressed="true">Ganar músculo</button>
+              <button class="chip" type="button" data-valor="mantener" aria-pressed="false">Mantenerme</button>
+              <button class="chip" type="button" data-valor="bajar" aria-pressed="false">Bajar grasa</button>
+            </div>
+          </div>
+          <div class="campo">
+            <span class="etiqueta-campo">Comidas al día</span>
+            <div class="segmento" id="comidas">
+              <button class="chip" type="button" data-valor="3" aria-pressed="false">3</button>
+              <button class="chip" type="button" data-valor="4" aria-pressed="true">4</button>
+              <button class="chip" type="button" data-valor="5" aria-pressed="false">5</button>
+            </div>
+          </div>
+          <p style="font-weight:700;text-transform:uppercase;letter-spacing:0.05em;font-size:15px;margin-top:6px">Al día, más o menos</p>
+          <p class="kcal"><span id="kcal">2450</span><small> kcal</small></p>
+          <div class="macros">
+            <div class="macro m-prot"><span>Proteína</span><span class="barra"><i id="b-prot"></i></span><span class="num"><span id="g-prot">126</span> g</span></div>
+            <div class="macro m-carb"><span>Carbohidratos</span><span class="barra"><i id="b-carb"></i></span><span class="num"><span id="g-carb">340</span> g</span></div>
+            <div class="macro m-gras"><span>Grasa sana</span><span class="barra"><i id="b-gras"></i></span><span class="num"><span id="g-gras">63</span> g</span></div>
+          </div>
+          <p class="nota-calcu">Proteína: 1,6 a 2,2 g por kilo (la usamos más alta si bajas grasa). Grasa: unos 0,8 a 0,9 g por kilo. Las calorías son una estimación para alguien que entrena de 4 a 6 días: tu cifra exacta depende de tu estatura, tu edad y tu actividad.</p>
         </div>
-        <p style="font-weight:700;text-transform:uppercase;letter-spacing:0.05em;font-size:16px">Proteína al día</p>
-        <p class="cifra"><span id="prote-min">112</span>–<span id="prote-max">154</span><small> g</small></p>
-        <p style="margin-top:8px">Repartida en 4 comidas: unos <b><span id="prote-comida">33</span> g</b> en cada una.</p>
-        <div class="platos" aria-hidden="true">
-          <span><img src="img/pollo.svg" alt="">Pollo</span>
-          <span><img src="img/huevo.svg" alt="">Huevos</span>
-          <span><img src="img/arroz.svg" alt="">y un carbohidrato</span>
+
+        <div class="caja entra">
+          <p style="font-weight:700;text-transform:uppercase;letter-spacing:0.05em;font-size:15px">Tu plato, en cada comida</p>
+          <div class="plato-vivo" aria-hidden="true">
+            <div class="base"></div>
+            <img class="c1" id="pl-1" src="img/pollo.svg" alt="">
+            <img class="c2" id="pl-2" src="img/arroz.svg" alt="">
+            <img class="c3" id="pl-3" src="img/comida-aguacate.svg" alt="">
+          </div>
+          <p class="sugerencia" id="sugerencia"></p>
+          <ul class="porciones" id="porciones"></ul>
+          <div class="grupo-comida"><p>Proteína</p><div class="chips" id="g-p"></div></div>
+          <div class="grupo-comida"><p>Carbohidrato</p><div class="chips" id="g-c"></div></div>
+          <div class="grupo-comida"><p>Grasa saludable</p><div class="chips" id="g-f"></div></div>
+          <button class="boton blanco ancho" type="button" id="otra" style="margin-top:18px">Otra combinación</button>
+          <a class="boton ancho" style="margin-top:12px" href="#p-nutricion">Aprende a armar todo tu día</a>
+          <p class="nota-calcu">Porciones aproximadas, en cocido salvo la avena. Si tienes una condición médica, consulta con un profesional.</p>
         </div>
-        <a class="boton ancho" style="margin-top:22px" href="#p-nutricion">Arma tu plan de comidas</a>
       </div>
     </div>
   </section>
@@ -597,9 +871,9 @@
         <p style="margin-top:14px">Creé a Tor para explicar el entrenamiento como me hubiera gustado que me lo explicaran: simple, visual y con la ciencia detrás.</p>
         <p>Cada video y cada guía pasan por los estudios antes de llegar a ti. Sin humo, sin promesas mágicas: lo que funciona y por qué.</p>
         <div class="redes-mini">
-          <a data-red="instagram" href="#">Instagram</a>
-          <a data-red="tiktok" href="#">TikTok</a>
-          <a data-red="youtube" href="#">YouTube</a>
+          <a data-red="instagram" href="#"><img src="img/red-instagram.svg" alt="">Instagram</a>
+          <a data-red="tiktok" href="#"><img src="img/red-tiktok.svg" alt="">TikTok</a>
+          <a data-red="youtube" href="#"><img src="img/red-youtube.svg" alt="">YouTube</a>
         </div>
       </div>
     </div>
@@ -617,7 +891,7 @@
   </section>
 
   <!-- ===================== PREGUNTAS ===================== -->
-  <section>
+  <section id="preguntas">
     <div class="envoltura">
       <div class="titulo-seccion entra">
         <span class="rotulo">Preguntas</span>
@@ -626,9 +900,10 @@
       <div class="faq">
         <details class="entra"><summary>¿Cómo recibo las guías?</summary><p>Apenas pagas, Hotmart te manda el acceso a tu correo. Descargas los PDF y las plantillas y los usas en el celular, la tablet o el computador.</p></details>
         <details class="entra"><summary>¿Es un pago único o una suscripción?</summary><p>Pago único. Es tuyo para siempre, con las actualizaciones incluidas.</p></details>
-        <details class="entra"><summary>¿Sirve si estoy empezando?</summary><p>Sí. Todo está explicado desde cero, con dibujos, y las rutinas tienen tres niveles.</p></details>
-        <details class="entra"><summary>¿Necesito ir al gimnasio?</summary><p>Las rutinas tienen versión de gimnasio y versión en casa. La guía de biomecánica está pensada para el gimnasio.</p></details>
+        <details class="entra"><summary>¿Sirve si estoy empezando?</summary><p>Sí. Todo está explicado desde cero, con dibujos, y la rutina para principiantes empieza suave las primeras semanas para que aprendas la técnica.</p></details>
+        <details class="entra"><summary>¿Necesito ir al gimnasio?</summary><p>La rutina y la guía de biomecánica están pensadas para el gimnasio (máquinas, poleas y mancuernas). La nutrición y la plantilla sirven entrenes donde entrenes.</p></details>
         <details class="entra"><summary>¿Cómo puedo pagar?</summary><p>Con tarjeta, PayPal y pagos locales según tu país, como PSE, Nequi o Efecty en Colombia y OXXO o SPEI en México.</p></details>
+        <details class="entra"><summary>¿Cómo funciona lo de los referidos?</summary><p>Creas tu link en la sección "Comparte y gana" y lo compartes. Si alguien compra entrando por tu link, la compra queda marcada con tu código; nos escribes con ese código y te mandamos un cupón de 25 % para tu próxima guía.</p></details>
         <details class="entra"><summary>¿Y si no me gusta?</summary><p>Tienes 7 días de garantía: pides el reembolso desde Hotmart y te devuelven todo.</p></details>
         <details class="entra"><summary>¿Esto reemplaza a un médico o nutricionista?</summary><p>No. Son guías educativas. Si tienes una lesión, dolor o una enfermedad, consulta antes con un profesional de la salud.</p></details>
       </div>
@@ -660,22 +935,37 @@
       </div>
     </div>
     <div class="redes-mini">
-      <a data-red="instagram" href="#">Instagram</a>
-      <a data-red="tiktok" href="#">TikTok</a>
-      <a data-red="youtube" href="#">YouTube</a>
+      <a data-red="instagram" href="#"><img src="img/red-instagram.svg" alt="">Instagram</a>
+      <a data-red="tiktok" href="#"><img src="img/red-tiktok.svg" alt="">TikTok</a>
+      <a data-red="youtube" href="#"><img src="img/red-youtube.svg" alt="">YouTube</a>
     </div>
   </div>
 </footer>
+
+<!-- Tor acompana: el tour por la pagina y el boton para volver a llamarlo -->
+<div class="tour" id="tour" role="dialog" aria-label="Tor te muestra la página">
+  <div class="mini" aria-hidden="true"><img src="img/tor-senala.svg" alt=""></div>
+  <div class="tarjeta">
+    <button class="cerrar" type="button" id="tour-cerrar" aria-label="Cerrar">&times;</button>
+    <p class="paso" id="tour-paso"></p>
+    <p class="texto" id="tour-texto"></p>
+    <div class="acciones" id="tour-acciones"></div>
+  </div>
+</div>
+<button class="ayuda" type="button" id="ayuda" data-abrir-guia><img src="img/tor-perfil.png" alt="">¿Te ayudo?</button>
 
 <script>
   /* =========================================================
      ENLACES: lo unico que hay que llenar antes de publicar.
      - checkout: el link de pago de cada producto en Hotmart
        (Hotmart > Productos > tu producto > Herramientas > Links / Checkout)
-     - redes: tus perfiles
+     - redes: tus perfiles (Instagram y TikTok de Entrena con Tor: pendientes)
      - formulario: la URL que te da tu herramienta de correo (Brevo,
        MailerLite...) para recibir los suscriptores del regalo. Se manda
        por POST con los campos nombre, email e interes.
+     - referidos.reclamar: donde te escriben para pedir el cupon
+       (link a tu Instagram, WhatsApp o mailto:). El codigo del amigo viaja
+       al checkout de Hotmart en el parametro sck, asi lo ves en tus ventas.
      Mientras un link este vacio, el boton lleva a la seccion de guias.
      ========================================================= */
   var ENLACES = {
@@ -688,38 +978,72 @@
       asesoria: ''       // un formulario de solicitud o tu WhatsApp
     },
     redes: {
-      instagram: 'https://www.instagram.com/',
-      tiktok: 'https://www.tiktok.com/',
+      instagram: '',     // pendiente: el Instagram de Entrena con Tor
+      tiktok: '',        // pendiente: el TikTok de Entrena con Tor
       youtube: 'https://www.youtube.com/@eltorvick'
     },
     legal: { terminos: '', privacidad: '', reembolsos: '' },
-    formulario: ''
+    formulario: '',
+    referidos: { descuento: 25, reclamar: '' }
+  };
+
+  /* lo que Tor recomienda: nombre, a donde lleva y por que */
+  var PRODUCTOS = {
+    pack: { nombre: 'el Pack Todo Tor', sel: '#pack', precio: '$34.90', porque: 'Técnica, comida, rutina y plantilla en un solo pago: es lo más completo para empezar bien.' },
+    rutinas: { nombre: 'la Rutina para principiantes', sel: '#p-rutinas', precio: '$19.90', porque: 'Te dice qué hacer cada día, cuántas series y cuándo subir el peso.' },
+    plantilla: { nombre: 'la Plantilla de plan de entrenamiento', sel: '#p-plantilla', precio: '$9.90', porque: 'Si ya entrenas, lo que te falta es medir: la plantilla te dice cuándo subir el peso para salir del estancamiento.' },
+    nutricion: { nombre: 'Nutrición para principiantes', sel: '#p-nutricion', precio: '$12.90', porque: 'Para bajar grasa sin perder músculo, primero hay que saber cuánto comer.' },
+    biomecanica: { nombre: 'Biomecánica de los ejercicios', sel: '#p-biomecanica', precio: '$14.90', porque: 'Cada ejercicio con su error y su forma correcta, para que lo sientas en el músculo que toca.' },
+    gluteos: { nombre: 'Glúteos en 8 semanas', sel: '#p-gluteos', precio: '', porque: 'Está por salir.' }
   };
 
   (function () {
-    // botones de compra -> checkout (o a las guias si aun no hay link)
-    document.querySelectorAll('[data-producto]').forEach(function (a) {
-      var url = ENLACES.checkout[a.getAttribute('data-producto')];
+    var $ = function (s, r) { return (r || document).querySelector(s); };
+    var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+    var guarda = {
+      lee: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+      pon: function (k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+    };
+    var quieto = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    /* ---------- referido que llega: ?ref=codigo ---------- */
+    var refLlega = null;
+    try { refLlega = new URLSearchParams(location.search).get('ref'); } catch (e) {}
+    if (refLlega && /^[a-z0-9-]{3,40}$/.test(refLlega)) guarda.pon('tor-ref', refLlega); else refLlega = guarda.lee('tor-ref');
+    if (refLlega && !/^[a-z0-9-]{3,40}$/.test(refLlega)) refLlega = null;
+    if (refLlega) {
+      var quien = refLlega.replace(/-[a-z0-9]{3}$/, '').replace(/-/g, ' ');
+      var aviso = $('#aviso-ref');
+      aviso.textContent = 'Vienes de parte de ' + quien.charAt(0).toUpperCase() + quien.slice(1) + '. ¡Bienvenido!';
+      aviso.classList.add('si');
+    }
+
+    /* ---------- links ---------- */
+    function conRef(url) {
+      if (!url || !refLlega) return url;
+      return url + (url.indexOf('?') >= 0 ? '&' : '?') + 'sck=ref_' + encodeURIComponent(refLlega);
+    }
+    $$('[data-producto]').forEach(function (a) {
+      var url = conRef(ENLACES.checkout[a.getAttribute('data-producto')]);
       a.href = url || '#guias';
       if (url) { a.target = '_blank'; a.rel = 'noopener'; }
     });
-    document.querySelectorAll('[data-red]').forEach(function (a) {
+    $$('[data-red]').forEach(function (a) {
       var url = ENLACES.redes[a.getAttribute('data-red')];
       if (url) { a.href = url; a.target = '_blank'; a.rel = 'noopener'; }
+      else { a.href = '#'; a.title = 'Muy pronto'; a.addEventListener('click', function (e) { e.preventDefault(); }); }
     });
-    document.querySelectorAll('[data-legal]').forEach(function (a) {
+    $$('[data-legal]').forEach(function (a) {
       var url = ENLACES.legal[a.getAttribute('data-legal')];
       if (url) a.href = url; else a.style.display = 'none';
     });
-    document.getElementById('anio').textContent = new Date().getFullYear();
-
-    // "Avisame" de los productos que vienen: marca el interes y lleva al formulario
-    document.querySelectorAll('[data-espera]').forEach(function (a) {
-      a.addEventListener('click', function () { document.getElementById('interes').value = 'espera-' + a.getAttribute('data-espera'); });
+    $('#anio').textContent = new Date().getFullYear();
+    $$('[data-espera]').forEach(function (a) {
+      a.addEventListener('click', function () { $('#interes').value = 'espera-' + a.getAttribute('data-espera'); });
     });
 
-    // entradas con rebote al aparecer
-    var vistos = document.querySelectorAll('.entra');
+    /* ---------- entradas con rebote al aparecer ---------- */
+    var vistos = $$('.entra');
     if ('IntersectionObserver' in window) {
       var io = new IntersectionObserver(function (es) {
         es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('visto'); io.unobserve(e.target); } });
@@ -727,55 +1051,400 @@
       vistos.forEach(function (el) { io.observe(el); });
     } else { vistos.forEach(function (el) { el.classList.add('visto'); }); }
 
-    // calculadora de proteina: 1,6 a 2,2 g por kg
-    var peso = document.getElementById('peso');
-    function calcular() {
-      var kg = +peso.value;
-      document.getElementById('peso-valor').textContent = kg;
-      document.getElementById('prote-min').textContent = Math.round(kg * 1.6);
-      document.getElementById('prote-max').textContent = Math.round(kg * 2.2);
-      document.getElementById('prote-comida').textContent = Math.round(kg * 1.9 / 4);
+    /* ---------- Tor vivo: saluda, parpadea ---------- */
+    var cuadros = { a: $('#tor-vivo .a'), b: $('#tor-vivo .b'), c: $('#tor-vivo .c') };
+    function muestra(k) { Object.keys(cuadros).forEach(function (n) { cuadros[n].classList.toggle('ve', n === k); }); }
+    var saludando = 0;
+    function saluda(veces) {
+      if (quieto) return;
+      saludando = veces * 2;
+      (function paso() {
+        if (saludando <= 0) { muestra('a'); return; }
+        muestra(saludando % 2 ? 'b' : 'a'); saludando--;
+        setTimeout(paso, 230);
+      })();
     }
-    peso.addEventListener('input', calcular); calcular();
+    setInterval(function () {
+      if (saludando > 0 || quieto) return;
+      muestra('c'); setTimeout(function () { if (saludando <= 0) muestra('a'); }, 150);
+    }, 3600);
 
-    // test de 2 preguntas
-    var elegido = {};
-    var RECO = {
-      musculo: { cero: ['pack', 'Empieza con el Pack Todo Tor: técnica, comida y rutina desde cero, en un solo pago.'],
-                 poco: ['rutinas', 'Te conviene Rutinas de 12 semanas: un plan claro para seguir creciendo.'],
-                 mucho: ['plantilla', 'Lo tuyo es la Plantilla de plan de entrenamiento: progresión automática para salir del estancamiento.'] },
-      grasa: { cero: ['nutricion', 'Empieza por Nutrición para principiantes: tus calorías y tu proteína, sin dietas raras.'],
-               poco: ['nutricion', 'Te conviene Nutrición para principiantes, y si quieres todo, el Pack Todo Tor.'],
-               mucho: ['pack', 'El Pack Todo Tor: nutrición, rutina y plantilla para bajar grasa sin perder músculo.'] },
-      tecnica: { cero: ['biomecanica', 'Biomecánica de los ejercicios del gym: cada ejercicio con su error y su forma correcta.'],
-                 poco: ['biomecanica', 'Biomecánica de los ejercicios del gym: deja de sentir el ejercicio donde no es.'],
-                 mucho: ['biomecanica', 'Biomecánica de los ejercicios del gym: elige cada ejercicio por cómo carga el músculo.'] },
-      gluteos: { cero: ['gluteos', 'Glúteos en 8 semanas está por salir: déjanos tu correo y te avisamos primero.'],
-                 poco: ['gluteos', 'Glúteos en 8 semanas está por salir: déjanos tu correo y te avisamos primero.'],
-                 mucho: ['gluteos', 'Glúteos en 8 semanas está por salir: déjanos tu correo y te avisamos primero.'] }
-    };
-    var NOMBRES = { pack: 'Quiero el pack', rutinas: 'Ver rutinas', plantilla: 'Ver plantilla', nutricion: 'Ver nutrición', biomecanica: 'Ver biomecánica', gluteos: 'Avísame' };
-    var DESTINO = { pack: '#guias', rutinas: '#p-rutinas', plantilla: '#p-plantilla', nutricion: '#p-nutricion', biomecanica: '#p-biomecanica', gluteos: '#gratis' };
-    document.querySelectorAll('.opciones').forEach(function (grupo) {
-      grupo.addEventListener('click', function (ev) {
-        var b = ev.target.closest('.opcion'); if (!b) return;
-        grupo.querySelectorAll('.opcion').forEach(function (o) { o.setAttribute('aria-pressed', 'false'); });
-        b.setAttribute('aria-pressed', 'true');
-        elegido[grupo.getAttribute('data-pregunta')] = b.getAttribute('data-valor');
-        if (elegido.objetivo && elegido.nivel) {
-          var r = RECO[elegido.objetivo][elegido.nivel];
-          document.getElementById('resultado-texto').textContent = r[1];
-          var boton = document.getElementById('resultado-boton');
-          boton.textContent = NOMBRES[r[0]];
-          boton.href = DESTINO[r[0]];
-          if (r[0] === 'gluteos') document.getElementById('interes').value = 'espera-gluteos';
-          document.getElementById('resultado').classList.add('listo');
-        }
+    /* ---------- la conversacion con Tor ---------- */
+    var dice = $('#guia-dice'), chips = $('#guia-chips');
+    var escribiendo = null;
+    function habla(html, opciones) {
+      clearTimeout(escribiendo);
+      chips.innerHTML = '';
+      saluda(3);
+      var tmp = document.createElement('div'); tmp.innerHTML = html;
+      var texto = tmp.textContent, i = 0;
+      function fin() {
+        dice.innerHTML = html;
+        (opciones || []).forEach(function (o, k) {
+          var b = document.createElement('button');
+          b.type = 'button'; b.className = 'chip' + (o.principal ? ' principal' : '');
+          b.style.animationDelay = (k * 70) + 'ms';
+          b.innerHTML = (o.img ? '<img src="img/' + o.img + '" alt="">' : '') + o.t;
+          b.addEventListener('click', o.f);
+          chips.appendChild(b);
+        });
+      }
+      if (quieto) { fin(); return; }
+      (function tipea() {
+        i += 2;
+        dice.innerHTML = texto.slice(0, i) + '<span class="cursor"></span>';
+        if (i < texto.length) escribiendo = setTimeout(tipea, 24); else fin();
+      })();
+    }
+    var eleccion = {};
+    function saludo() {
+      eleccion = {};
+      habla('¡Hola! Soy <b>Tor</b>. ¿Qué quieres lograr? Te digo por dónde empezar.', [
+        { t: 'Ganar músculo', img: 'pesa.svg', f: function () { eleccion.obj = 'musculo'; nivel(); } },
+        { t: 'Bajar grasa', img: 'brocoli.svg', f: function () { eleccion.obj = 'grasa'; nivel(); } },
+        { t: 'Aprender técnica', img: 'visto.svg', f: function () { recomienda('biomecanica'); } },
+        { t: 'Glúteos', img: 'corona.svg', f: function () { recomienda('gluteos'); } },
+        { t: 'Quiero todo', img: 'cerebro.svg', f: function () { recomienda('pack'); } }
+      ]);
+    }
+    function nivel() {
+      habla('¡Buenísimo! ¿Y cuánto llevas entrenando?', [
+        { t: 'Estoy empezando', f: function () { decide('cero'); } },
+        { t: 'Menos de 1 año', f: function () { decide('poco'); } },
+        { t: 'Más de 1 año', f: function () { decide('mucho'); } }
+      ]);
+    }
+    function decide(n) {
+      var tabla = { musculo: { cero: 'rutinas', poco: 'rutinas', mucho: 'plantilla' }, grasa: { cero: 'nutricion', poco: 'nutricion', mucho: 'pack' } };
+      recomienda(tabla[eleccion.obj][n]);
+    }
+    function recomienda(k) {
+      var p = PRODUCTOS[k];
+      if (k === 'gluteos') {
+        habla('El plan de <b>glúteos</b> está por salir. Déjame tu correo y te aviso primero (y te regalo la guía de los 7 errores).', [
+          { t: 'Llévame', principal: true, f: function () { $('#interes').value = 'espera-gluteos'; irA('#gratis'); habla('Ahí está: pon tu correo y listo. ¿Algo más?', [{ t: 'Empezar de nuevo', f: saludo }]); } },
+          { t: 'Ver otra cosa', f: saludo }
+        ]);
+        return;
+      }
+      habla('Te recomiendo <b>' + p.nombre + '</b>. ' + p.porque, [
+        { t: 'Llévame ahí', principal: true, f: function () { tour(k); } },
+        { t: 'Ver todas', f: function () { irA('#guias'); } },
+        { t: 'Volver', f: saludo }
+      ]);
+    }
+    function irA(sel) {
+      var el = $(sel); if (!el) return;
+      var y = el.getBoundingClientRect().top + window.pageYOffset - 90;
+      window.scrollTo({ top: y, behavior: quieto ? 'auto' : 'smooth' });
+    }
+
+    /* ---------- el tour: Tor te acompana hasta la compra ---------- */
+    var tourEl = $('#tour'), ayuda = $('#ayuda'), enFoco = null, pasos = [], nPaso = 0;
+    function foco(el) {
+      if (enFoco) enFoco.classList.remove('foco-tour');
+      enFoco = el || null;
+      if (enFoco) enFoco.classList.add('foco-tour');
+    }
+    function pasosDe(k) {
+      var p = PRODUCTOS[k], base = $(p.sel);
+      if (k === 'pack') {
+        return [
+          { el: base, texto: 'Este es <b>el Pack Todo Tor</b>: las 4 guías y 2 regalos.' },
+          { el: $('#pack-libros'), texto: 'Desliza los libros: cada uno muestra lo que vale por separado. Juntos te ahorras <b>$22.70</b>.' },
+          { el: $('#pack-precio'), texto: 'Es un <b>pago único</b> y tienes <b>7 días de garantía</b>: si no te sirve, te devuelven todo.' },
+          { el: $('#pack-boton'), texto: 'Cuando quieras, lo compras aquí y te llega al correo al instante.', compra: 'pack' }
+        ];
+      }
+      return [
+        { el: base, texto: 'Esta es <b>' + p.nombre + '</b>. ' + p.porque },
+        { el: $('.lista', base), texto: 'Esto es lo que trae. Todo con dibujos de Tor y con los estudios detrás.' },
+        { el: $('.precio', base), texto: 'Cuesta <b>' + p.precio + '</b>, en un solo pago, con <b>7 días de garantía</b>.' },
+        { el: $('.boton', base), texto: 'Cuando quieras, la compras aquí. ¿Te queda alguna duda? Mira las preguntas de abajo.', compra: k }
+      ];
+    }
+    function tour(k) {
+      pasos = pasosDe(k); nPaso = 0;
+      tourEl.classList.add('si'); ayuda.classList.remove('si');
+      muestraPaso();
+    }
+    function muestraPaso() {
+      var p = pasos[nPaso];
+      foco(p.el);
+      if (p.el.getBoundingClientRect) {
+        var r = p.el.getBoundingClientRect();
+        var y = r.top + window.pageYOffset - Math.max(90, (window.innerHeight - r.height) / 2 - 80);
+        window.scrollTo({ top: y, behavior: quieto ? 'auto' : 'smooth' });
+      }
+      $('#tour-paso').textContent = 'Paso ' + (nPaso + 1) + ' de ' + pasos.length;
+      $('#tour-texto').innerHTML = p.texto;
+      var acc = $('#tour-acciones'); acc.innerHTML = '';
+      function boton(t, clase, f) { var b = document.createElement('button'); b.type = 'button'; b.className = 'boton chico ' + clase; b.textContent = t; b.addEventListener('click', f); acc.appendChild(b); }
+      if (nPaso > 0) boton('Atrás', 'blanco', function () { nPaso--; muestraPaso(); });
+      if (p.compra) {
+        var url = conRef(ENLACES.checkout[p.compra]);
+        if (url) boton('Comprar', '', function () { window.open(url, '_blank', 'noopener'); });
+        boton('Seguir mirando', 'blanco', cierraTour);
+      } else {
+        boton('Siguiente', '', function () { nPaso++; muestraPaso(); });
+      }
+    }
+    function cierraTour() {
+      tourEl.classList.remove('si'); foco(null);
+      if (window.pageYOffset > 600) ayuda.classList.add('si');
+    }
+    $('#tour-cerrar').addEventListener('click', cierraTour);
+    $$('[data-abrir-guia]').forEach(function (b) {
+      b.addEventListener('click', function () { cierraTour(); ayuda.classList.remove('si'); irA('#inicio'); setTimeout(saludo, 400); });
+    });
+    window.addEventListener('scroll', function () {
+      var lejos = window.pageYOffset > 700;
+      if (!tourEl.classList.contains('si')) ayuda.classList.toggle('si', lejos);
+    }, { passive: true });
+    setTimeout(saludo, 500);
+
+    /* ---------- el pack: libros que se deslizan (con el dedo o el mouse) ---------- */
+    var car = $('#carrusel'), libros = $$('.libro', car), puntos = $('#car-puntos');
+    libros.forEach(function () { puntos.appendChild(document.createElement('i')); });
+    function activo() {
+      var c = car.scrollLeft + car.clientWidth / 2, mejor = 0, d = 1e9;
+      libros.forEach(function (l, i) { var m = l.offsetLeft + l.offsetWidth / 2, dd = Math.abs(m - c); if (dd < d) { d = dd; mejor = i; } });
+      libros.forEach(function (l, i) { l.classList.toggle('activo', i === mejor); });
+      $$('i', puntos).forEach(function (p, i) { p.classList.toggle('si', i === mejor); });
+      return mejor;
+    }
+    function irLibro(i) {
+      i = (i + libros.length) % libros.length;
+      var l = libros[i];
+      car.scrollTo({ left: l.offsetLeft + l.offsetWidth / 2 - car.clientWidth / 2, behavior: quieto ? 'auto' : 'smooth' });
+    }
+    car.addEventListener('scroll', function () { window.requestAnimationFrame(activo); }, { passive: true });
+    $('#car-ant').addEventListener('click', function () { tocado(); irLibro(activo() - 1); });
+    $('#car-sig').addEventListener('click', function () { tocado(); irLibro(activo() + 1); });
+    var arrastre = null;
+    car.addEventListener('pointerdown', function (e) {
+      if (e.pointerType !== 'mouse') return;
+      arrastre = { x: e.clientX, s: car.scrollLeft }; car.classList.add('arrastra'); tocado();
+    });
+    window.addEventListener('pointermove', function (e) { if (arrastre) car.scrollLeft = arrastre.s - (e.clientX - arrastre.x); });
+    window.addEventListener('pointerup', function () {
+      if (!arrastre) return; arrastre = null; car.classList.remove('arrastra'); irLibro(activo());
+    });
+    car.addEventListener('touchstart', tocado, { passive: true });
+    car.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowRight') { tocado(); irLibro(activo() + 1); }
+      if (e.key === 'ArrowLeft') { tocado(); irLibro(activo() - 1); }
+    });
+    var ultimoToque = 0;
+    function tocado() { ultimoToque = Date.now(); }
+    setInterval(function () {
+      if (quieto || Date.now() - ultimoToque < 8000) return;
+      var r = car.getBoundingClientRect();
+      if (r.bottom < 0 || r.top > window.innerHeight) return;
+      irLibro(activo() + 1);
+    }, 3200);
+    setTimeout(function () { irLibro(0); activo(); }, 50);
+
+    /* ---------- video ---------- */
+    var video = $('#video');
+    function juega() { var p = video.play(); if (p && p.catch) p.catch(function () {}); }
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) juega(); else video.pause(); }); }, { threshold: 0.4 }).observe(video);
+    }
+    $$('#pestanas .chip').forEach(function (b) {
+      b.addEventListener('click', function () {
+        $$('#pestanas .chip').forEach(function (o) { o.setAttribute('aria-pressed', o === b ? 'true' : 'false'); });
+        var id = b.getAttribute('data-video');
+        video.poster = 'video/' + id + '.jpg'; video.src = 'video/' + id + '.mp4'; juega();
       });
     });
 
-    // formulario del regalo
-    var form = document.getElementById('formulario'), msj = document.getElementById('mensaje');
+    /* ---------- calculadora: calorias, macros y un plato con lo que te gusta ---------- */
+    // por 100 g (cocido salvo la avena). u: unidad para decirlo en piezas
+    var COMIDAS = {
+      p: [
+        { k: 'pollo', n: 'pollo', img: 'pollo.svg', P: 31, C: 0, F: 3.6, max: 260 },
+        { k: 'huevo', n: 'huevos', img: 'huevo.svg', P: 12.6, C: 0.7, F: 9.5, max: 200, u: [50, 'huevo', 'huevos'] },
+        { k: 'pescado', n: 'pescado o atún', img: 'comida-pescado.svg', P: 26, C: 0, F: 2, max: 260 },
+        { k: 'carne', n: 'carne magra', img: 'comida-carne.svg', P: 26, C: 0, F: 8, max: 240 },
+        { k: 'yogur', n: 'yogur griego', img: 'comida-leche.svg', P: 10, C: 3.6, F: 0.4, max: 350 },
+        { k: 'legumbres', n: 'lentejas o frijoles', img: 'comida-legumbres.svg', P: 9, C: 20, F: 0.4, max: 300 },
+        { k: 'tofu', n: 'tofu', img: 'comida-tofu.svg', P: 15, C: 3, F: 8, max: 300 }
+      ],
+      c: [
+        { k: 'arroz', n: 'arroz', img: 'arroz.svg', P: 2.7, C: 28, F: 0.3, max: 9999 },
+        { k: 'papa', n: 'papa', img: 'comida-papa.svg', P: 2, C: 20, F: 0.1, max: 700 },
+        { k: 'avena', n: 'avena (cruda)', img: 'comida-cereal.svg', P: 13, C: 66, F: 6.5, max: 130 },
+        { k: 'pan', n: 'pan integral', img: 'comida-pan.svg', P: 12.5, C: 42, F: 3.5, max: 150, u: [30, 'rebanada', 'rebanadas'] },
+        { k: 'platano', n: 'plátano', img: 'comida-banana.svg', P: 1.1, C: 23, F: 0.3, max: 360, u: [120, 'plátano', 'plátanos'] },
+        { k: 'fruta', n: 'fruta', img: 'comida-manzana.svg', P: 0.3, C: 14, F: 0.2, max: 540, u: [180, 'fruta mediana', 'frutas medianas'] }
+      ],
+      f: [
+        { k: 'aguacate', n: 'aguacate', img: 'comida-aguacate.svg', P: 2, C: 8.5, F: 14.7, max: 300, u: [140, 'aguacate', 'aguacates'], cuartos: true },
+        { k: 'aceite', n: 'aceite de oliva', img: 'comida-aceite.svg', P: 0, C: 0, F: 100, max: 40, u: [13.5, 'cucharada', 'cucharadas'], medias: true },
+        { k: 'frutos', n: 'maní o almendras', img: 'comida-frutosSecos.svg', P: 23, C: 20, F: 50, max: 60 },
+        { k: 'semillas', n: 'semillas de chía', img: 'comida-semillas.svg', P: 17, C: 42, F: 31, max: 50, u: [12, 'cucharada', 'cucharadas'], medias: true }
+      ]
+    };
+    var calc = { peso: 70, obj: 'ganar', comidas: 4, p: 0, c: 0, f: 0 };
+    var peso = $('#peso');
+    function grupoChips(id, lista, clave) {
+      var caja = $(id);
+      lista.forEach(function (it, i) {
+        var b = document.createElement('button');
+        b.type = 'button'; b.className = 'chip'; b.setAttribute('aria-pressed', i === 0 ? 'true' : 'false');
+        b.innerHTML = '<img src="img/' + it.img + '" alt="">' + it.n.replace(' (cruda)', '');
+        b.addEventListener('click', function () { calc[clave] = i; marca(caja, i); dibuja(true); });
+        caja.appendChild(b);
+      });
+    }
+    function marca(caja, i) { $$('.chip', caja).forEach(function (o, j) { o.setAttribute('aria-pressed', j === i ? 'true' : 'false'); }); }
+    grupoChips('#g-p', COMIDAS.p, 'p'); grupoChips('#g-c', COMIDAS.c, 'c'); grupoChips('#g-f', COMIDAS.f, 'f');
+    function segmento(id, clave, num) {
+      var caja = $(id);
+      $$('.chip', caja).forEach(function (b) {
+        b.addEventListener('click', function () {
+          $$('.chip', caja).forEach(function (o) { o.setAttribute('aria-pressed', o === b ? 'true' : 'false'); });
+          calc[clave] = num ? +b.getAttribute('data-valor') : b.getAttribute('data-valor'); dibuja(false);
+        });
+      });
+    }
+    segmento('#objetivo', 'obj'); segmento('#comidas', 'comidas', true);
+
+    function metas() {
+      var kg = calc.peso;
+      var kcal = kg * 32 * ({ ganar: 1.1, mantener: 1, bajar: 0.8 })[calc.obj];
+      var P = kg * ({ ganar: 1.8, mantener: 1.6, bajar: 2.0 })[calc.obj];
+      var F = kg * (calc.obj === 'bajar' ? 0.8 : 0.9);
+      var Cc = Math.max(0, (kcal - P * 4 - F * 9) / 4);
+      return { kcal: Math.round(kcal / 10) * 10, P: Math.round(P), C: Math.round(Cc), F: Math.round(F) };
+    }
+    // gramos de cada comida para llegar a la proteina, el carbohidrato y la grasa de una comida
+    function plato(m) {
+      var n = calc.comidas, Pm = m.P / n, Cm = m.C / n, Fm = m.F / n;
+      var p = COMIDAS.p[calc.p], c = COMIDAS.c[calc.c], f = COMIDAS.f[calc.f];
+      var gp = 0, gc = 0, gf = 0, extraP = 0, extraC = 0;
+      for (var it = 0; it < 4; it++) {
+        gp = Math.max(0, Pm - (c.P * gc + f.P * gf) / 100) * 100 / p.P;
+        if (gp > p.max) { extraP = (gp - p.max) * p.P / 100; gp = p.max; } else extraP = 0;
+        gc = Math.max(0, Cm - (p.C * gp + f.C * gf) / 100) * 100 / c.C;
+        if (gc > c.max) { extraC = (gc - c.max) * c.C / 100; gc = c.max; } else extraC = 0;
+        gf = Math.max(0, Fm - (p.F * gp + c.F * gc) / 100) * 100 / f.F;
+        if (gf > f.max) gf = f.max;
+      }
+      var res = [{ it: p, g: gp }, { it: c, g: gc }, { it: f, g: gf }];
+      if (extraP >= 8) res.splice(1, 0, { it: COMIDAS.p[p.k === 'pollo' ? 2 : 0], g: extraP * 100 / (p.k === 'pollo' ? 26 : 31) });
+      if (extraC >= 10) res.push({ it: COMIDAS.c[0], g: extraC * 100 / 28 });
+      return res;
+    }
+    function porcion(x) {
+      var it = x.it, g = x.g;
+      if (g < 4) return null;
+      if (it.u) {
+        var q = g / it.u[0];
+        if (it.cuartos) { q = Math.max(0.25, Math.round(q * 4) / 4); return fraccion(q) + ' ' + (q > 1 ? it.u[2] : it.u[1]) + ' (' + redondea(g) + ' g)'; }
+        if (it.medias) { q = Math.max(0.5, Math.round(q * 2) / 2); return fraccion(q) + ' ' + (q > 1 ? it.u[2] : it.u[1]); }
+        q = Math.max(1, Math.round(q)); return q + ' ' + (q > 1 ? it.u[2] : it.u[1]);
+      }
+      return redondea(g) + ' g de ' + it.n;
+    }
+    function redondea(g) { return g < 60 ? Math.max(5, Math.round(g / 5) * 5) : Math.round(g / 10) * 10; }
+    function fraccion(q) {
+      var e = Math.floor(q), r = q - e, s = { 0.25: '¼', 0.5: '½', 0.75: '¾' }[r] || '';
+      return (e ? e + (s ? ' ' : '') : '') + s;
+    }
+    var mostrado = { kcal: 0 };
+    function cuenta(el, a, b) {
+      if (quieto) { el.textContent = b; return; }
+      var t0 = performance.now();
+      (function paso(t) {
+        var u = Math.min(1, (t - t0) / 450), v = a + (b - a) * (1 - Math.pow(1 - u, 3));
+        el.textContent = Math.round(v); if (u < 1) requestAnimationFrame(paso);
+      })(t0);
+    }
+    function dibuja(salta) {
+      var m = metas();
+      cuenta($('#kcal'), mostrado.kcal, m.kcal); mostrado.kcal = m.kcal;
+      $('#g-prot').textContent = m.P; $('#g-carb').textContent = m.C; $('#g-gras').textContent = m.F;
+      var tot = m.P * 4 + m.C * 4 + m.F * 9;
+      $('#b-prot').style.width = (m.P * 4 / tot * 100 * 1.6).toFixed(1) + '%';
+      $('#b-carb').style.width = (m.C * 4 / tot * 100 * 1.6).toFixed(1) + '%';
+      $('#b-gras').style.width = (m.F * 9 / tot * 100 * 1.6).toFixed(1) + '%';
+      var pl = plato(m), lista = $('#porciones');
+      lista.innerHTML = '';
+      var textos = [];
+      pl.forEach(function (x) {
+        var t = porcion(x); if (!t) return;
+        textos.push(t);
+        var li = document.createElement('li');
+        li.innerHTML = '<img src="img/' + x.it.img + '" alt="">' + '<span>' + t + '</span>';
+        lista.appendChild(li);
+      });
+      var grasaFuera = pl.filter(function (x) { return x.it === COMIDAS.f[calc.f]; })[0].g < 4;
+      if (grasaFuera) {
+        var li2 = document.createElement('li'); li2.className = 'info';
+        li2.innerHTML = '<img src="img/' + COMIDAS.f[calc.f].img + '" alt=""><span>Sin ' + COMIDAS.f[calc.f].n + ' extra: la grasa ya viene en ' + COMIDAS.p[calc.p].n + '.</span>';
+        lista.appendChild(li2);
+      }
+      var nombres = { ganar: 'ganar músculo', mantener: 'mantenerte', bajar: 'bajar grasa' };
+      $('#sugerencia').innerHTML = 'Con <b>' + calc.peso + ' kg</b> y para ' + nombres[calc.obj] + ', en cada una de tus ' + calc.comidas +
+        ' comidas puedes comer: ' + textos.join(' + ') + '.';
+      var imgs = [COMIDAS.p[calc.p], COMIDAS.c[calc.c], COMIDAS.f[calc.f]];
+      ['#pl-1', '#pl-2', '#pl-3'].forEach(function (s, i) {
+        var el = $(s), nueva = 'img/' + imgs[i].img;
+        if (el.getAttribute('src') !== nueva || salta) {
+          el.setAttribute('src', nueva);
+          el.classList.remove('salta'); void el.offsetWidth; el.classList.add('salta');
+        }
+        el.classList.toggle('apagado', i === 2 && grasaFuera);
+      });
+    }
+    peso.addEventListener('input', function () { calc.peso = +peso.value; $('#peso-valor').textContent = calc.peso; dibuja(false); });
+    $('#otra').addEventListener('click', function () {
+      ['p', 'c', 'f'].forEach(function (k) {
+        var n = COMIDAS[k].length, v = calc[k];
+        while (v === calc[k]) v = Math.floor(Math.random() * n);
+        calc[k] = v; marca($('#g-' + k), v);
+      });
+      dibuja(true);
+    });
+    dibuja(false);
+
+    /* ---------- referidos: crea tu link ---------- */
+    function codigoDe(nombre) {
+      var base = nombre.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 20) || 'amigo';
+      var azar = Math.random().toString(36).slice(2, 5).replace(/[^a-z0-9]/g, 'x');
+      while (azar.length < 3) azar += 'x';
+      return base + '-' + azar;
+    }
+    var miCodigo = guarda.lee('tor-mi-codigo');
+    function muestraLink(cod) {
+      var link = location.origin + location.pathname + '?ref=' + cod;
+      if (location.protocol === 'file:') link = 'https://tu-pagina.com/?ref=' + cod;
+      $('#ref-codigo').textContent = cod.toUpperCase();
+      $('#ref-link').textContent = link;
+      var msj = 'Mira las guías de Tor para entrenar y comer bien, explicadas fácil: ' + link;
+      $('#ref-whatsapp').href = 'https://wa.me/?text=' + encodeURIComponent(msj);
+      $('#ref-compartir').style.display = navigator.share ? '' : 'none';
+      $('#ref-compartir').onclick = function () { navigator.share({ title: 'Entrena con Tor', text: msj, url: link }).catch(function () {}); };
+      $('#ref-copiar').onclick = function () {
+        var ok = function () { $('#ref-copiar').textContent = '¡Copiado!'; setTimeout(function () { $('#ref-copiar').textContent = 'Copiar'; }, 1600); };
+        if (navigator.clipboard) navigator.clipboard.writeText(link).then(ok, function () {}); else ok();
+      };
+      var donde = ENLACES.referidos.reclamar;
+      $('#ref-reclamo').innerHTML = 'Guarda tu código. Cuando tu amigo compre, ' + (donde ? '<a href="' + donde + '" target="_blank" rel="noopener">escríbenos aquí</a>' : 'escríbenos por Instagram') +
+        ' con tu código y te mandamos tu cupón de ' + ENLACES.referidos.descuento + ' %.';
+      $('#ref-caja').classList.add('si');
+    }
+    if (miCodigo) { $('#ref-nombre').value = miCodigo.replace(/-[a-z0-9]{3}$/, '').replace(/-/g, ' '); muestraLink(miCodigo); }
+    $('#ref-crear').addEventListener('click', function () {
+      var n = $('#ref-nombre').value.trim();
+      if (!n) { $('#ref-nombre').focus(); return; }
+      miCodigo = codigoDe(n); guarda.pon('tor-mi-codigo', miCodigo); muestraLink(miCodigo);
+    });
+
+    /* ---------- formulario del regalo ---------- */
+    var form = $('#formulario'), msj = $('#mensaje');
     form.addEventListener('submit', function (ev) {
       ev.preventDefault();
       var email = form.email.value.trim();
