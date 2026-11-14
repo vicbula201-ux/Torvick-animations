@@ -59,6 +59,8 @@ vape.jsx, chatarra.jsx           la fórmula del de la marihuana: tema tabú + T
 identidad.jsx/.html  foto de perfil y portadas de destacadas (PNG en identidad/)
 tienda/           landing de Entrena con Tor para vender los productos digitales
                   (HTML estático; links de pago y redes en ENLACES, al final del index.html)
+ebooks/           los e-books en A4 (HTML -> PDF): ebook.css, 7-errores.html (guía gratis),
+                  img/ (láminas de los reels); los pagos van en ebooks/privado/ (fuera de git)
 face-pull.html    redirige a reels.html#face-pull
 largo.html        videos largos de YouTube (16:9): el video con cortes + capas encima
 largo.jsx         window.LARGOS: cámara, texto detrás de la persona, escenas, textos, tarjetas, CTA, sonidos
@@ -591,6 +593,21 @@ duras). Los dibujos de `tienda/img/` son SVG exportados de `TOR.Tor`,
 exportarlos. Los cobros van por Hotmart: cada botón toma su link de
 `ENLACES.checkout`; sin link, lleva a la sección de guías. No poner
 testimonios ni cifras de ventas inventadas.
+
+## E-books — `ebooks/`
+
+Cada e-book es un HTML con una `<section class="pagina">` por hoja A4 y el
+estilo común de `ebooks/ebook.css` (misma identidad: blanco, trazo INK, paleta
+de cinco, rótulos con punta, cajas con sombra dura, "Tor dice", cajas de
+estudio). `node herramientas/ebook.js <archivo.html> [--hojas carpeta]` lo
+pasa a PDF en `ebooks/pdf/` (fuera de git) y avisa si algo toca el pie.
+Las figuras de los ejercicios son **láminas** sacadas de los reels con
+`node herramientas/laminas.js ebooks/img id:Escena:fracción[:nombre]` (solo el
+cuerpo y su máquina, sin rótulos; usar fracciones 0,3 a 0,85, no el final de la
+escena). Los dibujos de Tor salen de `tienda/img/` y de `ebooks/img/eb-*.svg`.
+**El repositorio es público:** los e-books pagos (`rutina-principiantes.html`)
+viven en `ebooks/privado/`, que no va a git; la guía gratis sí.
+Cada dato lleva su estudio en la hoja y la lista completa al final.
 
 ## Videos largos de YouTube — `largo.html`
 

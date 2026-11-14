@@ -1,0 +1,478 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Los 7 errores que frenan tu progreso · Entrena con Tor</title>
+<meta name="author" content="Torvick · Entrena con Tor">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Barlow+Semi+Condensed:ital,wght@0,500;0,600;0,700;1,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="ebook.css">
+<!--
+  GUIA GRATIS: Los 7 errores que frenan tu progreso en el gimnasio. 12 hojas A4.
+  Es el regalo de la landing (a cambio del correo).
+  PDF: node herramientas/ebook.js ebooks/7-errores.html
+-->
+<style>
+  .error-cab { display: grid; grid-template-columns: 120px 1fr; gap: 14px; align-items: center; margin-top: 10px; }
+  .error-cab h1 { margin: 6px 0 0; font-size: 34px; }
+  .escena { border: 2.5px solid var(--ink); border-radius: 16px; background: var(--rosa); box-shadow: 4px 4px 0 var(--ink); display: flex; align-items: flex-end; justify-content: center; gap: 10px; padding: 12px 10px 8px; height: 250px; position: relative; }
+  .escena img { max-height: 225px; width: auto; }
+  .escena .x { position: absolute; top: 10px; right: 12px; width: 54px; }
+  .senales li { font-size: 14.5px; }
+  .err { font-size: 15.6px; }
+  .err .escena { height: 318px; }
+  .err .escena img { max-height: 288px; }
+  .err h2 { font-size: 25px; }
+  .err .caja { padding: 16px 18px; }
+  .err ul.checks, .err ol.numeros { gap: 9px; }
+  .err .estudio { font-size: 13.6px; }
+  .err .tor-dice .globo { font-size: 17px; }
+  .arreglo { background: var(--menta); }
+  .indice-err { list-style: none; padding: 0; margin: 10px 0 0; display: grid; gap: 8px; }
+  .indice-err li { display: grid; grid-template-columns: 40px 1fr auto; gap: 10px; align-items: center; border: 2.5px solid var(--ink); border-radius: 12px; padding: 6px 12px 6px 6px; box-shadow: 3px 3px 0 var(--ink); background: var(--blanco); font-weight: 700; font-size: 16px; }
+  .indice-err .n { width: 34px; height: 34px; border-radius: 50%; background: var(--red); color: #fff; font-family: 'Archivo Black', sans-serif; display: flex; align-items: center; justify-content: center; }
+  .indice-err .p { font-family: 'Archivo Black', sans-serif; font-size: 13px; }
+  .dia7 { display: grid; grid-template-columns: 112px 1fr 56px; gap: 12px; align-items: center; border: 2.5px solid var(--ink); border-radius: 14px; box-shadow: 3px 3px 0 var(--ink); padding: 11px 12px; background: var(--blanco); font-size: 15.5px; }
+  .dia7 .d { font-family: 'Archivo Black', sans-serif; font-size: 15px; text-transform: uppercase; background: var(--yel); border: 2px solid var(--ink); border-radius: 8px; text-align: center; padding: 4px 0; }
+  .dia7 img { width: 46px; justify-self: end; }
+  .check td { height: 58px; font-size: 14px; }
+  .check td:first-child { font-weight: 700; }
+  .mini-libro { position: relative; width: 170px; aspect-ratio: 3 / 4; background: var(--yel); border: 3px solid var(--ink); border-radius: 6px 12px 12px 6px; box-shadow: 5px 5px 0 var(--ink); overflow: hidden; flex: none; transform: rotate(-4deg); }
+  .mini-libro::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 10%; background: var(--ink); }
+  .mini-libro .t { position: absolute; top: 9%; left: 16%; font-family: 'Archivo Black', sans-serif; font-size: 8px; letter-spacing: 0.1em; background: var(--ink); color: #fff; padding: 1px 5px; }
+  .mini-libro .h { position: absolute; top: 19%; left: 16%; right: 6%; font-family: 'Archivo Black', sans-serif; font-size: 13px; line-height: 1.05; text-transform: uppercase; }
+  .mini-libro .h em { font-style: normal; background: #fff; padding: 0 2px; }
+  .mini-libro img { position: absolute; bottom: 3%; left: 20%; width: 76%; }
+  .redes { display: flex; gap: 10px; flex-wrap: wrap; }
+  .redes span { display: inline-flex; align-items: center; gap: 7px; border: 2px solid var(--ink); border-radius: 999px; padding: 3px 12px 3px 4px; font-weight: 700; font-size: 14px; background: #fff; }
+  .redes img { width: 26px; height: 26px; }
+</style>
+</head>
+<body>
+
+<!-- =============================== 1 · PORTADA =============================== -->
+<section class="pagina portada">
+  <div class="lomo"></div>
+  <div class="dentro">
+    <span class="tag">GUÍA GRATIS</span>
+    <h1 style="font-size:60px">Los 7 <em>errores</em> que frenan tu progreso en el gimnasio</h1>
+    <p class="sub">Por qué entrenas y no cambias, y cómo arreglarlo desde mañana. Explicado fácil, con Tor y con los estudios detrás.</p>
+  </div>
+  <img src="../tienda/img/comp-sin.svg" alt="" style="position:absolute;right:56px;bottom:120px;width:330px">
+  <img src="../tienda/img/tacha.svg" alt="" style="position:absolute;left:96px;bottom:170px;width:150px;transform:rotate(-8deg)">
+  <div class="autor">
+    <img src="../tienda/img/tor-perfil.png" alt="">
+    <div><p class="impacto">ENTRENA CON TOR</p><p>por Torvick · @eltorvick</p></div>
+  </div>
+</section>
+
+<!-- =============================== 2 · ANTES DE EMPEZAR =============================== -->
+<section class="pagina">
+  <div class="cabeza"><span class="marca"><img src="../tienda/img/tor-perfil.png" alt="">Entrena con Tor</span><span>Antes de empezar</span></div>
+  <span class="rotulo">Antes de empezar</span>
+  <h1>Si entrenas y no cambias, <span class="resalta">no es falta de ganas</span></h1>
+  <div class="fila" style="align-items:center">
+    <div style="flex:1.6">
+      <p class="bajada">Casi siempre es por alguno de estos 7 errores. Son muy comunes, nadie te los explica y todos tienen arreglo. Casi ninguno cuesta dinero: cuestan atención.</p>
+      <p class="mt10">En cada error vas a ver <b>por qué te frena</b>, <b>cómo darte cuenta</b> si lo estás cometiendo, <b>qué dice la ciencia</b> y <b>cómo arreglarlo</b>. Al final tienes una checklist y un plan para tu primera semana.</p>
+    </div>
+    <img src="img/eb-tor-feliz.svg" alt="" style="width:138px;flex:none">
+  </div>
+  <ul class="indice-err mt14">
+    <li><span class="n">1</span>Entrenar sin un plan<span class="p">pág. 3</span></li>
+    <li><span class="n">2</span>No subir las cargas<span class="p">pág. 4</span></li>
+    <li><span class="n">3</span>Mala técnica y recorridos a medias<span class="p">pág. 5</span></li>
+    <li><span class="n">4</span>Comer poca proteína<span class="p">pág. 6</span></li>
+    <li><span class="n">5</span>Dormir poco<span class="p">pág. 7</span></li>
+    <li><span class="n">6</span>Hacer abdominales para quemar la panza<span class="p">pág. 8</span></li>
+    <li><span class="n">7</span>No medir tu progreso (y rendirte antes de tiempo)<span class="p">pág. 9</span></li>
+  </ul>
+  <div class="tor-dice mt14">
+    <img src="../tienda/img/tor-senala.svg" alt="">
+    <p class="globo">Lee <b>un error por día</b> y arregla ese. En una semana entrenas distinto.</p>
+  </div>
+  <div class="estudio"><span class="tag">IMPORTANTE</span>Esta guía es educativa. Si tienes una lesión, dolor o una enfermedad, consulta con un profesional de la salud antes de cambiar tu entrenamiento o tu alimentación.</div>
+  <div class="pie"><span>Los 7 errores · Entrena con Tor · Guía gratis</span><span class="num">2</span></div>
+</section>
+
+<!-- =============================== 3 · ERROR 1 =============================== -->
+<section class="pagina err">
+  <div class="cabeza"><span class="marca"><img src="../tienda/img/tor-perfil.png" alt="">Entrena con Tor</span><span>Error 1</span></div>
+  <div class="error-cab"><span class="numero-grande">1</span><div><span class="rotulo rojo">Error 1</span><h1>Entrenar sin un plan</h1></div></div>
+  <div class="col2 mt14">
+    <div class="escena"><img src="../tienda/img/comp-sin.svg" alt=""><img class="x" src="../tienda/img/tacha.svg" alt=""></div>
+    <div>
+      <h2>Por qué te frena</h2>
+      <p>Si cada día haces lo que se te ocurre, o la rutina del video del momento, nunca repites un ejercicio lo suficiente como para mejorar en él. Sin repetir no puedes subir el peso, y sin subir el peso no hay progreso.</p>
+      <div class="caja rosa mt10">
+        <h3>Señales de que lo cometes</h3>
+        <ul class="equis senales">
+          <li>Cambias de rutina casi cada semana.</li>
+          <li>Llegas al gimnasio sin saber qué vas a hacer.</li>
+          <li>Hay músculos que entrenas mucho y otros casi nunca (¿las piernas?).</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="caja arreglo mt20">
+    <span class="rotulo verde">Cómo arreglarlo</span>
+    <ul class="checks">
+      <li>Elige un plan de <b>3 a 6 días</b> y síguelo por lo menos <b>8 semanas</b>.</li>
+      <li>Repite los mismos ejercicios cada semana: así puedes ver si mejoras en ellos.</li>
+      <li>Entrena cada músculo <b>2 veces por semana</b>.</li>
+      <li>Escribe antes de ir qué vas a hacer hoy (ejercicios, series y repeticiones).</li>
+    </ul>
+  </div>
+  <div class="estudio mt20"><span class="tag">LA CIENCIA</span>Los programas que funcionan tienen progresión planificada (ACSM, 2009), y entrenar cada músculo 2 veces por semana hace crecer más que 1 sola vez (Schoenfeld y cols., 2016). Cambiar algún ejercicio de vez en cuando no es malo; el problema es no tener un plan que te deje subir.</div>
+  <div class="tor-dice mt20">
+    <img src="../tienda/img/tor-senala.svg" alt="">
+    <p class="globo">Un plan normal que <b>sigues</b> le gana a un plan perfecto que cambias cada semana.</p>
+  </div>
+  <div class="pie"><span>Los 7 errores · Entrena con Tor · Guía gratis</span><span class="num">3</span></div>
+</section>
+
+<!-- =============================== 4 · ERROR 2 =============================== -->
+<section class="pagina err">
+  <div class="cabeza"><span class="marca"><img src="../tienda/img/tor-perfil.png" alt="">Entrena con Tor</span><span>Error 2</span></div>
+  <div class="error-cab"><span class="numero-grande">2</span><div><span class="rotulo rojo">Error 2</span><h1>No subir las cargas</h1></div></div>
+  <div class="col2 mt14">
+    <div class="escena"><img src="../tienda/img/tor-triste.svg" alt=""><img src="../tienda/img/pesa.svg" alt="" style="max-height:90px;margin-bottom:8px"><img class="x" src="../tienda/img/tacha.svg" alt=""></div>
+    <div>
+      <h2>Por qué te frena</h2>
+      <p>Levantas los mismos 10 kg desde hace meses. Tu cuerpo ya se adaptó a eso: no tiene ninguna razón para cambiar. El músculo crece cuando le pides <b>un poco más</b> de lo que ya sabe hacer.</p>
+      <div class="caja rosa mt10">
+        <h3>Señales de que lo cometes</h3>
+        <ul class="equis senales">
+          <li>Usas los mismos pesos de siempre.</li>
+          <li>No anotas nada y no recuerdas qué levantaste la semana pasada.</li>
+          <li>Terminas las series cómodo, como si pudieras hacer muchas más.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="caja arreglo mt20">
+    <span class="rotulo verde">Cómo arreglarlo: la doble progresión</span>
+    <ol class="numeros">
+      <li>Con el mismo peso, suma repeticiones semana a semana hasta llegar al tope de tu rango (por ejemplo, 12) en todas las series.</li>
+      <li>Cuando lo logras con buena técnica, <b>sube el peso</b> (1 a 2,5 kg por mancuerna, o el salto más chico de la máquina) y vuelve al piso del rango (por ejemplo, 8).</li>
+      <li>Termina cada serie con 1 a 3 repeticiones de sobra: exigente, pero limpia.</li>
+      <li><b>Anota</b> peso y repeticiones de cada serie. Sin registro no hay progresión.</li>
+    </ol>
+  </div>
+  <div class="estudio mt20"><span class="tag">LA CIENCIA</span>Subir el peso o subir las repeticiones dan resultados parecidos; lo que no funciona es no subir nada (Plotkin y cols., 2022). La sobrecarga progresiva es la base de cualquier programa de fuerza (ACSM, 2009).</div>
+  <div class="tor-dice mt20">
+    <img src="../tienda/img/tor-senala.svg" alt="">
+    <p class="globo">Una repetición más que la semana pasada <b>ya es progreso</b>.</p>
+  </div>
+  <div class="pie"><span>Los 7 errores · Entrena con Tor · Guía gratis</span><span class="num">4</span></div>
+</section>
+
+<!-- =============================== 5 · ERROR 3 =============================== -->
+<section class="pagina err">
+  <div class="cabeza"><span class="marca"><img src="../tienda/img/tor-perfil.png" alt="">Entrena con Tor</span><span>Error 3</span></div>
+  <div class="error-cab"><span class="numero-grande">3</span><div><span class="rotulo rojo">Error 3</span><h1>Mala técnica y recorridos a medias</h1></div></div>
+  <div class="col2 mt14">
+    <div class="escena" style="background:#fff;justify-content:space-around">
+      <div style="text-align:center"><img src="img/pm-mal.png" alt="" style="max-height:200px"><p class="chico" style="font-weight:700;color:var(--red)">Espalda curvada</p></div>
+      <div style="text-align:center"><img src="img/pm-bien.png" alt="" style="max-height:200px"><p class="chico" style="font-weight:700;color:var(--grn)">Espalda neutra</p></div>
+    </div>
+    <div>
+      <h2>Por qué te frena</h2>
+      <p>Mover más peso con mala técnica no es progreso: el músculo que quieres trabaja menos, otro hace el trabajo y aumenta el riesgo de lastimarte. Y bajar solo la mitad del recorrido deja crecimiento sobre la mesa.</p>
+      <div class="caja rosa mt10">
+        <h3>Señales de que lo cometes</h3>
+        <ul class="equis senales">
+          <li>Te balanceas o das tirones para subir el peso.</li>
+          <li>Bajas a medias (sentadillas cortas, flexiones de 5 cm).</li>
+          <li>Sientes el ejercicio en el cuello o la zona lumbar, no en el músculo.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="caja arreglo mt20">
+    <span class="rotulo verde">Cómo arreglarlo</span>
+    <ul class="checks">
+      <li>Baja el peso en unos <b>2 segundos</b>, sin rebotar abajo.</li>
+      <li>Usa <b>todo el recorrido</b> que tu cuerpo permita sin dolor.</li>
+      <li>Si te balanceas, baja el peso un 10 a 20 % y vuelve a subir desde ahí.</li>
+      <li>Grábate de perfil una serie por semana y compárala con el ejercicio bien hecho.</li>
+    </ul>
+  </div>
+  <div class="col2 mt20" style="align-items:center">
+    <div class="estudio"><span class="tag">LA CIENCIA</span>Entrenar con el recorrido completo da igual o más fuerza y músculo que hacerlo a medias (Pallarés y cols., 2021).</div>
+    <div class="fila" style="gap:8px">
+      <div style="border:2px solid var(--ink);border-radius:10px;padding:4px;text-align:center"><img src="img/pml-mal.png" alt="" style="height:96px;margin:0 auto"><p class="chico" style="font-weight:700;color:var(--red)">Hombros encogidos</p></div>
+      <div style="border:2px solid var(--ink);border-radius:10px;padding:4px;text-align:center"><img src="img/pml-bien.png" alt="" style="height:96px;margin:0 auto"><p class="chico" style="font-weight:700;color:var(--grn)">Hombros abajo</p></div>
+    </div>
+  </div>
+  <div class="pie"><span>Los 7 errores · Entrena con Tor · Guía gratis</span><span class="num">5</span></div>
+</section>
+
+<!-- =============================== 6 · ERROR 4 =============================== -->
+<section class="pagina err">
+  <div class="cabeza"><span class="marca"><img src="../tienda/img/tor-perfil.png" alt="">Entrena con Tor</span><span>Error 4</span></div>
+  <div class="error-cab"><span class="numero-grande">4</span><div><span class="rotulo rojo">Error 4</span><h1>Comer poca proteína</h1></div></div>
+  <div class="col2 mt14">
+    <div class="escena" style="background:var(--menta);align-items:center">
+      <div style="position:relative;width:230px;height:230px">
+        <img src="../tienda/img/plato.svg" alt="" style="position:absolute;inset:0;width:100%;max-height:none">
+        <img src="../tienda/img/pollo.svg" alt="" style="position:absolute;left:24px;top:36px;width:96px">
+        <img src="../tienda/img/huevo.svg" alt="" style="position:absolute;right:30px;top:44px;width:76px">
+        <img src="../tienda/img/arroz.svg" alt="" style="position:absolute;left:78px;bottom:30px;width:84px">
+      </div>
+    </div>
+    <div>
+      <h2>Por qué te frena</h2>
+      <p>El entrenamiento es la señal; la proteína es el material. Si no comes suficiente, el cuerpo recibe la orden de construir músculo pero no tiene con qué.</p>
+      <div class="caja rosa mt10">
+        <h3>Señales de que lo cometes</h3>
+        <ul class="equis senales">
+          <li>Tu desayuno es pan y café, sin huevo, yogur ni nada parecido.</li>
+          <li>Solo una comida del día tiene una buena porción de proteína.</li>
+          <li>No tienes idea de cuánta proteína comes.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="caja arreglo mt20">
+    <span class="rotulo verde">Cómo arreglarlo</span>
+    <ul class="checks">
+      <li>Come entre <b>1,6 y 2,2 g por kilo</b> de tu peso al día. Con 70 kg: unos 110 a 155 g.</li>
+      <li>Repártela en <b>3 a 5 comidas</b>, con 20 a 40 g en cada una.</li>
+      <li>Fuentes fáciles: pollo, huevos, pescado o atún, carne magra, yogur griego, legumbres y tofu.</li>
+    </ul>
+  </div>
+  <table class="tabla mt14">
+    <tr><th>Ejemplo para 70 kg</th><th>Comida</th><th>Proteína</th></tr>
+    <tr><td>Desayuno</td><td>3 huevos + 150 g de yogur griego</td><td class="num">≈ 34 g</td></tr>
+    <tr><td>Almuerzo</td><td>150 g de pollo + arroz + verduras</td><td class="num">≈ 46 g</td></tr>
+    <tr><td>Cena</td><td>150 g de pescado o atún + papa + ensalada</td><td class="num">≈ 39 g</td></tr>
+    <tr><td><b>Total</b></td><td></td><td class="num si">≈ 119 g</td></tr>
+  </table>
+  <div class="estudio mt14"><span class="tag">LA CIENCIA</span>Un análisis de 49 estudios encontró que la ganancia de músculo con pesas mejora al subir la proteína hasta unos 1,6 g por kilo al día, y que algunas personas se benefician de llegar a 2,2 g (Morton y cols., 2018).</div>
+  <div class="pie"><span>Los 7 errores · Entrena con Tor · Guía gratis</span><span class="num">6</span></div>
+</section>
+
+<!-- =============================== 7 · ERROR 5 =============================== -->
+<section class="pagina err">
+  <div class="cabeza"><span class="marca"><img src="../tienda/img/tor-perfil.png" alt="">Entrena con Tor</span><span>Error 5</span></div>
+  <div class="error-cab"><span class="numero-grande">5</span><div><span class="rotulo rojo">Error 5</span><h1>Dormir poco</h1></div></div>
+  <div class="col2 mt14">
+    <div class="escena" style="background:var(--papel)"><img src="img/eb-tor-dormido.svg" alt=""><img src="../tienda/img/luna.svg" alt="" style="position:absolute;left:18px;top:18px;width:70px"></div>
+    <div>
+      <h2>Por qué te frena</h2>
+      <p>El músculo no crece mientras entrenas: crece mientras te recuperas, y gran parte de esa recuperación pasa de noche. Si duermes poco, rindes menos en el gimnasio y aprovechas peor lo que entrenaste.</p>
+      <div class="caja rosa mt10">
+        <h3>Señales de que lo cometes</h3>
+        <ul class="equis senales">
+          <li>Duermes menos de 7 horas casi todos los días.</li>
+          <li>Te quedas con el celular en la cama hasta tarde.</li>
+          <li>Llegas al gimnasio sin fuerza y con sueño.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="caja arreglo mt20">
+    <span class="rotulo verde">Cómo arreglarlo</span>
+    <ul class="checks">
+      <li>Apunta a <b>7 a 9 horas</b> cada noche.</li>
+      <li>Ponte una alarma para <b>acostarte</b>, no solo para levantarte.</li>
+      <li>Deja el celular fuera de la cama 30 minutos antes de dormir.</li>
+      <li>Acuéstate y levántate a la misma hora, también el fin de semana.</li>
+      <li>Nada de café después de media tarde.</li>
+    </ul>
+  </div>
+  <div class="col2 mt20">
+    <div class="estudio"><span class="tag">LA CIENCIA</span>Una sola noche sin dormir bajó un 18 % la fabricación de proteína muscular al día siguiente (Lamon y cols., 2021).</div>
+    <div class="estudio"><span class="tag">LA CIENCIA</span>Los expertos en sueño recomiendan a los adultos dormir 7 horas o más por noche (Watson y cols., 2015).</div>
+  </div>
+  <div class="tor-dice mt20">
+    <img src="../tienda/img/tor-senala.svg" alt="">
+    <p class="globo">Dormir también es entrenar. Es la parte en la que <b>creces</b>.</p>
+  </div>
+  <div class="pie"><span>Los 7 errores · Entrena con Tor · Guía gratis</span><span class="num">7</span></div>
+</section>
+
+<!-- =============================== 8 · ERROR 6 =============================== -->
+<section class="pagina err">
+  <div class="cabeza"><span class="marca"><img src="../tienda/img/tor-perfil.png" alt="">Entrena con Tor</span><span>Error 6</span></div>
+  <div class="error-cab"><span class="numero-grande">6</span><div><span class="rotulo rojo">Error 6</span><h1>Hacer abdominales para quemar la panza</h1></div></div>
+  <div class="col2 mt14">
+    <div class="escena"><img src="img/eb-tor-panza.svg" alt=""><img src="img/abdominal.png" alt="" style="max-height:90px;margin-bottom:6px"><img class="x" src="../tienda/img/tacha.svg" alt=""></div>
+    <div>
+      <h2>Por qué te frena</h2>
+      <p>No se puede elegir de dónde bajar grasa. Los abdominales fortalecen el músculo, pero la grasa que lo tapa baja con el cuerpo entero: comiendo un poco menos de lo que gastas y entrenando todo el cuerpo.</p>
+      <div class="caja rosa mt10">
+        <h3>Señales de que lo cometes</h3>
+        <ul class="equis senales">
+          <li>Haces cientos de abdominales al día para "marcar".</li>
+          <li>Tu rutina es solo cardio y abdominales.</li>
+          <li>No sabes cuánto comes.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="caja arreglo mt20">
+    <span class="rotulo verde">Cómo arreglarlo</span>
+    <ul class="checks">
+      <li>Para bajar grasa, come unas <b>300 a 500 kcal menos</b> de lo que gastas, sin dietas extremas.</li>
+      <li>Mantén la proteína alta (error 4): así cuidas el músculo mientras bajas.</li>
+      <li>Entrena <b>todo el cuerpo</b> con pesas y camina más cada día.</li>
+      <li>Haz abdominales como cualquier músculo: 2 a 3 series al final, para que estén fuertes y se marquen cuando baje la grasa.</li>
+    </ul>
+  </div>
+  <div class="estudio mt20"><span class="tag">LA CIENCIA</span>En un estudio, 6 semanas de ejercicios de abdomen no bajaron la grasa del abdomen comparado con no hacerlos (Vispute y cols., 2011).</div>
+  <div class="tor-dice mt20">
+    <img src="../tienda/img/tor-senala.svg" alt="">
+    <p class="globo">Los abdominales se hacen en el gimnasio, pero se <b>marcan en la cocina</b>.</p>
+  </div>
+  <div class="pie"><span>Los 7 errores · Entrena con Tor · Guía gratis</span><span class="num">8</span></div>
+</section>
+
+<!-- =============================== 9 · ERROR 7 =============================== -->
+<section class="pagina err">
+  <div class="cabeza"><span class="marca"><img src="../tienda/img/tor-perfil.png" alt="">Entrena con Tor</span><span>Error 7</span></div>
+  <div class="error-cab"><span class="numero-grande">7</span><div><span class="rotulo rojo">Error 7</span><h1>No medir tu progreso (y rendirte antes de tiempo)</h1></div></div>
+  <div class="col2 mt14">
+    <div class="escena" style="background:var(--papel);align-items:center"><img src="../tienda/img/calendario.svg" alt="" style="max-height:150px"><img src="../tienda/img/barras.svg" alt="" style="max-height:150px"></div>
+    <div>
+      <h2>Por qué te frena</h2>
+      <p>En el espejo los cambios tardan, y como te ves todos los días, no los notas. Si no mides nada, a las 4 semanas crees que no pasa nada y abandonas justo cuando empezaba a funcionar.</p>
+      <div class="caja rosa mt10">
+        <h3>Señales de que lo cometes</h3>
+        <ul class="equis senales">
+          <li>Te pesas todos los días y te frustras cuando sube.</li>
+          <li>No tienes fotos de cómo empezaste.</li>
+          <li>No sabes cuánto levantabas hace un mes.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="caja arreglo mt20">
+    <span class="rotulo verde">Cómo arreglarlo</span>
+    <ul class="checks">
+      <li>Anota los pesos de cada sesión: es la prueba más rápida de que avanzas.</li>
+      <li>Sácate una <b>foto cada 4 semanas</b>, con la misma luz, ropa y posición.</li>
+      <li>Mide cintura y brazo cada 2 a 4 semanas.</li>
+      <li>Si te pesas, mira el <b>promedio de la semana</b>, no el número de un día.</li>
+      <li>Date por lo menos <b>12 semanas</b> antes de juzgar un plan.</li>
+    </ul>
+  </div>
+  <div class="col2 mt20">
+    <div class="estudio"><span class="tag">LA CIENCIA</span>En principiantes, el músculo ya crece de forma medible a las 3 o 4 semanas de entrenar (Seynnes y cols., 2007), aunque en el espejo se note más tarde.</div>
+    <div class="estudio"><span class="tag">LA CIENCIA</span>Registrar lo que haces se asocia con mejores resultados: en los estudios de pérdida de peso, quienes se anotan más, logran más (Burke y cols., 2011).</div>
+  </div>
+  <div class="pie"><span>Los 7 errores · Entrena con Tor · Guía gratis</span><span class="num">9</span></div>
+</section>
+
+<!-- =============================== 10 · CHECKLIST =============================== -->
+<section class="pagina">
+  <div class="cabeza"><span class="marca"><img src="../tienda/img/tor-perfil.png" alt="">Entrena con Tor</span><span>Tu checklist</span></div>
+  <span class="rotulo">Para imprimir</span>
+  <h1>Tu checklist de los <span class="resalta">7 arreglos</span></h1>
+  <p class="bajada">Marca cada semana los que cumpliste. Cuando tengas los 7 marcados cuatro semanas seguidas, ya no estás frenado.</p>
+  <table class="tabla check mt14">
+    <tr><th style="width:44%">El arreglo</th><th>Sem. 1</th><th>Sem. 2</th><th>Sem. 3</th><th>Sem. 4</th></tr>
+    <tr><td>1 · Seguí mi plan, sin cambiarlo</td><td><span class="casilla"></span></td><td><span class="casilla"></span></td><td><span class="casilla"></span></td><td><span class="casilla"></span></td></tr>
+    <tr><td>2 · Subí repeticiones o peso en algún ejercicio</td><td><span class="casilla"></span></td><td><span class="casilla"></span></td><td><span class="casilla"></span></td><td><span class="casilla"></span></td></tr>
+    <tr><td>3 · Bajé lento y con el recorrido completo</td><td><span class="casilla"></span></td><td><span class="casilla"></span></td><td><span class="casilla"></span></td><td><span class="casilla"></span></td></tr>
+    <tr><td>4 · Llegué a mi proteína casi todos los días</td><td><span class="casilla"></span></td><td><span class="casilla"></span></td><td><span class="casilla"></span></td><td><span class="casilla"></span></td></tr>
+    <tr><td>5 · Dormí 7 horas o más casi todas las noches</td><td><span class="casilla"></span></td><td><span class="casilla"></span></td><td><span class="casilla"></span></td><td><span class="casilla"></span></td></tr>
+    <tr><td>6 · Entrené todo el cuerpo (no solo abdomen)</td><td><span class="casilla"></span></td><td><span class="casilla"></span></td><td><span class="casilla"></span></td><td><span class="casilla"></span></td></tr>
+    <tr><td>7 · Anoté mis pesos (y foto cada 4 semanas)</td><td><span class="casilla"></span></td><td><span class="casilla"></span></td><td><span class="casilla"></span></td><td><span class="casilla"></span></td></tr>
+  </table>
+  <div class="col2 mt20">
+    <div class="caja amarilla">
+      <h3>Mi proteína del día</h3>
+      <p>Mi peso: ______ kg × 1,6 = <b>______ g</b> al día</p>
+      <p class="mt6">En ____ comidas = <b>______ g</b> por comida</p>
+    </div>
+    <div class="caja">
+      <h3>Mis medidas de inicio</h3>
+      <p>Fecha: ____________</p>
+      <p class="mt6">Peso: ______ kg · Cintura: ______ cm · Brazo: ______ cm</p>
+    </div>
+  </div>
+  <div class="tor-dice mt20">
+    <img src="../tienda/img/tor-senala.svg" alt="">
+    <p class="globo">No tienes que arreglar los 7 hoy. Empieza por <b>uno</b> y súmale otro cada semana.</p>
+  </div>
+  <div class="pie"><span>Los 7 errores · Entrena con Tor · Guía gratis</span><span class="num">10</span></div>
+</section>
+
+<!-- =============================== 11 · PRIMERA SEMANA =============================== -->
+<section class="pagina">
+  <div class="cabeza"><span class="marca"><img src="../tienda/img/tor-perfil.png" alt="">Entrena con Tor</span><span>Tu primera semana</span></div>
+  <span class="rotulo">Manos a la obra</span>
+  <h1>Tu primera semana <span class="resalta">sin errores</span></h1>
+  <p class="bajada">Una sola tarea por día. Ninguna te lleva más de 15 minutos fuera del entrenamiento.</p>
+  <div style="display:grid;gap:9px" class="mt14">
+    <div class="dia7"><span class="d">Lunes</span><p><b>Elige tu plan</b> y escribe qué días entrenas y qué haces cada día (error 1).</p><img src="../tienda/img/calendario.svg" alt=""></div>
+    <div class="dia7"><span class="d">Martes</span><p><b>Calcula tu proteína</b> (tu peso × 1,6) y decide qué proteína va en cada comida (error 4).</p><img src="../tienda/img/pollo.svg" alt=""></div>
+    <div class="dia7"><span class="d">Miércoles</span><p><b>Entrena y anota</b> el peso y las repeticiones de cada serie. Deja 2 o 3 repeticiones de sobra (errores 2 y 7).</p><img src="../tienda/img/barras.svg" alt=""></div>
+    <div class="dia7"><span class="d">Jueves</span><p><b>Pon tu alarma para acostarte</b> y deja el celular fuera de la cama (error 5).</p><img src="../tienda/img/luna.svg" alt=""></div>
+    <div class="dia7"><span class="d">Viernes</span><p><b>Grábate de perfil</b> una serie y revisa: ¿bajas lento?, ¿recorrido completo?, ¿sin balanceo? (error 3).</p><img src="../tienda/img/visto.svg" alt=""></div>
+    <div class="dia7"><span class="d">Sábado</span><p><b>Foto y medidas de inicio</b>: cintura, brazo y peso. Guárdalas en una carpeta (error 7).</p><img src="../tienda/img/cerebro.svg" alt=""></div>
+    <div class="dia7"><span class="d">Domingo</span><p><b>Descansa</b> y marca tu checklist. Si ves abdominales en tu plan, que sean al final, no todo el plan (error 6).</p><img src="../tienda/img/corona.svg" alt=""></div>
+  </div>
+  <div class="caja amarilla mt20">
+    <div class="fila" style="align-items:center">
+      <img src="../tienda/img/tor-flex.svg" alt="" style="width:96px;flex:none">
+      <p style="font-size:16px"><b>Cuéntame cómo te fue.</b> Escríbeme en Instagram o TikTok de Entrena con Tor con la palabra <b>"SEMANA 1"</b> y dime cuál de los 7 errores te costó más.</p>
+    </div>
+  </div>
+  <div class="pie"><span>Los 7 errores · Entrena con Tor · Guía gratis</span><span class="num">11</span></div>
+</section>
+
+<!-- =============================== 12 · CIERRE =============================== -->
+<section class="pagina">
+  <div class="cabeza"><span class="marca"><img src="../tienda/img/tor-perfil.png" alt="">Entrena con Tor</span><span>¿Y ahora?</span></div>
+  <span class="rotulo">El siguiente paso</span>
+  <h1>¿Quieres el plan <span class="resalta">día por día</span>?</h1>
+  <div class="caja amarilla mt14">
+    <div class="fila" style="align-items:center;gap:26px">
+      <div class="mini-libro"><span class="t">PROGRAMA</span><div class="h">Rutina para <em>principiantes</em></div><img src="../tienda/img/tor-medio.svg" alt=""></div>
+      <div>
+        <h2>Rutina para principiantes · 12 semanas</h2>
+        <p>Los 7 arreglos de esta guía, convertidos en un plan: qué hacer cada día, cuántas series y repeticiones, cómo subir el peso y tu registro para anotar.</p>
+        <ul class="checks">
+          <li>3 rutinas: pecho y hombro, espalda y bíceps, piernas y glúteos.</li>
+          <li>Versión de 6 o 5 días, con abdominales cada día.</li>
+          <li>Cada ejercicio dibujado con Tor, con sus claves.</li>
+        </ul>
+        <p class="mt10" style="font-weight:700">Encuéntrala en el link de mi perfil.</p>
+      </div>
+    </div>
+  </div>
+  <div class="caja mt20">
+    <h3>Sígueme para ver cada ejercicio explicado</h3>
+    <div class="redes mt10">
+      <span><img src="../tienda/img/red-youtube.svg" alt="">YouTube · @eltorvick</span>
+      <span><img src="../tienda/img/red-instagram.svg" alt="">Instagram · Entrena con Tor</span>
+      <span><img src="../tienda/img/red-tiktok.svg" alt="">TikTok · Entrena con Tor</span>
+    </div>
+  </div>
+  <h3 class="mt20">Los estudios de esta guía</h3>
+  <ol class="chico" style="margin:4px 0 0;padding-left:18px;display:grid;gap:3px;font-size:11px;line-height:1.3">
+    <li>American College of Sports Medicine (2009). Progression models in resistance training for healthy adults. <i>Med Sci Sports Exerc</i>, 41(3), 687–708.</li>
+    <li>Burke LE, Wang J, Sevick MA (2011). Self-monitoring in weight loss: a systematic review of the literature. <i>J Am Diet Assoc</i>, 111(1), 92–102.</li>
+    <li>Lamon S y cols. (2021). The effect of acute sleep deprivation on skeletal muscle protein synthesis and the hormonal environment. <i>Physiol Rep</i>, 9(1), e14660.</li>
+    <li>Morton RW y cols. (2018). A systematic review, meta-analysis and meta-regression of the effect of protein supplementation on resistance training-induced gains in muscle mass and strength. <i>Br J Sports Med</i>, 52(6), 376–384.</li>
+    <li>Pallarés JG y cols. (2021). Effects of range of motion on resistance training adaptations: a systematic review and meta-analysis. <i>Scand J Med Sci Sports</i>, 31(10), 1866–1881.</li>
+    <li>Plotkin D y cols. (2022). Progressive overload without progressing load? The effects of load or repetition progression on muscular adaptations. <i>PeerJ</i>, 10, e14142.</li>
+    <li>Schoenfeld BJ, Ogborn D, Krieger JW (2016). Effects of resistance training frequency on measures of muscle hypertrophy. <i>Sports Med</i>, 46(11), 1689–1697.</li>
+    <li>Seynnes OR, de Boer M, Narici MV (2007). Early skeletal muscle hypertrophy and architectural changes in response to high-intensity resistance training. <i>J Appl Physiol</i>, 102(1), 368–373.</li>
+    <li>Vispute SS y cols. (2011). The effect of abdominal exercise on abdominal fat. <i>J Strength Cond Res</i>, 25(9), 2559–2564.</li>
+    <li>Watson NF y cols. (2015). Recommended amount of sleep for a healthy adult. <i>Sleep</i>, 38(6), 843–844.</li>
+  </ol>
+  <p class="chico gris-t mt10">© Torvick · Entrena con Tor. Guía gratis: compártela con quien quieras, tal cual está.</p>
+  <div class="tor-dice" style="position:absolute;right:52px;bottom:72px;width:360px;grid-template-columns:96px 1fr">
+    <img src="../tienda/img/tor-saludo-a.svg" alt="" style="width:96px">
+    <p class="globo">¡Nos vemos en el <b>próximo video</b>!</p>
+  </div>
+  <div class="pie"><span>Los 7 errores · Entrena con Tor · Guía gratis</span><span class="num">12</span></div>
+</section>
+
+</body>
+</html>

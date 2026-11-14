@@ -2,3 +2,5 @@ node_modules/
 .DS_Store
 videos/
 largos/*/media/
+ebooks/privado/
+ebooks/pdf/

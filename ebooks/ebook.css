@@ -1,0 +1,138 @@
+/* ============================================================
+   E-BOOKS DE ENTRENA CON TOR — estilo comun (A4)
+   Misma identidad que los videos y la landing: blanco, trazo INK, paleta de
+   cinco, Archivo Black + Barlow Semi Condensed, rotulos negros con punta.
+   Cada <section class="pagina"> es una hoja A4. Se exporta a PDF con
+   node herramientas/ebook.js <archivo.html>
+   ============================================================ */
+@page { size: A4; margin: 0; }
+:root {
+  --ink: #14110F; --yel: #FFD400; --red: #E03A2F; --grn: #16A06A; --gry: #C9C3B8;
+  --blanco: #ffffff; --papel: #F4F1EC; --rosa: #FBE3E1; --menta: #DDF3EA;
+}
+* { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+html, body { margin: 0; padding: 0; }
+body { font-family: 'Barlow Semi Condensed', system-ui, sans-serif; font-weight: 500; color: var(--ink); font-size: 14.5px; line-height: 1.42; }
+@media screen { body { background: #8C867C; } .pagina { margin: 24px auto; box-shadow: 0 10px 40px rgba(0,0,0,.35); } }
+img { display: block; max-width: 100%; }
+p { margin: 0; }
+b, strong { font-weight: 700; }
+
+.pagina {
+  width: 210mm; height: 297mm; position: relative; overflow: hidden; background: var(--blanco);
+  padding: 64px 52px 70px; break-after: page; page-break-after: always;
+}
+.pagina:last-child { break-after: auto; page-break-after: auto; }
+
+/* cabecera y pie de cada hoja */
+.cabeza { position: absolute; top: 22px; left: 52px; right: 52px; display: flex; justify-content: space-between; align-items: center;
+  font-weight: 700; font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase; color: #5a534b; }
+.cabeza .marca { display: flex; align-items: center; gap: 7px; color: var(--ink); }
+.cabeza .marca img { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--ink); }
+.pie { position: absolute; bottom: 22px; left: 52px; right: 52px; display: flex; justify-content: space-between; align-items: center;
+  font-size: 10.5px; font-weight: 600; color: #5a534b; }
+.pie .num { width: 30px; height: 30px; border-radius: 50%; background: var(--ink); color: var(--yel); display: flex; align-items: center; justify-content: center;
+  font-family: 'Archivo Black', sans-serif; font-size: 12px; }
+
+/* titulos */
+h1, h2, h3, .impacto { font-family: 'Archivo Black', sans-serif; font-weight: 400; letter-spacing: -0.01em; margin: 0; line-height: 1.04; }
+h1 { font-size: 36px; margin: 12px 0 12px; }
+h2 { font-size: 23px; margin: 0 0 8px; }
+h3 { font-size: 17px; margin: 0 0 6px; }
+.rotulo { display: inline-block; background: var(--ink); color: var(--blanco); text-transform: uppercase; font-weight: 700; font-size: 13px;
+  letter-spacing: 0.08em; padding: 5px 24px 5px 11px; clip-path: polygon(0 0, calc(100% - 13px) 0, 100% 50%, calc(100% - 13px) 100%, 0 100%); }
+.rotulo.amarillo { background: var(--yel); color: var(--ink); }
+.rotulo.rojo { background: var(--red); }
+.rotulo.verde { background: var(--grn); }
+.resalta { box-shadow: inset 0 -0.42em 0 var(--yel); padding: 0 2px; }
+.bajada { font-size: 16.5px; line-height: 1.38; }
+.chico { font-size: 12px; line-height: 1.35; }
+.gris-t { color: #5a534b; }
+
+/* cajas */
+.caja { border: 2.5px solid var(--ink); border-radius: 14px; box-shadow: 4px 4px 0 var(--ink); padding: 14px 16px; background: var(--blanco); }
+.caja.amarilla { background: var(--yel); }
+.caja.papel { background: var(--papel); }
+.caja.rosa { background: var(--rosa); }
+.caja.menta { background: var(--menta); }
+.caja.negra { background: var(--ink); color: var(--blanco); }
+.caja .rotulo { margin-bottom: 8px; }
+.fila { display: flex; gap: 16px; }
+.fila > * { flex: 1; min-width: 0; }
+.col2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.col3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+.mt6 { margin-top: 6px; } .mt10 { margin-top: 10px; } .mt14 { margin-top: 14px; } .mt20 { margin-top: 20px; } .mt28 { margin-top: 28px; }
+
+/* listas con visto, X o numero */
+ul.checks, ul.equis, ol.numeros { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 7px; }
+ul.checks li, ul.equis li { position: relative; padding-left: 29px; }
+ul.checks li::before, ul.equis li::before { content: ''; position: absolute; left: 0; top: 1px; width: 20px; height: 20px; background-size: contain; background-repeat: no-repeat; }
+ul.checks li::before { background-image: url('../tienda/img/visto.svg'); }
+ul.equis li::before { background-image: url('../tienda/img/tacha.svg'); }
+ol.numeros { counter-reset: n; }
+ol.numeros li { position: relative; padding-left: 36px; min-height: 26px; }
+ol.numeros li::before { counter-increment: n; content: counter(n); position: absolute; left: 0; top: -1px; width: 26px; height: 26px; border-radius: 50%; background: var(--yel); border: 2px solid var(--ink);
+  display: flex; align-items: center; justify-content: center; font-family: 'Archivo Black', sans-serif; font-size: 12px; }
+
+/* Tor dice: globo con Tor chico */
+.tor-dice { display: grid; grid-template-columns: 70px 1fr; gap: 10px; align-items: end; }
+.tor-dice img { width: 70px; }
+.tor-dice .globo { position: relative; background: var(--blanco); border: 2.5px solid var(--ink); border-radius: 16px; box-shadow: 4px 4px 0 var(--ink);
+  padding: 10px 14px; font-weight: 700; font-size: 16px; line-height: 1.3; margin-bottom: 26px; }
+.tor-dice .globo::after { content: ''; position: absolute; left: -10px; bottom: 16px; width: 16px; height: 16px; background: var(--blanco);
+  border-left: 2.5px solid var(--ink); border-bottom: 2.5px solid var(--ink); transform: rotate(45deg); }
+.tor-dice .globo b { background: var(--yel); padding: 0 3px; }
+
+/* el estudio detras */
+.estudio { border: 2px dashed var(--ink); border-radius: 12px; padding: 10px 12px 10px 12px; background: var(--papel); font-size: 12.8px; line-height: 1.38; }
+.estudio .tag { display: inline-block; font-family: 'Archivo Black', sans-serif; font-size: 10px; letter-spacing: 0.1em; background: var(--ink); color: var(--yel);
+  padding: 2px 7px; border-radius: 4px; margin-right: 6px; vertical-align: 1px; }
+.cita { font-style: italic; color: #4a443e; }
+
+/* tablas */
+table.tabla { width: 100%; border-collapse: separate; border-spacing: 0; border: 2.5px solid var(--ink); border-radius: 12px; overflow: hidden; font-size: 13px; }
+.tabla th { background: var(--ink); color: var(--blanco); text-align: left; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; font-size: 11px; padding: 7px 9px; }
+.tabla td { padding: 7px 9px; border-top: 1.5px solid var(--gry); vertical-align: middle; }
+.tabla tr:nth-child(even) td { background: var(--papel); }
+.tabla td.si { background: var(--yel) !important; font-weight: 700; }
+.tabla .num { font-family: 'Archivo Black', sans-serif; }
+
+/* la semana: siete casillas */
+.semana { display: grid; grid-template-columns: repeat(7, 1fr); gap: 7px; }
+.dia { border: 2.5px solid var(--ink); border-radius: 12px; text-align: center; padding: 7px 4px 9px; box-shadow: 3px 3px 0 var(--ink); background: var(--blanco); }
+.dia .d { font-weight: 700; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; }
+.dia .n { font-family: 'Archivo Black', sans-serif; font-size: 26px; line-height: 1.1; }
+.dia .q { font-size: 10.5px; font-weight: 700; line-height: 1.15; }
+.dia.r1 { background: var(--yel); } .dia.r2 { background: var(--gry); } .dia.r3 { background: var(--grn); color: var(--blanco); }
+.dia.libre { border-style: dashed; box-shadow: none; color: #5a534b; }
+
+/* ejercicio: la figura y la ficha */
+.ejercicio { display: grid; grid-template-columns: 118px 1fr; gap: 12px; align-items: center; border: 2.5px solid var(--ink); border-radius: 14px;
+  padding: 7px 12px 7px 7px; background: var(--blanco); box-shadow: 3px 3px 0 var(--ink); }
+.ejercicio .fig { height: 104px; border-radius: 10px; background: var(--papel); display: flex; align-items: center; justify-content: center; padding: 5px; position: relative; }
+.ejercicio .fig img { max-height: 94px; max-width: 104px; width: auto; }
+.ejercicio .fig .n { position: absolute; top: -7px; left: -7px; width: 26px; height: 26px; border-radius: 50%; background: var(--ink); color: var(--yel);
+  font-family: 'Archivo Black', sans-serif; font-size: 12px; display: flex; align-items: center; justify-content: center; }
+.ejercicio h3 { font-size: 16.5px; margin: 0; }
+.ejercicio .dosis { display: flex; gap: 6px; flex-wrap: wrap; margin: 4px 0 4px; }
+.pastilla { display: inline-block; border: 2px solid var(--ink); border-radius: 999px; padding: 0 9px; font-weight: 700; font-size: 12px; line-height: 19px; background: var(--blanco); }
+.pastilla.am { background: var(--yel); }
+.pastilla.ne { background: var(--ink); color: var(--yel); }
+.ejercicio .clave { font-size: 12.8px; line-height: 1.32; }
+.lista-ej { display: grid; gap: 9px; }
+
+/* portada */
+.portada { background: var(--yel); padding: 0; }
+.portada .lomo { position: absolute; left: 0; top: 0; bottom: 0; width: 36px; background: var(--ink); }
+.portada .dentro { position: absolute; left: 76px; right: 52px; top: 70px; }
+.portada .tag { display: inline-block; font-family: 'Archivo Black', sans-serif; font-size: 14px; letter-spacing: 0.12em; background: var(--ink); color: var(--blanco); padding: 4px 12px; }
+.portada h1 { font-size: 66px; line-height: 0.96; text-transform: uppercase; margin: 22px 0 14px; }
+.portada h1 em { font-style: normal; background: var(--blanco); padding: 0 6px; }
+.portada .sub { font-size: 21px; font-weight: 600; max-width: 22em; line-height: 1.3; }
+.portada .autor { position: absolute; left: 76px; bottom: 54px; display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 15px; }
+.portada .autor img { width: 52px; height: 52px; border-radius: 50%; border: 3px solid var(--ink); object-fit: cover; background: var(--blanco); }
+.portada .autor .impacto { font-size: 18px; }
+
+/* caja de numero grande (los 7 errores) */
+.numero-grande { font-family: 'Archivo Black', sans-serif; font-size: 110px; line-height: 0.85; color: var(--blanco); -webkit-text-stroke: 3px var(--ink); text-shadow: 5px 5px 0 var(--ink); }
+.casilla { display: inline-block; width: 18px; height: 18px; border: 2.5px solid var(--ink); border-radius: 4px; vertical-align: -3px; background: var(--blanco); }
