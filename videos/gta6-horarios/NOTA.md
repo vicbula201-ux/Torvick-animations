@@ -38,21 +38,13 @@
   de medios que las citan.
 - **Fecha:** el video dice "jueves 19". Publícalo como tarde el 18. El 19 ya queda viejo.
 
-## Descripción sugerida para YouTube
+## Versión corta y textos para publicar
 
-> ¿A qué hora sale GTA 6 en tu país? Rockstar confirmó que se desbloquea a las 00:00 hora
-> local del jueves 19 de noviembre en PS5 y Xbox Series X|S. Primero Nueva Zelanda y, 19
-> horas después, México y Centroamérica.
->
-> Horarios según la PlayStation Store (pueden cambiar; revisa tu tienda):
-> España 00:00 · Argentina, Chile, Uruguay y Paraguay 00:00 · Bolivia 00:00 · Colombia,
-> Perú, Ecuador y Panamá 00:00 · EE. UU. 00:00 hora del Este (21:00 del miércoles en el
-> Pacífico) · México y Centroamérica 00:00.
->
-> Canal de fans independiente, sin afiliación con Rockstar Games.
-> #GTA6 #GTAVI #ModoVice
+También hay una versión de 30 s (`salida/gta6-a-que-hora-sale-modo-vice-corto.mp4`):
+portada → jueves 19 a las 00:00 → la ola de medianoches → la tabla → suscribirse.
+El título, la descripción, los hashtags y las etiquetas están en `PUBLICACION.md`.
 
 ## Para cambiar algo
 
 Los textos están en `escenas.js` y las duraciones en `tiempos.js`. Para volver a generar todo
-se corre `./construir.sh`. Más detalle en `README.md`.
+se corre `./construir.sh` (o `./construir.sh corto`). Más detalle en `README.md`.

@@ -1,0 +1,324 @@
+{
+ "duracion": 30,
+ "cues": [
+  {
+   "t": 2.35,
+   "tipo": "rollo",
+   "gan": 0.8,
+   "dur": 0.95
+  },
+  {
+   "t": 3,
+   "tipo": "m_groove",
+   "gan": 1
+  },
+  {
+   "t": 3.1,
+   "tipo": "pop",
+   "gan": 0.6
+  },
+  {
+   "t": 3.25,
+   "tipo": "pop",
+   "gan": 0.6
+  },
+  {
+   "t": 3.35,
+   "tipo": "whoosh",
+   "gan": 0.4
+  },
+  {
+   "t": 3.5,
+   "tipo": "pop",
+   "gan": 0.6
+  },
+  {
+   "t": 3.6,
+   "tipo": "whoosh",
+   "gan": 0.3
+  },
+  {
+   "t": 3.64,
+   "tipo": "pop",
+   "gan": 0.6
+  },
+  {
+   "t": 4.1,
+   "tipo": "marcador",
+   "gan": 0.7,
+   "dur": 0.75
+  },
+  {
+   "t": 5.4,
+   "tipo": "giro",
+   "gan": 0.55,
+   "dur": 1.1
+  },
+  {
+   "t": 6.5,
+   "tipo": "ding",
+   "gan": 0.7
+  },
+  {
+   "t": 8.55,
+   "tipo": "salida",
+   "gan": 0.25
+  },
+  {
+   "t": 9.3,
+   "tipo": "whoosh",
+   "gan": 0.4
+  },
+  {
+   "t": 9.45,
+   "tipo": "pop",
+   "gan": 0.6
+  },
+  {
+   "t": 9.7,
+   "tipo": "pop",
+   "gan": 0.6
+  },
+  {
+   "t": 9.95,
+   "tipo": "pop",
+   "gan": 0.35
+  },
+  {
+   "t": 10.05,
+   "tipo": "pop",
+   "gan": 0.35
+  },
+  {
+   "t": 10.15,
+   "tipo": "pop",
+   "gan": 0.35
+  },
+  {
+   "t": 10.25,
+   "tipo": "pop",
+   "gan": 0.35
+  },
+  {
+   "t": 10.25,
+   "tipo": "pop",
+   "gan": 0.3
+  },
+  {
+   "t": 10.37,
+   "tipo": "pop",
+   "gan": 0.3
+  },
+  {
+   "t": 10.45,
+   "tipo": "pop",
+   "gan": 0.6
+  },
+  {
+   "t": 10.49,
+   "tipo": "pop",
+   "gan": 0.3
+  },
+  {
+   "t": 10.77,
+   "tipo": "ding",
+   "gan": 0.45
+  },
+  {
+   "t": 10.95,
+   "tipo": "whoosh",
+   "gan": 0.22
+  },
+  {
+   "t": 11.52,
+   "tipo": "ding",
+   "gan": 0.45
+  },
+  {
+   "t": 11.7,
+   "tipo": "whoosh",
+   "gan": 0.22
+  },
+  {
+   "t": 12.27,
+   "tipo": "ding",
+   "gan": 0.45
+  },
+  {
+   "t": 12.45,
+   "tipo": "whoosh",
+   "gan": 0.22
+  },
+  {
+   "t": 13.02,
+   "tipo": "ding",
+   "gan": 0.45
+  },
+  {
+   "t": 13.25,
+   "tipo": "exito",
+   "gan": 0.5
+  },
+  {
+   "t": 14.55,
+   "tipo": "salida",
+   "gan": 0.25
+  },
+  {
+   "t": 15.3,
+   "tipo": "whoosh",
+   "gan": 0.4
+  },
+  {
+   "t": 15.5,
+   "tipo": "pop",
+   "gan": 0.6
+  },
+  {
+   "t": 15.8,
+   "tipo": "whoosh",
+   "gan": 0.18
+  },
+  {
+   "t": 16,
+   "tipo": "whoosh",
+   "gan": 0.18
+  },
+  {
+   "t": 16.05,
+   "tipo": "pop",
+   "gan": 0.3
+  },
+  {
+   "t": 16.2,
+   "tipo": "whoosh",
+   "gan": 0.18
+  },
+  {
+   "t": 16.25,
+   "tipo": "pop",
+   "gan": 0.3
+  },
+  {
+   "t": 16.4,
+   "tipo": "whoosh",
+   "gan": 0.18
+  },
+  {
+   "t": 16.45,
+   "tipo": "pop",
+   "gan": 0.3
+  },
+  {
+   "t": 16.6,
+   "tipo": "whoosh",
+   "gan": 0.18
+  },
+  {
+   "t": 16.65,
+   "tipo": "pop",
+   "gan": 0.3
+  },
+  {
+   "t": 16.8,
+   "tipo": "whoosh",
+   "gan": 0.18
+  },
+  {
+   "t": 16.85,
+   "tipo": "pop",
+   "gan": 0.3
+  },
+  {
+   "t": 17.05,
+   "tipo": "pop",
+   "gan": 0.3
+  },
+  {
+   "t": 17.6,
+   "tipo": "pop",
+   "gan": 0.6
+  },
+  {
+   "t": 18.4,
+   "tipo": "obturador",
+   "gan": 0.8
+  },
+  {
+   "t": 22.55,
+   "tipo": "salida",
+   "gan": 0.25
+  },
+  {
+   "t": 23.2,
+   "tipo": "pop",
+   "gan": 0.6
+  },
+  {
+   "t": 23.3,
+   "tipo": "whoosh",
+   "gan": 0.4
+  },
+  {
+   "t": 23.6,
+   "tipo": "pop",
+   "gan": 0.6
+  },
+  {
+   "t": 24.55,
+   "tipo": "toque",
+   "gan": 0.8
+  },
+  {
+   "t": 24.65,
+   "tipo": "confeti",
+   "gan": 0.7
+  },
+  {
+   "t": 24.72,
+   "tipo": "exito",
+   "gan": 0.7
+  },
+  {
+   "t": 25,
+   "tipo": "pop",
+   "gan": 0.6
+  },
+  {
+   "t": 25.85,
+   "tipo": "toque",
+   "gan": 0.8
+  },
+  {
+   "t": 25.85,
+   "tipo": "campana",
+   "gan": 0.8
+  },
+  {
+   "t": 28.3846,
+   "tipo": "rollo",
+   "gan": 0.8,
+   "dur": 0.9
+  },
+  {
+   "t": 28.3846,
+   "tipo": "m_cierre",
+   "gan": 1
+  },
+  {
+   "t": 28.9346,
+   "tipo": "pop",
+   "gan": 0.45
+  },
+  {
+   "t": 29.0546,
+   "tipo": "pop",
+   "gan": 0.45
+  },
+  {
+   "t": 29.1746,
+   "tipo": "pop",
+   "gan": 0.45
+  }
+ ]
+}

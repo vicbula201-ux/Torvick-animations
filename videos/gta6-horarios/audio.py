@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """audio.py — música y efectos sintetizados con numpy (sin samples ni licencias).
 
+  python3 audio.py          versión completa
+  python3 audio.py corto    versión de 30 s (lee cues-corto.json, escribe audio-corto.wav)
+
 Lee salida/cues.json (cada efecto lo registra la animación en su tiempo exacto) y escribe:
   salida/audio-crudo.wav   mezcla sin normalizar
   salida/audio.wav         normalizada a -16 LUFS (ffmpeg loudnorm en dos pasadas), pico -1.5 dBTP
@@ -11,6 +14,7 @@ final, cuando se desenrolla el cierre (cue m_cierre).
 """
 import json
 import subprocess
+import sys
 import wave
 from pathlib import Path
 
@@ -419,7 +423,9 @@ def loudnorm(entrada, salida, objetivo=-16.0):
 
 
 def main():
-    datos = json.loads((SAL / 'cues.json').read_text())
+    version = sys.argv[1] if len(sys.argv) > 1 else 'completo'
+    suf = '' if version == 'completo' else '-' + version
+    datos = json.loads((SAL / f'cues{suf}.json').read_text())
     dur = float(datos['duracion'])
     cues = datos['cues']
     groove = next(c['t'] for c in cues if c['tipo'] == 'm_groove')
@@ -437,10 +443,10 @@ def main():
     mezcla = mus * 0.9 + np.vstack([sfx, sfx])
     mezcla = np.tanh(mezcla * 1.1) / 1.1          # limitador suave
     mezcla = norm(mezcla, 0.89)
-    escribir_wav(SAL / 'audio-crudo.wav', mezcla)
-    m = loudnorm(SAL / 'audio-crudo.wav', SAL / 'audio.wav')
+    escribir_wav(SAL / f'audio-crudo{suf}.wav', mezcla)
+    m = loudnorm(SAL / f'audio-crudo{suf}.wav', SAL / f'audio{suf}.wav')
     print(f'Audio: {dur:.2f} s · {sum(usados.values())} efectos · {usados}')
-    print(f"Loudness de la mezcla cruda: {m['input_i']} LUFS -> normalizada a -16 LUFS (salida/audio.wav)")
+    print(f"Loudness de la mezcla cruda: {m['input_i']} LUFS -> normalizada a -16 LUFS (salida/audio{suf}.wav)")
 
 
 if __name__ == '__main__':

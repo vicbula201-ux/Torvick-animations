@@ -8,6 +8,7 @@
     escena, pop, deslizar, cambiar, vivo, temblar, titular, contador, tipear, confeti, toque,
     circuloAMano, trazo, escribir, enrollar, moverDamero, subtitulo, ocultarSubtitulos } = MV;
   const SAL = TIEMPOS.salida;
+  const CORTO = TIEMPOS.version === 'corto';   // versión de 30 s: algunas escenas van más rápido
 
   // ------------------------------------------------------------------ utilidades de maqueta
   function centrarX(el, cx) { el.style.left = (cx - el.offsetWidth / 2) + 'px'; return el; }
@@ -79,7 +80,8 @@
     gsap.set(st, { rotation: -5 });
     const fl = crearFlamenco(P, { x: 385, y: 896, w: 310, h: 465 }).poseSaludo();
     // vivo desde el cuadro 0
-    fl.respirar(0, b).parpadear(0.7).parpadear(3.3);
+    fl.respirar(0, b).parpadear(0.7);
+    if (b > 4) fl.parpadear(3.3);
     TL.to(fl.p.alaD, { rotation: -100, duration: 0.24, ease: 'sine.inOut', yoyo: true, repeat: 7 }, 0.3);
     vivo(st, 0.15, b, { rotation: -1.5, scale: 1.05 }, 1.4);
     vivo(logo, 0, b, { scale: 1.05 }, 1.8);
@@ -104,7 +106,7 @@
 
   function contexto() {
     const { S, a, b } = escena('contexto');
-    titular(S, 'Sale el *jueves 19*', a + 0.45, { y: 236 });
+    titular(S, 'Sale el *jueves 19*', a + (CORTO ? 0.35 : 0.45), { y: 236 });
 
     // calendario de noviembre 2026 (el 1 cae domingo)
     const cal = caja(S, 'tarjeta', { x: 60, y: 400, w: 580, h: 640 });
@@ -146,23 +148,27 @@
     const p2 = nodo('div', 'pill', fila, icono('gamepad-2', 40, 2.3) + 'Xbox Series X|S');
     const fl = crearFlamenco(S, { x: 700, y: 900, w: 300, h: 450 });
 
-    pop(cal, a + 0.15, ENTRA_TARJETA);
-    pop(rl, a + 0.35, ENTRA_TARJETA);
-    pop([p1, p2], a + 0.7, { stagger: 0.14 });
-    deslizar(fl.el, a + 0.9, { dx: 260 });
-    fl.respirar(a + 0.9, b).saludar(a + 1.45, 2).parpadeos(a + 3.2, b);
-    pop(f19, a + 2.0, { desde: { autoAlpha: 0, scale: 0.2, y: 0 }, sonido: false });
-    circuloAMano(cal, { x: f19.offsetLeft, y: f19.offsetTop, w: 72, h: 72 }, a + 2.1, { pad: 14, dur: 0.75 });
-    vivo(cal, a + 1.0, b, { y: -8 }, 3.4);
-    vivo(rl, a + 1.2, b, { y: -8 }, 3.0);
-    TL.to(rh, { rotation: 360, duration: 1.3, ease: 'power3.inOut' }, a + 4.1);
-    TL.to(rm, { rotation: 1080, duration: 1.3, ease: 'power3.inOut' }, a + 4.1);
-    cue(a + 4.1, 'giro', 0.55, { dur: 1.3 });
-    pop(dig, a + 5.4, { sonido: 'ding', gan: 0.7, desde: { autoAlpha: 0, scale: 0.5, y: 0 } });
-    pop(hl, a + 5.6, { sonido: false });
-    fl.asentir(a + 5.7);
-    subtitulo('GTA 6 llega el <b>jueves 19 de noviembre</b> a PS5 y Xbox Series X|S.', a + 0.3, a + 4.1);
-    subtitulo('Y se desbloquea a medianoche… <b>en la hora de tu país</b>.', a + 4.1, b - 0.25);
+    // tiempos de la coreografía (relativos al inicio): versión completa / versión corta de 30 s
+    const O = CORTO
+      ? { cal: 0.1, rl: 0.25, pills: 0.5, fl: 0.6, saludo: 1.0, olas: 1, parp: 2.3, f19: 1.0, giro: 2.4, dg: 1.1, dig: 3.5, hl: 3.65, asiente: 3.8, sub: 2.6 }
+      : { cal: 0.15, rl: 0.35, pills: 0.7, fl: 0.9, saludo: 1.45, olas: 2, parp: 3.2, f19: 2.0, giro: 4.1, dg: 1.3, dig: 5.4, hl: 5.6, asiente: 5.7, sub: 4.1 };
+    pop(cal, a + O.cal, ENTRA_TARJETA);
+    pop(rl, a + O.rl, ENTRA_TARJETA);
+    pop([p1, p2], a + O.pills, { stagger: 0.14 });
+    deslizar(fl.el, a + O.fl, { dx: 260 });
+    fl.respirar(a + O.fl, b).saludar(a + O.saludo, O.olas).parpadeos(a + O.parp, b);
+    pop(f19, a + O.f19, { desde: { autoAlpha: 0, scale: 0.2, y: 0 }, sonido: false });
+    circuloAMano(cal, { x: f19.offsetLeft, y: f19.offsetTop, w: 72, h: 72 }, a + O.f19 + 0.1, { pad: 14, dur: 0.75 });
+    vivo(cal, a + O.cal + 0.85, b, { y: -8 }, 3.4);
+    vivo(rl, a + O.rl + 0.85, b, { y: -8 }, 3.0);
+    TL.to(rh, { rotation: 360, duration: O.dg, ease: 'power3.inOut' }, a + O.giro);
+    TL.to(rm, { rotation: 1080, duration: O.dg, ease: 'power3.inOut' }, a + O.giro);
+    cue(a + O.giro, 'giro', 0.55, { dur: O.dg });
+    pop(dig, a + O.dig, { sonido: 'ding', gan: 0.7, desde: { autoAlpha: 0, scale: 0.5, y: 0 } });
+    pop(hl, a + O.hl, { sonido: false });
+    fl.asentir(a + O.asiente);
+    subtitulo('GTA 6 llega el <b>jueves 19 de noviembre</b> a PS5 y Xbox Series X|S.', a + 0.3, a + O.sub);
+    subtitulo('Y se desbloquea a medianoche… <b>en la hora de tu país</b>.', a + O.sub, b - 0.25);
   }
 
   // ================================================================== rastreador de pasos (escenas 3 a 7)
@@ -209,15 +215,20 @@
   // ================================================================== 3. LA OLA
   function ola() {
     const { S, a, b } = escena('ola');
-    crearPasos();
-    titular(S, 'Una *ola* de|medianoches', a + 0.35, { y: 330 });
+    // en la versión corta no hay rastreador de pasos: todo sube 90 px y va más rápido
+    const dy = CORTO ? -90 : 0;
+    const O = CORTO
+      ? { tit: 0.3, regla: 0.45, card: 0.7, nodos: 0.95, saltos: 1.25, marca: 1.45, viaje: 1.65, mover: 0.45, pausa: 0.3, sub: 2.9 }
+      : { tit: 0.35, regla: 0.6, card: 1.0, nodos: 1.3, saltos: 1.8, marca: 2.15, viaje: 2.45, mover: 0.62, pausa: 0.38, sub: 3.4 };
+    if (!CORTO) crearPasos();
+    titular(S, 'Una *ola* de|medianoches', a + O.tit, { y: 330 + dy });
 
-    const regla = caja(S, 'tarjeta', { x: 60, y: 560, w: 960, h: 170 });
+    const regla = caja(S, 'tarjeta', { x: 60, y: 560 + dy, w: 960, h: 170 });
     icoCirculo(regla, { x: 36, y: 37, w: 96, h: 96 }, 'badge-check', 'var(--cyan-soft)', 'var(--cyan-ink)', 54);
     texto(regla, { x: 160, y: 38 }, 'REGLA OFICIAL DE ROCKSTAR', F.cab);
     texto(regla, { x: 160, y: 74, w: 760 }, '00:00 hora local, en todas las regiones', { font: "800 38px/1.2 Inter", color: 'var(--ink)' });
 
-    const card = caja(S, 'tarjeta', { x: 60, y: 770, w: 960, h: 540 });
+    const card = caja(S, 'tarjeta', { x: 60, y: 770 + dy, w: 960, h: 540 });
     texto(card, { x: 40, y: 38 }, icono('moon', 38, 2.4) + '<span>La medianoche avanza</span>',
       { display: 'flex', alignItems: 'center', gap: '14px', font: "800 34px/1 Inter", color: 'var(--ink)' });
     const X = [130, 363, 597, 830], Y = 312;
@@ -240,27 +251,37 @@
       background: 'var(--night)', color: '#fff', font: "800 30px/1 Inter",
     });
 
-    pop(regla, a + 0.6, ENTRA_TARJETA);
-    pop(card, a + 1.0, ENTRA_TARJETA);
-    pop(nodos, a + 1.3, { stagger: 0.1, gan: 0.35, desde: { autoAlpha: 0, scale: 0.3, y: 0 } });
-    pop(etiq, a + 1.4, { stagger: 0.1, sonido: false, desde: { autoAlpha: 0, y: 16, scale: 1 } });
-    pop(saltos, a + 1.8, { stagger: 0.12, gan: 0.3 });
-    pop(marca, a + 2.15, { desde: { autoAlpha: 0, scale: 0.4, y: 20 } });
-    let t = a + 2.45;
+    pop(regla, a + O.regla, ENTRA_TARJETA);
+    pop(card, a + O.card, ENTRA_TARJETA);
+    pop(nodos, a + O.nodos, { stagger: 0.1, gan: 0.35, desde: { autoAlpha: 0, scale: 0.3, y: 0 } });
+    pop(etiq, a + O.nodos + 0.1, { stagger: 0.1, sonido: false, desde: { autoAlpha: 0, y: 16, scale: 1 } });
+    pop(saltos, a + O.saltos, { stagger: 0.12, gan: 0.3 });
+    pop(marca, a + O.marca, { desde: { autoAlpha: 0, scale: 0.4, y: 20 } });
+    let t = a + O.viaje;
     for (let i = 0; i < 4; i++) {
       if (i > 0) {
-        TL.to(marca, { x: X[i] - X[0], duration: 0.62, ease: 'power2.inOut' }, t);
-        TL.to(rell, { scaleX: (X[i] - X[0]) / (X[3] - X[0]), duration: 0.62, ease: 'power2.inOut' }, t);
+        TL.to(marca, { x: X[i] - X[0], duration: O.mover, ease: 'power2.inOut' }, t);
+        TL.to(rell, { scaleX: (X[i] - X[0]) / (X[3] - X[0]), duration: O.mover, ease: 'power2.inOut' }, t);
         cue(t, 'whoosh', 0.22);
-        t += 0.62;
+        t += O.mover;
       }
       TL.to(nodos[i], { backgroundColor: '#12B76A', borderColor: '#12B76A', duration: 0.2 }, t);
       cambiar(candados[i], checks[i], t, { sonido: 'ding', gan: 0.45 });
-      t += 0.38;
+      t += O.pausa;
     }
     vivo(marca, t, b, { scale: 1.06 }, 1.0);
-    subtitulo('Rockstar lo lanza a las <b>00:00 de cada región</b>: no sale a la vez en todo el mundo.', a + 0.3, a + 3.4);
-    subtitulo('Empieza en <b>Nueva Zelanda</b> y termina en <b>México y Centroamérica</b>.', a + 3.4, b - 0.25);
+    if (CORTO) {
+      // remate: 19 h entre el primero y el último
+      const total = caja(card, 'chip mag', { y: 34 }, icono('timer', 28, 2.6) + '19 h en total');
+      total.style.right = '40px';
+      pop(total, t + 0.05, { desde: { autoAlpha: 0, scale: 0.4, y: 0 }, sonido: 'exito', gan: 0.5 });
+      vivo(total, t + 0.7, b, { scale: 1.07 }, 0.9);
+      subtitulo('Rockstar lo lanza a las <b>00:00 de cada región</b>.', a + 0.3, a + O.sub);
+      subtitulo('Primero <b>Nueva Zelanda</b>… y 19 horas después, <b>México y Centroamérica</b>.', a + O.sub, b - 0.25);
+    } else {
+      subtitulo('Rockstar lo lanza a las <b>00:00 de cada región</b>: no sale a la vez en todo el mundo.', a + 0.3, a + O.sub);
+      subtitulo('Empieza en <b>Nueva Zelanda</b> y termina en <b>México y Centroamérica</b>.', a + O.sub, b - 0.25);
+    }
   }
 
   // ================================================================== 4. PASO 1: NUEVA ZELANDA
@@ -702,36 +723,52 @@
     const dedo = caja(S, 'dedo', { x: 0, y: 0, w: 76, h: 76 });
     gsap.set(dedo, { autoAlpha: 0, x: 900, y: 1560 });
 
+    // tiempos de la coreografía: versión completa / versión corta de 30 s
+    let O;
+    if (CORTO) {
+      // el cierre cae en un tiempo fuerte de la música (104 BPM, compás de 4 que arranca en la escena 2)
+      const compas = 4 * 60 / 104, g = T.inicio.contexto;
+      const tc = g + Math.round((a + 5.3 - g) / compas) * compas - a;
+      O = { saludo: 0.55, olas: 1, btn: 0.6, dedo: 0.9, toque1: 1.55, celebra: 1.7, celebraDur: 1.2, camp: 2.0, mover: 2.3,
+        toque2: 2.85, fuera: 3.25, asiente: 3.4, saludo2: 3.9, olas2: 1, sub: 2.7, tc, olasFin: 1, parp: 2.9,
+        s1: '¿Listo para Leonida? <b>Suscríbete y activa el modo Vice</b>.',
+        s2: 'Cuéntame: <b>¿desde qué país lo vas a jugar?</b>' };
+    } else {
+      O = { saludo: 0.7, olas: 2, btn: 0.9, dedo: 1.45, toque1: 2.1, celebra: 2.25, celebraDur: 1.3, camp: 2.7, mover: 2.95,
+        toque2: 3.5, fuera: 3.95, asiente: 4.0, saludo2: 5.0, olas2: 3, sub: 3.9, tc: 6.9, olasFin: 2, parp: 2.4,
+        s1: '¿Listo para Leonida? <b>Suscríbete y activa el modo Vice</b> para no perderte nada de GTA 6.',
+        s2: 'Y cuéntame en comentarios: <b>¿desde qué país lo vas a jugar?</b>' };
+    }
     pop(fl.el, a + 0.2, { desde: { autoAlpha: 0, scale: 0.6, y: 60 } });
-    fl.respirar(a + 0.4, b).saludar(a + 0.7, 2).parpadeos(a + 2.4, a + 6.8);
-    pop(btn, a + 0.9, { desde: { autoAlpha: 0, scale: 0.6, y: 30 } });
-    vivo(btn, a + 1.5, a + 2.0, { scale: 1.04 }, 0.5);
-    TL.fromTo(dedo, { autoAlpha: 0, x: 900, y: 1560 }, { autoAlpha: 1, x: 540 - 38, y: 1144 - 38, duration: 0.55, ease: 'power3.out', immediateRender: false }, a + 1.45);
-    TL.to(dedo, { scale: 0.8, duration: 0.1, yoyo: true, repeat: 1 }, a + 2.02);
-    toque(S, 540, 1144, a + 2.1);
-    TL.to(btn, { backgroundColor: '#ffffff', borderColor: '#190028', boxShadow: '0 26px 50px -24px rgba(25,0,40,.35)', duration: 0.25 }, a + 2.15);
-    cambiar(bA, bB, a + 2.15, { sonido: 'exito', gan: 0.7 });
-    confeti(S, 540, 1100, a + 2.2, { n: 36 });
-    fl.celebrar(a + 2.25, 1.3);
-    pop(camp, a + 2.7, { desde: { autoAlpha: 0, scale: 0.6, y: 20 } });
-    TL.to(dedo, { x: 540 - 38, y: 1284 - 38, duration: 0.45, ease: 'power2.inOut' }, a + 2.95);
-    TL.to(dedo, { scale: 0.8, duration: 0.1, yoyo: true, repeat: 1 }, a + 3.42);
-    toque(S, 540, 1284, a + 3.5);
-    TL.to(camp, { backgroundColor: '#02F8F7', duration: 0.25 }, a + 3.5);
+    fl.respirar(a + 0.4, b).saludar(a + O.saludo, O.olas).parpadeos(a + O.parp, a + O.tc - 0.1);
+    pop(btn, a + O.btn, { desde: { autoAlpha: 0, scale: 0.6, y: 30 } });
+    if (!CORTO) vivo(btn, a + 1.5, a + 2.0, { scale: 1.04 }, 0.5);
+    TL.fromTo(dedo, { autoAlpha: 0, x: 900, y: 1560 }, { autoAlpha: 1, x: 540 - 38, y: 1144 - 38, duration: 0.55, ease: 'power3.out', immediateRender: false }, a + O.dedo);
+    TL.to(dedo, { scale: 0.8, duration: 0.1, yoyo: true, repeat: 1 }, a + O.toque1 - 0.08);
+    toque(S, 540, 1144, a + O.toque1);
+    TL.to(btn, { backgroundColor: '#ffffff', borderColor: '#190028', boxShadow: '0 26px 50px -24px rgba(25,0,40,.35)', duration: 0.25 }, a + O.toque1 + 0.05);
+    cambiar(bA, bB, a + O.toque1 + 0.05, { sonido: 'exito', gan: 0.7 });
+    confeti(S, 540, 1100, a + O.toque1 + 0.1, { n: 36 });
+    fl.celebrar(a + O.celebra, O.celebraDur);
+    pop(camp, a + O.camp, { desde: { autoAlpha: 0, scale: 0.6, y: 20 } });
+    TL.to(dedo, { x: 540 - 38, y: 1284 - 38, duration: 0.45, ease: 'power2.inOut' }, a + O.mover);
+    TL.to(dedo, { scale: 0.8, duration: 0.1, yoyo: true, repeat: 1 }, a + O.toque2 - 0.08);
+    toque(S, 540, 1284, a + O.toque2);
+    TL.to(camp, { backgroundColor: '#02F8F7', duration: 0.25 }, a + O.toque2);
     gsap.set(icoC, { transformOrigin: '50% 12%' });
-    TL.to(icoC, { keyframes: { rotation: [0, -24, 20, -16, 12, -6, 0] }, duration: 0.9, ease: 'none' }, a + 3.5);
-    cue(a + 3.5, 'campana', 0.8);
-    TL.to(dedo, { autoAlpha: 0, x: 920, y: 1620, duration: 0.5, ease: 'power2.in' }, a + 3.95);
-    fl.asentir(a + 4.0);
-    fl.saludar(a + 5.0, 3);
-    vivo(camp, a + 4.4, a + 6.9, { scale: 1.04 }, 1.0);
-    subtitulo('¿Listo para Leonida? <b>Suscríbete y activa el modo Vice</b> para no perderte nada de GTA 6.', a + 0.3, a + 3.9);
-    subtitulo('Y cuéntame en comentarios: <b>¿desde qué país lo vas a jugar?</b>', a + 3.9, a + 6.75);
-    ocultarSubtitulos(a + 6.75);
-    TL.to('#marca', { autoAlpha: 0, y: -30, duration: 0.3, ease: 'power2.in' }, a + 6.6);
+    TL.to(icoC, { keyframes: { rotation: [0, -24, 20, -16, 12, -6, 0] }, duration: 0.9, ease: 'none' }, a + O.toque2);
+    cue(a + O.toque2, 'campana', 0.8);
+    TL.to(dedo, { autoAlpha: 0, x: 920, y: 1620, duration: 0.5, ease: 'power2.in' }, a + O.fuera);
+    fl.asentir(a + O.asiente);
+    fl.saludar(a + O.saludo2, O.olas2);
+    vivo(camp, a + O.toque2 + 0.9, a + O.tc, { scale: 1.04 }, 1.0);
+    subtitulo(O.s1, a + 0.3, a + O.sub);
+    subtitulo(O.s2, a + O.sub, a + O.tc - 0.15);
+    ocultarSubtitulos(a + O.tc - 0.15);
+    TL.to('#marca', { autoAlpha: 0, y: -30, duration: 0.3, ease: 'power2.in' }, a + O.tc - 0.3);
 
     // cierre: panel oscuro que se desenrolla, con la marca y el flamenco despidiéndose
-    const tc = a + 6.9;
+    const tc = a + O.tc;
     const P = caja(lienzo, 'panel-oscuro', { x: 0, y: 0, w: W, h: H });
     P.style.zIndex = 80;
     escenarioOscuro(P);
@@ -743,15 +780,15 @@
     const fl2 = crearFlamenco(P, { x: 385, y: 896, w: 310, h: 465 });
     enrollar(P, tc, 0.9, 'baja');
     pop([logo, handle, pill], tc + 0.55, { stagger: 0.12, gan: 0.45 });
-    fl2.respirar(tc, b).saludar(tc + 0.45, 2).parpadear(tc + 0.3);
+    fl2.respirar(tc, b).saludar(tc + 0.45, O.olasFin).parpadear(tc + 0.3);
     cue(tc, 'm_cierre', 1);
   }
 
   // ------------------------------------------------------------------ montaje
   MV.arrancar(() => {
     gsap.set('#marca', { autoAlpha: 0 });
-    portada(); contexto(); ola(); nz(); espana(); sudamerica(); mexico();
-    tabla(); ojo(); precarga(); hub(); fuentes(); cta();
+    const ESCENAS = { portada, contexto, ola, nz, espana, sudamerica, mexico, tabla, ojo, precarga, hub, fuentes, cta };
+    for (const [nombre] of TIEMPOS.escenas) ESCENAS[nombre]();
     pop('#marca', T.inicio.contexto + 0.35, {
       desde: { autoAlpha: 0, x: -40, scale: 0.9, y: 0 }, hasta: { autoAlpha: 1, x: 0, scale: 1, y: 0 },
       ease: 'power3.out', sonido: false,

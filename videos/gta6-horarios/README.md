@@ -1,6 +1,9 @@
 # GTA 6 · ¿a qué hora sale en tu país? — Modo Vice
 
-Video explainer vertical (1080×1920, 60 fps, 92,5 s) para Shorts / TikTok / Reels.
+Video explainer vertical (1080×1920, 60 fps) para Shorts / TikTok / Reels, en dos versiones
+que salen del mismo código: **completa (92,5 s)** y **corta (30 s)**. Los textos para publicar
+(título, descripción, hashtags) están en `PUBLICACION.md`.
+
 Página HTML + GSAP con **una sola línea de tiempo maestra en pausa**, renderizada cuadro
 por cuadro con Playwright y ffmpeg. Audio sintetizado con numpy.
 
@@ -10,12 +13,15 @@ paleta (la de la marca Modo Vice) y usa GSAP a propósito.
 ## Ver y editar
 
 - **Vista previa:** doble clic en `index.html`. Aparece una barra abajo con reproducir y
-  línea de tiempo (sin audio). Las fuentes, GSAP y los íconos están en la carpeta: no hace
+  línea de tiempo (sin audio). Para ver la versión de 30 s, agrega `?v=corto` al final de la
+  dirección en el navegador. Las fuentes, GSAP y los íconos están en la carpeta: no hace
   falta internet.
 - **Textos:** viven en `escenas.js`, dentro de cada escena (`titular(...)`, `subtitulo(...)`,
   tarjetas). En los titulares, `*palabra*` la resalta en magenta y `|` corta la línea.
-- **Tiempos:** la duración de cada escena está en `tiempos.js`, en un solo objeto. Si cambias
-  un número, las escenas siguientes se corren solas. Dentro de cada escena, los tiempos son
+- **Tiempos:** la duración de cada escena está en `tiempos.js`, en un solo objeto, con una
+  lista por versión. Si cambias un número, las escenas siguientes se corren solas. Las escenas
+  que la versión corta acelera (`contexto`, `ola`, `cta`) guardan sus tiempos internos en un
+  objeto `O` al principio de cada escena. Dentro de cada escena, los tiempos son
   relativos a su inicio (`a + 0.6`).
 - **Mascota:** `personaje.js` (flamenco con gafas). Acciones: `parpadear`, `saludar`,
   `asentir`, `celebrar`, `feliz`, `respirar`.
@@ -26,7 +32,11 @@ paleta (la de la marca Modo Vice) y usa GSAP a propósito.
 ./construir.sh
 ```
 
-Hace todo: render en 4 procesos → `salida/video-sin-audio.mp4`, audio → `salida/audio.wav`
+```bash
+./construir.sh corto
+```
+
+El primero arma la versión completa y el segundo la de 30 s (los archivos llevan `-corto`). Cada uno hace todo: render en 4 procesos → `salida/video-sin-audio.mp4`, audio → `salida/audio.wav`
 (-16 LUFS), MP4 final → `salida/gta6-a-que-hora-sale-modo-vice.mp4`, miniatura →
 `salida/miniatura.png` (el primer cuadro) y una verificación con ffprobe y ebur128.
 
@@ -40,7 +50,7 @@ node render.js --fotos 0,12,24.5
 node render.js --hoja 1.0
 ```
 
-La primera saca capturas PNG en `salida/fotos/`; la segunda, un cuadro por segundo en `salida/hojas/`.
+La primera saca capturas PNG en `salida/fotos/`; la segunda, un cuadro por segundo en `salida/hojas/`. Agrega `--version corto` para revisar la de 30 s.
 
 Requisitos: Node con `playwright` (Chromium), Python 3 con `numpy`, `ffmpeg` y `ffprobe`.
 

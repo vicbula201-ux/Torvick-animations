@@ -4,6 +4,7 @@
 //   node render.js --fotos 0,6.2,30   capturas PNG de esos segundos -> salida/fotos/
 //   node render.js --hoja 0.5         hojas de contacto (una captura cada 0.5 s) -> salida/hojas/
 //   node render.js --procesos 4       cantidad de procesos en paralelo (por defecto 4)
+//   node render.js --version corto    versión de 30 s (archivos con sufijo -corto)
 //
 // Cada cuadro: window.__seek(f/60) -> screenshot JPEG 93 -> pipe a ffmpeg (libx264 -crf 16, yuv420p, 60 fps).
 // Los segmentos se unen con el demuxer concat, sin recodificar.
@@ -19,6 +20,8 @@ const SALIDA = path.join(RAIZ, 'salida');
 const args = process.argv.slice(2);
 const opt = (n) => { const i = args.indexOf(n); return i >= 0 ? args[i + 1] : null; };
 const PROCESOS = +(opt('--procesos') || 4);
+const VERSION = opt('--version') || 'completo';          // completo (92,5 s) | corto (30 s)
+const SUF = VERSION === 'completo' ? '' : '-' + VERSION;
 
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.otf': 'font/otf', '.woff2': 'font/woff2', '.json': 'application/json' };
 function servidor() {
@@ -72,7 +75,7 @@ async function segmento(url, i, f0, f1, fps, out) {
 (async () => {
   fs.mkdirSync(SALIDA, { recursive: true });
   const srv = await servidor();
-  const url = `http://127.0.0.1:${srv.address().port}/index.html?render=1`;
+  const url = `http://127.0.0.1:${srv.address().port}/index.html?render=1&v=${VERSION}`;
   try {
     if (opt('--fotos') || opt('--hoja')) {
       const browser = await chromium.launch();
@@ -103,10 +106,11 @@ async function segmento(url, i, f0, f1, fps, out) {
     const browser = await chromium.launch();
     const page = await abrir(browser, url);
     const info = await page.evaluate(() => ({ dur: window.__duration, tl: window.__tlDuration, cues: window.__cues }));
-    fs.writeFileSync(path.join(SALIDA, 'cues.json'), JSON.stringify({ duracion: info.dur, cues: info.cues }, null, 1));
+    fs.writeFileSync(path.join(SALIDA, `cues${SUF}.json`), JSON.stringify({ duracion: info.dur, cues: info.cues }, null, 1));
     await page.evaluate(() => window.__seek(0));
-    await page.screenshot({ path: path.join(SALIDA, 'miniatura.png'), type: 'png' });
+    await page.screenshot({ path: path.join(SALIDA, `miniatura${SUF}.png`), type: 'png' });
     await browser.close();
+    console.log(`Versión: ${VERSION}`);
     if (info.tl > info.dur + 0.001) console.warn(`Ojo: la línea de tiempo dura ${info.tl}s y el video ${info.dur}s.`);
     const fps = 60, total = Math.round(info.dur * fps);
     console.log(`Render: ${info.dur}s, ${total} cuadros, ${PROCESOS} procesos`);
@@ -114,18 +118,18 @@ async function segmento(url, i, f0, f1, fps, out) {
     const t0 = Date.now();
     await Promise.all(Array.from({ length: PROCESOS }, (_, i) => {
       const f0 = i * trozo, f1 = Math.min(total, f0 + trozo);
-      const out = path.join(SALIDA, `parte-${i}.mp4`);
+      const out = path.join(SALIDA, `parte${SUF}-${i}.mp4`);
       partes.push(out);
       return segmento(url, i, f0, f1, fps, out);
     }));
-    const lista = path.join(SALIDA, 'partes.txt');
+    const lista = path.join(SALIDA, `partes${SUF}.txt`);
     fs.writeFileSync(lista, partes.map((p) => `file '${p}'`).join('\n'));
-    const cat = ffmpeg(['-y', '-loglevel', 'error', '-f', 'concat', '-safe', '0', '-i', lista, '-c', 'copy', path.join(SALIDA, 'video-sin-audio.mp4')]);
+    const cat = ffmpeg(['-y', '-loglevel', 'error', '-f', 'concat', '-safe', '0', '-i', lista, '-c', 'copy', path.join(SALIDA, `video-sin-audio${SUF}.mp4`)]);
     cat.stdin.end();
     await cat.fin;
     for (const p of partes) fs.unlinkSync(p);
     fs.unlinkSync(lista);
-    console.log(`Listo en ${((Date.now() - t0) / 1000).toFixed(0)} s -> salida/video-sin-audio.mp4`);
+    console.log(`Listo en ${((Date.now() - t0) / 1000).toFixed(0)} s -> salida/video-sin-audio${SUF}.mp4`);
   } finally {
     srv.close();
   }
