@@ -15,6 +15,12 @@ ver más videos similares? Sígueme para más contenido.») y, mientras lo dice,
 aparecen @eltorvick, YouTube, Instagram y TikTok; la plantilla del borrador
 (fondo oscuro, letras en amarillo, blanco y negro) le gusta.
 
+**Después del borrador 2:** la barra de pasos de arriba no le gustó (fuera); las
+tarjetas «aparecen y se van muy rápido, no se alcanzan a leer» (ahora cada una se
+queda 2 s después de su último dato); y todo junto se veía «muy saturado» (ahora
+entra una cosa a la vez y el plan tiene menos piezas). Los subtítulos y las
+animaciones, bien. Ver «El ritmo» en `estilo.md`.
+
 **Referencias de estilo:** las 14 reviews de `reviews.md`, las capturas del
 creador del laboratorio que te gustaron (el nombre de cada producto aparece
 encima del producto; el estudio flotando con la frase resaltada) y los videos de
@@ -31,20 +37,19 @@ Repetir el orden es lo que vuelve reconocible la serie.
 |---|---|---|---|
 | Gancho | tú con el alimento en la mano, a cámara | la pregunta **gigante detrás de ti** («¿SALUDABLE?»); **el nombre encima del alimento**, pegado a él aunque lo muevas; golpe de zoom; «Mal alimento» tachado | golpe, pop, error |
 | Calorías y macros | tomas de apoyo del alimento (desenfocadas detrás) | **la tabla nutricional**: llega con las filas apagadas y cada fila se enciende, cuenta su número y se resalta en amarillo **cuando la nombras** | whoosh, pop + subida por fila |
-| Lo interesante | primer plano del alimento | el rótulo sobre el alimento; una **comparación en barras** cuando hay un «similar a…» | golpe, subida, ding |
+| Lo interesante | primer plano del alimento | una **comparación en barras** cuando hay un «similar a…» | subida, ding |
 | Micronutrientes | tú señalando hacia un lado | la segunda tabla entra **como carrusel**, del lado al que señalas | whoosh, pop por fila |
-| Beneficios | el alimento en el plato | pastillas que arman la idea («Fibra + Grasas = Más saciedad») | click, ding |
-| Cómo comerlo | el alimento con lo que lo acompañas | «¿CÓMO COMERLO?»; **rótulos encima de cada cosa** que se ve (arepa, huevos); pastillas para lo que no se ve (atún, ensalada) | whoosh, pop |
+| Beneficios | el alimento en el plato | una pastilla por idea, una tras otra en el mismo lugar («Más saciedad», «Mejor absorción de vitaminas») | click |
+| Cómo comerlo | el alimento con lo que lo acompañas | «¿CÓMO COMERLO?»; **rótulos encima de cada cosa** que se ve (arepa, huevos); lo que no se ve lo dicen los subtítulos | whoosh, pop |
 | Veredicto | tú probándolo, a cámara | **el sello Torvick** (ver abajo) | whoosh, golpe, campana, ding por palabra |
 | Advertencia | tú | «Las porciones importan» con el ícono de aviso | click |
 | Pregunta | tú | «¿Con qué lo acompañas?» grande y la caja de comentario | whoosh, clicks |
 | Cierre | tú a cámara: «¿Quieres ver más videos similares? Sígueme para más contenido.» | **mientras preguntas**, arriba se arma la pastilla de **@eltorvick** y entran **YouTube, Instagram y TikTok**, uno por uno; en «sígueme», **SÍGUEME** gigante y «para más contenido». Tú sigues a la vista (la cámara se acerca despacio) | pop por red, golpe |
 
-Arriba, del primer dato al veredicto, va la **barra de pasos** (Calorías ·
-Grasas · Beneficios · Cómo comerlo · Veredicto): la línea amarilla avanza con el
-video, cada paso se enciende cuando empieza su parte y el último se completa con
-la nota. Es lo que hace que la gente se quede hasta el veredicto, y repetirla en
-cada alimento vuelve reconocible la serie.
+**El ritmo** (`lectura: 2` en el plan): además de los subtítulos, una pieza a la
+vez; cada tarjeta se queda 2 s después de su último dato (lo chico, 1,5 s) y lo
+que viene espera a que se vaya. Unas 15 piezas en el minuto, no más. Los golpes de
+zoom, solo en el gancho y en el veredicto.
 
 Todo el video lleva los **subtítulos** de 1 a 3 palabras con la que suena en la
 caja amarilla, **sin música** y **sin emojis** (al autor no le convencieron en la
@@ -63,7 +68,6 @@ sobre material del autor, con sus sonidos; el plan está en `cambios/_muestrario
 | Sello del veredicto | `p.veredicto(ini, fin, { nota: 9, palabras: [...], criterio, encoger, esquina })` | cae como un sello (golpe y sacudida), el anillo y la nota cuentan hasta el valor, el texto «VEREDICTO · TORVICK» gira; las palabras salen con visto cuando se dicen; con `encoger` se va a una esquina y se queda |
 | Pastilla con ícono | `p.etiqueta(ini, fin, 'Las porciones importan', { icono: 'aviso', minus: true, letra: 'texto' })` | `icono`: `aviso`, `check`, `equis` |
 | Pregunta | `p.cta(ini, fin, '¿Con qué\nlo acompañas?', { pregunta: true, texto: 'te leo en los comentarios' })` | la pregunta en grande y la caja de comentario (con `respuesta`, se escribe sola) |
-| Barra de pasos | `p.pasos(ini, fin, { pasos: [{ txt: 'Calorías', t: t('por cada') }, …], cFin })` | arriba (y 221-313, debajo de lo que tapan las apps): círculos numerados unidos por una línea que se llena con el tiempo; el paso que empieza se enciende en amarillo con un aro, el anterior queda con su visto; en `cFin` se completa el último y la barra hace una ola |
 | Cierre dicho | `firma: { estilo: 'grande', ini: t('quieres ver'), sigueme: t('sígueme'), texto: 'para más contenido' }` en el registro | ver la tabla de arriba; los subtítulos se van en «sígueme» (desde ahí lo que dices ya está escrito en grande). Sin `sigueme`, el cierre grande callado: la última toma oscurecida con «¿quieres ver más videos así?» |
 
 Los tiempos salen de la voz: `t('por cada')`, `t.fin('proteína')`, y
@@ -92,7 +96,7 @@ que se arma por dentro, azul, lima y azul marino. En Torvick se lleva a
 
 | En la referencia | En Torvick |
 |---|---|
-| la barra de pasos arriba (1 Prepare · 2 Learn live · 3 Practice · 4 Check & improve) que avanza con el video | **`p.pasos`**: Calorías · Grasas · Beneficios · Cómo comerlo · Veredicto |
+| la barra de pasos arriba (1 Prepare · 2 Learn live · 3 Practice · 4 Check & improve) que avanza con el video | se probó en el borrador 2 (Calorías · Grasas · Beneficios · Cómo comerlo · Veredicto) y **no le gustó al autor**: no se usa |
 | una tarjeta por idea que se arma por dentro: filas que se encienden, vistos uno por uno, números que cuentan, un resaltado que barre la fila | la tabla y las barras (ya lo hacían) |
 | título arriba con la palabra clave en color; debajo, la frase con lo importante resaltado | los subtítulos con la caja amarilla + la palabra grande |
 | el escudo «30 DAYS · MONEY-BACK GUARANTEE» con su cinta | el sello del veredicto |
@@ -115,7 +119,8 @@ líneas) no se toman: los del P4 ya son la marca.
 tu guion. Cuando llegue el material, solo falta cortar, seguir los objetos y
 ajustar posiciones a lo que se ve.
 
-**Prueba con voz sintética** (`videos/aguacate-borrador-2.mp4`, fuera de git):
+**Prueba con voz sintética** (`videos/aguacate-borrador-3.mp4`, fuera de git; el 3 ya con
+el ritmo nuevo):
 el guion leído en voz sintética, transcrito con la misma herramienta que tus
 tomas, con el plan encima y un fondo que dice qué toma va en cada parte. Con la
 línea del cierre, la voz dura 61 s (62,7 con el segundo y medio en que te quedas
@@ -128,12 +133,12 @@ de corregir las palabras que la transcripción oyó mal («vitamina C» por
 | Segundo (aprox.) | Toma | Lo que dices | Lo que sale |
 |---|---|---|---|
 | 0-8 | 1 · tú con el aguacate | «¿Qué tan saludable es realmente el aguacate? Tiene más calorías que muchas frutas, pero…» | ¿SALUDABLE? detrás de ti · rótulo «Aguacate» · calorías de otras frutas · «Mal alimento» tachado |
-| 8-17 | 2 · entero → partido | «Por cada 100 gramos… 160 calorías, 15 gramos de grasas…» | entra la barra de pasos (Calorías) · tabla de macros |
-| 17-24 | 3 · primer plano | «Y aquí viene lo interesante… aceite de oliva» | paso Grasas · golpe · rótulo · barras aguacate contra aceite de oliva |
-| 24-29 | 1 · tú señalando | «También aporta potasio, magnesio, folato…» | paso Beneficios · tabla de micronutrientes (carrusel) |
-| 29-37 | 3 · en el plato | «Su combinación de fibra y grasas…» | Fibra + Grasas = Más saciedad · Absorbes mejor las vitaminas |
-| 37-42 | 4 · arepa con huevos | «¿Y cómo comerlo? Con arepa, huevos, atún…» | paso Cómo comerlo · ¿CÓMO COMERLO? · rótulos Arepa y Huevos · pastillas Atún y Ensalada |
-| 42-52 | 5 · tú probándolo | «¿Mi veredicto? ¡9 de 10!… las porciones importan» | paso Veredicto · sello 9/10 (la barra se completa y se va) · Nutritivo · Versátil · Delicioso · aviso de porciones |
+| 8-17 | 2 · entero → partido | «Por cada 100 gramos… 160 calorías, 15 gramos de grasas…» | tabla de macros (entra cuando se lee el tachado y se queda 2 s después de la proteína) |
+| 17-24 | 3 · primer plano | «Y aquí viene lo interesante… aceite de oliva» | barras aguacate contra aceite de oliva, «¡Casi iguales!» |
+| 24-30 | 1 · tú señalando | «También aporta potasio, magnesio, folato…» | tabla de micronutrientes (carrusel: las barras salen por un lado y la tabla entra por el otro) |
+| 30-37 | 3 · en el plato | «Su combinación de fibra y grasas…» | Más saciedad · después, Mejor absorción de vitaminas |
+| 37-42 | 4 · arepa con huevos | «¿Y cómo comerlo? Con arepa, huevos, atún…» | ¿CÓMO COMERLO? · rótulos Arepa y Huevos |
+| 42-52 | 5 · tú probándolo | «¿Mi veredicto? ¡9 de 10!… las porciones importan» | sello 9/10 · Nutritivo · Versátil · Delicioso (2 s para leerlo, después a la esquina) · aviso de porciones |
 | 52-57 | 5 | «Y tú, ¿con qué acompañas el aguacate?…» | la pregunta con la caja de comentario |
 | 57-63 | 5 | «¿Quieres ver más videos similares? Sígueme para más contenido.» | arriba @eltorvick con YouTube, Instagram y TikTok; SÍGUEME y «para más contenido» |
 
@@ -183,6 +188,11 @@ fuente; el autor las aprobó):
 - **Toma 4:** la arepa con huevos, y tú poniendo el aguacate encima.
 - **Toma 5** (a cámara): tú probándolo, con una reacción natural.
 - Todo en una sola sesión y antes de cortarlo, para que no se oxide.
+
+**Pausas:** después de la frase de los macros («…y dos gramos de proteína») y de
+la del aceite de oliva, deja un segundo de silencio antes de seguir: en el corte
+queda un respiro con la toma de apoyo para leer la tabla, y la voz no se adelanta
+a lo que está en pantalla.
 
 **Cómo me lo mandas:** las tomas en bruto, sin cortar, con el número de toma en
 el nombre si puedes («toma3-cortado.mov»). Si pesan mucho, de a varias.

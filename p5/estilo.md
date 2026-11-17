@@ -71,6 +71,30 @@ Todo entra animado (0,1-0,3 s: lo grande llega desenfocado y un poco más
 grande; las tarjetas, con un rebote corto), sale en 0,2 s y deriva mientras está
 en pantalla. Nada aparece de golpe ni se queda quieto.
 
+### El ritmo: una cosa a la vez y tiempo para leer
+
+Lo pidió el autor después del segundo borrador del aguacate: las tarjetas
+«aparecen y se van muy rápido, no se alcanzan a leer» y todo junto se veía «muy
+saturado». Estímulo sí, pero balanceado:
+
+- **Una cosa a la vez.** Además de los subtítulos, una sola pieza en pantalla;
+  la siguiente entra cuando la anterior ya se fue (nunca se montan al salir).
+  Con una tarjeta grande en pantalla no entra nada más.
+- **Tiempo para leer.** Una tarjeta con datos se queda **2 s después de su
+  último dato**; una pastilla, un título o un nombre, 1,5 s. Si la voz ya sigue,
+  la pieza siguiente espera.
+- **Menos piezas.** De referencia, una pieza cada 3-4 s (en 60 s, unas 15). Un
+  dato que la voz ya dice claro no necesita pastilla; tampoco hace falta poner el
+  nombre de la misma cosa dos veces. Los golpes de zoom, en el gancho y en el
+  momento fuerte (el veredicto), no en cada frase.
+- **Un respiro en el corte.** Después de una tarjeta densa (la tabla), dejar
+  ~1 s de la toma de apoyo sin voz antes de la frase siguiente, así la voz no se
+  adelanta a lo que se lee.
+
+En el plan es `lectura: 2` en el registro: el motor aplica las dos primeras reglas
+solo (`CAMBIO.md`) y `grabar-cambio.js <id> --plan` muestra el horario que
+quedó.
+
 ### El cierre
 
 La última línea pide **una sola cosa** (comenta una palabra, guarda, sígueme) y la
@@ -98,10 +122,6 @@ entre y 1000 y 1560: ahí van el texto y los botones de Instagram y TikTok.
 | Comparando productos | **notas que se acumulan** («Calidad 9/10», «Precio 7/10») | pop |
 | El veredicto | **el sello Torvick** con la nota, que se encoge a una esquina (`veredicto`) | golpe, campana |
 | Cierre | la pregunta con la caja de comentario (`cta` con `pregunta`) y el cierre dicho: tú preguntas «¿quieres ver más videos similares?» y salen las redes y @eltorvick; en «sígueme», SÍGUEME gigante | click, pop, golpe |
-
-Arriba, del primer dato al veredicto, la **barra de pasos** (`pasos`: Calorías ·
-Grasas · Beneficios · Cómo comerlo · Veredicto), tomada de la animación de
-MyEdSpace que le gusta al autor: avanza con el video y se completa con la nota.
 
 Cuando la cámara muestra el producto: empuje lento o cámara lenta (tomas de apoyo
 a 60 fps). Detrás de las tarjetas grandes, la toma se desenfoca y se oscurece
@@ -163,7 +183,7 @@ datos, cómo grabar y el plan ya armado (`cambios/aguacate/plan.jsx`).
 El motor del P4 hace casi todo lo de arriba. Ya están (noviembre de 2026): las
 tomas de apoyo y el corte desde las tomas en bruto (`montar.py`), los rótulos que
 siguen a los objetos (`seguir.py`), la tabla, las barras, el sello del veredicto,
-la barra de pasos, la pregunta, el cierre grande y el cierre dicho. Lo que falta, por orden, está en `resumen.md` (el
+la pregunta, el cierre grande, el cierre dicho y el ritmo (`lectura`). Lo que falta, por orden, está en `resumen.md` (el
 inserto a pantalla completa para las escenas de Tor, las reacciones de Tor, los
 subtítulos de dos voces, el confeti, la tarjeta del largo, entre otros). Se
 construye cuando llegue el primer video que lo necesite.

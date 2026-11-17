@@ -1832,83 +1832,6 @@
     );
   }
 
-  // PASOS: la barra de capitulos de arriba (de la animacion de MyEdSpace que le gusto al autor). Circulos
-  // numerados unidos por una linea que se va llenando con el tiempo; cuando llega al siguiente, ese paso
-  // se enciende (amarillo, con un aro que sale) y el anterior queda con su visto. En b.cFin se completa el
-  // ultimo y la barra hace una ola. Sirve para cualquier video con partes (la review: hasta el veredicto).
-  function PasosBeat(props) {
-    var T = props.T, b = props.b;
-    if (!vivo(T, b, 0.35)) return null;
-    var n = b.pasos.length, ts = b.tiempos;
-    var y = b.y == null ? 250 : b.y;
-    var x0 = b.x0 == null ? 150 : b.x0, x1 = b.x1 == null ? 930 : b.x1;
-    var xs = b.pasos.map(function (_, i) { return n === 1 ? 540 : x0 + (x1 - x0) * i / (n - 1); });
-    var r = b.radio || 17;
-    var cFin = b.cFin == null ? b.fin - 0.5 : b.cFin;
-    var ke = Easing.easeOutExpo(k01(T, b.ini, 0.45));
-    var ks = Easing.easeInCubic(k01(T, b.fin, 0.26));
-    // hasta donde llega lo amarillo: de un paso al siguiente, parejo con el tiempo
-    var lleno = x0;
-    for (var i = 0; i < n; i++) {
-      if (T < ts[i]) break;
-      lleno = i + 1 < n ? lerp(xs[i], xs[i + 1], clamp((T - ts[i]) / Math.max(0.3, ts[i + 1] - ts[i]), 0, 1)) : xs[i];
-    }
-    var fsL = b.tamTexto || 24;
-    // compacta: con y 250 ocupa de 221 a 313 (las tarjetas grandes empiezan en ~335)
-    var arriba = y - r - 12, alto = 2 * r + 31 + fsL * 1.1;
-    return (
-      <div style={{
-        position: 'absolute', left: 0, top: 0, width: ANCHO, height: ALTO, zIndex: 34, pointerEvents: 'none',
-        opacity: clamp(k01(T, b.ini - 0.02, 0.16), 0, 1) * (1 - ks), transform: 'translateY(' + (-46 * (1 - ke) - 20 * ks + deriva(T, 2.2, 2)).toFixed(2) + 'px)'
-      }}>
-        <div style={{ position: 'absolute', left: x0 - 94, width: x1 - x0 + 188, top: arriba, height: alto, borderRadius: 30, background: 'rgba(20,17,15,0.78)', boxShadow: '0 10px 30px rgba(0,0,0,0.28)' }} />
-        <div style={{ position: 'absolute', left: x0, width: x1 - x0, top: y - 3, height: 6, borderRadius: 3, background: 'rgba(255,255,255,0.22)' }} />
-        <div style={{ position: 'absolute', left: x0, width: Math.max(0, lleno - x0), top: y - 3, height: 6, borderRadius: 3, background: AMARILLO }} />
-        {b.pasos.map(function (ps, i) {
-          var c = ts[i];
-          var listo = i + 1 < n ? ts[i + 1] : cFin;
-          var on = T >= c, hecho = T >= listo;
-          var kp = back(k01(T, b.ini + 0.08 + i * 0.06, 0.3), 1.8);
-          var kOn = k01(T, c, 0.3);
-          var kOk = k01(T, listo, 0.32);
-          var ola = 1 + 0.18 * Math.max(0, Math.sin(Math.PI * k01(T, cFin + 0.1 + i * 0.07, 0.3)));
-          var late = on && !hecho ? 1 + 0.05 * Math.sin((T - c) * 5) : 1;
-          var esc = Math.max(0, kp) * (on ? 0.82 + 0.18 * back(kOn, 2.4) : 1) * late * ola;
-          var aro = on && T < c + 0.7 ? k01(T, c, 0.7) : 0;
-          return (
-            <React.Fragment key={i}>
-              {aro > 0 ? (
-                <div style={{
-                  position: 'absolute', left: xs[i] - r, top: y - r, width: 2 * r, height: 2 * r, borderRadius: '50%', boxSizing: 'border-box',
-                  border: '4px solid ' + AMARILLO, opacity: 1 - aro, transform: 'scale(' + (1 + 1.3 * Easing.easeOutCubic(aro)).toFixed(3) + ')'
-                }} />
-              ) : null}
-              <div style={{
-                position: 'absolute', left: xs[i] - r, top: y - r, width: 2 * r, height: 2 * r, borderRadius: '50%', boxSizing: 'border-box',
-                background: on ? AMARILLO : '#2A2522', border: on ? 'none' : '3px solid rgba(255,255,255,0.5)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', transform: 'scale(' + esc.toFixed(3) + ')'
-              }}>
-                {hecho ? (
-                  <svg width={2 * r} height={2 * r} viewBox="0 0 100 100" style={{ display: 'block', overflow: 'visible' }}>
-                    <path d="M 28 53 L 44 68 L 73 35" fill="none" stroke={NEGRO} strokeWidth={13} strokeLinecap="round" strokeLinejoin="round"
-                      strokeDasharray={64} strokeDashoffset={64 * (1 - Easing.easeOutCubic(kOk))} />
-                  </svg>
-                ) : (
-                  <span style={{ fontFamily: F, fontWeight: 900, fontSize: r * 1.15, lineHeight: 1, color: on ? NEGRO : 'rgba(255,255,255,0.8)' }}>{i + 1}</span>
-                )}
-              </div>
-              <div style={{
-                position: 'absolute', left: xs[i] - 120, width: 240, top: y + r + 7, textAlign: 'center', whiteSpace: 'pre',
-                fontFamily: F, fontWeight: 800, fontSize: fsL, lineHeight: 1.1, letterSpacing: '-0.01em',
-                color: on && !hecho ? AMARILLO : BLANCO, opacity: clamp(kp, 0, 1) * (on ? 1 : 0.6)
-              }}>{ps.txt}</div>
-            </React.Fragment>
-          );
-        })}
-      </div>
-    );
-  }
-
   /* =========================================================
      EL PLAN: beats con tiempos de la voz (t('frase'))
      ========================================================= */
@@ -1956,8 +1879,6 @@
     barras: function (ini, fin, o) { return Object.assign({ tipo: 'barras', ini: ini, fin: fin }, o || {}); },
     // sello del veredicto: { nota, de, palabras: ['nutritivo', { texto, busca, t }], criterio, pos, tam, encoger, esquina, tamFinal }
     veredicto: function (ini, fin, o) { return Object.assign({ tipo: 'veredicto', ini: ini, fin: fin }, o || {}); },
-    // barra de pasos arriba (las partes del video): { pasos: ['Calorías', { txt, t, busca }], cFin (se completa el ultimo), y }
-    pasos: function (ini, fin, o) { return Object.assign({ tipo: 'pasos', ini: ini, fin: fin }, o || {}); },
     sonido: function (t, tipo, g) { return { tipo: 'sonido', ini: t, fin: t, sfx: tipo, g: g }; },
     flash: function (t) { return { tipo: 'flash', ini: t, fin: t + 0.28 }; },
     sacudida: function (t, fuerza) { return { tipo: 'sacudida', ini: t, fin: t + 0.42, fuerza: fuerza }; }
@@ -1965,7 +1886,7 @@
 
   var DETRAS = ['detras', 'dia'];
   var ENCIMA = ['titulo', 'numero', 'tarjeta', 'lista', 'emoji', 'imagen', 'etiqueta', 'progreso', 'cta', 'contador', 'suscribete',
-    'tabla', 'barras', 'veredicto', 'pasos'];
+    'tabla', 'barras', 'veredicto'];
   // lo que tapa la camara con una tarjeta grande: detras, la camara se desenfoca y se oscurece
   var CON_FONDO = ['tabla', 'barras', 'veredicto'];
 
@@ -1982,9 +1903,120 @@
     });
   }
 
+  /* RITMO (P5, `lectura: 2` en el registro). Pedido del autor: «aparece muy rápido y se va muy rápido,
+     no se alcanza a leer» y «se nota muy saturado». Con lectura:
+       - una tarjeta con datos (tabla, barras, lista, el sello) se queda `lectura` s despues de su ultimo
+         dato; lo chico (pastillas, titulos, numeros, rotulos, la palabra detras), 1,5 s
+       - mientras hay una tarjeta grande (la camara desenfocada detras) no entra nada mas: lo que tocaba
+         espera a que se vaya y, si tendria que esperar mas de 1,5 s, no sale (aviso en la consola); los
+         golpes de zoom de ese rato se quitan
+       - dos cosas que se tapan no estan juntas: la de antes se va antes de que entre la nueva (si ya se
+         pudo leer) o la nueva espera
+     Una tarjeta nunca se quita: si espera, las filas que ya se dijeron se encienden una tras otra al entrar. */
+  var TARJETAS = ['tabla', 'barras', 'lista', 'veredicto'];
+  var CAMPOS_T = ['cTachado', 'cSub', 'cRemate', 'cFinal', 'clic', 'cTexto'];
+  function exclusiva(b) { return (CON_FONDO.indexOf(b.tipo) >= 0 && b.fondo !== false) || (b.tipo === 'cta' && !!b.pregunta); }
+  function finExclusiva(b) { return b.tipo === 'veredicto' && b.encoger != null ? b.encoger + 0.5 : b.fin; }
+  // franja vertical que ocupa una pieza (aproximada), para saber si dos se tapan
+  function franja(b) {
+    if (b.tipo === 'rotulo') return null;
+    if (b.tipo === 'detras' || b.tipo === 'dia') { var yd = b.y == null ? 560 : b.y; return [yd - 280, yd + 280]; }
+    var y = b.tipo === 'cta' && b.y != null ? b.y : posicion(b.pos || (b.tipo === 'titulo' || b.tipo === 'numero' || b.tipo === 'imagen' || b.tipo === 'cta' ? 'arriba' : b.tipo === 'lista' ? 'arriba-izq' : 'abajo'))[1];
+    var h = b.tipo === 'etiqueta' ? 70 : b.tipo === 'titulo' ? 180 : b.tipo === 'barras' && b.compacta ? 200 : 260;
+    return [y - h, y + h];
+  }
+  // los items de una pieza que entra tarde: nunca antes de que este entrando y separados (los ya dichos, uno tras otro)
+  function apretar(b) {
+    if (!b.tiempos || b.tipo === 'titulo') return;
+    var ult = b.ini + 0.3;
+    b.tiempos = b.tiempos.map(function (c, i) {
+      c = Math.max(c == null ? ult : c, b.ini + 0.3 + i * 0.05, i ? ult + 0.22 : ult);
+      ult = c;
+      return c;
+    });
+  }
+  // segundo en que la pieza termina de armarse
+  function armada(b) {
+    var u = b.tiempos && b.tiempos.length && b.tipo !== 'titulo' ? b.tiempos[b.tiempos.length - 1] : b.ini + 0.3;
+    if (b.tipo === 'titulo' && b.tiempos) u = Math.max(b.ini, b.tiempos[1] || b.ini) + 0.3;
+    if (b.tipo === 'barras' && b.remate && b.cRemate != null) u = Math.max(u, b.cRemate);
+    if (b.tipo === 'etiqueta' && b.tachado && b.cTachado != null) u = Math.max(u, b.cTachado + 0.3);
+    return u;
+  }
+  function ritmo(d, L) {
+    var Lc = Math.min(1.5, L);
+    var visibles = d.encima.concat(d.detras, d.rotulos).filter(function (b) { return !b.tapa; });
+    var leida = function (b) { return armada(b) + (TARJETAS.indexOf(b.tipo) >= 0 ? L : Lc); };
+    var alargar = function (b) {
+      if (b.tipo === 'barras' && b.remate && b.cRemate == null) b.cRemate = Math.max(b.tiempos[b.tiempos.length - 1] + 0.5, b.fin - 1);
+      if (b.tipo === 'veredicto' && b.encoger != null) { b.encoger = Math.max(b.encoger, leida(b)); b.fin = Math.max(b.fin, b.encoger + 1); }
+      else b.fin = Math.max(b.fin, leida(b));
+    };
+    var mover = function (b, t) {
+      if (t <= b.ini) return;
+      var dt = t - b.ini;
+      if (TARJETAS.indexOf(b.tipo) >= 0 || exclusiva(b)) {
+        b.ini = t;
+        if (b.tipo === 'barras' && b.cRemate != null) b.cRemate = Math.max(b.cRemate, t + 0.3 + 0.22 * b.filas.length);
+        apretar(b);
+      } else {
+        b.ini += dt; b.fin += dt;
+        CAMPOS_T.forEach(function (k) { if (b[k] != null) b[k] += dt; });
+        if (b.tipo === 'titulo' && b.tiempos) b.tiempos = b.tiempos.map(function (x) { return x + dt; });
+      }
+      alargar(b);
+    };
+    var puestos = [], quitar = [];
+    visibles.sort(function (x, y) { return x.ini - y.ini; }).forEach(function (b) {
+      var ini0 = b.ini;
+      alargar(b);
+      for (var vuelta = 0; vuelta < 6; vuelta++) {
+        var movio = false;
+        for (var k = 0; k < puestos.length; k++) {
+          var a = puestos[k];
+          var fa = exclusiva(a) ? finExclusiva(a) : a.fin;
+          if (fa <= b.ini - 0.25) continue;
+          var choca = exclusiva(a) || exclusiva(b);
+          if (!choca) { var ja = franja(a), jb = franja(b); choca = !!(ja && jb && ja[0] < jb[1] && jb[0] < ja[1]); }
+          if (!choca) continue;
+          if (exclusiva(a)) {
+            // espera a que se vaya la tarjeta (en carrusel, entra justo cuando la otra sale)
+            var carrusel = exclusiva(b) && a.sale === 'izquierda' && b.entra === 'derecha';
+            if (fa + (carrusel ? 0 : 0.2) > b.ini + 0.01) { mover(b, fa + (carrusel ? 0 : 0.2)); movio = true; }
+          } else if (leida(a) <= b.ini - 0.25) {
+            a.fin = Math.min(a.fin, b.ini - 0.25);
+          } else {
+            mover(b, leida(a) + 0.25);
+            a.fin = Math.min(a.fin, b.ini - 0.25);
+            movio = true;
+          }
+        }
+        if (!movio) break;
+      }
+      // lo chico que tendria que esperar demasiado ya no tiene sentido: no sale
+      if (TARJETAS.indexOf(b.tipo) < 0 && !exclusiva(b) && b.ini - ini0 > 1.5) {
+        quitar.push(b);
+        if (global.console) console.warn('ritmo: no sale (esperaria ' + (b.ini - ini0).toFixed(1) + ' s):', b.tipo, b.txt || b.titulo || '');
+        return;
+      }
+      puestos.push(b);
+    });
+    quitar.forEach(function (b) { b.quitado = true; });
+    var fuera = function (b) { return !b.quitado; };
+    d.encima = d.encima.filter(fuera); d.detras = d.detras.filter(fuera); d.rotulos = d.rotulos.filter(fuera);
+    // los golpes de zoom que caen debajo de una tarjeta grande no se ven: fuera
+    var excl = puestos.filter(exclusiva);
+    d.camaras = d.camaras.filter(function (c) {
+      if ((c.mov || 'golpe') !== 'golpe') return true;
+      var tapado = excl.some(function (a) { return c.ini > a.ini - 0.3 && c.ini < finExclusiva(a); });
+      if (tapado) c.quitado = true;
+      return !tapado;
+    });
+  }
+
   function zonaDe(b) {
     // lo que tapa algo del video viejo no se acorta nunca (ni las tarjetas grandes de las reviews)
-    if (b.tipo === 'emoji' || b.tipo === 'etiqueta' || b.tipo === 'contador' || b.tipo === 'pasos' || b.tapa || CON_FONDO.indexOf(b.tipo) >= 0) return null;
+    if (b.tipo === 'emoji' || b.tipo === 'etiqueta' || b.tipo === 'contador' || b.tapa || CON_FONDO.indexOf(b.tipo) >= 0) return null;
     var p = posicion(b.pos || (b.tipo === 'titulo' || b.tipo === 'numero' || b.tipo === 'imagen' ? 'arriba' : b.tipo === 'lista' ? 'arriba-izq' : b.tipo === 'cta' ? 'arriba' : 'abajo'));
     return Math.round(p[0] / 120) + ':' + Math.round(p[1] / 200);
   }
@@ -2016,19 +2048,9 @@
     // tiempos de la voz: los items de las listas y las lineas de los titulos
     beats.forEach(function (b) {
       if (b.tipo === 'tabla' || b.tipo === 'barras') b.tiempos = tiemposItems(d.id, b.filas, b, 'nombre');
-      if (b.tipo === 'pasos') {
-        b.pasos = (b.pasos || []).map(function (x) { return typeof x === 'string' ? { txt: x } : x; });
-        b.tiempos = tiemposItems(d.id, b.pasos, b, 'txt');
-      }
       if (b.tipo === 'veredicto') {
         b.palabras = (b.palabras || []).map(function (w) { return typeof w === 'string' ? { texto: w } : w; });
         b.tiempos = tiemposItems(d.id, b.palabras, b, 'texto');
-        if (b.sacudida !== false) d.sacudidas.push({ t: b.ini + 0.24, fuerza: 16 });
-      }
-      // detras de una tarjeta grande la camara se desenfoca y se oscurece (o.fondo: false lo apaga)
-      if ((CON_FONDO.indexOf(b.tipo) >= 0 || (b.tipo === 'cta' && b.pregunta)) && b.fondo !== false) {
-        var hasta = b.tipo === 'veredicto' && b.encoger != null ? b.encoger + 0.1 : b.fin;
-        d.camaras.push({ tipo: 'camara', ini: b.ini - 0.12, fin: hasta, mov: 'suave', zoom: 1.05, desenfoque: 16, oscuro: 0.32, sfx: false });
       }
       if (b.tipo === 'lista') {
         b.items = b.items.map(function (it) { return typeof it === 'string' ? { texto: it } : it; });
@@ -2038,6 +2060,17 @@
       if (b.tipo === 'titulo' && b.arriba && b.voz !== false && !b.tiempos) {
         var pal = String(b.txt).split(/\s+/)[0];
         b.tiempos = [b.ini, tiemposDe(d.id, [b.arriba.split(/\s+/)[0], pal], b.ini - 0.2, b.fin)[1]];
+      }
+    });
+    // el ritmo (P5): cada pieza se queda hasta poder leerla y entra una cosa a la vez
+    if (crudo.lectura) ritmo(d, crudo.lectura);
+    beats.forEach(function (b) {
+      if (b.quitado) return;
+      if (b.tipo === 'veredicto' && b.sacudida !== false) d.sacudidas.push({ t: b.ini + 0.24, fuerza: 16 });
+      // detras de una tarjeta grande la camara se desenfoca y se oscurece (o.fondo: false lo apaga)
+      if ((CON_FONDO.indexOf(b.tipo) >= 0 || (b.tipo === 'cta' && b.pregunta)) && b.fondo !== false) {
+        var hasta = b.tipo === 'veredicto' && b.encoger != null ? b.encoger + 0.1 : b.fin;
+        d.camaras.push({ tipo: 'camara', ini: b.ini - 0.12, fin: hasta, mov: 'suave', zoom: 1.05, desenfoque: 16, oscuro: 0.32, sfx: false });
       }
     });
     // dos cosas en la misma zona no se pisan: la anterior se va antes
@@ -2095,7 +2128,7 @@
     d.cues = [];
     var cue = function (tipo, t, g) { if (t >= 0 && t < d.dur) d.cues.push({ tipo: tipo, t: Math.round(t * 1000) / 1000, g: g == null ? 1 : g }); };
     beats.forEach(function (b) {
-      if (b.sfx === false) return;
+      if (b.sfx === false || b.quitado) return;
       if (b.tipo === 'dia') { cue('whoosh', b.ini - 0.05, 0.4); cue('golpe', b.ini + 0.1, 0.5); }
       else if (b.tipo === 'detras') cue('golpe', b.ini, 0.45);
       else if (b.tipo === 'titulo') cue('whoosh', (b.tiempos ? b.tiempos[1] : b.ini) - 0.05, 0.35);
@@ -2136,11 +2169,6 @@
         cue('campana', b.ini + 1.3, 0.5);
         b.tiempos.forEach(function (t) { cue('pop', t, 0.32); cue('ding', t + 0.1, 0.32); });
         if (b.encoger != null) cue('whoosh', b.encoger, 0.32);
-      }
-      else if (b.tipo === 'pasos') {
-        cue('whoosh', b.ini - 0.05, 0.22);
-        b.tiempos.forEach(function (t) { cue('pop', t, 0.24); });
-        if (b.sonidoFin !== false) cue('ding', b.cFin == null ? b.fin - 0.5 : b.cFin, 0.26);
       }
       else if (b.tipo === 'capitulo') { cue('whoosh', b.ini - T_MARCO * 0.5, 0.6); cue('pop', b.ini + 0.1, 0.4); cue('whoosh', b.fin - T_MARCO * 0.5, 0.45); }
       else if (b.tipo === 'comparar') { cue('whoosh', b.ini - 0.15, 0.6); cue('pop', b.ini + 0.1, 0.4); cue('pop', b.ini + 0.32, 0.4); }
@@ -2201,7 +2229,6 @@
       if (b.tipo === 'tabla') return <TablaBeat key={i} T={T} b={b} />;
       if (b.tipo === 'barras') return <BarrasBeat key={i} T={T} b={b} />;
       if (b.tipo === 'veredicto') return <VeredictoBeat key={i} T={T} b={b} />;
-      if (b.tipo === 'pasos') return <PasosBeat key={i} T={T} b={b} />;
       return null;
     };
     var rotulos = def.rotulos.filter(function (b) { return vivo(T, b, 0.3); });
@@ -2305,6 +2332,15 @@
           if (!img) return Promise.resolve();
           img.src = url;
           return img.decode ? img.decode().catch(function () {}) : Promise.resolve();
+        },
+        // el horario final de lo que sale encima (despues del ritmo), para revisar: grabar-cambio.js --plan
+        piezas: function () {
+          var nombre = function (b) { return String(b.txt || b.titulo || b.palabra || b.n || b.nota || '').replace(/\n/g, ' '); };
+          return def.encima.concat(def.detras, def.rotulos, def.camaras.filter(function (c) { return (c.mov || 'golpe') === 'golpe'; }))
+            .map(function (b) {
+              return { tipo: b.tipo === 'camara' ? 'golpe' : b.tipo, txt: nombre(b), ini: Math.round(b.ini * 100) / 100, fin: Math.round(b.fin * 100) / 100, encoger: b.encoger };
+            })
+            .sort(function (x, y) { return x.ini - y.ini; });
         },
         precargar: function () {
           var srcs = [FOTO];

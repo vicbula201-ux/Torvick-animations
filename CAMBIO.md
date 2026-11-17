@@ -333,14 +333,29 @@ va antes) y nada de arriba se cruza con la firma.
 | `tabla(ini, fin, o)` | información nutricional: `titulo`, `sub`, `encabezado`, `pie`, `filas: [{ nombre, valor, dec, unidad, busca, t, sub, grande }]` (cada fila se enciende cuando se dice), `pos`, `ancho`, `entra: 'derecha'`, `sale: 'izquierda'` (dos tablas seguidas = carrusel) |
 | `barras(ini, fin, o)` | barras apiladas para comparar: `filas: [{ nombre, partes, busca, t }]`, `leyenda`, `colores`, `unidad` (' %'), `soloPrimera`, `compacta`, `remate` + `cRemate`, `pie` |
 | `veredicto(ini, fin, o)` | el sello Torvick: `nota`, `de`, `palabras: [{ texto, busca }]`, `criterio`, `pos`, `tam`, `encoger` (segundo en que se va a la esquina), `esquina`, `tamFinal`, `sacudida: false` |
-| `pasos(ini, fin, o)` | la barra de pasos de arriba (de la animación de MyEdSpace): `pasos: ['Calorías', { txt, t, busca }]` (cada uno se enciende en su segundo; la línea se llena con el tiempo), `cFin` (se completa el último; si no, medio segundo antes del final), `sonidoFin: false`, `y` (250: ocupa de 221 a 313), `x0`, `x1`, `radio`, `tamTexto`. Sirve en cualquier video con partes |
 
 Detrás de `tabla`, `barras`, `veredicto` y `cta` con `pregunta` la cámara se
 desenfoca y se oscurece sola (`fondo: false` lo apaga). `etiqueta` suma `icono`
 (`aviso`, `check`, `equis`) y `letra: 'texto'` (Inter Tight en vez de Archivo
 Black); `cta` suma `pregunta: true` (la pregunta en grande, `respuesta` escrita en
 la caja) y el registro, `firma: { estilo: 'grande' }` (el cierre con SÍGUEME, las
-redes grandes y @eltorvick, sobre la última toma oscurecida). **Cuando el cierre
+redes grandes y @eltorvick, sobre la última toma oscurecida). **El ritmo del P5: `lectura: 2` en el registro.** Pedido del autor después del
+segundo borrador del aguacate («aparece y se va muy rápido, no se alcanza a leer»;
+«se nota muy saturado»). Con `lectura`, `preparar` reacomoda el plan antes de
+dibujarlo: una tarjeta con datos (`tabla`, `barras`, `lista`, el `veredicto` antes
+de irse a la esquina) se queda `lectura` segundos después de su último dato, y lo
+chico (pastillas, títulos, números, rótulos, la palabra detrás), 1,5 s; mientras hay
+una tarjeta grande (la cámara desenfocada detrás) no entra nada más: lo que tocaba
+espera a que se vaya, y si tendría que esperar más de 1,5 s no sale (aviso en la
+consola); dos piezas que se tapan no están juntas (la de antes se va si ya se pudo
+leer; si no, la nueva espera); los golpes de zoom que caen debajo de una tarjeta se
+quitan. Una tarjeta que espera enciende las filas ya dichas una tras otra al entrar;
+`sale: 'izquierda'` en la de antes y `entra: 'derecha'` en la siguiente las pasa en
+carrusel, sin hueco. Para ver el horario que quedó, sin grabar nada:
+`node herramientas/grabar-cambio.js <id> --plan`. Los videos del P4 no llevan
+`lectura` y quedan como estaban.
+
+**Cuando el cierre
 lo dice el autor**, `firma: { estilo: 'grande', ini: t('quieres ver'), sigueme:
 t('sígueme'), texto: 'para más contenido' }`: mientras pregunta, arriba se arma la
 pastilla de @eltorvick y entran YouTube, Instagram y TikTok uno por uno (`redes:

@@ -9,6 +9,8 @@
      --4k                 exporta 2160x3840 (los graficos se dibujan al doble)
      --desde <s> --hasta <s>   solo un tramo (para revisar)
      --cuadros 1.5,8,20   solo esas fotos (PNG), sin video
+     --plan               solo muestra el horario de lo que sale encima (despues del
+                          ritmo de `lectura`): para ver que nada se pise
      --trabajos <n>       paginas en paralelo (por defecto: nucleos - 1, hasta 6)
      --crf <n>            calidad x264 (por defecto 18; menos = mejor)
      --preset <p>         preset de x264 (por defecto fast)
@@ -65,8 +67,14 @@ const ANCHO = 1080, ALTO = 1920;
 async function abrirPagina(browser, id, escala) {
   const p = await browser.newPage({ viewport: { width: ANCHO, height: ALTO }, deviceScaleFactor: escala || 1 });
   p.on('pageerror', (e) => console.log('error en la pagina:', e.message));
-  p.on('console', (m) => { if (m.type() === 'warning' || m.type() === 'error') console.log('pagina:', m.text()); });
-  p.on('requestfailed', (r) => { if (!r.url().includes('/recorte/') && !r.url().endsWith('/seguimientos.js')) console.log('no carga:', r.url().replace('file://' + raiz + '/', '')); });
+  // el seguimiento de objetos es opcional: que no este no es un error
+  const opcional = (u) => u.includes('/recorte/') || u.endsWith('/seguimientos.js');
+  p.on('console', (m) => {
+    if (m.type() !== 'warning' && m.type() !== 'error') return;
+    if (/Failed to load resource/.test(m.text()) && opcional((m.location() || {}).url || '')) return;
+    console.log('pagina:', m.text());
+  });
+  p.on('requestfailed', (r) => { if (!opcional(r.url())) console.log('no carga:', r.url().replace('file://' + raiz + '/', '')); });
   const vendor = process.env.TORVICK_VENDOR;
   let actual = null;
   await p.route('**/*', (r) => {
@@ -187,6 +195,15 @@ function filtroEscala(fuente, W, H) {
   const W = ANCHO * escala, H = ALTO * escala;
   const p0 = await abrirPagina(browser, id, escala);
   const info = await p0.evaluate(() => ({ total: window.CAMBIO.total, video: window.CAMBIO.video }));
+  if (o.plan) {
+    const piezas = await p0.evaluate(() => window.CAMBIO.piezas());
+    for (const x of piezas) {
+      console.log(x.ini.toFixed(2).padStart(6) + ' - ' + x.fin.toFixed(2).padStart(6) + '  ' + (x.fin - x.ini).toFixed(1).padStart(4) + ' s  ' +
+        x.tipo.padEnd(9) + ' ' + x.txt + (x.encoger != null ? '  (a la esquina en ' + x.encoger.toFixed(2) + ')' : ''));
+    }
+    await browser.close();
+    return;
+  }
   const fuente = o.fuente ? path.resolve(String(o.fuente)) : path.join(raiz, info.video);
   if (!fs.existsSync(fuente)) throw new Error('no encuentro el video: ' + fuente);
   const escalar = filtroEscala(fuente, W, H);

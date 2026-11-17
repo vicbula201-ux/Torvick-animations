@@ -645,10 +645,12 @@ tomas de apoyo encima de la voz, ubicadas por frase (`"apoyo"` en `corte.json`);
 `seguir.py` sigue los objetos; el plan usa las piezas de reviews de `cambio.jsx`:
 `rotulo` (el nombre encima del objeto, que lo sigue), `tabla` (información
 nutricional: cada fila se enciende cuando se dice), `barras`, `veredicto` (el
-sello Torvick con la nota), `pasos` (la barra de partes de arriba, de la animación
-de MyEdSpace), `cta` con `pregunta` y `firma: { estilo: 'grande' }`; con
-`sigueme: t('sígueme')` es el cierre que dice el autor a cámara (las redes y
-@eltorvick entran mientras pregunta).
+sello Torvick con la nota), `cta` con `pregunta` y `firma: { estilo: 'grande' }`;
+con `sigueme: t('sígueme')` es el cierre que dice el autor a cámara (las redes y
+@eltorvick entran mientras pregunta). Los planes del P5 llevan **`lectura: 2`**
+(pedido del autor: «se va muy rápido», «muy saturado»): cada tarjeta se queda 2 s
+después de su último dato y entra una cosa a la vez; `grabar-cambio.js <id> --plan`
+muestra el horario que quedó. La barra de pasos arriba se probó y no le gustó.
 `cambios/aguacate/plan.jsx` es la referencia (armado sobre el guion antes de
 grabar) y `cambios/_muestrario/` muestra todas las piezas (carpeta local, fuera de
 git).
