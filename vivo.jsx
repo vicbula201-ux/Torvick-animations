@@ -205,7 +205,73 @@
 
   function Sombra(props) {
     var c = props.c, rx = props.rx || 260;
+    if (props.suave) {
+      // estilo fluido: la sombra con el borde difuminado
+      return (
+        <g>
+          <defs><filter id="vSombraSuave" x="-30%" y="-200%" width="160%" height="500%"><feGaussianBlur stdDeviation={rx * 0.05} /></filter></defs>
+          <ellipse cx={c[0]} cy={c[1]} rx={rx} ry={rx * 0.11} fill={C.GRY} opacity={0.85} filter="url(#vSombraSuave)" />
+        </g>
+      );
+    }
     return <ellipse cx={c[0]} cy={c[1]} rx={rx} ry={rx * 0.12} fill={C.GRY} />;
+  }
+
+  /* ---------------- ESTILO FLUIDO (pedido del autor, por el video de referencia) ----------------
+     Halo: el musculo que trabaja se enciende con un brillo amarillo difuminado que late.
+     (Es la unica excepcion a "sin degradados": un resplandor, no un relleno.)
+     Destellos: estrellitas de cuatro puntas que titilan alrededor del musculo.
+     Movido: desenfoque de movimiento; copias difuminadas de lo que se mueve rapido. */
+  function Halo(props) {
+    var v = clamp(props.v == null ? 1 : props.v, 0, 1);
+    if (v < 0.02) return null;
+    var T = props.T || 0, c = props.c, r = (props.r || 110) * (1 + 0.07 * Math.sin(T * 7)) * (0.75 + 0.25 * v);
+    return (
+      <g>
+        <defs><filter id="vHalo" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation={18} /></filter></defs>
+        <circle cx={c[0]} cy={c[1]} r={r} fill={props.color || C.YEL} opacity={(props.opacidad || 0.7) * v} filter="url(#vHalo)" />
+      </g>
+    );
+  }
+
+  function Destellos(props) {
+    var v = clamp(props.v == null ? 1 : props.v, 0, 1);
+    if (v < 0.02) return null;
+    var T = props.T || 0, c = props.c, r = props.r || 120, n = props.n || 5;
+    var estrellas = [];
+    for (var i = 0; i < n; i++) {
+      var z = azar(i + (props.semilla || 0));
+      var a = (i / n) * Math.PI * 2 + z[0] * 0.9;
+      var d = r * (0.75 + 0.45 * z[1]);
+      var k = Math.max(0, Math.sin(T * (4 + 2 * z[2]) + i * 1.9));
+      var t = (16 + 18 * z[2]) * k * v;
+      if (t < 2) continue;
+      var x = c[0] + Math.cos(a) * d, y = c[1] + Math.sin(a) * d, q = t * 0.22;
+      estrellas.push(
+        <path key={i} d={'M ' + x.toFixed(1) + ' ' + (y - t).toFixed(1) + ' Q ' + (x + q).toFixed(1) + ' ' + (y - q).toFixed(1) + ' ' + (x + t).toFixed(1) + ' ' + y.toFixed(1) +
+          ' Q ' + (x + q).toFixed(1) + ' ' + (y + q).toFixed(1) + ' ' + x.toFixed(1) + ' ' + (y + t).toFixed(1) +
+          ' Q ' + (x - q).toFixed(1) + ' ' + (y + q).toFixed(1) + ' ' + (x - t).toFixed(1) + ' ' + y.toFixed(1) +
+          ' Q ' + (x - q).toFixed(1) + ' ' + (y - q).toFixed(1) + ' ' + x.toFixed(1) + ' ' + (y - t).toFixed(1) + ' Z'}
+          fill={props.color || C.YEL} opacity={Math.min(1, 0.4 + k)} />
+      );
+    }
+    return <g>{estrellas}</g>;
+  }
+
+  // desenfoque de movimiento (dentro de un SVG): dibujar(dt) dibuja lo que se mueve
+  // dt segundos antes; las copias van difuminadas y cada vez mas transparentes
+  function Movido(props) {
+    var n = props.n || 3, paso = props.paso || 0.03, op = props.opacidad == null ? 0.45 : props.opacidad;
+    var copias = [];
+    for (var i = n; i >= 1; i--) {
+      copias.push(<g key={i} opacity={op * (1 - (i - 1) / n)} filter="url(#vMovido)">{props.dibujar(i * paso)}</g>);
+    }
+    return (
+      <g>
+        <defs><filter id="vMovido" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation={props.blur || 7} /></filter></defs>
+        {copias}
+      </g>
+    );
   }
 
   function frac(x) { return x - Math.floor(x); }
@@ -425,6 +491,7 @@
   global.V = {
     Camara: Camara, tomaEn: tomaEn, parpadeo: parpadeo, respira: respira, Rot: Rot,
     Brillo: Brillo, Gotas: Gotas, Lineas: Lineas, Chispa: Chispa, Sombra: Sombra,
+    Halo: Halo, Destellos: Destellos, Movido: Movido,
     Mitad: Mitad, escena: escena, fase: fase, ida: ida,
     Estela: Estela, Humo: Humo, Polvo: Polvo, Confeti: Confeti, Ondas: Ondas, azar: azar
   };

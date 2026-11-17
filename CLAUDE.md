@@ -55,6 +55,7 @@ espalda-top3.jsx, pecho-top3.jsx,
 triceps-top3.jsx, abdominales-top3.jsx (con Tor),
 gluteos-top3.jsx, isquios-top3.jsx,
 cuadriceps-top3.jsx (con la novia de Tor)   top 3 por músculo, ~16 s + acción
+remo-serrucho.jsx                primer reel del ESTILO FLUIDO (halo, destellos, desenfoque)
 novato-avanzado.jsx,
 calistenia-gym.jsx               pantalla dividida: los dos Tors en paralelo
 gluteos.jsx                      con la novia de Tor (público femenino)
@@ -238,7 +239,8 @@ lienzo. El reel la usa para el guion y para exponer `window.REEL`.
   al centro x 800-1200, resultado a la derecha x 1300-1800). Los reels de
   ejercicios son la excepción: van en 1080x1920 y ahí la comparación
   mal/bien se apila arriba/abajo.
-- No usar degradados, sombras internas, glassmorphism ni estética futurista.
+- No usar degradados, sombras internas, glassmorphism ni estética futurista
+  (la excepción es el resplandor de `V.Halo` del estilo fluido, pedido del autor).
 - No usar emoji en el lienzo.
 - No tapar piezas con rectángulos opacos para "recortarlas": eso borra el
   trazo de abajo.
@@ -348,6 +350,18 @@ dibuja la cabeza delante de los brazos (brazos arriba, como en el tríceps
 francés). `flexion-pecho.jsx` es la versión en estilo 2 de
 `flexiones.jsx`; `zancada.jsx` pasa a una vista de frente para mostrar la
 rodilla que se va hacia adentro (valgo).
+
+**Estilo fluido** (pedido del autor a partir de un video de referencia hecho
+con IA; `remo-serrucho.jsx` es la referencia): lo mismo del estilo 2 con
+cámara más cinematográfica (empujes largos y suaves y **cortes** a primer
+plano: dos tomas casi pegadas, `[0.44, A], [0.441, B]`), el músculo que
+trabaja encendido con **`V.Halo`** (resplandor amarillo difuminado que late; es
+la única excepción a "sin degradados") y **`V.Destellos`** (estrellitas de
+cuatro puntas que titilan), **`V.Movido`** (desenfoque de movimiento: copias
+difuminadas de la mancuerna o la barra unos instantes antes), `V.Sombra suave`
+y el equipo con volumen (el banco con su cara de arriba y sus patas de atrás).
+La repetición tira rápido (38 %), aguanta y baja lento; el tronco acompaña el
+tirón (sube apenas). Va en los videos nuevos de ahora en adelante.
 
 **Top 3 por músculo** (formato de `biceps-top3.jsx`, ~16 s con la acción y
 el cierre): `TOP3.gancho({ musculo, fig, figura, tomas })` (el músculo

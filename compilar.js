@@ -38,6 +38,7 @@ const FUENTES = [
   'press-militar.jsx', 'peso-muerto.jsx', 'zancada.jsx', 'abdominal-polea.jsx', 'flexion-pecho.jsx',
   'top3.jsx', 'espalda-top3.jsx', 'pecho-top3.jsx', 'triceps-top3.jsx', 'abdominales-top3.jsx',
   'gluteos-top3.jsx', 'isquios-top3.jsx', 'cuadriceps-top3.jsx',
+  'remo-serrucho.jsx',
   'largo.jsx', 'largo-iconos.jsx', 'largo-plantillas.jsx'
 ];
 
