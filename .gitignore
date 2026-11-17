@@ -1,2 +1,12 @@
 node_modules/
 .DS_Store
+
+# videos: temporales del render (el MP4 final y la miniatura sí se guardan)
+videos/*/salida/fotos/
+videos/*/salida/hojas/
+videos/*/salida/parte-*.mp4
+videos/*/salida/partes.txt
+videos/*/salida/video-sin-audio.mp4
+videos/*/salida/audio-crudo.wav
+videos/*/salida/audio.wav
+videos/*/salida/construir.log

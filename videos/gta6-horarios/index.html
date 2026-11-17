@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>GTA 6 · ¿a qué hora sale? — Modo Vice</title>
+<link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+<div id="lienzo">
+  <div id="damero"></div>
+  <div id="escenas"></div>
+  <div id="marca">
+    <img src="img/logo-avatar.png" alt="">
+    <span class="marca-txt"><b>MODO</b> <i>VICE</i></span>
+  </div>
+  <div id="subtitulo"></div>
+</div>
+
+<!-- Solo en la vista previa (doble clic). El render abre la página con ?render y esto no se muestra. -->
+<div id="controles">
+  <button type="button">▶ Reproducir</button>
+  <input type="range" min="0" max="1" value="0">
+  <span>0.00 s</span>
+</div>
+
+<script src="vendor/gsap.min.js"></script>
+<script src="tiempos.js"></script>
+<script src="iconos.js"></script>
+<script src="motor-video.js"></script>
+<script src="personaje.js"></script>
+<script src="escenas.js"></script>
+</body>
+</html>

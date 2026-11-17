@@ -1,0 +1,188 @@
+/* estilos.css — solo apariencia. Ninguna animación vive aquí: todo se mueve desde la línea de tiempo. */
+
+@font-face { font-family: 'Inter Display'; src: url(fuentes/InterDisplay-ExtraBold.otf); font-weight: 800; }
+@font-face { font-family: 'Inter Display'; src: url(fuentes/InterDisplay-Black.otf); font-weight: 900; }
+@font-face { font-family: 'Inter Display'; src: url(fuentes/InterDisplay-BlackItalic.otf); font-weight: 900; font-style: italic; }
+@font-face { font-family: 'Inter'; src: url(fuentes/Inter-Medium.otf); font-weight: 500; }
+@font-face { font-family: 'Inter'; src: url(fuentes/Inter-SemiBold.otf); font-weight: 600; }
+@font-face { font-family: 'Inter'; src: url(fuentes/Inter-Bold.otf); font-weight: 700; }
+@font-face { font-family: 'Inter'; src: url(fuentes/Inter-ExtraBold.otf); font-weight: 800; }
+@font-face { font-family: 'Caveat'; src: url(fuentes/Caveat-Bold.woff2); font-weight: 700; }
+
+:root {
+  --bg: #F7F0FB;        /* lila muy claro */
+  --bg2: #F0E5F7;       /* cuadro del damero */
+  --ink: #190028;       /* morado casi negro de la marca: texto y contornos */
+  --ink2: #4A3A5E;
+  --muted: #8B7D9E;
+  --line: #E8DEF0;
+  --soft: #F4EEF8;
+  --mag: #FD0894;       /* magenta de la marca */
+  --mag-soft: #FFE3F2;
+  --cyan: #02F8F7;      /* cian de la marca (fondos, nunca texto sobre blanco) */
+  --cyan-soft: #D9FEFE;
+  --cyan-ink: #006E75;
+  --orange: #FEA632;    /* atardecer de la marca */
+  --green: #12B76A;
+  --green-ink: #067647;
+  --green-soft: #DCFAE6;
+  --red: #F04438;
+  --red-soft: #FEE4E2;
+  --night: #190028;
+  --night2: #220839;
+  --sombra: 0 30px 70px -30px rgba(25, 0, 40, .30), 0 6px 18px -8px rgba(25, 0, 40, .10);
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: #0E0A12; }
+body { width: 1080px; height: 1920px; overflow: hidden; }
+
+#lienzo {
+  position: relative; width: 1080px; height: 1920px; overflow: hidden;
+  background: var(--bg); color: var(--ink);
+  font-family: 'Inter', sans-serif; font-weight: 600;
+  -webkit-font-smoothing: antialiased;
+  transform-origin: 0 0;
+}
+#damero {
+  position: absolute; inset: 0;
+  background: repeating-conic-gradient(var(--bg2) 0 25%, var(--bg) 0 50%) 0 0 / 480px 480px;
+}
+#escenas { position: absolute; inset: 0; z-index: 10; }
+.escena { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+.capa { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+
+/* ---------- titulares: palabra por palabra detrás de una máscara ---------- */
+.titular {
+  text-align: center;
+  font-family: 'Inter Display'; font-weight: 800; font-size: 88px;
+  line-height: 1.04; letter-spacing: -0.035em; color: var(--ink);
+}
+.titular .m { display: inline-block; overflow: hidden; vertical-align: top; padding: .05em .04em .14em; margin: -.05em -.04em -.14em; }
+.titular .w { display: inline-block; }
+.titular .hl { color: var(--mag); }
+
+/* ---------- piezas comunes ---------- */
+.tarjeta {
+  background: #fff; border: 2px solid var(--line); border-radius: 40px;
+  box-shadow: var(--sombra);
+}
+.pill {
+  display: inline-flex; align-items: center; gap: 14px; white-space: nowrap;
+  height: 80px; padding: 0 32px; border-radius: 999px;
+  background: #fff; border: 2px solid var(--line); box-shadow: var(--sombra);
+  font: 700 34px/1 'Inter'; color: var(--ink);
+}
+.pill .ico { flex: none; }
+.sticker {
+  display: inline-flex; align-items: center; gap: 12px; white-space: nowrap;
+  padding: 14px 28px; border-radius: 20px;
+  background: var(--orange); color: var(--ink);
+  font: italic 900 48px/1 'Inter Display'; letter-spacing: -0.01em;
+  border: 4px solid var(--ink); box-shadow: 7px 8px 0 var(--ink);
+}
+.chip {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px; white-space: nowrap;
+  height: 54px; padding: 0 22px; border-radius: 999px;
+  font: 800 27px/1 'Inter';
+}
+.chip.mag { background: var(--mag-soft); color: var(--mag); }
+.chip.verde { background: var(--green-soft); color: var(--green-ink); }
+.chip.gris { background: var(--soft); color: var(--muted); }
+.chip.rojo { background: var(--red-soft); color: var(--red); }
+.chip.cian { background: var(--cyan-soft); color: var(--cyan-ink); }
+.circulo-ico {
+  display: flex; align-items: center; justify-content: center; border-radius: 50%;
+}
+.divisor { position: absolute; left: 40px; right: 40px; height: 2px; background: var(--line); }
+
+/* ---------- marca fija arriba ---------- */
+#marca {
+  position: absolute; left: 56px; top: 70px; z-index: 40;
+  display: flex; align-items: center; gap: 16px;
+  height: 84px; padding: 0 26px 0 8px; border-radius: 999px;
+  background: #fff; border: 2px solid var(--line); box-shadow: var(--sombra);
+}
+#marca img { width: 68px; height: 68px; border-radius: 50%; display: block; }
+.marca-txt { font: italic 900 38px/1 'Inter Display'; letter-spacing: -0.01em; color: var(--ink); }
+.marca-txt b { font-weight: 900; }
+.marca-txt i { color: var(--mag); }
+
+/* ---------- rastreador de pasos ---------- */
+.pasos { z-index: 30; }
+.pasos-pista { position: absolute; height: 8px; border-radius: 4px; background: var(--line); }
+.pasos-relleno { position: absolute; left: 0; top: 0; height: 8px; border-radius: 4px; background: var(--green); transform-origin: 0 50%; }
+.paso-n {
+  position: absolute; width: 68px; height: 68px; border-radius: 50%;
+  background: #fff; border: 3px solid var(--line); box-shadow: var(--sombra);
+  display: flex; align-items: center; justify-content: center;
+  font: 800 30px/1 'Inter'; color: var(--muted);
+}
+.paso-n .num, .paso-n .ok { position: absolute; display: flex; align-items: center; justify-content: center; }
+.paso-et { position: absolute; width: 220px; text-align: center; font: 700 27px/1.1 'Inter'; color: var(--muted); }
+
+/* ---------- subtítulo ---------- */
+#subtitulo {
+  position: absolute; left: 80px; width: 880px; bottom: 330px; z-index: 45;
+  background: #fff; border-radius: 36px; border: 2px solid var(--line);
+  box-shadow: 0 30px 70px -26px rgba(25, 0, 40, .35), 0 6px 18px -8px rgba(25, 0, 40, .12);
+  overflow: hidden;
+}
+.sub {
+  position: absolute; left: 40px; right: 40px; bottom: 28px;
+  font: 600 46px/1.2 'Inter'; letter-spacing: -0.01em; text-align: center; color: var(--ink);
+}
+.sub b { color: var(--mag); font-weight: 800; }
+
+/* ---------- paneles oscuros (portada y cierre) ---------- */
+.panel-oscuro { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; background: var(--night); overflow: hidden; }
+.damero-oscuro {
+  position: absolute; inset: 0;
+  background: repeating-conic-gradient(var(--night2) 0 25%, var(--night) 0 50%) 0 0 / 480px 480px;
+}
+.rodillo {
+  border-radius: 48px;
+  background: linear-gradient(180deg, #0D0016 0%, #3B1260 28%, #8A4BB8 46%, #4A1A70 66%, #0D0016 100%);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, .45);
+}
+.sol-recorte { overflow: hidden; }
+.sol {
+  position: absolute; border-radius: 50%;
+  background: linear-gradient(180deg, #FFD23F 0%, #FEA632 35%, #FF5E7E 65%, #FD0894 100%);
+}
+.sol-rayas {
+  position: absolute; inset: 0; border-radius: 50%;
+  background: repeating-linear-gradient(180deg, transparent 0 34px, var(--night) 34px 46px);
+  -webkit-mask: linear-gradient(180deg, transparent 0 48%, #000 62%);
+          mask: linear-gradient(180deg, transparent 0 48%, #000 62%);
+}
+.logo-anillo { border-radius: 50%; padding: 7px; background: var(--cyan); box-shadow: 0 0 0 6px var(--night), 0 0 0 10px var(--mag); }
+.logo-anillo img { width: 100%; height: 100%; border-radius: 50%; display: block; }
+
+/* ---------- mascota ---------- */
+.flamenco svg { width: 100%; height: 100%; display: block; overflow: visible; }
+
+/* ---------- efectos ---------- */
+.confeti { position: absolute; visibility: hidden; z-index: 50; }
+.onda { border-radius: 50%; background: rgba(25, 0, 40, .22); border: 4px solid rgba(255, 255, 255, .9); z-index: 50; }
+.dedo {
+  border-radius: 50%; background: rgba(25, 0, 40, .30);
+  border: 5px solid #fff; box-shadow: 0 8px 24px rgba(25, 0, 40, .35); z-index: 52;
+}
+.trazo-svg { position: absolute; left: 0; top: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+
+/* ---------- vista previa (solo al abrir con doble clic; el render usa ?render) ---------- */
+#controles { display: none; }
+body.previa { width: auto; height: auto; overflow: hidden; background: #171614; }
+body.previa #lienzo { position: absolute; left: 50%; top: 12px; }
+body.previa #controles {
+  display: flex; align-items: center; gap: 12px;
+  position: fixed; left: 0; right: 0; bottom: 0; height: 56px; padding: 0 16px;
+  background: #201F1C; border-top: 1px solid #3A362F; color: #EDE7DD;
+  font: 600 14px/1 'Inter', system-ui, sans-serif; z-index: 100;
+}
+#controles button {
+  font: inherit; color: inherit; background: #3A362F; border: 0; border-radius: 8px;
+  height: 36px; padding: 0 16px; cursor: pointer;
+}
+#controles input[type=range] { flex: 1; }

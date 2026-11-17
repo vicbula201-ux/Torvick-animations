@@ -177,6 +177,13 @@ del asistente**, y el ajuste como último turno. Mandar el código como turno
 del asistente es lo que hace que el modelo corrija en vez de rehacer.
 No reemplazarlo por "acá está el código: ..." dentro del mensaje del usuario.
 
+## Carpeta `videos/`
+
+Cada subcarpeta de `videos/` es un video renderizado aparte, no parte del generador. Usa
+GSAP, Playwright y ffmpeg por pedido explícito del usuario, con la paleta de su marca. Las
+reglas de este archivo (paleta de cinco, nada de GSAP, `f(fracción)`, sin paso de
+compilación) aplican al generador de la raíz, no a esos videos. Cada uno tiene su README.
+
 ## Verificación
 
 `prueba-piezas.html` renderiza el motor (un cuadrado que cruza el lienzo en
