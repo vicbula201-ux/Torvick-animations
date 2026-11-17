@@ -1402,6 +1402,7 @@
     if (!f) return null;
     var ini = def.iniFirma;
     if (T < ini - 0.05) return null;
+    if (f.estilo === 'grande' && f.sigueme != null) return <FirmaHablada T={T} f={f} ini={ini} />;
     if (f.estilo === 'grande') return <FirmaGrande T={T} f={f} ini={ini} />;
     var y = f.y == null ? 330 : f.y;
     var e = entra(T, ini, 'pop', 0.3);
@@ -1463,6 +1464,66 @@
         </Caja>
         <Caja p={[540, y + 340, 'c']} e={entra(T, ini + 0.82, 'pop', 0.3)} dy={dy} rot={-2} z={45}>
           <Pastilla txt={f.texto || 'para más contenido así'} estilo="amarillo" tam={50} />
+        </Caja>
+      </React.Fragment>
+    );
+  }
+
+  // segundos en que salta cada red del cierre dicho: f.redes, o repartidas en la pregunta (de ini a sigueme)
+  function tiemposRedes(f, ini) {
+    if (f.redes && f.redes.length === 3) return f.redes;
+    var paso = clamp((f.sigueme - ini - 0.5) / 2, 0.12, 0.7);
+    return [0, 1, 2].map(function (i) { return ini + 0.25 + i * paso; });
+  }
+
+  // cierre grande DICHO por el autor (firma: { estilo: 'grande', ini, sigueme }): mientras pregunta
+  // «¿quieres ver más videos…?» arriba se arma la pastilla negra (@eltorvick y las tres redes, que entran
+  // una tras otra y la van agrandando); en «sígueme», SÍGUEME gigante abajo y la pastilla con lo que sigue
+  // diciendo. La camara queda nitida (es el que habla) y se acerca despacio (preparar).
+  function FirmaHablada(props) {
+    var T = props.T, f = props.f, ini = props.ini;
+    var sig = f.sigueme;
+    var redes = ['youtube', 'instagram', 'tiktok'];
+    var tr = tiemposRedes(f, ini);
+    var yA = f.yArriba == null ? 318 : f.yArriba;
+    var y = f.y == null ? 1010 : f.y;
+    var dy = deriva(T, 1.3, 3);
+    var r = 54;
+    var k0 = Easing.easeOutCubic(k01(T, tr[0], 0.24));
+    var fsS = f.tam || ajustar(f.grande || 'SÍGUEME', F_IMPACTO, 400, 780, 190, -0.02);
+    return (
+      <React.Fragment>
+        <Caja p={[540, yA, 'c']} e={entra(T, ini, 'pop', 0.3)} dy={dy} z={45}>
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', background: NEGRO, borderRadius: 999,
+            padding: '14px 42px 14px ' + lerp(42, 16, k0).toFixed(1) + 'px', boxShadow: '0 12px 36px rgba(0,0,0,0.35)'
+          }}>
+            {redes.map(function (rd, i) {
+              var c = tr[i];
+              // el hueco se abre y el logo salta adentro: la pastilla crece con cada red
+              var hueco = Easing.easeOutCubic(k01(T, c, 0.24));
+              var si = back(k01(T, c, 0.32), 2.2);
+              var latido = 1 + 0.16 * Math.max(0, Math.sin(Math.PI * k01(T, sig + 0.12 + i * 0.09, 0.3)));
+              var giro = (1 - k01(T, c, 0.32)) * -28;
+              return (
+                <div key={rd} style={{ width: ((2 * r + 14) * hueco).toFixed(1) + 'px', height: 2 * r, flex: 'none' }}>
+                  <div style={{
+                    width: 2 * r, opacity: clamp(k01(T, c, 0.1), 0, 1), transformOrigin: '50% 50%',
+                    transform: 'translateY(' + M.life(T, 1.9, 2.5, i * 1.3).toFixed(2) + 'px) rotate(' + giro.toFixed(1) + 'deg) scale(' + Math.max(0, si * latido).toFixed(3) + ')'
+                  }}>
+                    <Logo red={rd} r={r} />
+                  </div>
+                </div>
+              );
+            })}
+            <span style={{ fontFamily: F, fontWeight: 900, fontSize: f.tamArroba || 66, color: BLANCO, letterSpacing: '-0.02em', marginLeft: 6, whiteSpace: 'pre' }}>@eltorvick</span>
+          </div>
+        </Caja>
+        <Caja p={[540, y, 'c']} e={entra(T, sig, 'enfoque', 0.3)} dy={dy} esc={1 + 0.03 * k01(T, sig, 3)} z={45}>
+          <LineaGigante fs={fsS} color={AMARILLO}>{f.grande || 'SÍGUEME'}</LineaGigante>
+        </Caja>
+        <Caja p={[540, y + fsS * 0.43 + 76, 'c']} e={entra(T, f.cTexto == null ? sig + 0.38 : f.cTexto, 'pop', 0.3)} dy={dy} rot={-2} z={45}>
+          <Pastilla txt={f.texto || 'para más contenido'} estilo="blanco" tam={54} fuente={F} minus />
         </Caja>
       </React.Fragment>
     );
@@ -1771,6 +1832,83 @@
     );
   }
 
+  // PASOS: la barra de capitulos de arriba (de la animacion de MyEdSpace que le gusto al autor). Circulos
+  // numerados unidos por una linea que se va llenando con el tiempo; cuando llega al siguiente, ese paso
+  // se enciende (amarillo, con un aro que sale) y el anterior queda con su visto. En b.cFin se completa el
+  // ultimo y la barra hace una ola. Sirve para cualquier video con partes (la review: hasta el veredicto).
+  function PasosBeat(props) {
+    var T = props.T, b = props.b;
+    if (!vivo(T, b, 0.35)) return null;
+    var n = b.pasos.length, ts = b.tiempos;
+    var y = b.y == null ? 250 : b.y;
+    var x0 = b.x0 == null ? 150 : b.x0, x1 = b.x1 == null ? 930 : b.x1;
+    var xs = b.pasos.map(function (_, i) { return n === 1 ? 540 : x0 + (x1 - x0) * i / (n - 1); });
+    var r = b.radio || 17;
+    var cFin = b.cFin == null ? b.fin - 0.5 : b.cFin;
+    var ke = Easing.easeOutExpo(k01(T, b.ini, 0.45));
+    var ks = Easing.easeInCubic(k01(T, b.fin, 0.26));
+    // hasta donde llega lo amarillo: de un paso al siguiente, parejo con el tiempo
+    var lleno = x0;
+    for (var i = 0; i < n; i++) {
+      if (T < ts[i]) break;
+      lleno = i + 1 < n ? lerp(xs[i], xs[i + 1], clamp((T - ts[i]) / Math.max(0.3, ts[i + 1] - ts[i]), 0, 1)) : xs[i];
+    }
+    var fsL = b.tamTexto || 24;
+    // compacta: con y 250 ocupa de 221 a 313 (las tarjetas grandes empiezan en ~335)
+    var arriba = y - r - 12, alto = 2 * r + 31 + fsL * 1.1;
+    return (
+      <div style={{
+        position: 'absolute', left: 0, top: 0, width: ANCHO, height: ALTO, zIndex: 34, pointerEvents: 'none',
+        opacity: clamp(k01(T, b.ini - 0.02, 0.16), 0, 1) * (1 - ks), transform: 'translateY(' + (-46 * (1 - ke) - 20 * ks + deriva(T, 2.2, 2)).toFixed(2) + 'px)'
+      }}>
+        <div style={{ position: 'absolute', left: x0 - 94, width: x1 - x0 + 188, top: arriba, height: alto, borderRadius: 30, background: 'rgba(20,17,15,0.78)', boxShadow: '0 10px 30px rgba(0,0,0,0.28)' }} />
+        <div style={{ position: 'absolute', left: x0, width: x1 - x0, top: y - 3, height: 6, borderRadius: 3, background: 'rgba(255,255,255,0.22)' }} />
+        <div style={{ position: 'absolute', left: x0, width: Math.max(0, lleno - x0), top: y - 3, height: 6, borderRadius: 3, background: AMARILLO }} />
+        {b.pasos.map(function (ps, i) {
+          var c = ts[i];
+          var listo = i + 1 < n ? ts[i + 1] : cFin;
+          var on = T >= c, hecho = T >= listo;
+          var kp = back(k01(T, b.ini + 0.08 + i * 0.06, 0.3), 1.8);
+          var kOn = k01(T, c, 0.3);
+          var kOk = k01(T, listo, 0.32);
+          var ola = 1 + 0.18 * Math.max(0, Math.sin(Math.PI * k01(T, cFin + 0.1 + i * 0.07, 0.3)));
+          var late = on && !hecho ? 1 + 0.05 * Math.sin((T - c) * 5) : 1;
+          var esc = Math.max(0, kp) * (on ? 0.82 + 0.18 * back(kOn, 2.4) : 1) * late * ola;
+          var aro = on && T < c + 0.7 ? k01(T, c, 0.7) : 0;
+          return (
+            <React.Fragment key={i}>
+              {aro > 0 ? (
+                <div style={{
+                  position: 'absolute', left: xs[i] - r, top: y - r, width: 2 * r, height: 2 * r, borderRadius: '50%', boxSizing: 'border-box',
+                  border: '4px solid ' + AMARILLO, opacity: 1 - aro, transform: 'scale(' + (1 + 1.3 * Easing.easeOutCubic(aro)).toFixed(3) + ')'
+                }} />
+              ) : null}
+              <div style={{
+                position: 'absolute', left: xs[i] - r, top: y - r, width: 2 * r, height: 2 * r, borderRadius: '50%', boxSizing: 'border-box',
+                background: on ? AMARILLO : '#2A2522', border: on ? 'none' : '3px solid rgba(255,255,255,0.5)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', transform: 'scale(' + esc.toFixed(3) + ')'
+              }}>
+                {hecho ? (
+                  <svg width={2 * r} height={2 * r} viewBox="0 0 100 100" style={{ display: 'block', overflow: 'visible' }}>
+                    <path d="M 28 53 L 44 68 L 73 35" fill="none" stroke={NEGRO} strokeWidth={13} strokeLinecap="round" strokeLinejoin="round"
+                      strokeDasharray={64} strokeDashoffset={64 * (1 - Easing.easeOutCubic(kOk))} />
+                  </svg>
+                ) : (
+                  <span style={{ fontFamily: F, fontWeight: 900, fontSize: r * 1.15, lineHeight: 1, color: on ? NEGRO : 'rgba(255,255,255,0.8)' }}>{i + 1}</span>
+                )}
+              </div>
+              <div style={{
+                position: 'absolute', left: xs[i] - 120, width: 240, top: y + r + 7, textAlign: 'center', whiteSpace: 'pre',
+                fontFamily: F, fontWeight: 800, fontSize: fsL, lineHeight: 1.1, letterSpacing: '-0.01em',
+                color: on && !hecho ? AMARILLO : BLANCO, opacity: clamp(kp, 0, 1) * (on ? 1 : 0.6)
+              }}>{ps.txt}</div>
+            </React.Fragment>
+          );
+        })}
+      </div>
+    );
+  }
+
   /* =========================================================
      EL PLAN: beats con tiempos de la voz (t('frase'))
      ========================================================= */
@@ -1818,6 +1956,8 @@
     barras: function (ini, fin, o) { return Object.assign({ tipo: 'barras', ini: ini, fin: fin }, o || {}); },
     // sello del veredicto: { nota, de, palabras: ['nutritivo', { texto, busca, t }], criterio, pos, tam, encoger, esquina, tamFinal }
     veredicto: function (ini, fin, o) { return Object.assign({ tipo: 'veredicto', ini: ini, fin: fin }, o || {}); },
+    // barra de pasos arriba (las partes del video): { pasos: ['Calorías', { txt, t, busca }], cFin (se completa el ultimo), y }
+    pasos: function (ini, fin, o) { return Object.assign({ tipo: 'pasos', ini: ini, fin: fin }, o || {}); },
     sonido: function (t, tipo, g) { return { tipo: 'sonido', ini: t, fin: t, sfx: tipo, g: g }; },
     flash: function (t) { return { tipo: 'flash', ini: t, fin: t + 0.28 }; },
     sacudida: function (t, fuerza) { return { tipo: 'sacudida', ini: t, fin: t + 0.42, fuerza: fuerza }; }
@@ -1825,7 +1965,7 @@
 
   var DETRAS = ['detras', 'dia'];
   var ENCIMA = ['titulo', 'numero', 'tarjeta', 'lista', 'emoji', 'imagen', 'etiqueta', 'progreso', 'cta', 'contador', 'suscribete',
-    'tabla', 'barras', 'veredicto'];
+    'tabla', 'barras', 'veredicto', 'pasos'];
   // lo que tapa la camara con una tarjeta grande: detras, la camara se desenfoca y se oscurece
   var CON_FONDO = ['tabla', 'barras', 'veredicto'];
 
@@ -1844,7 +1984,7 @@
 
   function zonaDe(b) {
     // lo que tapa algo del video viejo no se acorta nunca (ni las tarjetas grandes de las reviews)
-    if (b.tipo === 'emoji' || b.tipo === 'etiqueta' || b.tipo === 'contador' || b.tapa || CON_FONDO.indexOf(b.tipo) >= 0) return null;
+    if (b.tipo === 'emoji' || b.tipo === 'etiqueta' || b.tipo === 'contador' || b.tipo === 'pasos' || b.tapa || CON_FONDO.indexOf(b.tipo) >= 0) return null;
     var p = posicion(b.pos || (b.tipo === 'titulo' || b.tipo === 'numero' || b.tipo === 'imagen' ? 'arriba' : b.tipo === 'lista' ? 'arriba-izq' : b.tipo === 'cta' ? 'arriba' : 'abajo'));
     return Math.round(p[0] / 120) + ':' + Math.round(p[1] / 200);
   }
@@ -1876,6 +2016,10 @@
     // tiempos de la voz: los items de las listas y las lineas de los titulos
     beats.forEach(function (b) {
       if (b.tipo === 'tabla' || b.tipo === 'barras') b.tiempos = tiemposItems(d.id, b.filas, b, 'nombre');
+      if (b.tipo === 'pasos') {
+        b.pasos = (b.pasos || []).map(function (x) { return typeof x === 'string' ? { txt: x } : x; });
+        b.tiempos = tiemposItems(d.id, b.pasos, b, 'txt');
+      }
       if (b.tipo === 'veredicto') {
         b.palabras = (b.palabras || []).map(function (w) { return typeof w === 'string' ? { texto: w } : w; });
         b.tiempos = tiemposItems(d.id, b.palabras, b, 'texto');
@@ -1917,9 +2061,18 @@
     d.finApertura = dia ? dia.fin + 0.2 : 0.4;
     d.firma = crudo.firma === false ? null : Object.assign({ dur: crudo.firma && crudo.firma.estilo === 'grande' ? 3.2 : 2.8 }, crudo.firma || {});
     if (d.firma && crudo.serie && !d.firma.texto && crudo.serie.dia != null) d.firma.texto = 'SÍGUEME PARA EL DÍA ' + (Number(crudo.serie.dia) + 1);
-    d.iniFirma = d.firma ? (d.firma.ini != null ? d.firma.ini : Math.max(0, d.dur - d.firma.dur)) : d.dur + 1;
-    // el cierre grande oscurece y desenfoca la ultima toma
-    if (d.firma && d.firma.estilo === 'grande') d.camaras.push({ tipo: 'camara', ini: d.iniFirma - 0.15, fin: d.dur + 1, mov: 'suave', zoom: 1.06, desenfoque: 12, oscuro: 0.48, sfx: false });
+    // el cierre dicho por el autor (firma.sigueme): sin ini, empieza un poco antes del «sígueme»
+    var hablada = !!(d.firma && d.firma.estilo === 'grande' && d.firma.sigueme != null);
+    d.iniFirma = d.firma ? (d.firma.ini != null ? d.firma.ini : hablada ? d.firma.sigueme - 0.6 : Math.max(0, d.dur - d.firma.dur)) : d.dur + 1;
+    if (hablada) {
+      // el que habla se sigue viendo: la camara se acerca despacio y se oscurece apenas; los subtitulos
+      // se van en «sígueme» (desde ahi lo que dice ya esta escrito en grande)
+      d.camaras.push({ tipo: 'camara', ini: d.iniFirma - 0.15, fin: d.dur + 1, mov: 'empuje', zoom: d.firma.zoom || 1.1, foco: d.firma.foco, oscuro: 0.16, sfx: false });
+      d.subs.ocultar = (d.subs.ocultar || []).concat([[d.firma.sigueme - 0.05, d.dur + 1]]);
+    } else if (d.firma && d.firma.estilo === 'grande') {
+      // el cierre grande (callado) oscurece y desenfoca la ultima toma
+      d.camaras.push({ tipo: 'camara', ini: d.iniFirma - 0.15, fin: d.dur + 1, mov: 'suave', zoom: 1.06, desenfoque: 12, oscuro: 0.48, sfx: false });
+    }
     d.serie = crudo.serie || null;
     // lo que ocupa la parte de arriba esconde el sello de la serie mientras esta
     d.tapanSello = [];
@@ -1928,12 +2081,14 @@
         (ENCIMA.indexOf(b.tipo) >= 0 && b.tipo !== 'emoji' && posicion(b.pos || (b.tipo === 'tarjeta' || b.tipo === 'progreso' ? 'abajo' : b.tipo === 'lista' ? 'arriba-izq' : 'arriba'))[1] < 760);
       if (arriba) d.tapanSello.push([b.ini - (b.tipo === 'capitulo' ? T_MARCO : 0), b.fin + (b.tipo === 'capitulo' ? T_MARCO * 0.5 : 0.2)]);
     });
-    // nada de lo de arriba se cruza con la firma (la firma va en y 330-450)
+    // nada de lo de arriba se cruza con la firma (la firma va en y 330-450); en el cierre dicho, lo de
+    // abajo tampoco se cruza con el SÍGUEME
     d.encima.concat(d.detras).forEach(function (b) {
       if (b.tapa) return;
       var y = b.tipo === 'dia' || b.tipo === 'detras' ? 0 : posicion(b.pos || (b.tipo === 'tarjeta' || b.tipo === 'progreso' || b.tipo === 'suscribete' ? 'abajo' : 'arriba'))[1];
       if (b.tipo === 'cta' && b.y != null) y = b.y;
-      if (y < 900 && b.ini < d.iniFirma && b.fin > d.iniFirma - 0.1) b.fin = Math.max(b.ini + 0.3, d.iniFirma - 0.12);
+      var corte = y < 900 ? d.iniFirma : hablada ? d.firma.sigueme : null;
+      if (corte != null && b.ini < corte && b.fin > corte - 0.1) b.fin = Math.max(b.ini + 0.3, corte - 0.12);
     });
 
     // efectos
@@ -1982,6 +2137,11 @@
         b.tiempos.forEach(function (t) { cue('pop', t, 0.32); cue('ding', t + 0.1, 0.32); });
         if (b.encoger != null) cue('whoosh', b.encoger, 0.32);
       }
+      else if (b.tipo === 'pasos') {
+        cue('whoosh', b.ini - 0.05, 0.22);
+        b.tiempos.forEach(function (t) { cue('pop', t, 0.24); });
+        if (b.sonidoFin !== false) cue('ding', b.cFin == null ? b.fin - 0.5 : b.cFin, 0.26);
+      }
       else if (b.tipo === 'capitulo') { cue('whoosh', b.ini - T_MARCO * 0.5, 0.6); cue('pop', b.ini + 0.1, 0.4); cue('whoosh', b.fin - T_MARCO * 0.5, 0.45); }
       else if (b.tipo === 'comparar') { cue('whoosh', b.ini - 0.15, 0.6); cue('pop', b.ini + 0.1, 0.4); cue('pop', b.ini + 0.32, 0.4); }
       else if (b.tipo === 'camara' && (b.mov || 'golpe') === 'golpe') cue('golpe', b.ini, 0.35);
@@ -1989,7 +2149,13 @@
       else if (b.tipo === 'flash') cue('whoosh', b.ini - 0.1, 0.5);
       else if (b.tipo === 'sacudida') cue('golpe', b.ini, 0.5);
     });
-    if (d.firma && d.firma.estilo === 'grande') {
+    if (hablada) {
+      cue('pop', d.iniFirma, 0.3);
+      tiemposRedes(d.firma, d.iniFirma).forEach(function (t) { cue('pop', t, 0.34); });
+      cue('whoosh', d.firma.sigueme - 0.05, 0.3);
+      cue('golpe', d.firma.sigueme, 0.42);
+      cue('pop', d.firma.cTexto == null ? d.firma.sigueme + 0.38 : d.firma.cTexto, 0.3);
+    } else if (d.firma && d.firma.estilo === 'grande') {
       cue('whoosh', d.iniFirma - 0.05, 0.45);
       cue('golpe', d.iniFirma + 0.12, 0.4);
       [0, 1, 2].forEach(function (i) { cue('pop', d.iniFirma + 0.3 + i * 0.1, 0.36); });
@@ -2035,6 +2201,7 @@
       if (b.tipo === 'tabla') return <TablaBeat key={i} T={T} b={b} />;
       if (b.tipo === 'barras') return <BarrasBeat key={i} T={T} b={b} />;
       if (b.tipo === 'veredicto') return <VeredictoBeat key={i} T={T} b={b} />;
+      if (b.tipo === 'pasos') return <PasosBeat key={i} T={T} b={b} />;
       return null;
     };
     var rotulos = def.rotulos.filter(function (b) { return vivo(T, b, 0.3); });

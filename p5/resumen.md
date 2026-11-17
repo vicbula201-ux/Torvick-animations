@@ -72,8 +72,11 @@ referencias. Lo demás, cuando llegue el primer video de cada tipo.
 tomas en bruto con **tomas de apoyo** encima de la voz y el HDR del iPhone pasado a
 color normal (`montar.py`), los **rótulos que siguen a los objetos**
 (`seguir.py` + `rotulo`), la **tabla nutricional**, las **barras de comparación**,
-el **sello del veredicto**, la **pregunta con la caja de comentario** y el **cierre
-grande**. Detalle en `reviews-alimentos.md`.
+el **sello del veredicto**, la **pregunta con la caja de comentario**, el **cierre
+grande** y, después de las respuestas del autor y de sus referencias nuevas (Eddie
+Kang y la animación de MyEdSpace), la **barra de pasos** de arriba y el **cierre
+dicho** (las redes entran mientras él dice «sígueme»). Detalle en
+`reviews-alimentos.md`.
 
 ## Cómo se trabaja un video del P5
 

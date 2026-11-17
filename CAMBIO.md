@@ -333,11 +333,20 @@ va antes) y nada de arriba se cruza con la firma.
 | `tabla(ini, fin, o)` | información nutricional: `titulo`, `sub`, `encabezado`, `pie`, `filas: [{ nombre, valor, dec, unidad, busca, t, sub, grande }]` (cada fila se enciende cuando se dice), `pos`, `ancho`, `entra: 'derecha'`, `sale: 'izquierda'` (dos tablas seguidas = carrusel) |
 | `barras(ini, fin, o)` | barras apiladas para comparar: `filas: [{ nombre, partes, busca, t }]`, `leyenda`, `colores`, `unidad` (' %'), `soloPrimera`, `compacta`, `remate` + `cRemate`, `pie` |
 | `veredicto(ini, fin, o)` | el sello Torvick: `nota`, `de`, `palabras: [{ texto, busca }]`, `criterio`, `pos`, `tam`, `encoger` (segundo en que se va a la esquina), `esquina`, `tamFinal`, `sacudida: false` |
+| `pasos(ini, fin, o)` | la barra de pasos de arriba (de la animación de MyEdSpace): `pasos: ['Calorías', { txt, t, busca }]` (cada uno se enciende en su segundo; la línea se llena con el tiempo), `cFin` (se completa el último; si no, medio segundo antes del final), `sonidoFin: false`, `y` (250: ocupa de 221 a 313), `x0`, `x1`, `radio`, `tamTexto`. Sirve en cualquier video con partes |
 
 Detrás de `tabla`, `barras`, `veredicto` y `cta` con `pregunta` la cámara se
 desenfoca y se oscurece sola (`fondo: false` lo apaga). `etiqueta` suma `icono`
 (`aviso`, `check`, `equis`) y `letra: 'texto'` (Inter Tight en vez de Archivo
 Black); `cta` suma `pregunta: true` (la pregunta en grande, `respuesta` escrita en
 la caja) y el registro, `firma: { estilo: 'grande' }` (el cierre con SÍGUEME, las
-redes grandes y @eltorvick). `t.alguna(['nueve', '9'])` busca la primera forma
-que aparezca en la transcripción.
+redes grandes y @eltorvick, sobre la última toma oscurecida). **Cuando el cierre
+lo dice el autor**, `firma: { estilo: 'grande', ini: t('quieres ver'), sigueme:
+t('sígueme'), texto: 'para más contenido' }`: mientras pregunta, arriba se arma la
+pastilla de @eltorvick y entran YouTube, Instagram y TikTok uno por uno (`redes:
+[t1, t2, t3]` para fijarlos; si no, se reparten en la pregunta); en `sigueme`,
+SÍGUEME gigante abajo (`y`, 1010) y la pastilla con `texto` (`cTexto`); la cámara
+queda nítida con un empuje lento (`zoom`, `foco`) y los subtítulos se van en
+«sígueme». Lo de abajo que se cruzaría con el SÍGUEME se va antes, como lo de
+arriba con la firma. `t.alguna(['nueve', '9'])` busca la primera forma que
+aparezca en la transcripción.

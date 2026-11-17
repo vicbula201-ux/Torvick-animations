@@ -75,7 +75,9 @@ en pantalla. Nada aparece de golpe ni se queda quieto.
 
 La última línea pide **una sola cosa** (comenta una palabra, guarda, sígueme) y la
 pantalla la muestra con la caja de comentario (`cta`). Después, **la firma de
-Torvick**, siempre.
+Torvick**, siempre. Si el autor la dice a cámara («sígueme para más contenido»),
+la firma entra **mientras habla**: las redes y @eltorvick arriba, SÍGUEME abajo,
+él a la vista (`firma` con `sigueme`).
 
 ### Zonas libres
 
@@ -95,7 +97,11 @@ entre y 1000 y 1560: ahí van el texto y los botones de Instagram y TikTok.
 | El mito | «Mal alimento» tachado; la verdad, con el **visto** | error / ding |
 | Comparando productos | **notas que se acumulan** («Calidad 9/10», «Precio 7/10») | pop |
 | El veredicto | **el sello Torvick** con la nota, que se encoge a una esquina (`veredicto`) | golpe, campana |
-| Cierre | la pregunta con la caja de comentario (`cta` con `pregunta`) y el cierre grande | click |
+| Cierre | la pregunta con la caja de comentario (`cta` con `pregunta`) y el cierre dicho: tú preguntas «¿quieres ver más videos similares?» y salen las redes y @eltorvick; en «sígueme», SÍGUEME gigante | click, pop, golpe |
+
+Arriba, del primer dato al veredicto, la **barra de pasos** (`pasos`: Calorías ·
+Grasas · Beneficios · Cómo comerlo · Veredicto), tomada de la animación de
+MyEdSpace que le gusta al autor: avanza con el video y se completa con la nota.
 
 Cuando la cámara muestra el producto: empuje lento o cámara lenta (tomas de apoyo
 a 60 fps). Detrás de las tarjetas grandes, la toma se desenfoca y se oscurece
@@ -157,7 +163,7 @@ datos, cómo grabar y el plan ya armado (`cambios/aguacate/plan.jsx`).
 El motor del P4 hace casi todo lo de arriba. Ya están (noviembre de 2026): las
 tomas de apoyo y el corte desde las tomas en bruto (`montar.py`), los rótulos que
 siguen a los objetos (`seguir.py`), la tabla, las barras, el sello del veredicto,
-la pregunta y el cierre grande. Lo que falta, por orden, está en `resumen.md` (el
+la barra de pasos, la pregunta, el cierre grande y el cierre dicho. Lo que falta, por orden, está en `resumen.md` (el
 inserto a pantalla completa para las escenas de Tor, las reacciones de Tor, los
 subtítulos de dos voces, el confeti, la tarjeta del largo, entre otros). Se
 construye cuando llegue el primer video que lo necesite.

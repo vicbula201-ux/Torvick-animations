@@ -13,17 +13,33 @@
   function golpe(ini, foco) { return p.camara(ini, ini + 1.0, { zoom: 1.28, foco: foco || CARA, mov: 'golpe' }); }
   // la transcripcion a veces escribe los numeros con cifras («9 de 10»)
   var nueve = t.alguna(['nueve', '9']);
+  // el cierre lo dices tú a cámara: «¿Quieres ver más videos similares? Sígueme para más contenido.»
+  var pregunta = t('quieres ver', t('comentarios'));
+  var sigueme = t('sígueme', pregunta);
 
   C.registrar({
     id: id, titulo: 'Review · ¿Qué tan saludable es el aguacate?', video: 'cambios/' + id + '/media/fuente.mp4',
-    // el cierre grande: «¿quieres ver más videos así?» + SÍGUEME + redes + @eltorvick
-    firma: { estilo: 'grande' },
+    // el cierre dicho: mientras preguntas, arriba se arma @eltorvick con YouTube, Instagram y TikTok;
+    // en «sígueme», SÍGUEME gigante abajo + «para más contenido». Tú sigues a la vista.
+    firma: { estilo: 'grande', ini: pregunta - 0.1, sigueme: sigueme, texto: 'para más contenido' },
     subs: {
       y: 1260,
       marcadas: ['saludable', 'calorías', 'grasas', 'fibra', 'proteína', 'monoinsaturadas', 'oliva', 'potasio', 'magnesio',
         'folato', 'satisfecho', 'absorción', 'veredicto', 'nutritivo', 'versátil', 'delicioso', 'porciones']
     },
     plan: [
+      // las partes del video arriba (como la animacion de MyEdSpace): se completa con la nota
+      p.pasos(t('por cada') - 0.35, t('eso sí') - 0.3, {
+        pasos: [
+          { txt: 'Calorías', t: t('por cada') },
+          { txt: 'Grasas', t: t('aquí viene') },
+          { txt: 'Beneficios', t: t('también aporta') },
+          { txt: 'Cómo comerlo', t: t('cómo comerlo') },
+          { txt: 'Veredicto', t: t('mi veredicto') }
+        ],
+        cFin: nueve + 0.05, sonidoFin: false
+      }),
+
       // ---- 1. GANCHO (tú con el aguacate entero en la mano) ----
       p.detras(t('qué tan') - 0.05, t.fin('realmente') + 0.25, '¿SALUDABLE?'),
       golpe(t('realmente')),
@@ -76,7 +92,7 @@
       p.etiqueta(t('grasas', t('fibra y grasas')) - 0.05, t.fin('satisfecho') + 0.6, '+ Grasas', { estilo: 'blanco', minus: true, letra: 'texto', tam: 58, pos: [740, 470], rot: 3 }),
       p.etiqueta(t('satisfecho') - 0.05, t.fin('satisfecho') + 0.6, '= Más saciedad', { estilo: 'amarillo', icono: 'check', minus: true, letra: 'texto', tam: 64, pos: [540, 600], rot: -2 }),
       p.etiqueta(t('absorción') - 0.05, t.fin('alimentos') + 0.4, 'Absorbes mejor las vitaminas', { estilo: 'negro', icono: 'check', minus: true, letra: 'texto', tam: 50, pos: [540, 560], rot: -2 }),
-      p.titulo(t('cómo comerlo') - 0.05, t('con arepa') + 0.1, '¿CÓMO\nCOMERLO?'),
+      p.titulo(t('cómo comerlo') - 0.05, t('con arepa') + 0.1, '¿CÓMO\nCOMERLO?', { pos: [540, 500] }),
       golpe(t('cómo comerlo')),
       p.rotulo(t('arepa') - 0.05, t.fin('ensalada') + 0.8, 'Arepa', { sigue: 'arepa' }),
       p.rotulo(t('huevos') - 0.05, t.fin('ensalada') + 0.8, 'Huevos', { sigue: 'huevos' }),
