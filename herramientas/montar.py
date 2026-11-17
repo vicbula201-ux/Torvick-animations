@@ -17,7 +17,18 @@ corte.json:
     "piezas": [ ["1", 15.86, 19.22], ["1", 19.54, 20.58], ... ],   # en orden; segundos de la toma
     "cola": 3.2,                            # segundos de imagen despues de la ultima pieza (para la firma)
     "corregir": { "cotidiaridad": "cotidianidad" },
-    "minusculas": true                      # subtitulos en minuscula, como se habla (por defecto)
+    "minusculas": true,                     # subtitulos en minuscula, como se habla (por defecto)
+    "hdr": "auto",                          # tomas HDR del iPhone (HLG/PQ): se pasan a color normal (bt709)
+                                            # con un mapeo de tonos; "no" las deja como vienen
+    "apoyo": [                              # tomas de apoyo: la imagen cambia, la voz sigue
+      { "video": ".../apoyo/entero.mp4", "desde": 1.2,      # desde que segundo de la toma de apoyo
+        "frase": "por cada 100 gramos",                     # empieza cuando se dice esto (o "ini": segundo del corte)
+        "hasta": "proteína",                                # y termina cuando se termina de decir esto
+                                                            # (o "fin", o "dur" en segundos)
+        "velocidad": 0.5,                                   # camara lenta (las tomas a 60 fps quedan suaves)
+        "foco": [0.5, 0.5],                                 # que parte de la toma queda si hay que recortarla a 9:16
+        "encuadre": [w, h, x, y] }                          # o el recorte exacto
+    ]
   }
 
 Cada pieza va del inicio de su primera palabra al final de la ultima (los
@@ -29,14 +40,19 @@ tiempos de transcripcion.json). La herramienta:
   - iguala el volumen de habla de las tomas y funde 8 ms en cada corte;
   - encuadra, escala a 1080x1920 (lanczos) a 30 fps y escribe el MP4;
   - traslada las palabras al tiempo del corte y escribe la transcripcion nueva
-    (.json, .txt y .js, como transcribir.py) y un informe <salida>.txt.
+    (.json, .txt y .js, como transcribir.py) y un informe <salida>.txt;
+  - con "apoyo": deja el corte hablado en <salida>-hablado.mp4 y arma <salida> con las
+    tomas de apoyo encima de la voz (los tiempos salen de las frases de la transcripcion).
+    `--solo-apoyo` rehace solo eso (cuando se cambia una toma de apoyo, sin volver a cortar).
 
-Necesita ffmpeg y python3 con numpy.
+Necesita ffmpeg (con zscale para el HDR) y python3 con numpy.
 """
+import argparse
 import json
 import os
 import subprocess
 import sys
+import unicodedata
 
 import numpy as np
 
@@ -73,8 +89,32 @@ def redondear(t):
     return round(t * FPS) / FPS
 
 
-def main():
-    cfg = json.load(open(sys.argv[1]))
+# HLG / PQ (el iPhone graba en HDR) -> color normal bt709: mapeo de tonos hable con un toque de
+# brillo y contraste (probado con las tomas del autor: piel natural, la pared blanca sin quemarse)
+TONOS = ('zscale=tin={tin}:min=bt2020nc:pin=bt2020:rin=tv:t=linear:npl=100,format=gbrpf32le,zscale=p=bt709,'
+         'tonemap=tonemap=hable:desat=0,zscale=t=bt709:m=bt709:r=tv,format=yuv420p,'
+         'eq=brightness=0.03:contrast=1.05:saturation=0.92,')
+ETIQUETAS_709 = ['-colorspace', 'bt709', '-color_primaries', 'bt709', '-color_trc', 'bt709']
+
+
+def color(video, cfg):
+    """filtro de entrada para pasar a bt709 (vacio si la toma ya es de color normal o si hdr = no)"""
+    if cfg.get('hdr', 'auto') == 'no':
+        return ''
+    r = subprocess.run(['ffprobe', '-v', 'error', '-select_streams', 'v:0', '-show_entries', 'stream=color_transfer',
+                        '-of', 'csv=p=0', video], capture_output=True, text=True)
+    tr = r.stdout.strip().split(',')[0]
+    return TONOS.format(tin=tr) if tr in ('arib-std-b67', 'smpte2084') else ''
+
+
+def norm(p):
+    """como norm() de cambio.jsx: minusculas, sin tildes ni signos"""
+    p = unicodedata.normalize('NFD', str(p).lower())
+    p = ''.join(c for c in p if unicodedata.category(c) != 'Mn')
+    return ''.join(c for c in p if c.isalnum() or c in '%')
+
+
+def cortar(cfg, salida):
     corregir = cfg.get('corregir', {})
     tomas = {}
     for k, tm in cfg['tomas'].items():
@@ -165,7 +205,8 @@ def main():
     # ---- video: pieza por pieza (poca memoria) y despues se unen ----
     nombres = sorted(tomas)
     w, h, x0, y0 = cfg.get('encuadre', [1080, 1920, 0, 0])
-    tmp = cfg['salida'] + '.piezas'
+    tmp = salida + '.piezas'
+    hdr = any(color(t['video'], cfg) for t in tomas.values())
     os.makedirs(tmp, exist_ok=True)
     lista = []
     for i, (toma, a, b) in enumerate(piezas):
@@ -173,20 +214,20 @@ def main():
         cuadros = int(round(d * FPS))
         g = tomas[toma]['ganancia']
         f = os.path.join(tmp, '%04d.mkv' % i)
-        vf = 'fps=%d,crop=%d:%d:%d:%d,scale=1080:1920:flags=lanczos,setsar=1' % (FPS, w, h, x0, y0)
+        vf = color(tomas[toma]['video'], cfg) + 'fps=%d,crop=%d:%d:%d:%d,scale=1080:1920:flags=lanczos,setsar=1' % (FPS, w, h, x0, y0)
         af = ('aresample=48000,aformat=sample_rates=48000:channel_layouts=stereo,volume=%.2fdB,'
               'afade=t=in:d=0.008,afade=t=out:st=%.4f:d=0.008,apad,atrim=end=%.4f' % (g, max(0, d - 0.008), cuadros / FPS))
         subprocess.run(['ffmpeg', '-v', 'error', '-y', '-ss', '%.4f' % a, '-i', tomas[toma]['video'], '-t', '%.4f' % (d + 0.2),
                         '-vf', vf, '-af', af, '-frames:v', str(cuadros), '-r', str(FPS),
-                        '-c:v', 'libx264', '-preset', 'medium', '-crf', '14', '-pix_fmt', 'yuv420p',
-                        '-c:a', 'pcm_s16le', f], check=True)
+                        '-c:v', 'libx264', '-preset', 'medium', '-crf', '14', '-pix_fmt', 'yuv420p']
+                       + (ETIQUETAS_709 if hdr else []) + ['-c:a', 'pcm_s16le', f], check=True)
         lista.append("file '%s'" % os.path.abspath(f))
         print('\r  pieza %d/%d' % (i + 1, len(piezas)), end='', flush=True)
     print()
     fl = os.path.join(tmp, 'lista.txt')
     open(fl, 'w').write('\n'.join(lista) + '\n')
     subprocess.run(['ffmpeg', '-v', 'error', '-y', '-f', 'concat', '-safe', '0', '-i', fl,
-                    '-c:v', 'copy', '-c:a', 'aac', '-b:a', '192k', cfg['salida']], check=True)
+                    '-c:v', 'copy', '-c:a', 'aac', '-b:a', '192k', salida], check=True)
     for x in os.listdir(tmp):
         os.remove(os.path.join(tmp, x))
     os.rmdir(tmp)
@@ -237,14 +278,125 @@ def main():
         for f in frases:
             fh.write('[%s - %s] %s\n' % (fmt(f['ini']), fmt(f['fin']), f['texto']))
     raiz = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    subprocess.run([sys.executable, os.path.join(raiz, 'herramientas', 'transcribir.py'), '--solo-js', '--out', out, cfg['salida']], check=True)
+    subprocess.run([sys.executable, os.path.join(raiz, 'herramientas', 'transcribir.py'), '--solo-js', '--out', out, salida], check=True)
 
     sil = sum(1 for i in range(len(nuevas) - 1) if nuevas[i + 1]['ini'] - nuevas[i]['fin'] > 0.5)
     resumen = (f'{len(piezas)} cortes, {pos:.1f} s, {len(nuevas)} palabras '
                f'({len(nuevas) / max(pos, 1) * 60:.0f} por minuto), {sil} huecos de mas de 0,5 s; '
                + ', '.join(f'toma {k}: {t["ganancia"]:+.1f} dB' for k, t in sorted(tomas.items())))
-    open(cfg['salida'] + '.txt', 'w').write(resumen + '\n\n' + '\n'.join(informe) + '\n')
+    open(salida + '.txt', 'w').write(resumen + '\n\n' + '\n'.join(informe) + '\n')
     print(resumen)
+
+
+def buscar(palabras, frase, desde=0.0):
+    """(ini, fin) de la primera vez que se dice la frase desde un segundo (como t() de cambio.jsx)"""
+    q = [norm(x) for x in str(frase).split() if norm(x)]
+    ws = [norm(w['p']) for w in palabras]
+    for i in range(len(ws)):
+        if palabras[i]['ini'] < desde - 0.01:
+            continue
+        if ws[i:i + len(q)] == q:
+            return palabras[i]['ini'], palabras[i + len(q) - 1]['fin']
+    return None
+
+
+def insertar_apoyo(cfg, hablado, salida):
+    """la imagen de las tomas de apoyo encima del corte hablado (la voz no se toca)"""
+    tr = json.load(open(cfg['transcripcion']))
+    pal, dur = tr['palabras'], tr['dur']
+    hdr = bool(color(hablado, cfg)) or any(color(t['video'], cfg) for t in cfg.get('tomas', {}).values())
+    insertos = []
+    for n, ap in enumerate(cfg['apoyo']):
+        ini, fin = ap.get('ini'), ap.get('fin')
+        if ini is None:
+            r = buscar(pal, ap['frase'], ap.get('buscar_desde', 0))
+            if not r:
+                sys.exit('apoyo %d: no encuentro "%s" en la transcripcion del corte' % (n + 1, ap['frase']))
+            ini = r[0] - ap.get('antes', 0.12)
+        if fin is None and ap.get('hasta'):
+            r = buscar(pal, ap['hasta'], ini)
+            if not r:
+                sys.exit('apoyo %d: no encuentro "%s" despues del segundo %.2f' % (n + 1, ap['hasta'], ini))
+            fin = r[1] + ap.get('despues', 0.25)
+        if fin is None:
+            fin = ini + ap.get('dur', 2.5)
+        ini, fin = redondear(max(0.0, ini)), redondear(min(dur, fin))
+        if fin - ini >= 2.0 / FPS:
+            insertos.append(dict(ap, ini=ini, fin=fin))
+    insertos.sort(key=lambda x: x['ini'])
+    for a, b in zip(insertos, insertos[1:]):   # uno nuevo corta al anterior
+        a['fin'] = min(a['fin'], b['ini'])
+    tramos, t = [], 0.0
+    for ins in insertos:
+        if ins['ini'] > t + 1e-6:
+            tramos.append(('hablado', t, ins['ini'], None))
+        tramos.append(('apoyo', ins['ini'], ins['fin'], ins))
+        t = ins['fin']
+    if t < dur - 1e-6:
+        tramos.append(('hablado', t, dur, None))
+
+    tmp = salida + '.apoyo'
+    os.makedirs(tmp, exist_ok=True)
+    lista, informe = [], []
+    for i, (tipo, a, b, ins) in enumerate(tramos):
+        cuadros = int(round((b - a) * FPS))
+        if cuadros <= 0:
+            continue
+        f = os.path.join(tmp, '%03d.mkv' % i)
+        if tipo == 'hablado':
+            cmd = ['ffmpeg', '-v', 'error', '-y', '-ss', '%.4f' % a, '-i', hablado, '-an', '-vf', 'fps=%d' % FPS]
+        else:
+            vel = float(ins.get('velocidad', 1.0))
+            if ins.get('encuadre'):
+                w, h, x0, y0 = ins['encuadre']
+                recorte = 'crop=%d:%d:%d:%d' % (w, h, x0, y0)
+            else:
+                fx, fy = ins.get('foco', [0.5, 0.5])
+                recorte = ("crop='min(iw,ih*9/16)':'min(ih,iw*16/9)':'(iw-min(iw,ih*9/16))*%.3f':'(ih-min(ih,iw*16/9))*%.3f'" % (fx, fy))
+            vf = (color(ins['video'], cfg) + 'setpts=PTS/%.4f,fps=%d,' % (vel, FPS) + recorte +
+                  ',scale=1080:1920:flags=lanczos,setsar=1')
+            # -t antes de -i: limita lo que se lee de la toma (con camara lenta se lee menos de lo que dura)
+            cmd = ['ffmpeg', '-v', 'error', '-y', '-ss', '%.4f' % float(ins.get('desde', 0)), '-t', '%.4f' % ((b - a) * vel + 0.4),
+                   '-i', ins['video'], '-an', '-vf', vf]
+            informe.append('%7.2f - %7.2f  %s desde %.2f%s' % (a, b, os.path.basename(ins['video']), float(ins.get('desde', 0)),
+                                                             (' · velocidad %.2f' % vel) if vel != 1 else ''))
+        cmd += ['-frames:v', str(cuadros), '-r', str(FPS), '-c:v', 'libx264', '-preset', 'medium', '-crf', '14',
+                '-pix_fmt', 'yuv420p'] + (ETIQUETAS_709 if hdr else []) + [f]
+        subprocess.run(cmd, check=True)
+        reales = int(subprocess.run(['ffprobe', '-v', 'error', '-count_frames', '-select_streams', 'v:0', '-show_entries',
+                                     'stream=nb_read_frames', '-of', 'csv=p=0', f], capture_output=True, text=True).stdout.strip() or 0)
+        if reales < cuadros:
+            sys.exit('apoyo: %s no alcanza (%d de %d cuadros): empieza antes ("desde") o dura menos'
+                     % (ins['video'] if ins else hablado, reales, cuadros))
+        lista.append("file '%s'" % os.path.abspath(f))
+    fl = os.path.join(tmp, 'lista.txt')
+    open(fl, 'w').write('\n'.join(lista) + '\n')
+    subprocess.run(['ffmpeg', '-v', 'error', '-y', '-f', 'concat', '-safe', '0', '-i', fl, '-i', hablado,
+                    '-map', '0:v', '-map', '1:a', '-c:v', 'copy', '-c:a', 'copy', salida], check=True)
+    for x in os.listdir(tmp):
+        os.remove(os.path.join(tmp, x))
+    os.rmdir(tmp)
+    with open(salida + '.txt', 'a') as fh:
+        fh.write('\ntomas de apoyo (segundos del corte):\n' + '\n'.join(informe) + '\n')
+    print('%d tomas de apoyo encima de la voz' % len(insertos))
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument('corte')
+    ap.add_argument('--solo-apoyo', action='store_true', help='rehace solo las tomas de apoyo (el corte hablado ya esta)')
+    a = ap.parse_args()
+    cfg = json.load(open(a.corte))
+    salida = cfg['salida']
+    if not cfg.get('apoyo'):
+        cortar(cfg, salida)
+        return
+    hablado = os.path.splitext(salida)[0] + '-hablado.mp4'
+    if not a.solo_apoyo:
+        cortar(cfg, hablado)
+        if os.path.exists(hablado + '.txt'):
+            os.replace(hablado + '.txt', salida + '.txt')
+    insertar_apoyo(cfg, hablado, salida)
 
 
 if __name__ == '__main__':

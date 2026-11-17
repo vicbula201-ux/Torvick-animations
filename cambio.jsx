@@ -68,7 +68,11 @@
   // ancho de un texto (las fuentes ya cargadas: si no, no se guarda en cache)
   var lienzoMedir = null, cacheMedir = {};
   function medir(texto, fuente, espaciado) {
-    var listo = global.document && document.fonts && document.fonts.status === 'loaded';
+    // la fuente puede no estar pedida todavia aunque document.fonts diga 'loaded': se mira esa fuente
+    // (si no, el primer cuadro mide con la de reemplazo y esa medida quedaba guardada)
+    var listo = false;
+    try { listo = !!(global.document && document.fonts && document.fonts.check(fuente)); } catch (e) { listo = false; }
+    if (!listo && global.document && document.fonts && document.fonts.load) { try { document.fonts.load(fuente); } catch (e) { /* sigue */ } }
     var clave = fuente + '|' + texto;
     if (listo && cacheMedir[clave] != null) return cacheMedir[clave];
     if (!lienzoMedir) lienzoMedir = document.createElement('canvas').getContext('2d');
@@ -209,7 +213,7 @@
   function buscador(id) {
     var tr = transcripcion(id);
     var ws = tr.palabras.map(function (w) { return norm(w.p); });
-    function hallar(frase, desde) {
+    function hallar(frase, desde, quieto) {
       var q = String(frase).split(/\s+/).map(norm).filter(Boolean);
       desde = desde || 0;
       for (var i = 0; i < ws.length; i++) {
@@ -218,11 +222,17 @@
         for (var j = 0; j < q.length; j++) { if (ws[i + j] !== q[j]) { ok = false; break; } }
         if (ok) return [i, i + q.length - 1];
       }
-      if (global.console) console.warn('no encuentro en la transcripcion:', frase, 'desde', desde);
+      if (global.console && !quieto) console.warn('no encuentro en la transcripcion:', frase, 'desde', desde);
       return null;
     }
     var t = function (frase, desde) { var r = hallar(frase, desde); return r ? tr.palabras[r[0]].ini : (desde || 0); };
     t.fin = function (frase, desde) { var r = hallar(frase, desde); return r ? tr.palabras[r[1]].fin : (desde || 0); };
+    // t.alguna(['nueve', '9'], desde): la primera forma que aparezca (la transcripcion a veces escribe los numeros con cifras)
+    t.alguna = function (frases, desde) {
+      for (var i = 0; i < frases.length; i++) { var r = hallar(frases[i], desde, true); if (r) return tr.palabras[r[0]].ini; }
+      if (global.console) console.warn('no encuentro en la transcripcion ninguna de:', frases.join(' | '), 'desde', desde);
+      return desde || 0;
+    };
     t.palabras = tr.palabras;
     t.dur = tr.dur;
     return t;
@@ -764,12 +774,30 @@
       <div style={{
         display: 'inline-flex', alignItems: 'center', gap: fs * 0.3, background: fondo, color: tinta, borderRadius: fs * 0.32,
         padding: (fs * 0.16) + 'px ' + (fs * 0.42) + 'px ' + (fs * 0.2) + 'px', boxShadow: '0 ' + (fs * 0.09).toFixed(1) + 'px 0 rgba(20,17,15,0.85), 0 10px 30px rgba(0,0,0,0.25)',
-        fontFamily: props.fuente || F_IMPACTO, fontSize: fs, lineHeight: 1, letterSpacing: '0.01em', whiteSpace: 'pre', textTransform: props.minus ? 'none' : 'uppercase'
+        fontFamily: props.fuente || F_IMPACTO, fontSize: fs, lineHeight: 1, letterSpacing: props.fuente === F ? '-0.015em' : '0.01em', whiteSpace: 'pre', textTransform: props.minus ? 'none' : 'uppercase',
+        fontWeight: props.fuente === F ? 800 : undefined
       }}>
         {props.emoji ? <Emoji n={props.emoji} tam={fs * 1.25} /> : null}
+        {props.icono ? <IconoPastilla icono={props.icono} tam={fs * 1.12} p={props.pIcono} /> : null}
         <span>{props.txt}</span>
       </div>
     );
+  }
+
+  // icono de una pastilla: check (verde, se dibuja), equis (roja) o aviso (! en amarillo)
+  function IconoPastilla(props) {
+    var t = props.tam, p = props.p == null ? 1 : props.p;
+    if (props.icono === 'aviso') {
+      var s = 0.6 + 0.4 * back(clamp(p * 1.4, 0, 1), 2);
+      return (
+        <svg width={t} height={t} viewBox="0 0 100 100" style={{ display: 'block', flex: 'none', overflow: 'visible' }}>
+          <circle cx={50} cy={50} r={46 * s} fill={AMARILLO} />
+          <path d="M 50 26 L 50 58" stroke={NEGRO} strokeWidth={12} strokeLinecap="round" />
+          <circle cx={50} cy={76} r={7} fill={NEGRO} />
+        </svg>
+      );
+    }
+    return <Signo tam={t} p={p} bien={props.icono !== 'equis'} />;
   }
 
   // titulo arriba: linea chica + linea grande (Archivo Black). Las lineas entran cuando se dicen.
@@ -1115,7 +1143,8 @@
     var rot = b.rot == null ? (b.estilo === 'mano' ? -4 : -2) : b.rot;
     var cuerpo = b.estilo === 'mano'
       ? <div style={{ fontFamily: F_MANO, fontSize: b.tam || 64, color: col(b.color, BLANCO), textShadow: SOMBRA_TX, whiteSpace: 'pre', lineHeight: 1.05 }}>{b.txt}</div>
-      : <Pastilla txt={b.txt} estilo={b.estilo || 'amarillo'} tam={b.tam || 44} emoji={b.emoji} minus={b.minus} />;
+      : <Pastilla txt={b.txt} estilo={b.estilo || 'amarillo'} tam={b.tam || 44} emoji={b.emoji} minus={b.minus}
+        icono={b.icono} pIcono={k01(T, b.ini + 0.1, 0.4)} fuente={b.letra === 'texto' ? F : undefined} />;
     return (
       <Caja p={p} e={e} dy={dy} rot={rot} z={34}>
         <div style={{ position: 'relative', display: 'inline-block' }}>
@@ -1161,29 +1190,34 @@
     if (!vivo(T, b, 0.3)) return null;
     var y = b.y == null ? 400 : b.y;
     var palabra = String(b.palabra).toUpperCase();
-    var fs = Math.min(150, ajustar('“' + palabra + '”', F_IMPACTO, 400, 940, 150, -0.02));
+    // o.pregunta: la pregunta en grande (sin comillas, '\n' para dos lineas) y la caja escribe o.respuesta
+    var lineas = b.pregunta ? palabra.split('\n') : ['“' + palabra + '”'];
+    var fs = Math.min(b.pregunta ? 124 : 150, Math.min.apply(null, lineas.map(function (l) { return ajustar(l, F_IMPACTO, 400, 940, 150, -0.02); })));
+    var altoG = fs * 0.86 * lineas.length;
+    var escribe = b.pregunta ? String(b.respuesta || '') : palabra;
     var e1 = junta(entra(T, b.ini, 'sube', 0.24), sale(T, b.fin, 0.2));
     var e2 = junta(entra(T, b.ini + 0.12, 'enfoque', 0.3), sale(T, b.fin, 0.22));
     var e3 = junta(entra(T, b.ini + 0.3, 'pop', 0.3), sale(T, b.fin, 0.2));
     var cEsc = b.ini + 0.6;
-    var n = Math.floor(clamp((T - cEsc) / 0.09, 0, palabra.length));
+    var n = Math.floor(clamp((T - cEsc) / 0.07, 0, escribe.length));
     var cursor = Math.floor(T * 2.4) % 2 === 0;
     var dy = deriva(T, 2.2, 3);
-    var enviado = T >= cEsc + palabra.length * 0.09 + 0.35;
-    var pb = k01(T, cEsc + palabra.length * 0.09 + 0.35, 0.25);
+    var enviado = escribe.length > 0 && T >= cEsc + escribe.length * 0.07 + 0.35;
+    var pb = escribe.length ? k01(T, cEsc + escribe.length * 0.07 + 0.35, 0.25) : 0;
     return (
       <React.Fragment>
-        <Caja p={[540, y - fs * 0.5 - 40, 'c']} e={e1} dy={dy} z={34}>
+        <Caja p={[540, y - altoG * 0.5 - 40, 'c']} e={e1} dy={dy} z={34}>
           <TextoChico txt={b.texto || 'comenta'} tam={64} fuente={F_MANO} />
         </Caja>
         <Caja p={[540, y, 'c']} e={e2} dy={dy} z={34}>
-          <LineaGigante fs={fs} color={AMARILLO}>{'“' + palabra + '”'}</LineaGigante>
+          {lineas.map(function (l, i) { return <LineaGigante key={i} fs={fs} color={AMARILLO}>{l}</LineaGigante>; })}
         </Caja>
-        <Caja p={[540, y + fs * 0.5 + 90, 'c']} e={e3} dy={dy} z={34}>
+        <Caja p={[540, y + altoG * 0.5 + 90, 'c']} e={e3} dy={dy} z={34}>
           <div style={{ width: 820, height: 112, background: BLANCO, borderRadius: 56, boxShadow: SOMBRA_TARJETA, display: 'flex', alignItems: 'center', padding: '0 18px 0 22px', boxSizing: 'border-box', gap: 20 }}>
             <div style={{ width: 70, height: 70, borderRadius: 35, background: AMARILLO, flex: 'none' }} />
-            <div style={{ flex: 1, fontFamily: F, fontWeight: 800, fontSize: 46, color: NEGRO, letterSpacing: '0.01em', whiteSpace: 'pre' }}>
-              {palabra.slice(0, n)}<span style={{ opacity: cursor && !enviado ? 1 : 0, color: NEGRO }}>|</span>
+            <div style={{ flex: 1, fontFamily: F, fontWeight: 800, fontSize: 46, color: NEGRO, letterSpacing: '0.01em', whiteSpace: 'pre', overflow: 'hidden' }}>
+              {escribe.length ? escribe.slice(0, n) : <span style={{ color: 'rgba(20,17,15,0.38)', fontWeight: 700 }}>{b.vacio || 'Añade un comentario…'}</span>}
+              {escribe.length ? <span style={{ opacity: cursor && !enviado ? 1 : 0, color: NEGRO }}>|</span> : null}
             </div>
             <div style={{ width: 78, height: 78, borderRadius: 39, background: NEGRO, display: 'flex', alignItems: 'center', justifyContent: 'center', transform: 'scale(' + (1 + 0.18 * Math.sin(Math.PI * pb)).toFixed(3) + ')' }}>
               <svg width={40} height={40} viewBox="0 0 40 40"><path d="M 20 31 L 20 10 M 11 18 L 20 9 L 29 18" fill="none" stroke={AMARILLO} strokeWidth={5.5} strokeLinecap="round" strokeLinejoin="round" /></svg>
@@ -1368,6 +1402,7 @@
     if (!f) return null;
     var ini = def.iniFirma;
     if (T < ini - 0.05) return null;
+    if (f.estilo === 'grande') return <FirmaGrande T={T} f={f} ini={ini} />;
     var y = f.y == null ? 330 : f.y;
     var e = entra(T, ini, 'pop', 0.3);
     var e2 = entra(T, ini + 0.35, 'pop', 0.3);
@@ -1391,9 +1426,349 @@
     );
   }
 
+  // cierre grande (P5): la pregunta a mano, SIGUEME gigante, los tres logos que saltan uno tras
+  // otro, @eltorvick y la pastilla; la camara se oscurece y se desenfoca debajo (preparar)
+  function FirmaGrande(props) {
+    var T = props.T, f = props.f, ini = props.ini;
+    var y = f.y == null ? 780 : f.y;
+    var dy = deriva(T, 1.3, 3);
+    var redes = ['youtube', 'instagram', 'tiktok'];
+    return (
+      <React.Fragment>
+        {f.arriba !== false ? (
+          <Caja p={[540, y - 268, 'c']} e={entra(T, ini, 'sube', 0.28)} dy={dy} rot={-3} z={45}>
+            <TextoChico txt={f.arriba || '¿quieres ver más videos así?'} tam={64} fuente={F_MANO} />
+          </Caja>
+        ) : null}
+        <Caja p={[540, y - 128, 'c']} e={entra(T, ini + 0.12, 'enfoque', 0.3)} dy={dy} z={45}>
+          <LineaGigante fs={f.tam || 196} color={AMARILLO}>{f.grande || 'SÍGUEME'}</LineaGigante>
+        </Caja>
+        <Caja p={[540, y + 62, 'c']} dy={dy} z={45}>
+          <div style={{ display: 'flex', gap: 36 }}>
+            {redes.map(function (r, i) {
+              var c = ini + 0.3 + i * 0.1;
+              var si = back(k01(T, c, 0.32), 2.2);
+              var latido = 1 + 0.1 * Math.max(0, Math.sin(Math.PI * k01(T, ini + 1.35 + i * 0.12, 0.32)));
+              var giro = (1 - k01(T, c, 0.32)) * (i - 1) * 24;
+              return (
+                <div key={r} style={{ opacity: clamp(k01(T, c, 0.1), 0, 1), transform: 'translateY(' + M.life(T, 1.9, 5, i * 1.3).toFixed(2) + 'px) rotate(' + giro.toFixed(1) + 'deg) scale(' + Math.max(0, si * latido).toFixed(3) + ')', filter: 'drop-shadow(0 10px 22px rgba(0,0,0,0.35))' }}>
+                  <Logo red={r} r={80} />
+                </div>
+              );
+            })}
+          </div>
+        </Caja>
+        <Caja p={[540, y + 222, 'c']} e={entra(T, ini + 0.62, 'sube', 0.3)} dy={dy} z={45}>
+          <div style={{ fontFamily: F, fontWeight: 900, fontSize: 94, color: BLANCO, letterSpacing: '-0.02em', textShadow: SOMBRA_TX, whiteSpace: 'pre' }}>@eltorvick</div>
+        </Caja>
+        <Caja p={[540, y + 340, 'c']} e={entra(T, ini + 0.82, 'pop', 0.3)} dy={dy} rot={-2} z={45}>
+          <Pastilla txt={f.texto || 'para más contenido así'} estilo="amarillo" tam={50} />
+        </Caja>
+      </React.Fragment>
+    );
+  }
+
   function Flash(props) {
     if (props.ex.flash <= 0.001) return null;
     return <div style={{ position: 'absolute', left: 0, top: 0, width: ANCHO, height: ALTO, background: BLANCO, opacity: 0.85 * props.ex.flash, zIndex: 60 }} />;
+  }
+
+  /* =========================================================
+     REVIEWS (P5): rotulos pegados a los objetos, tabla nutricional,
+     barras de comparacion y el sello del veredicto (p5/estilo.md)
+     ========================================================= */
+
+  // sombra de los rotulos sobre los objetos: borde oscuro fino + sombra blanda (como las referencias)
+  var SOMBRA_ROTULO = '0 0 2px rgba(20,17,15,0.6), 0 2px 3px rgba(20,17,15,0.45), 0 6px 22px rgba(0,0,0,0.38)';
+
+  // caja del objeto seguido (herramientas/seguir.py) en T, en px del lienzo; vis 0..1 (perdido o fuera de cuadro = 0).
+  // Antes y despues del tramo seguido se queda en la primera / ultima posicion.
+  var avisados = {};
+  function cajaSeguida(def, nombre, T) {
+    var s = ((global.SEGUIMIENTOS || {})[def.id] || {})[nombre];
+    if (!s) {
+      if (global.console && !avisados[nombre]) { avisados[nombre] = 1; console.warn('no hay seguimiento:', nombre, '(herramientas/seguir.py)'); }
+      return null;
+    }
+    var n = s.cajas.length;
+    var f = clamp((T - s.ini) * s.fps, 0, n - 1);
+    var i = Math.floor(f), j = Math.min(n - 1, i + 1), u = f - i;
+    var a = s.cajas[i], b = s.cajas[j];
+    var vis = 0;
+    for (var k = -4; k <= 4; k++) { var q = s.cajas[clamp(i + k, 0, n - 1)]; vis += q[4] == null ? 1 : q[4]; }
+    return { cx: lerp(a[0], b[0], u) * ANCHO, cy: lerp(a[1], b[1], u) * ALTO, w: lerp(a[2], b[2], u) * ANCHO, h: lerp(a[3], b[3], u) * ALTO, vis: vis / 9 };
+  }
+
+  // letras que entran una tras otra (suben y aparecen)
+  function Cascada(props) {
+    var T = props.T, c = props.c, paso = props.paso || 0.022;
+    return Array.from(String(props.txt)).map(function (ch, i) {
+      var p = Easing.easeOutCubic(k01(T, c + i * paso, 0.24));
+      return (
+        <span key={i} style={{ display: 'inline-block', whiteSpace: 'pre', opacity: clamp(p * 1.7, 0, 1), transform: 'translateY(' + ((1 - p) * 0.32).toFixed(3) + 'em)' }}>{ch}</span>
+      );
+    });
+  }
+
+  // ROTULO: el nombre de la cosa justo encima de la cosa (texto blanco limpio, sin caja).
+  // Va dentro de la camara: sigue al zoom y, con o.sigue, al objeto que se mueve.
+  function RotuloBeat(props) {
+    var T = props.T, b = props.b, R = props.R;
+    if (!vivo(T, b, 0.25)) return null;
+    var kx = R.w / ANCHO, ky = R.h / ALTO;
+    var fs = b.tam || 78;
+    var ancho = medir(b.txt, '800 ' + fs + 'px ' + F) * 1.04 + (b.estilo === 'pastilla' ? fs * 0.9 : 0);
+    var x, y, ancla = 'c', vis = 1;
+    if (b.sigue) {
+      var c = cajaSeguida(props.def, b.sigue, T);
+      if (!c) return null;
+      vis = clamp((c.vis - 0.25) / 0.5, 0, 1);
+      var sep = b.sep == null ? 16 : b.sep;
+      var lado = b.lado || 'arriba';
+      x = c.cx; y = c.cy;
+      if (lado === 'arriba') y = c.cy - c.h / 2 - sep - fs * 0.5;
+      else if (lado === 'abajo') y = c.cy + c.h / 2 + sep + fs * 0.5;
+      else if (lado === 'izq') { x = c.cx - c.w / 2 - sep; ancla = 'd'; }
+      else if (lado === 'der') { x = c.cx + c.w / 2 + sep; ancla = 'i'; }
+      x += b.dx || 0; y += b.dy || 0;
+    } else {
+      var en = b.en || [540, 760];
+      x = en[0]; y = en[1];
+    }
+    // que no se salga por los costados
+    if (ancla === 'c') x = clamp(x, 34 + ancho / 2, ANCHO - 34 - ancho / 2);
+    else if (ancla === 'd') x = Math.max(x, 34 + ancho);
+    else x = Math.min(x, ANCHO - 34 - ancho);
+    var ent = Easing.easeOutCubic(k01(T, b.ini, 0.3));
+    var e = junta({ p: ent, op: clamp(ent * 3, 0, 1) * vis, esc: 0.9 + 0.1 * back(k01(T, b.ini, 0.32), 1.8), blur: 0, dy: 0 }, sale(T, b.fin, 0.2));
+    var cuerpo = b.estilo === 'pastilla'
+      ? <Pastilla txt={b.txt} estilo={b.color === 'negro' ? 'negro' : 'blanco'} tam={fs * 0.7} minus fuente={F} />
+      : (
+        <div style={{ fontFamily: F, fontWeight: 800, fontSize: fs, letterSpacing: '-0.025em', lineHeight: 1, color: col(b.color, BLANCO), textShadow: SOMBRA_ROTULO, whiteSpace: 'pre' }}>
+          <Cascada T={T} c={b.ini} txt={b.txt} />
+        </div>
+      );
+    return (
+      <Caja p={[x * kx, y * ky, ancla]} e={e} esc={kx} dy={deriva(T, hash(b.txt) * 6, 2) * ky} z={2}>
+        {cuerpo}
+      </Caja>
+    );
+  }
+
+  // entrada y salida de una tarjeta grande: desde abajo (por defecto) o desde la derecha; sale hacia abajo o a la izquierda
+  function movTarjeta(T, b) {
+    var ke = Easing.easeOutExpo(k01(T, b.ini, 0.5));
+    var ks = Easing.easeInCubic(k01(T, b.fin, 0.34));
+    var dx = 0, dy = 0, esc = 1, rot = 0, op = clamp(k01(T, b.ini - 0.02, 0.16), 0, 1);
+    if (b.entra === 'derecha') { dx += (1 - ke) * 1000; rot += (1 - ke) * 5; }
+    else { dy += (1 - ke) * 170; esc *= 0.93 + 0.07 * back(k01(T, b.ini, 0.45), 1.4); }
+    if (b.sale === 'izquierda') { dx -= ks * 1050; rot -= ks * 5; }
+    else { dy += ks * 70; op *= 1 - ks; esc *= 1 - 0.04 * ks; }
+    return { e: { p: ke, op: op, esc: esc, blur: 0, dy: dy + deriva(T, hash(b.titulo) * 5, 3) }, dx: dx, rot: rot };
+  }
+
+  // TABLA: informacion nutricional (o cualquier lista de valores). La tarjeta llega con las filas
+  // apagadas; cada fila se enciende, cuenta su numero y se resalta cuando se dice.
+  function TablaBeat(props) {
+    var T = props.T, b = props.b;
+    if (!vivo(T, b, 0.4)) return null;
+    var p = posicion(b.pos || [540, 760]);
+    var W = b.ancho || 930;
+    var mv = movTarjeta(T, b);
+    var raya = Easing.easeInOutCubic(k01(T, b.ini + 0.12, 0.45));
+    var tiempos = b.tiempos;
+    var fsTit = Math.min(b.tamTitulo || 104, ajustar(String(b.titulo || '').toUpperCase(), F_IMPACTO, 400, W - 110, 110, -0.02));
+    var filas = b.filas.map(function (f, i) {
+      var c = tiempos[i];
+      var sig = i + 1 < tiempos.length ? tiempos[i + 1] : b.fin;
+      var on = k01(T, c, 0.2);
+      var cuenta = Easing.easeOutExpo(k01(T, c + 0.03, 0.75));
+      var hi = Easing.easeOutCubic(k01(T, c, 0.3)) * (1 - Easing.easeInOutCubic(k01(T, sig - 0.04, 0.3)));
+      var alto = f.grande ? 116 : f.sub ? 84 : 96;
+      var fsN = f.grande ? 60 : f.sub ? 46 : 54;
+      var fsV = f.grande ? 72 : f.sub ? 50 : 60;
+      var salto = 1 + 0.06 * Math.sin(Math.PI * k01(T, c, 0.3));
+      var valor = T < c ? '—' : formato(f.valor * cuenta, f.dec || 0);
+      return (
+        <div key={i} style={{ position: 'relative', height: alto, display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingLeft: f.sub ? 48 : 0 }}>
+          <div style={{ position: 'absolute', left: -22, right: -22, top: 7, bottom: 7, borderRadius: 18, background: AMARILLO, opacity: hi, transformOrigin: '0 50%', transform: 'scaleX(' + Easing.easeOutExpo(k01(T, c, 0.32)).toFixed(3) + ')' }} />
+          <span style={{ position: 'relative', fontFamily: F, fontWeight: f.sub ? 700 : 800, fontSize: fsN, letterSpacing: '-0.02em', color: NEGRO, opacity: 0.28 + 0.72 * on, whiteSpace: 'pre' }}>
+            {f.sub ? <span style={{ color: 'rgba(20,17,15,0.45)' }}>{'↳ '}</span> : null}{f.nombre}
+          </span>
+          <span style={{ position: 'relative', display: 'inline-flex', alignItems: 'baseline', gap: 8, transform: 'scale(' + salto.toFixed(3) + ')', transformOrigin: '100% 50%', opacity: 0.28 + 0.72 * on }}>
+            <span style={{ fontFamily: F_IMPACTO, fontSize: fsV, color: NEGRO, letterSpacing: '-0.02em', lineHeight: 1 }}>{valor}</span>
+            {f.unidad ? <span style={{ fontFamily: F, fontWeight: 800, fontSize: fsV * 0.62, color: 'rgba(20,17,15,0.6)' }}>{f.unidad}</span> : null}
+          </span>
+          {i < b.filas.length - 1 && !(b.filas[i + 1] || {}).sub ? (
+            <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: 3, background: '#DDD8CF', transformOrigin: '0 50%', transform: 'scaleX(' + raya.toFixed(3) + ')' }} />
+          ) : null}
+        </div>
+      );
+    });
+    return (
+      <Caja p={p} e={mv.e} dx={mv.dx} rot={mv.rot} z={30}>
+        <div style={{ width: W, background: BLANCO, borderRadius: 46, padding: '40px 54px 30px', boxSizing: 'border-box', boxShadow: SOMBRA_TARJETA }}>
+          {b.encabezado !== false ? <div style={{ fontFamily: F_MONO, fontWeight: 600, fontSize: 30, letterSpacing: '0.12em', color: 'rgba(20,17,15,0.5)', textTransform: 'uppercase' }}>{b.encabezado || 'Información nutricional'}</div> : null}
+          {b.titulo ? <div style={{ fontFamily: F_IMPACTO, fontSize: fsTit, lineHeight: 0.95, letterSpacing: '-0.02em', color: NEGRO, marginTop: 6 }}>{String(b.titulo).toUpperCase()}</div> : null}
+          {b.sub ? <div style={{ fontFamily: F, fontWeight: 700, fontSize: 36, color: 'rgba(20,17,15,0.55)', marginTop: 8 }}>{b.sub}</div> : null}
+          <div style={{ height: 16, background: NEGRO, borderRadius: 3, margin: '20px 0 6px', transformOrigin: '0 50%', transform: 'scaleX(' + raya.toFixed(3) + ')' }} />
+          {filas}
+          <div style={{ height: 16, background: NEGRO, borderRadius: 3, margin: '6px 0 0', transformOrigin: '0 50%', transform: 'scaleX(' + raya.toFixed(3) + ')' }} />
+          {b.pie ? <div style={{ fontFamily: F_MONO, fontWeight: 500, fontSize: 25, color: 'rgba(20,17,15,0.5)', marginTop: 16, letterSpacing: '0.02em' }}>{b.pie}</div> : null}
+        </div>
+      </Caja>
+    );
+  }
+
+  // BARRAS: comparar como se reparte algo (las grasas del aguacate contra las del aceite de oliva)
+  function BarrasBeat(props) {
+    var T = props.T, b = props.b;
+    if (!vivo(T, b, 0.4)) return null;
+    var p = posicion(b.pos || [540, 740]);
+    var W = b.ancho || 920, anchoBarra = W - 104;
+    var mv = movTarjeta(T, b);
+    var compacta = !!b.compacta;
+    var unidad = b.unidad == null ? ' %' : b.unidad;
+    var colores = (b.colores || ['amarillo', 'gris', 'negro']).map(function (c) { return col(c); });
+    var tintas = colores.map(function (c) { return c === NEGRO ? BLANCO : NEGRO; });
+    var filas = b.filas.map(function (f, i) {
+      var c = b.tiempos[i];
+      var on = Easing.easeOutCubic(k01(T, c, 0.25));
+      var total = f.partes.reduce(function (s, v) { return s + v; }, 0);
+      var x = 0;
+      var segs = f.partes.map(function (v, k) {
+        var crece = Easing.easeOutExpo(k01(T, c + 0.1 + k * 0.16, 0.6));
+        var w = anchoBarra * v / total;
+        var el = (
+          <div key={k} style={{ position: 'absolute', left: x, top: 0, height: '100%', width: w * crece, background: colores[k], display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+            {w > (compacta ? 70 : 100) && (!b.soloPrimera || k === 0) ? <span style={{ fontFamily: F_IMPACTO, fontSize: compacta ? 30 : k === 0 ? 44 : 30, color: tintas[k], whiteSpace: 'pre', opacity: clamp((crece - 0.6) / 0.4, 0, 1) }}>{Math.round(v * Easing.easeOutExpo(k01(T, c + 0.1 + k * 0.16, 0.8))) + unidad}</span> : null}
+          </div>
+        );
+        x += w;
+        return el;
+      });
+      return (
+        <div key={i} style={{ opacity: 0.4 + 0.6 * on, marginTop: i ? (compacta ? 14 : 30) : 0 }}>
+          <div style={{ fontFamily: F, fontWeight: 800, fontSize: compacta ? 36 : 46, letterSpacing: '-0.02em', color: NEGRO, marginBottom: compacta ? 6 : 12 }}>{f.nombre}</div>
+          <div style={{ position: 'relative', width: anchoBarra, height: compacta ? 48 : 84, borderRadius: compacta ? 14 : 22, overflow: 'hidden', background: '#EDEAE4' }}>{segs}</div>
+        </div>
+      );
+    });
+    var cRem = b.cRemate == null ? b.fin - 1 : b.cRemate;
+    var er = junta(entra(T, cRem, 'pop', 0.3), sale(T, b.fin, 0.2));
+    return (
+      <Caja p={p} e={mv.e} dx={mv.dx} rot={mv.rot} z={30}>
+        <div style={{ position: 'relative', width: W, background: BLANCO, borderRadius: compacta ? 36 : 46, padding: compacta ? '30px 44px 30px' : '40px 52px 36px', boxSizing: 'border-box', boxShadow: SOMBRA_TARJETA }}>
+          {b.titulo ? <div style={{ fontFamily: F_IMPACTO, fontSize: b.tamTitulo || (compacta ? 46 : 62), lineHeight: 0.95, color: NEGRO, letterSpacing: '-0.02em' }}>{String(b.titulo).toUpperCase()}</div> : null}
+          {b.sub ? <div style={{ fontFamily: F, fontWeight: 700, fontSize: 34, color: 'rgba(20,17,15,0.55)', margin: '8px 0 26px' }}>{b.sub}</div> : <div style={{ height: compacta ? 16 : 22 }} />}
+          {filas}
+          {b.leyenda ? (
+            <div style={{ display: 'flex', gap: 28, marginTop: 28, flexWrap: 'wrap' }}>
+              {b.leyenda.map(function (l, k) {
+                return (
+                  <span key={k} style={{ display: 'inline-flex', alignItems: 'center', gap: 10, fontFamily: F, fontWeight: 700, fontSize: 30, color: 'rgba(20,17,15,0.7)' }}>
+                    <span style={{ width: 26, height: 26, borderRadius: 8, background: colores[k], boxShadow: colores[k] === BLANCO ? 'inset 0 0 0 2px #CCC' : undefined }} />{l}
+                  </span>
+                );
+              })}
+            </div>
+          ) : null}
+          {b.pie ? <div style={{ fontFamily: F_MONO, fontWeight: 500, fontSize: 23, color: 'rgba(20,17,15,0.48)', marginTop: 16 }}>{b.pie}</div> : null}
+          {b.remate && er.op > 0.003 ? (
+            <div style={{ position: 'absolute', right: -26, top: -40, opacity: er.op, transform: 'scale(' + er.esc.toFixed(3) + ') rotate(4deg)', transformOrigin: '100% 0' }}>
+              <Pastilla txt={b.remate} estilo="negro" tam={46} icono="check" pIcono={k01(T, cRem + 0.1, 0.4)} />
+            </div>
+          ) : null}
+        </div>
+      </Caja>
+    );
+  }
+
+  // el borde ondulado de un sello (roseta)
+  function rutaSello(r, ondas, amp) {
+    var d = '';
+    for (var i = 0; i <= 360; i++) {
+      var a = i / 360 * Math.PI * 2;
+      var rr = r + amp * Math.cos(ondas * a);
+      d += (i ? 'L' : 'M') + (rr * Math.cos(a)).toFixed(2) + ' ' + (rr * Math.sin(a)).toFixed(2);
+    }
+    return d + 'Z';
+  }
+
+  // VEREDICTO: el sello de Torvick con la nota. Cae como un sello en el centro (golpe + sacudida),
+  // cuenta la nota con el anillo, aparecen las palabras cuando se dicen y, con o.encoger, se achica
+  // a una esquina y se queda mientras sigue hablando.
+  function VeredictoBeat(props) {
+    var T = props.T, b = props.b;
+    if (!vivo(T, b, 0.35)) return null;
+    var D = b.tam || 540;
+    var impacto = b.ini + 0.24;
+    var kin = k01(T, b.ini, 0.24);
+    var esc = lerp(1.9, 1, Easing.easeInQuad(kin)) * (T >= impacto ? 1 - 0.07 * Math.sin(Math.PI * k01(T, impacto, 0.2)) : 1);
+    var rot = lerp(-24, -6, Easing.easeInQuad(kin));
+    var kc = b.encoger != null ? Easing.easeInOutCubic(k01(T, b.encoger, 0.5)) : 0;
+    var p0 = posicion(b.pos || [540, 640]), p1 = posicion(b.esquina || [210, 400]);
+    var x = lerp(p0[0], p1[0], kc), y = lerp(p0[1], p1[1], kc);
+    esc *= lerp(1, (b.tamFinal || 260) / D, kc);
+    rot = lerp(rot, -10, kc);
+    var s = sale(T, b.fin, 0.25);
+    var op = clamp(kin * 4, 0, 1) * s.op;
+    var cuenta = Easing.easeOutCubic(k01(T, impacto + 0.08, 0.95));
+    var de = b.de || 10, nota = b.nota;
+    var arco = nota / de * cuenta;
+    var txtNota = Number.isInteger(nota) ? String(Math.round(nota * cuenta)) : formato(nota * cuenta, 1);
+    var giro = (T - b.ini) * 8;
+    var rc = 52, largo = 2 * Math.PI * rc;
+    var finCuenta = impacto + 1.05;
+    var pulso = k01(T, finCuenta, 0.6);
+    var idAnillo = 'cambio-anillo-' + Math.round(hash(b.ini + ':' + nota) * 1e6);
+    var anillo = (b.texto || ((b.titulo || 'VEREDICTO') + ' · ' + (b.firma || 'TORVICK') + ' · ')).toUpperCase();
+    var palabras = (b.palabras || []).map(function (w, i) {
+      var c = b.tiempos[i];
+      var e = junta(entra(T, c, 'pop', 0.3), sale(T, b.encoger != null ? b.encoger : b.fin, 0.2));
+      if (e.op <= 0.003) return null;
+      return (
+        <div key={i} style={{ opacity: e.op, transform: 'scale(' + e.esc.toFixed(3) + ') rotate(' + (i % 2 ? 2 : -2) + 'deg)' }}>
+          <Pastilla txt={w.texto} estilo="blanco" tam={42} icono="check" pIcono={k01(T, c + 0.08, 0.4)} minus fuente={F} />
+        </div>
+      );
+    });
+    return (
+      <React.Fragment>
+        <Caja p={[x, y, 'c']} e={{ op: op, esc: esc * s.esc, blur: s.blur, dy: s.dy + deriva(T, 3.3, 3) }} rot={rot} z={35}>
+          <div style={{ position: 'relative', width: D, height: D }}>
+            {pulso > 0 && pulso < 1 ? <div style={{ position: 'absolute', left: 0, top: 0, width: D, height: D, borderRadius: '50%', border: '10px solid ' + AMARILLO, boxSizing: 'border-box', opacity: 0.7 * (1 - pulso), transform: 'scale(' + (1 + 0.4 * Easing.easeOutCubic(pulso)).toFixed(3) + ')' }} /> : null}
+            <svg width={D} height={D} viewBox="-100 -100 200 200" style={{ display: 'block', overflow: 'visible', filter: 'drop-shadow(0 14px 30px rgba(0,0,0,0.4))' }}>
+              <path d={rutaSello(92, 26, 3.6)} fill={AMARILLO} stroke={NEGRO} strokeWidth={4} strokeLinejoin="round" />
+              <circle r={79} fill={NEGRO} />
+              <defs><path id={idAnillo} d="M 0 -66 A 66 66 0 1 1 0 66 A 66 66 0 1 1 0 -66" /></defs>
+              <g transform={'rotate(' + giro.toFixed(2) + ')'}>
+                <text fill={BLANCO} style={{ fontFamily: F, fontWeight: 800, fontSize: 12.5, letterSpacing: 2.6 }}>
+                  <textPath href={'#' + idAnillo}>{anillo + anillo}</textPath>
+                </text>
+              </g>
+              <circle r={rc - 4} fill="none" stroke="rgba(255,255,255,0.14)" strokeWidth={8} />
+              <circle r={rc - 4} fill="none" stroke={AMARILLO} strokeWidth={8} strokeLinecap="round" transform="rotate(-90)"
+                strokeDasharray={(2 * Math.PI * (rc - 4)).toFixed(2)} strokeDashoffset={(2 * Math.PI * (rc - 4) * (1 - arco)).toFixed(2)} />
+              <text x={0} y={19} textAnchor="middle" style={{ fontFamily: F_IMPACTO }}>
+                <tspan fontSize={58} fill={AMARILLO} fillOpacity={clamp(k01(T, impacto + 0.08, 0.18), 0, 1)}>{txtNota}</tspan>
+                <tspan fontSize={20} fill={BLANCO} dx={2}>{'/' + de}</tspan>
+              </text>
+            </svg>
+          </div>
+        </Caja>
+        {palabras.length ? (
+          <Caja p={[p0[0], p0[1] + D / 2 + 78, 'c']} z={35}>
+            <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'nowrap' }}>{palabras}</div>
+          </Caja>
+        ) : null}
+        {b.criterio ? (
+          <Caja p={[p0[0], p0[1] + D / 2 + 164, 'c']} e={junta(entra(T, b.tiempos.length ? b.tiempos[b.tiempos.length - 1] + 0.3 : impacto + 1, 'sube', 0.3), sale(T, b.encoger != null ? b.encoger : b.fin, 0.2))} z={35}>
+            <div style={{ fontFamily: F_MONO, fontWeight: 600, fontSize: 28, letterSpacing: '0.05em', color: BLANCO, textShadow: SOMBRA_TX, whiteSpace: 'pre' }}>{b.criterio}</div>
+          </Caja>
+        ) : null}
+      </React.Fragment>
+    );
   }
 
   /* =========================================================
@@ -1431,17 +1806,45 @@
     suscribete: function (ini, fin, o) { return Object.assign({ tipo: 'suscribete', ini: ini, fin: fin }, o || {}); },
     // reedicion: borronea un rectangulo [x0, y0, x1, y1] del video (lo viejo que asoma)
     parche: function (ini, fin, r) { return { tipo: 'parche', ini: ini, fin: fin, r: r }; },
+    // REVIEWS (P5) ----
+    // rotulo sobre un objeto (texto blanco limpio, sin caja): o.en [x, y] fijo, o o.sigue 'nombre' (herramientas/seguir.py)
+    // con o.lado arriba|abajo|izq|der, sep, dx, dy; tam, color, estilo: 'pastilla'
+    rotulo: function (ini, fin, txt, o) { return Object.assign({ tipo: 'rotulo', ini: ini, fin: fin, txt: txt }, o || {}); },
+    // tabla de valores (informacion nutricional): { titulo, sub, encabezado, pie, pos, ancho, entra: 'derecha', sale: 'izquierda',
+    //   filas: [{ nombre, valor, dec, unidad, busca, t, sub, grande }] } (cada fila se enciende cuando se dice)
+    tabla: function (ini, fin, o) { return Object.assign({ tipo: 'tabla', ini: ini, fin: fin }, o || {}); },
+    // barras apiladas para comparar: { titulo, sub, filas: [{ nombre, partes: [71, 13, 16], busca, t }], leyenda, colores, remate, cRemate, pie,
+    //   unidad (' %' por defecto; '' o ' kcal'), soloPrimera (solo el numero del primer tramo), compacta (mas chica, para ir arriba) }
+    barras: function (ini, fin, o) { return Object.assign({ tipo: 'barras', ini: ini, fin: fin }, o || {}); },
+    // sello del veredicto: { nota, de, palabras: ['nutritivo', { texto, busca, t }], criterio, pos, tam, encoger, esquina, tamFinal }
+    veredicto: function (ini, fin, o) { return Object.assign({ tipo: 'veredicto', ini: ini, fin: fin }, o || {}); },
     sonido: function (t, tipo, g) { return { tipo: 'sonido', ini: t, fin: t, sfx: tipo, g: g }; },
     flash: function (t) { return { tipo: 'flash', ini: t, fin: t + 0.28 }; },
     sacudida: function (t, fuerza) { return { tipo: 'sacudida', ini: t, fin: t + 0.42, fuerza: fuerza }; }
   };
 
   var DETRAS = ['detras', 'dia'];
-  var ENCIMA = ['titulo', 'numero', 'tarjeta', 'lista', 'emoji', 'imagen', 'etiqueta', 'progreso', 'cta', 'contador', 'suscribete'];
+  var ENCIMA = ['titulo', 'numero', 'tarjeta', 'lista', 'emoji', 'imagen', 'etiqueta', 'progreso', 'cta', 'contador', 'suscribete',
+    'tabla', 'barras', 'veredicto'];
+  // lo que tapa la camara con una tarjeta grande: detras, la camara se desenfoca y se oscurece
+  var CON_FONDO = ['tabla', 'barras', 'veredicto'];
+
+  // tiempos de los items de una pieza: o.t de cada uno, o el segundo en que se dice (o.busca o el texto);
+  // nunca antes de que la pieza este entrando y siempre en orden
+  function tiemposItems(id, items, b, campo) {
+    var auto = tiemposDe(id, items.map(function (it) { return it.busca || it[campo]; }), b.ini, b.fin);
+    var ult = b.ini + 0.3;
+    return items.map(function (it, i) {
+      var c = it.t != null ? it.t : auto[i];
+      c = Math.max(c == null ? ult : c, b.ini + 0.3 + i * 0.05, ult);
+      ult = c;
+      return c;
+    });
+  }
 
   function zonaDe(b) {
-    // lo que tapa algo del video viejo no se acorta nunca
-    if (b.tipo === 'emoji' || b.tipo === 'etiqueta' || b.tipo === 'contador' || b.tapa) return null;
+    // lo que tapa algo del video viejo no se acorta nunca (ni las tarjetas grandes de las reviews)
+    if (b.tipo === 'emoji' || b.tipo === 'etiqueta' || b.tipo === 'contador' || b.tapa || CON_FONDO.indexOf(b.tipo) >= 0) return null;
     var p = posicion(b.pos || (b.tipo === 'titulo' || b.tipo === 'numero' || b.tipo === 'imagen' ? 'arriba' : b.tipo === 'lista' ? 'arriba-izq' : b.tipo === 'cta' ? 'arriba' : 'abajo'));
     return Math.round(p[0] / 120) + ':' + Math.round(p[1] / 200);
   }
@@ -1469,8 +1872,20 @@
       if (b.tapa && b.parche !== false) d.parches.push({ tipo: 'parche', ini: b.ini, fin: b.finTapa == null ? b.fin + 0.2 : b.finTapa, r: b.tapa });
     });
     d.flashes = beats.filter(function (b) { return b.tipo === 'flash'; }).map(function (b) { return { t: b.ini }; });
+    d.rotulos = beats.filter(function (b) { return b.tipo === 'rotulo'; });
     // tiempos de la voz: los items de las listas y las lineas de los titulos
     beats.forEach(function (b) {
+      if (b.tipo === 'tabla' || b.tipo === 'barras') b.tiempos = tiemposItems(d.id, b.filas, b, 'nombre');
+      if (b.tipo === 'veredicto') {
+        b.palabras = (b.palabras || []).map(function (w) { return typeof w === 'string' ? { texto: w } : w; });
+        b.tiempos = tiemposItems(d.id, b.palabras, b, 'texto');
+        if (b.sacudida !== false) d.sacudidas.push({ t: b.ini + 0.24, fuerza: 16 });
+      }
+      // detras de una tarjeta grande la camara se desenfoca y se oscurece (o.fondo: false lo apaga)
+      if ((CON_FONDO.indexOf(b.tipo) >= 0 || (b.tipo === 'cta' && b.pregunta)) && b.fondo !== false) {
+        var hasta = b.tipo === 'veredicto' && b.encoger != null ? b.encoger + 0.1 : b.fin;
+        d.camaras.push({ tipo: 'camara', ini: b.ini - 0.12, fin: hasta, mov: 'suave', zoom: 1.05, desenfoque: 16, oscuro: 0.32, sfx: false });
+      }
       if (b.tipo === 'lista') {
         b.items = b.items.map(function (it) { return typeof it === 'string' ? { texto: it } : it; });
         var auto = tiemposDe(d.id, b.items.map(function (it) { return it.busca || it.texto; }), b.ini, b.fin);
@@ -1500,9 +1915,11 @@
     // la serie: el sello aparece cuando termina la apertura; la firma al final
     var dia = beats.filter(function (b) { return b.tipo === 'dia'; })[0];
     d.finApertura = dia ? dia.fin + 0.2 : 0.4;
-    d.firma = crudo.firma === false ? null : Object.assign({ dur: 2.8 }, crudo.firma || {});
+    d.firma = crudo.firma === false ? null : Object.assign({ dur: crudo.firma && crudo.firma.estilo === 'grande' ? 3.2 : 2.8 }, crudo.firma || {});
     if (d.firma && crudo.serie && !d.firma.texto && crudo.serie.dia != null) d.firma.texto = 'SÍGUEME PARA EL DÍA ' + (Number(crudo.serie.dia) + 1);
     d.iniFirma = d.firma ? (d.firma.ini != null ? d.firma.ini : Math.max(0, d.dur - d.firma.dur)) : d.dur + 1;
+    // el cierre grande oscurece y desenfoca la ultima toma
+    if (d.firma && d.firma.estilo === 'grande') d.camaras.push({ tipo: 'camara', ini: d.iniFirma - 0.15, fin: d.dur + 1, mov: 'suave', zoom: 1.06, desenfoque: 12, oscuro: 0.48, sfx: false });
     d.serie = crudo.serie || null;
     // lo que ocupa la parte de arriba esconde el sello de la serie mientras esta
     d.tapanSello = [];
@@ -1541,8 +1958,29 @@
       }
       else if (b.tipo === 'cta') {
         cue('whoosh', b.ini, 0.4);
-        for (var i = 0; i < String(b.palabra).length; i++) cue('click', b.ini + 0.6 + i * 0.09, 0.22);
-        cue('pop', b.ini + 0.6 + String(b.palabra).length * 0.09 + 0.35, 0.4);
+        var escrito = b.pregunta ? String(b.respuesta || '') : String(b.palabra);
+        var paso = b.pregunta ? 0.07 : 0.09;
+        for (var i = 0; i < escrito.length; i++) if (escrito[i] !== ' ') cue('click', b.ini + 0.6 + i * paso, 0.2);
+        if (escrito.length) cue('pop', b.ini + 0.6 + escrito.length * paso + 0.35, 0.4);
+      }
+      else if (b.tipo === 'rotulo') cue('pop', b.ini, 0.3);
+      else if (b.tipo === 'tabla') {
+        cue('whoosh', b.ini - 0.05, 0.42);
+        b.tiempos.forEach(function (t) { cue('pop', t, 0.3); cue('subida', t + 0.04, 0.16); });
+        if (b.sale === 'izquierda') cue('whoosh', b.fin, 0.3);
+      }
+      else if (b.tipo === 'barras') {
+        cue('whoosh', b.ini - 0.05, 0.42);
+        b.tiempos.forEach(function (t) { cue('pop', t, 0.28); cue('subida', t + 0.12, 0.22); });
+        if (b.remate) { cue('pop', b.cRemate == null ? b.fin - 1 : b.cRemate, 0.4); cue('ding', (b.cRemate == null ? b.fin - 1 : b.cRemate) + 0.12, 0.42); }
+      }
+      else if (b.tipo === 'veredicto') {
+        cue('whoosh', b.ini - 0.1, 0.38);
+        cue('golpe', b.ini + 0.24, 0.75);
+        cue('subida', b.ini + 0.32, 0.3);
+        cue('campana', b.ini + 1.3, 0.5);
+        b.tiempos.forEach(function (t) { cue('pop', t, 0.32); cue('ding', t + 0.1, 0.32); });
+        if (b.encoger != null) cue('whoosh', b.encoger, 0.32);
       }
       else if (b.tipo === 'capitulo') { cue('whoosh', b.ini - T_MARCO * 0.5, 0.6); cue('pop', b.ini + 0.1, 0.4); cue('whoosh', b.fin - T_MARCO * 0.5, 0.45); }
       else if (b.tipo === 'comparar') { cue('whoosh', b.ini - 0.15, 0.6); cue('pop', b.ini + 0.1, 0.4); cue('pop', b.ini + 0.32, 0.4); }
@@ -1551,7 +1989,12 @@
       else if (b.tipo === 'flash') cue('whoosh', b.ini - 0.1, 0.5);
       else if (b.tipo === 'sacudida') cue('golpe', b.ini, 0.5);
     });
-    if (d.firma) { cue('whoosh', d.iniFirma - 0.05, 0.45); [0, 1, 2].forEach(function (i) { cue('pop', d.iniFirma + 0.12 + i * 0.07, 0.3); }); }
+    if (d.firma && d.firma.estilo === 'grande') {
+      cue('whoosh', d.iniFirma - 0.05, 0.45);
+      cue('golpe', d.iniFirma + 0.12, 0.4);
+      [0, 1, 2].forEach(function (i) { cue('pop', d.iniFirma + 0.3 + i * 0.1, 0.36); });
+      cue('pop', d.iniFirma + 0.82, 0.3);
+    } else if (d.firma) { cue('whoosh', d.iniFirma - 0.05, 0.45); [0, 1, 2].forEach(function (i) { cue('pop', d.iniFirma + 0.12 + i * 0.07, 0.3); }); }
     d.cues.sort(function (a, b) { return a.t - b.t; });
     return d;
   }
@@ -1589,8 +2032,12 @@
       if (b.tipo === 'cta') return <CtaBeat key={i} T={T} b={b} />;
       if (b.tipo === 'contador') return <ContadorBeat key={i} T={T} b={b} />;
       if (b.tipo === 'suscribete') return <SuscribeteBeat key={i} T={T} b={b} />;
+      if (b.tipo === 'tabla') return <TablaBeat key={i} T={T} b={b} />;
+      if (b.tipo === 'barras') return <BarrasBeat key={i} T={T} b={b} />;
+      if (b.tipo === 'veredicto') return <VeredictoBeat key={i} T={T} b={b} />;
       return null;
     };
+    var rotulos = def.rotulos.filter(function (b) { return vivo(T, b, 0.3); });
     return (
       <div style={{ position: 'absolute', left: 0, top: 0, width: ANCHO, height: ALTO, overflow: 'hidden', background: NEGRO }}>
         <FondoPuntos T={T} op={km > 0.001 ? 1 : 0} oscuro={def.capitulos.some(function (b) { return b.oscuro && vivo(T, b, T_MARCO); })} />
@@ -1602,6 +2049,11 @@
             {detras.map(dibujar)}
             <Frente T={T} def={def} R={R} st={st} ex={ex} medioRef={props.medioRef} />
           </React.Fragment>
+        ) : null}
+        {rotulos.length ? (
+          <MarcoCamara R={R} st={st} ex={ex} z={14}>
+            {rotulos.map(function (b, i) { return <RotuloBeat key={'r' + i} T={T} b={b} def={def} R={R} />; })}
+          </MarcoCamara>
         ) : null}
         <BordeMarco R={R} />
         {def.encima.map(dibujar)}
@@ -1734,7 +2186,7 @@
       if (v.paused) { v.play(); setPlaying(true); } else { v.pause(); setPlaying(false); }
     };
     var ir = function (t) { var v = medioRef.current; if (v) v.currentTime = clamp(t, 0, def.dur); setT(t); };
-    var marcas = def.encima.concat(def.detras, def.capitulos, def.comparar).map(function (b, i) {
+    var marcas = def.encima.concat(def.detras, def.capitulos, def.comparar, def.rotulos).map(function (b, i) {
       return <div key={i} title={b.tipo} className={'marca' + (b.tipo === 'capitulo' || b.tipo === 'dia' ? ' cap' : '')}
         style={{ left: (100 * b.ini / def.dur) + '%', width: Math.max(0.3, 100 * (b.fin - b.ini) / def.dur) + '%' }} />;
     });
@@ -1760,11 +2212,11 @@
           </div>
           <div className="cambio-dice">{frase ? frase.texto : '—'}</div>
           <ol className="cambio-beats">
-            {def.encima.concat(def.detras, def.capitulos, def.comparar).slice().sort(function (a, b) { return a.ini - b.ini; }).map(function (b, i) {
+            {def.encima.concat(def.detras, def.capitulos, def.comparar, def.rotulos).slice().sort(function (a, b) { return a.ini - b.ini; }).map(function (b, i) {
               var on = T >= b.ini && T <= b.fin;
               return (
                 <li key={i} className={on ? 'on' : ''} onClick={function () { ir(Math.max(0, b.ini - 0.3)); }}>
-                  <span className="t">{fmt(b.ini)}</span> <b>{b.tipo}</b> {b.txt || b.texto || b.titulo || b.grande || b.nombre || b.n || b.palabra || (b.items ? b.items.map(function (x) { return x.texto; }).join(', ') : '') || (b.valor != null ? b.valor + ' ' + (b.unidad || '') : '')}
+                  <span className="t">{fmt(b.ini)}</span> <b>{b.tipo}</b> {b.txt || b.texto || b.titulo || b.grande || b.nombre || b.n || b.palabra || (b.items ? b.items.map(function (x) { return x.texto; }).join(', ') : '') || (b.valor != null ? b.valor + ' ' + (b.unidad || '') : '') || (b.nota != null ? b.nota + '/' + (b.de || 10) : '')}
                 </li>
               );
             })}

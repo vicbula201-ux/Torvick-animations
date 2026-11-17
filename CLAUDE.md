@@ -65,8 +65,9 @@ cambios/<id>/     un video vertical: plan.jsx + transcripcion.* (+ media/, fuera
                   cambios/lista.js los pone en los botones de cambio.html
 CAMBIO.md         análisis de los 5 reels de referencia, estilo y flujo del P4
 p5/               P5 (reviews, entrevistas, retos, divagaciones): estilo.md, la
-                  guía de edición; un análisis por tipo; resumen.md con lo común
-                  y lo que le falta al motor del P4
+                  guía de edición; reviews-alimentos.md, la serie de reviews (el
+                  aguacate: cambios/aguacate/plan.jsx); un análisis por tipo;
+                  resumen.md con lo común y lo que le falta al motor del P4
 compilar.js       regenera los .js desde los .jsx
 prueba-piezas.html  verificación: motor + las 21 piezas + las piezas de B
 herramientas/     grabar.js (exporta MP4 con música y efectos; con --voz,
@@ -79,7 +80,9 @@ herramientas/     grabar.js (exporta MP4 con música y efectos; con --voz,
                   (le pone el cierre con la firma a un short); grabar-cambio.js
                   (graba los verticales del P4) y viejos.py (detecta subtítulos
                   y contadores quemados para reeditar); montar.py (arma el corte
-                  desde las tomas en bruto); no son parte de la app
+                  desde las tomas en bruto, con tomas de apoyo y el HDR del iPhone
+                  pasado a color normal) y seguir.py (sigue un objeto del video
+                  para pegarle su rotulo); no son parte de la app
 trabajo/          para el autor: tablero de piezas y cómo pasar de la voz al
                   video (sin datos personales: el repositorio es público)
 ```
@@ -240,7 +243,8 @@ lienzo. El reel la usa para el guion y para exponer `window.REEL`.
   mal/bien se apila arriba/abajo.
 - No usar degradados, sombras internas, glassmorphism ni estética futurista.
 - No usar emoji en el lienzo. (La excepción es el P4, `cambio.html`: ahí sí,
-  pero solo los emojis 3D de `cambio/emoji/`, nunca los del sistema.)
+  pero solo los emojis 3D de `cambio/emoji/`, nunca los del sistema. En los
+  videos del P5, tampoco.)
 - No tapar piezas con rectángulos opacos para "recortarlas": eso borra el
   trazo de abajo.
 - No agregar un bundler, ni TypeScript, ni un paso de compilación.
@@ -630,9 +634,21 @@ corte con la categoría; la edición se hace con el **motor del P4**
 aplica**: la base común (subtítulos de 1-3 palabras con la palabra que suena en
 la caja amarilla, la palabra o el número grande encima, golpes de zoom,
 desenfoque, un efecto de sonido por cada cosa que entra) y lo que suma cada
-categoría. **Sin música** (pedido del autor). Sin memes ni clips con derechos de
-terceros. Los análisis de los 25 videos de referencia están en el resto de
-`p5/`; los videos de referencia no van al repositorio.
+categoría. **Sin música** (pedido del autor). **Sin emojis** (no le convencieron:
+en su lugar, el nombre encima de la cosa o una pastilla con ícono). Sin memes ni
+clips con derechos de terceros. Los análisis de los 25 videos de referencia están
+en el resto de `p5/`; los videos de referencia no van al repositorio.
+
+**Reviews de alimentos** (`p5/reviews-alimentos.md`): el autor manda las tomas
+en bruto (a cámara + tomas de apoyo) y el guion. `montar.py` arma el corte con las
+tomas de apoyo encima de la voz, ubicadas por frase (`"apoyo"` en `corte.json`);
+`seguir.py` sigue los objetos; el plan usa las piezas de reviews de `cambio.jsx`:
+`rotulo` (el nombre encima del objeto, que lo sigue), `tabla` (información
+nutricional: cada fila se enciende cuando se dice), `barras`, `veredicto` (el
+sello Torvick con la nota), `cta` con `pregunta` y `firma: { estilo: 'grande' }`.
+`cambios/aguacate/plan.jsx` es la referencia (armado sobre el guion antes de
+grabar) y `cambios/_muestrario/` muestra todas las piezas (carpeta local, fuera de
+git).
 
 ## Verificación
 

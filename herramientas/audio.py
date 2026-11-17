@@ -398,7 +398,12 @@ def normalizar_voz(voz, objetivo=-19.0):
     n = len(mono) // w
     rms = np.sqrt(np.mean(mono[:n * w].reshape(n, w) ** 2, axis=1) + 1e-12)
     hablado = rms[rms > np.percentile(rms, 50)]
+    # una toma sin voz (silencio digital): se deja como esta (si no, el nivel da NaN y apaga toda la mezcla)
+    if not len(hablado):
+        return voz
     actual = 20 * np.log10(np.sqrt(np.mean(hablado ** 2)) + 1e-12)
+    if not np.isfinite(actual) or actual < -80:
+        return voz
     return voz * 10 ** ((objetivo - actual) / 20)
 
 

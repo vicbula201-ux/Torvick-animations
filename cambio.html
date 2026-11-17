@@ -164,18 +164,21 @@
     (function () {
       var lista = window.CAMBIOS_LISTA || [];
       var id = String(location.hash || '').replace(/^#/, '').split('/')[0] || (lista[0] && lista[0].id);
-      var cargar = function (src) {
+      var cargar = function (src, opcional) {
         return new Promise(function (listo) {
           var s = document.createElement('script');
           s.src = src;
           s.onload = listo;
-          s.onerror = function () { console.warn('no carga', src); listo(); };
+          s.onerror = function () { if (!opcional) console.warn('no carga', src); listo(); };
           document.body.appendChild(s);
         });
       };
       var montar = function () { if (window.CAMBIOS) window.CAMBIOS.montar(); };
       if (!id) { montar(); return; }
-      cargar('cambios/' + id + '/transcripcion.js').then(function () { return cargar('cambios/' + id + '/plan.js'); }).then(montar);
+      // seguimientos.js (herramientas/seguir.py) solo existe si el plan pega rotulos a objetos que se mueven
+      cargar('cambios/' + id + '/transcripcion.js')
+        .then(function () { return cargar('cambios/' + id + '/seguimientos.js', true); })
+        .then(function () { return cargar('cambios/' + id + '/plan.js'); }).then(montar);
       // otro video: se recarga la pagina para traer sus archivos
       window.addEventListener('hashchange', function () {
         var nuevo = String(location.hash || '').replace(/^#/, '').split('/')[0];

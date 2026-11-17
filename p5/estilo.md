@@ -7,13 +7,15 @@ efectos de sonido, zooms, desenfoques). El guion y las tomas los decide el autor
 el análisis completo de cada categoría está en `reviews.md`, `entrevistas.md`,
 `retos.md` y `divagaciones.md`.
 
-**Cómo llega un video:** el autor graba, corta en Premiere y manda el corte **sin
-música**, con una línea que diga la categoría («review», «entrevista», «reto» o
-«divagando») y, si quiere, qué resaltar. Se edita con el motor del P4
-(`cambio.html`, `cambio.jsx`, `herramientas/grabar-cambio.js`): transcripción →
-plan → exportación en 1080×1920. **Si llega sin cortar** (las tomas en bruto), el
-corte lo arma `herramientas/montar.py` (ver `CAMBIO.md`, «¿Y si mando el video sin
-cortar?»).
+**Cómo llega un video:** el autor graba y manda las tomas **sin música**, con una
+línea que diga la categoría («review», «entrevista», «reto» o «divagando») y, si
+quiere, qué resaltar. Pueden llegar **en bruto**: el corte lo arma
+`herramientas/montar.py`, con las **tomas de apoyo** encima de la voz y el HDR del
+iPhone pasado a color normal (ver `CAMBIO.md`, «¿Y si mando el video sin cortar?»).
+Se edita con el motor del P4 (`cambio.html`, `cambio.jsx`,
+`herramientas/grabar-cambio.js`): transcripción → corte → plan → exportación en
+1080×1920. Las reviews de alimentos tienen su guía completa en
+`reviews-alimentos.md`.
 
 ## La base: va en todas las categorías
 
@@ -38,7 +40,8 @@ grande, y se va cuando termina la idea (1-3 s):
 | el remate o el tema («AGUACATE», «PÉPTIDOS») | la palabra gigante **detrás de la persona** | `detras` | golpe |
 | algo que está mal / bien | la X roja / el visto verde, o la tarjeta con su ícono | `tarjeta`, `etiqueta` | error / ding |
 | una lista (ingredientes, beneficios) | pastillas que aparecen al nombrar cada una | `lista` | pop |
-| una cosa concreta (el aguacate, el pollo) | su emoji 3D, uno a la vez | `emoji` | pop |
+| una cosa que se ve (el aguacate, el envase) | **su nombre encima de la cosa**, pegado a ella aunque se mueva | `rotulo` (+ `herramientas/seguir.py`) | pop |
+| una cosa que no se ve | una pastilla con su nombre (y visto, X o aviso) | `etiqueta` con `icono` | click |
 
 ### La cámara
 
@@ -85,17 +88,19 @@ entre y 1000 y 1560: ahí van el texto y los botones de Instagram y TikTok.
 
 | Momento | Qué se ve encima | Sonido |
 |---|---|---|
-| Primer segundo | **título del tema** en dos tamaños («¿AGUACATE / todos los días?»), 2-3 s | whoosh |
-| Cuando lo nombras | el nombre del producto en grande, o **detrás de ti** | golpe |
-| Cada dato | **el número en grande** (precio, gramos, calorías) | golpe |
-| Propiedades o ingredientes | **la lista que se arma** o rótulos junto al producto en primer plano | pop |
-| El mito | tarjeta con la **X**; la verdad, con el **visto** | error / ding |
-| Comparando | **notas que se acumulan** («Calidad 9/10», «Precio 7/10») | pop |
-| El veredicto | la frase en grande + golpe de zoom | golpe |
-| Cierre | «Comenta X» con la caja que se escribe | click |
+| Primer segundo | **la pregunta del tema** gigante detrás de ti («¿SALUDABLE?»), 2-3 s | golpe |
+| Cuando lo nombras | **su nombre encima del producto** (`rotulo`), pegado a él aunque lo muevas | pop |
+| Los datos (calorías, macros) | **la tabla nutricional**: cada fila se enciende y cuenta cuando la nombras (`tabla`) | pop + subida |
+| Una comparación («similar a…») | **barras** que crecen y un remate («¡Casi iguales!») (`barras`) | subida, ding |
+| El mito | «Mal alimento» tachado; la verdad, con el **visto** | error / ding |
+| Comparando productos | **notas que se acumulan** («Calidad 9/10», «Precio 7/10») | pop |
+| El veredicto | **el sello Torvick** con la nota, que se encoge a una esquina (`veredicto`) | golpe, campana |
+| Cierre | la pregunta con la caja de comentario (`cta` con `pregunta`) y el cierre grande | click |
 
-Cuando la cámara muestra el producto: empuje lento. Cuando lo nombras sin
-mostrarlo: su emoji 3D o tu foto del producto (`imagen`).
+Cuando la cámara muestra el producto: empuje lento o cámara lenta (tomas de apoyo
+a 60 fps). Detrás de las tarjetas grandes, la toma se desenfoca y se oscurece
+sola. El detalle (formato, tomas, el plan del aguacate) está en
+`reviews-alimentos.md`.
 
 ### Entrevista (le preguntas algo a alguien)
 
@@ -142,34 +147,26 @@ Si se recortan repeticiones, el contador salta con el número real (2 → 8 → 
 
 Con una sola toma larga, el ritmo lo dan los acercamientos: uno por frase.
 
-## Ejemplo: una review del aguacate
+## Ejemplo: la review del aguacate
 
-Lo que pasaría en pantalla con un video de 40 s («el aguacate, sus propiedades»):
-
-| Segundo | Dices | Encima | Sonido |
-|---|---|---|---|
-| 0-2 | «¿Comes aguacate todos los días?» | «AGUACATE» gigante **detrás de ti**, «¿todos los días?» en la línea chica | golpe |
-| 2-5 | «Esto es lo que tiene» | la lista empieza a armarse | whoosh |
-| 5-15 | «grasas buenas… fibra… potasio…» | una pastilla por cada una, con el emoji 3D del aguacate al lado | pop × 3 |
-| 15-18 | «más potasio que un plátano» | «MÁS POTASIO QUE UN PLÁTANO» con el visto | ding |
-| 18-24 | «uno mediano tiene unas 240 calorías» | **240 KCAL** contando, golpe de zoom | golpe |
-| 24-30 | «¿engorda?» | tarjeta «engorda» con la X; «depende de cuánto» con el visto | error, ding |
-| 30-36 | «medio al día está perfecto» | «½ AL DÍA» en grande, fondo desenfocado | golpe |
-| 36-40 | «comenta AGUACATE y te mando…» | la caja de comentario escribiendo «AGUACATE» | click |
-| + | — | la firma de Torvick | — |
-
-Y los subtítulos de 1 a 3 palabras corriendo todo el tiempo debajo.
+Está completa en `reviews-alimentos.md`: el formato, el mapa segundo a segundo, los
+datos, cómo grabar y el plan ya armado (`cambios/aguacate/plan.jsx`).
 
 ## Lo que todavía hay que construir
 
-El motor del P4 hace casi todo lo de arriba. Lo que falta, por orden, está en
-`resumen.md` (el inserto a pantalla completa para las escenas de Tor, las
-reacciones de Tor, los subtítulos de dos voces, el confeti, la tarjeta del largo,
-entre otros). Se construye cuando llegue el primer video que lo necesite.
+El motor del P4 hace casi todo lo de arriba. Ya están (noviembre de 2026): las
+tomas de apoyo y el corte desde las tomas en bruto (`montar.py`), los rótulos que
+siguen a los objetos (`seguir.py`), la tabla, las barras, el sello del veredicto,
+la pregunta y el cierre grande. Lo que falta, por orden, está en `resumen.md` (el
+inserto a pantalla completa para las escenas de Tor, las reacciones de Tor, los
+subtítulos de dos voces, el confeti, la tarjeta del largo, entre otros). Se
+construye cuando llegue el primer video que lo necesite.
 
 ## Valores por defecto (se cambian si el autor lo pide)
 
 - **Sin música** (decisión del autor).
 - **Subtítulos del P4**, con la palabra grande encima cuando hace falta.
-- **Emojis 3D** de `cambio/emoji/`, uno a la vez y pocos; nunca los del sistema.
+- **Sin emojis** (al autor no le convencieron en la divagación): en su lugar, el
+  nombre encima de la cosa (`rotulo`) o una pastilla con ícono. Los 3D de
+  `cambio/emoji/` quedan para el P4.
 - **Sin memes** ni clips con derechos de terceros: en su lugar, reacciones de Tor.

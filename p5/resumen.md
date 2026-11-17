@@ -38,7 +38,9 @@ animaciones, efectos, zooms), no el guion ni la música.
 1. **Sin música** (decisión del autor). Solo la voz y los efectos.
 2. **Subtítulos:** los del P4 (1-3 palabras en minúscula, la que suena en la caja
    amarilla) más la palabra clave o el número en grande. Valor por defecto.
-3. **Emojis:** los 3D de `cambio/emoji/`, uno a la vez y pocos. Valor por defecto.
+3. **Emojis:** no (al autor no le convencieron en la divagación). En su lugar, el
+   nombre encima de la cosa (`rotulo`) o una pastilla con ícono. Los 3D de
+   `cambio/emoji/` quedan para el P4.
 4. **Memes:** no; en su lugar, **reacciones de Tor** (ver `entrevistas.md`).
    Valor por defecto.
 
@@ -65,6 +67,13 @@ ordenado por cuántos tipos lo usan:
 **Propuesta de orden:** primero el **inserto** y las **primeras 5-6 animaciones
 de Tor**, porque los cuatro tipos los usan y son lo que te diferencia de todas las
 referencias. Lo demás, cuando llegue el primer video de cada tipo.
+
+**Ya hecho (noviembre de 2026, para la review del aguacate):** el corte desde las
+tomas en bruto con **tomas de apoyo** encima de la voz y el HDR del iPhone pasado a
+color normal (`montar.py`), los **rótulos que siguen a los objetos**
+(`seguir.py` + `rotulo`), la **tabla nutricional**, las **barras de comparación**,
+el **sello del veredicto**, la **pregunta con la caja de comentario** y el **cierre
+grande**. Detalle en `reviews-alimentos.md`.
 
 ## Cómo se trabaja un video del P5
 

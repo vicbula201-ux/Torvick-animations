@@ -179,11 +179,34 @@ arranques en falso; el corte decide qué historia se cuenta) y
 - el mismo volumen de voz en todas las tomas, el encuadre (`encuadre`: recorte
   de la toma; útil si te grabaste en plano general) y una cola de imagen para la
   firma;
-- la transcripción del corte ya trasladada (en minúscula), lista para el plan.
+- la transcripción del corte ya trasladada (en minúscula), lista para el plan;
+- **el HDR del iPhone** (HLG/PQ: las tomas del autor vienen así) pasa a color
+  normal bt709 con un mapeo de tonos (`"hdr": "auto"`, por defecto; `"no"` lo
+  deja como viene). Sin esto la imagen queda gris y desaturada;
+- **tomas de apoyo** (`"apoyo"`): la imagen cambia a otra toma mientras la voz
+  sigue. Cada una se ubica por la frase que se dice encima (`"frase"`, `"hasta"`)
+  o por segundos (`"ini"`, `"fin"`, `"dur"`), con `"desde"` (el segundo de la toma
+  de apoyo), `"velocidad"` (0,5: cámara lenta; con tomas a 60 fps queda suave) y
+  `"foco"` o `"encuadre"` (qué parte queda si hay que recortarla a 9:16). El corte
+  hablado queda en `fuente-hablado.mp4`, y `--solo-apoyo` rehace solo los
+  insertos, sin volver a cortar.
 
 ```
 python3 herramientas/transcribir.py cambios/<id>/media/toma1.mp4 --out cambios/<id>/media/t1/transcripcion.json
 python3 herramientas/montar.py cambios/<id>/corte.json
+python3 herramientas/montar.py cambios/<id>/corte.json --solo-apoyo   # cambiar una toma de apoyo
+```
+
+**Rótulos que siguen a un objeto** (el aguacate en la mano, el plato): una caja
+alrededor del objeto en un cuadro donde se vea bien, y `herramientas/seguir.py`
+lo sigue hacia adelante y hacia atrás con flujo óptico (OpenCV), suaviza el
+recorrido y deja `cambios/<id>/seguimientos.js` (cambio.html lo carga solo). La
+hoja de control muestra la caja en 8 cuadros: amarilla si lo siguió, roja si se
+perdió o salió de cuadro (ahí el rótulo se va solo).
+
+```
+python3 herramientas/seguir.py cambios/<id>/media/fuente.mp4 --id <id> --nombre aguacate --en 12.4 \
+    --caja 380,900,640,1180 --desde 11.8 --hasta 16 --control hoja.png
 ```
 
 Los cortes de la toma quedan en `fuente.mp4.txt`: en el plan se alternan dos
@@ -300,3 +323,21 @@ hasta taparlos y nunca queda uno viejo a la vista sin uno nuevo encima).
 `pos`: `arriba`, `arriba-izq`, `arriba-der`, `izq`, `der`, `centro`, `abajo`,
 `abajo-izq`, o `[x, y]`. Lo que va en la misma zona no se pisa (el anterior se
 va antes) y nada de arriba se cruza con la firma.
+
+**Piezas de las reviews (P5).** Guía y ejemplo completo en `p5/reviews-alimentos.md`;
+`cambios/_muestrario/` las muestra todas sobre material del autor.
+
+| beat | qué hace |
+|---|---|
+| `rotulo(ini, fin, txt, o)` | el nombre encima de la cosa (texto blanco limpio, letras en cascada), dentro de la cámara: `en: [x, y]` fijo o `sigue: 'nombre'` (`seguir.py`) con `lado` arriba/abajo/izq/der, `sep`, `dx`, `dy`; `tam`, `color`, `estilo: 'pastilla'` |
+| `tabla(ini, fin, o)` | información nutricional: `titulo`, `sub`, `encabezado`, `pie`, `filas: [{ nombre, valor, dec, unidad, busca, t, sub, grande }]` (cada fila se enciende cuando se dice), `pos`, `ancho`, `entra: 'derecha'`, `sale: 'izquierda'` (dos tablas seguidas = carrusel) |
+| `barras(ini, fin, o)` | barras apiladas para comparar: `filas: [{ nombre, partes, busca, t }]`, `leyenda`, `colores`, `unidad` (' %'), `soloPrimera`, `compacta`, `remate` + `cRemate`, `pie` |
+| `veredicto(ini, fin, o)` | el sello Torvick: `nota`, `de`, `palabras: [{ texto, busca }]`, `criterio`, `pos`, `tam`, `encoger` (segundo en que se va a la esquina), `esquina`, `tamFinal`, `sacudida: false` |
+
+Detrás de `tabla`, `barras`, `veredicto` y `cta` con `pregunta` la cámara se
+desenfoca y se oscurece sola (`fondo: false` lo apaga). `etiqueta` suma `icono`
+(`aviso`, `check`, `equis`) y `letra: 'texto'` (Inter Tight en vez de Archivo
+Black); `cta` suma `pregunta: true` (la pregunta en grande, `respuesta` escrita en
+la caja) y el registro, `firma: { estilo: 'grande' }` (el cierre con SÍGUEME, las
+redes grandes y @eltorvick). `t.alguna(['nueve', '9'])` busca la primera forma
+que aparezca en la transcripción.

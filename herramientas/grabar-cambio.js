@@ -66,7 +66,7 @@ async function abrirPagina(browser, id, escala) {
   const p = await browser.newPage({ viewport: { width: ANCHO, height: ALTO }, deviceScaleFactor: escala || 1 });
   p.on('pageerror', (e) => console.log('error en la pagina:', e.message));
   p.on('console', (m) => { if (m.type() === 'warning' || m.type() === 'error') console.log('pagina:', m.text()); });
-  p.on('requestfailed', (r) => { if (!r.url().includes('/recorte/')) console.log('no carga:', r.url().replace('file://' + raiz + '/', '')); });
+  p.on('requestfailed', (r) => { if (!r.url().includes('/recorte/') && !r.url().endsWith('/seguimientos.js')) console.log('no carga:', r.url().replace('file://' + raiz + '/', '')); });
   const vendor = process.env.TORVICK_VENDOR;
   let actual = null;
   await p.route('**/*', (r) => {
