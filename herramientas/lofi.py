@@ -8,7 +8,7 @@ libre de derechos) para ponerle debajo a la voz.
 Version 1: en Fa, 88 BPM, calida. Version 2: en La menor, 92 BPM, mas nostalgica y opaca.
 
 Piano electrico (tipo Rhodes) con acordes de septima y novena, bajo redondo, bateria
-suave con swing, una melodia corta cada tanto, crujido de vinilo y un filtro calido. El
+suave con swing (con --melodia, una campanita cada tanto), crujido de vinilo y un filtro calido. El
 nivel es parejo de principio a fin (sin subidas ni cortes): pensado para ir ~20 dB debajo
 de la voz. Se mezcla con: node herramientas/grabar-cambio.js <id> --musica-wav videos/lofi.wav
 """
@@ -118,7 +118,7 @@ def poner(buf, x, t, g=1.0, pan=0.0):
     buf[1, i:i + len(x)] += x * g * (1 + pan) * 0.5 * 2 ** 0.5
 
 
-def tema(dur, bpm=None, semilla=7, version=1):
+def tema(dur, bpm=None, semilla=7, version=1, melodia=False):
     v = VERSIONES[version]
     bpm = bpm or v['bpm']
     rng = np.random.default_rng(semilla)
@@ -152,7 +152,8 @@ def tema(dur, bpm=None, semilla=7, version=1):
             te = t0 + e * negra / 2 + (swing if e % 2 else 0) + rng.uniform(-0.006, 0.006)
             poner(buf, charles(rng, abierto=(e == 7 and c % 2 == 1)), te, 0.5 if e % 2 == 0 else 0.32, pan=0.35)
         # melodia: cada dos compases, sobre los pares
-        if c % 2 == 0 and c > 0:
+        # (por defecto no va: al autor no le gusto el «tun tun» de la campanita; --melodia la pone)
+        if melodia and c % 2 == 0 and c > 0:
             for (corchea, m) in v['motivo']:
                 tt = t0 + corchea * negra / 2 + rng.uniform(0, 0.02)
                 poner(buf, campanita(hz(m + (0 if c % 4 == 0 else -2))), tt, 0.07, pan=0.3)
@@ -189,10 +190,11 @@ def main():
     ap.add_argument('--dur', type=float, default=72)
     ap.add_argument('--bpm', type=float, default=None, help='por defecto el de la version (88 / 92)')
     ap.add_argument('--version', type=int, default=1, choices=sorted(VERSIONES))
+    ap.add_argument('--melodia', action='store_true', help='agrega la melodia de campanita (por defecto, solo la base)')
     ap.add_argument('--semilla', type=int, default=7)
     ap.add_argument('--out', required=True)
     a = ap.parse_args()
-    x = tema(a.dur, a.bpm, a.semilla, a.version)
+    x = tema(a.dur, a.bpm, a.semilla, a.version, a.melodia)
     with wave.open(a.out, 'wb') as w:
         w.setnchannels(2)
         w.setsampwidth(2)
