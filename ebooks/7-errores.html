@@ -45,8 +45,9 @@
   .mini-libro .h em { font-style: normal; background: #fff; padding: 0 2px; }
   .mini-libro img { position: absolute; bottom: 3%; left: 20%; width: 76%; }
   .redes { display: flex; gap: 10px; flex-wrap: wrap; }
-  .redes span { display: inline-flex; align-items: center; gap: 7px; border: 2px solid var(--ink); border-radius: 999px; padding: 3px 12px 3px 4px; font-weight: 700; font-size: 14px; background: #fff; }
+  .redes span, .redes a { display: inline-flex; align-items: center; gap: 7px; border: 2px solid var(--ink); border-radius: 999px; padding: 3px 12px 3px 4px; font-weight: 700; font-size: 14px; background: #fff; color: var(--ink); text-decoration: none; }
   .redes img { width: 26px; height: 26px; }
+  .boton-pdf { display: inline-block; background: var(--ink); color: var(--yel); text-decoration: none; font-family: 'Archivo Black', sans-serif; font-size: 16px; padding: 8px 18px; border-radius: 10px; box-shadow: 3px 3px 0 var(--blanco), 3px 3px 0 2px var(--ink); }
 </style>
 </head>
 <body>
@@ -104,7 +105,7 @@
     <div class="escena"><img src="../tienda/img/comp-sin.svg" alt=""><img class="x" src="../tienda/img/tacha.svg" alt=""></div>
     <div>
       <h2>Por qué te frena</h2>
-      <p>Si cada día haces lo que se te ocurre, o la rutina del video del momento, nunca repites un ejercicio lo suficiente como para mejorar en él. Sin repetir no puedes subir el peso, y sin subir el peso no hay progreso.</p>
+      <p>Si cada día haces lo que se te ocurre, o la rutina del video del momento, nunca repites un ejercicio lo suficiente como para mejorar en él. Sin repetir no puedes mejorar, y sin subir algo —repeticiones o peso— no hay progreso.</p>
       <div class="caja rosa mt10">
         <h3>Señales de que lo cometes</h3>
         <ul class="equis senales">
@@ -124,7 +125,7 @@
       <li>Escribe antes de ir qué vas a hacer hoy (ejercicios, series y repeticiones).</li>
     </ul>
   </div>
-  <div class="estudio mt20"><span class="tag">LA CIENCIA</span>Los programas que funcionan tienen progresión planificada (ACSM, 2009), y entrenar cada músculo 2 veces por semana hace crecer más que 1 sola vez (Schoenfeld y cols., 2016). Cambiar algún ejercicio de vez en cuando no es malo; el problema es no tener un plan que te deje subir.</div>
+  <div class="estudio mt20"><span class="tag">LA CIENCIA</span>Los programas que funcionan tienen progresión planificada (ACSM, 2009). Con el mismo trabajo total, entrenar un músculo 1, 2 o 3 veces por semana da un crecimiento parecido (Schoenfeld y cols., 2019): repartirlo en 2 días es la forma práctica de hacer suficiente sin sesiones eternas. Cambiar algún ejercicio de vez en cuando no es malo; el problema es no tener un plan que te deje subir.</div>
   <div class="tor-dice mt20">
     <img src="../tienda/img/tor-senala.svg" alt="">
     <p class="globo">Un plan normal que <b>sigues</b> le gana a un plan perfecto que cambias cada semana.</p>
@@ -246,11 +247,11 @@
   <table class="tabla mt14">
     <tr><th>Ejemplo para 70 kg</th><th>Comida</th><th>Proteína</th></tr>
     <tr><td>Desayuno</td><td>3 huevos + 150 g de yogur griego</td><td class="num">≈ 34 g</td></tr>
-    <tr><td>Almuerzo</td><td>150 g de pollo + arroz + verduras</td><td class="num">≈ 46 g</td></tr>
+    <tr><td>Almuerzo</td><td>120 g de pollo + arroz + verduras</td><td class="num">≈ 40 g</td></tr>
     <tr><td>Cena</td><td>150 g de pescado o atún + papa + ensalada</td><td class="num">≈ 39 g</td></tr>
-    <tr><td><b>Total</b></td><td></td><td class="num si">≈ 119 g</td></tr>
+    <tr><td><b>Total</b></td><td></td><td class="num si">≈ 113 g</td></tr>
   </table>
-  <div class="estudio mt14"><span class="tag">LA CIENCIA</span>Un análisis de 49 estudios encontró que la ganancia de músculo con pesas mejora al subir la proteína hasta unos 1,6 g por kilo al día, y que algunas personas se benefician de llegar a 2,2 g (Morton y cols., 2018).</div>
+  <div class="estudio mt14"><span class="tag">LA CIENCIA</span>Un análisis de 49 estudios encontró que el músculo ganado con pesas deja de subir a partir de unos 1,6 g de proteína por kilo al día; los autores sugieren llegar hasta 2,2 g para ir a lo seguro (Morton y cols., 2018).</div>
   <div class="pie"><span>Los 7 errores · Entrena con Tor · Guía gratis</span><span class="num">6</span></div>
 </section>
 
@@ -316,7 +317,7 @@
   <div class="caja arreglo mt20">
     <span class="rotulo verde">Cómo arreglarlo</span>
     <ul class="checks">
-      <li>Para bajar grasa, come unas <b>300 a 500 kcal menos</b> de lo que gastas, sin dietas extremas.</li>
+      <li>Para bajar grasa, empieza comiendo unas <b>300 a 500 kcal menos</b> de lo que gastas y ajusta según cómo baje tu peso, sin dietas extremas.</li>
       <li>Mantén la proteína alta (error 4): así cuidas el músculo mientras bajas.</li>
       <li>Entrena <b>todo el cuerpo</b> con pesas y camina más cada día.</li>
       <li>Haz abdominales como cualquier músculo: 2 a 3 series al final, para que estén fuertes y se marquen cuando baje la grasa.</li>
@@ -371,10 +372,10 @@
   <div class="cabeza"><span class="marca"><img src="../tienda/img/tor-perfil.png" alt="">Entrena con Tor</span><span>Tu checklist</span></div>
   <span class="rotulo">Para imprimir</span>
   <h1>Tu checklist de los <span class="resalta">7 arreglos</span></h1>
-  <p class="bajada">Marca cada semana los que cumpliste. Cuando tengas los 7 marcados cuatro semanas seguidas, ya no estás frenado.</p>
+  <p class="bajada">Marca cada semana los que cumpliste. Si marcas los 7 cuatro semanas seguidas, quitaste los frenos más comunes. Lo demás es constancia: el músculo se nota en meses.</p>
   <table class="tabla check mt14">
     <tr><th style="width:44%">El arreglo</th><th>Sem. 1</th><th>Sem. 2</th><th>Sem. 3</th><th>Sem. 4</th></tr>
-    <tr><td>1 · Seguí mi plan, sin cambiarlo</td><td><span class="casilla"></span></td><td><span class="casilla"></span></td><td><span class="casilla"></span></td><td><span class="casilla"></span></td></tr>
+    <tr><td>1 · Hice mis sesiones: ___ de ___</td><td><span class="casilla"></span></td><td><span class="casilla"></span></td><td><span class="casilla"></span></td><td><span class="casilla"></span></td></tr>
     <tr><td>2 · Subí repeticiones o peso en algún ejercicio</td><td><span class="casilla"></span></td><td><span class="casilla"></span></td><td><span class="casilla"></span></td><td><span class="casilla"></span></td></tr>
     <tr><td>3 · Bajé lento y con el recorrido completo</td><td><span class="casilla"></span></td><td><span class="casilla"></span></td><td><span class="casilla"></span></td><td><span class="casilla"></span></td></tr>
     <tr><td>4 · Llegué a mi proteína casi todos los días</td><td><span class="casilla"></span></td><td><span class="casilla"></span></td><td><span class="casilla"></span></td><td><span class="casilla"></span></td></tr>
@@ -419,7 +420,7 @@
   <div class="caja amarilla mt20">
     <div class="fila" style="align-items:center">
       <img src="../tienda/img/tor-flex.svg" alt="" style="width:96px;flex:none">
-      <p style="font-size:16px"><b>Cuéntame cómo te fue.</b> Escríbeme en Instagram o TikTok de Entrena con Tor con la palabra <b>"SEMANA 1"</b> y dime cuál de los 7 errores te costó más.</p>
+      <p style="font-size:16px"><b>Cuéntame cómo te fue.</b> Escríbeme en Instagram o TikTok, <b>@entrenacontor</b>, con la palabra <b>"SEMANA 1"</b> y dime cuál de los 7 errores te costó más.</p>
     </div>
   </div>
   <div class="pie"><span>Los 7 errores · Entrena con Tor · Guía gratis</span><span class="num">11</span></div>
@@ -438,19 +439,22 @@
         <p>Los 7 arreglos de esta guía, convertidos en un plan: qué hacer cada día, cuántas series y repeticiones, cómo subir el peso y tu registro para anotar.</p>
         <ul class="checks">
           <li>3 rutinas: pecho y hombro, espalda y bíceps, piernas y glúteos.</li>
-          <li>Versión de 6 o 5 días, con abdominales cada día.</li>
+          <li>Versión de 3, 5 o 6 días, con abdominales cada día.</li>
           <li>Cada ejercicio dibujado con Tor, con sus claves.</li>
         </ul>
-        <p class="mt10" style="font-weight:700">Encuéntrala en el link de mi perfil.</p>
+        <!-- LINK A LA RUTINA: hoy lleva al perfil de Instagram (el link de la bio).
+             Cuando la landing tenga su direccion (o con el link de Hotmart), cambiar este href. -->
+        <a class="boton-pdf mt10" id="link-rutina" href="https://www.instagram.com/entrenacontor/">Quiero la rutina →</a>
+        <p class="chico mt6">O búscala en el link de mi perfil, @entrenacontor.</p>
       </div>
     </div>
   </div>
   <div class="caja mt20">
     <h3>Sígueme para ver cada ejercicio explicado</h3>
     <div class="redes mt10">
-      <span><img src="../tienda/img/red-youtube.svg" alt="">YouTube · @eltorvick</span>
-      <span><img src="../tienda/img/red-instagram.svg" alt="">Instagram · Entrena con Tor</span>
-      <span><img src="../tienda/img/red-tiktok.svg" alt="">TikTok · Entrena con Tor</span>
+      <a href="https://www.instagram.com/entrenacontor/"><img src="../tienda/img/red-instagram.svg" alt="">Instagram · @entrenacontor</a>
+      <a href="https://www.tiktok.com/@entrenacontor"><img src="../tienda/img/red-tiktok.svg" alt="">TikTok · @entrenacontor</a>
+      <a href="https://www.youtube.com/@eltorvick"><img src="../tienda/img/red-youtube.svg" alt="">YouTube · @eltorvick</a>
     </div>
   </div>
   <h3 class="mt20">Los estudios de esta guía</h3>
@@ -461,7 +465,7 @@
     <li>Morton RW y cols. (2018). A systematic review, meta-analysis and meta-regression of the effect of protein supplementation on resistance training-induced gains in muscle mass and strength. <i>Br J Sports Med</i>, 52(6), 376–384.</li>
     <li>Pallarés JG y cols. (2021). Effects of range of motion on resistance training adaptations: a systematic review and meta-analysis. <i>Scand J Med Sci Sports</i>, 31(10), 1866–1881.</li>
     <li>Plotkin D y cols. (2022). Progressive overload without progressing load? The effects of load or repetition progression on muscular adaptations. <i>PeerJ</i>, 10, e14142.</li>
-    <li>Schoenfeld BJ, Ogborn D, Krieger JW (2016). Effects of resistance training frequency on measures of muscle hypertrophy. <i>Sports Med</i>, 46(11), 1689–1697.</li>
+    <li>Schoenfeld BJ, Grgic J, Krieger J (2019). How many times per week should a muscle be trained to maximize muscle hypertrophy? A systematic review and meta-analysis of studies examining the effects of resistance training frequency. <i>J Sports Sci</i>, 37(11), 1286–1295.</li>
     <li>Seynnes OR, de Boer M, Narici MV (2007). Early skeletal muscle hypertrophy and architectural changes in response to high-intensity resistance training. <i>J Appl Physiol</i>, 102(1), 368–373.</li>
     <li>Vispute SS y cols. (2011). The effect of abdominal exercise on abdominal fat. <i>J Strength Cond Res</i>, 25(9), 2559–2564.</li>
     <li>Watson NF y cols. (2015). Recommended amount of sleep for a healthy adult. <i>Sleep</i>, 38(6), 843–844.</li>

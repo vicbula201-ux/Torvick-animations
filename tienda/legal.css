@@ -1,0 +1,27 @@
+/* paginas legales de la tienda: misma identidad que la landing (blanco, trazo INK, paleta de cinco) */
+:root { --ink: #14110F; --yel: #FFD400; --red: #E03A2F; --grn: #16A06A; --gry: #C9C3B8; --papel: #F4F1EC; --borde: 3px solid var(--ink); }
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: #ffffff; color: var(--ink); font-family: 'Barlow Semi Condensed', system-ui, sans-serif; font-weight: 500; font-size: 19px; line-height: 1.5; }
+a { color: var(--ink); text-decoration-color: var(--yel); text-decoration-thickness: 3px; text-underline-offset: 2px; }
+.cabecera { border-bottom: var(--borde); padding: 12px 16px; background: #fff; }
+.marca { display: inline-flex; align-items: center; gap: 10px; font-family: 'Archivo Black', sans-serif; font-size: 18px; text-decoration: none; }
+.marca img { width: 40px; height: 40px; border-radius: 50%; border: var(--borde); }
+.legal { max-width: 760px; margin: 0 auto; padding: 32px 16px 56px; }
+.rotulo { display: inline-block; background: var(--ink); color: #fff; text-transform: uppercase; font-weight: 700; font-size: 14px; letter-spacing: 0.08em;
+  padding: 5px 26px 5px 12px; clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%); }
+h1, h2 { font-family: 'Archivo Black', sans-serif; font-weight: 400; line-height: 1.08; letter-spacing: -0.01em; }
+h1 { font-size: clamp(30px, 7vw, 44px); margin: 14px 0 6px; }
+h2 { font-size: 23px; margin: 30px 0 8px; }
+.fecha { color: #5a534b; font-size: 16px; margin: 0 0 10px; }
+p { margin: 8px 0; }
+ul, ol { padding-left: 22px; margin: 8px 0; }
+li { margin: 6px 0; }
+.grande { font-size: 22px; }
+.sello { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; width: 92px; height: 92px; border-radius: 50%;
+  background: var(--yel); border: var(--borde); box-shadow: 4px 4px 0 var(--ink); margin-top: 14px; }
+.sello b { font-family: 'Archivo Black', sans-serif; font-size: 36px; line-height: 1; }
+.sello span { font-weight: 700; font-size: 13px; letter-spacing: 0.1em; }
+.boton { display: inline-block; background: var(--yel); text-decoration: none; text-transform: uppercase; font-family: 'Archivo Black', sans-serif; font-size: 16px;
+  padding: 13px 22px; border: var(--borde); border-radius: 14px; box-shadow: 4px 4px 0 var(--ink); }
+.volver { margin-top: 36px; }

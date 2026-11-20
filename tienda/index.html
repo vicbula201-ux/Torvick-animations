@@ -233,6 +233,33 @@
   .duda-final { margin-top: 36px; display: flex; gap: 18px; align-items: center; justify-content: center; flex-wrap: wrap; text-align: center; }
   .duda-final img { width: 70px; }
 
+  /* MODO PILOTO: solo la rutina y la guia gratis. Para volver a mostrar el
+     catalogo (pack y demas guias), sacar la clase "piloto" del <body>. */
+  .piloto .catalogo { display: none !important; }
+  [id] { scroll-margin-top: 88px; }
+
+  /* la rutina destacada: portada + una pagina de muestra + todo lo que trae */
+  .destacado { display: grid; gap: 24px; background: var(--blanco); border: var(--borde); border-radius: 24px; box-shadow: 8px 8px 0 var(--ink); padding: 22px; position: relative; }
+  .destacado .vitrina-doble { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: center; background: var(--papel); border: var(--borde); border-radius: 18px; padding: 30px 18px 24px; position: relative; }
+  .destacado .vitrina-doble .portada { width: 100%; transform: rotate(-4deg); }
+  .destacado .vitrina-doble .etiqueta { top: -16px; right: auto; left: 18px; }
+  .muestra { display: block; position: relative; transform: rotate(3deg); border: var(--borde); border-radius: 6px; overflow: hidden; box-shadow: 5px 5px 0 var(--ink); background: var(--blanco); transition: transform 0.3s cubic-bezier(.34, 1.56, .64, 1); color: inherit; }
+  .muestra:hover { transform: rotate(0deg) scale(1.04); }
+  .muestra img { width: 100%; display: block; }
+  .muestra span { position: absolute; left: 6px; right: 6px; bottom: 6px; background: var(--ink); color: var(--yel); font-weight: 700; font-size: 13px; line-height: 1.2; padding: 4px 8px; border-radius: 6px; text-align: center; }
+  .destacado .cuerpo { display: flex; flex-direction: column; gap: 14px; }
+  .destacado h3 { font-size: clamp(26px, 4.4vw, 36px); }
+  .destacado .formato { font-size: 15px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #5a534b; }
+  .destacado .lista li { font-size: 18px; }
+  .equipo { background: var(--papel); border: 2px dashed var(--ink); border-radius: 12px; padding: 10px 14px; font-size: 17px; }
+  .compra { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 18px; margin-top: 4px; }
+  .compra .boton { flex: 1 1 200px; text-align: center; justify-content: center; }
+
+  /* video: boton de play cuando el navegador no lo arranca solo */
+  .play { position: absolute; inset: 0; margin: auto; width: 84px; height: 84px; border-radius: 50%; border: var(--borde); background: var(--yel); box-shadow: 4px 4px 0 var(--ink); cursor: pointer; z-index: 3; display: flex; align-items: center; justify-content: center; }
+  .play[hidden] { display: none; }
+  .play::before { content: ''; margin-left: 7px; border-style: solid; border-width: 16px 0 16px 26px; border-color: transparent transparent transparent var(--ink); }
+
   /* portadas de las guias, dibujadas con la marca */
   .portada {
     position: relative; aspect-ratio: 3 / 4; background: var(--blanco); border: 4px solid var(--ink);
@@ -430,6 +457,7 @@
     .hero-acciones { align-self: start; }
     .comparar { grid-template-columns: 1fr 1fr; }
     .pack { grid-template-columns: 1fr 1.1fr; padding: 36px; }
+    .destacado { grid-template-columns: 1fr 1.05fr; padding: 34px; align-items: center; }
     .grilla { grid-template-columns: repeat(2, 1fr); }
     .regalo, .calcu, .autor, .referidos, .video-bloque { grid-template-columns: 1fr 1fr; }
     .pie-pagina .envoltura { grid-template-columns: 1fr auto; align-items: center; }
@@ -451,12 +479,12 @@
   }
 </style>
 </head>
-<body>
+<body class="piloto">
 
 <header class="cabecera">
   <div class="envoltura">
     <a class="marca" href="#inicio"><img src="img/tor-perfil.png" alt=""><span>ENTRENA CON TOR</span></a>
-    <a class="boton" href="#guias">Ver guías</a>
+    <a class="boton" href="#p-rutinas">Ver la rutina</a>
   </div>
 </header>
 <p class="aviso-ref" id="aviso-ref" role="status"></p>
@@ -473,7 +501,7 @@
       <div class="hero-texto">
         <span class="rotulo">Ciencia + dibujos simples</span>
         <h1>Lo que nadie te explica del ejercicio, <span class="resalta">Tor</span> te lo explica fácil.</h1>
-        <p class="bajada">Guías ilustradas: cada ejercicio con su error y su forma correcta, la nutrición sin dietas raras y planes listos para seguir. Todo basado en estudios, nada de opiniones.</p>
+        <p class="bajada">Una rutina ilustrada para empezar con buena técnica: qué hacer cada día, cuántas series y cuándo subir el peso. Cada ejercicio con su error y su forma correcta. Todo basado en estudios, nada de opiniones.</p>
       </div>
 
       <div class="guia" id="guia" aria-live="polite">
@@ -497,10 +525,10 @@
 
       <div class="hero-acciones">
         <div class="acciones">
-          <a class="boton" href="#guias">Ver las guías</a>
-          <a class="boton blanco" href="#gratis">Guía gratis</a>
+          <a class="boton" href="#gratis">Descargar los 7 errores</a>
+          <a class="boton blanco" href="#p-rutinas">Ver la rutina de 12 semanas</a>
         </div>
-        <p class="confianza"><b>Pago único</b> · Acceso inmediato · Garantía de 7 días</p>
+        <p class="confianza"><b>La guía es gratis</b> · La rutina: pago único y garantía de 7 días</p>
         <div class="redes-mini" aria-label="Redes">
           <a data-red="instagram" href="#"><img src="img/red-instagram.svg" alt="">Instagram</a>
           <a data-red="tiktok" href="#"><img src="img/red-tiktok.svg" alt="">TikTok</a>
@@ -512,8 +540,8 @@
 
   <div class="tira" aria-hidden="true">
     <div class="tira-pista">
-      <span>Biomecánica</span><span>Nutrición</span><span>Rutina para principiantes</span><span>Plantilla de progreso</span><span>Basado en ciencia</span><span>Acceso inmediato</span>
-      <span>Biomecánica</span><span>Nutrición</span><span>Rutina para principiantes</span><span>Plantilla de progreso</span><span>Basado en ciencia</span><span>Acceso inmediato</span>
+      <span>Rutina para principiantes</span><span>12 semanas</span><span>Técnica primero</span><span>3, 5 o 6 días</span><span>Basado en ciencia</span><span>Guía gratis</span>
+      <span>Rutina para principiantes</span><span>12 semanas</span><span>Técnica primero</span><span>3, 5 o 6 días</span><span>Basado en ciencia</span><span>Guía gratis</span>
     </div>
   </div>
 
@@ -523,7 +551,7 @@
       <div class="entra">
         <span class="rotulo">Así explica Tor</span>
         <h2 style="margin-top:14px">Cada ejercicio, con su <span class="resalta">error</span> y su forma correcta</h2>
-        <p style="margin-top:14px;font-size:20px">Así son los videos de Tor y así están hechas las guías: ves el error, entiendes por qué pasa y aprendes a corregirlo.</p>
+        <p style="margin-top:14px;font-size:20px">Así son los videos de Tor y así está hecha la rutina: ves el error, entiendes por qué pasa y aprendes a corregirlo.</p>
         <div class="pestanas" id="pestanas" role="tablist" aria-label="Elige un video">
           <button class="chip" type="button" role="tab" aria-pressed="true" data-video="press-militar">Press militar</button>
           <button class="chip" type="button" role="tab" aria-pressed="false" data-video="peso-muerto">Peso muerto</button>
@@ -532,7 +560,11 @@
       </div>
       <div class="entra">
         <div class="telefono">
-          <video id="video" src="video/press-militar.mp4" poster="video/press-militar.jpg" muted loop playsinline preload="metadata" aria-label="Video de Tor explicando un ejercicio"></video>
+          <video id="video" poster="video/press-militar.jpg" muted loop playsinline preload="metadata" aria-label="Video de Tor explicando un ejercicio">
+            <source src="video/press-militar.mp4" type="video/mp4">
+            <source src="video/press-militar.webm" type="video/webm">
+          </video>
+          <button class="play" type="button" id="play" aria-label="Reproducir el video" hidden></button>
         </div>
       </div>
     </div>
@@ -562,7 +594,7 @@
           <h3><img src="img/visto.svg" alt="">Con Tor</h3>
           <ul class="lista">
             <li><img src="img/visto.svg" alt="">Sabes qué músculo trabaja y cómo moverlo bien.</li>
-            <li><img src="img/visto.svg" alt="">Sigues un plan que sube el peso semana a semana.</li>
+            <li><img src="img/visto.svg" alt="">Sigues un plan y sabes cuándo sumar repeticiones o subir el peso.</li>
             <li><img src="img/visto.svg" alt="">Comes con números simples, sin dietas imposibles.</li>
             <li><img src="img/visto.svg" alt="">Cada consejo tiene su estudio detrás.</li>
           </ul>
@@ -575,13 +607,40 @@
   <section id="guias">
     <div class="envoltura">
       <div class="titulo-seccion entra">
-        <span class="rotulo">Las guías de Tor</span>
-        <h2 style="margin-top:14px">Elige por dónde <span class="resalta">empezar</span></h2>
-        <p>PDF ilustrados y plantillas para el celular. Las descargas apenas pagas.</p>
+        <span class="rotulo">La rutina de Tor</span>
+        <h2 style="margin-top:14px">Tu plan para los próximos <span class="resalta">3 meses</span></h2>
+        <p>Un PDF ilustrado para el celular o para imprimir. Lo descargas apenas pagas.</p>
       </div>
 
-      <!-- el pack: la mejor oferta, con los libros que se deslizan -->
-      <div class="pack entra" id="pack">
+      <!-- la rutina: el producto del piloto -->
+      <article class="destacado entra" id="p-rutinas">
+        <div class="vitrina-doble">
+          <span class="etiqueta">Nuevo</span>
+          <div class="portada amarilla"><span class="p-tag">PROGRAMA</span><div class="p-titulo">Rutina para <em>principiantes</em></div><img class="p-fig" src="img/tor-medio.svg" alt="" style="left:18%;width:78%"></div>
+          <a class="muestra" href="img/muestra-rutina.jpg" target="_blank" rel="noopener"><img src="img/muestra-rutina.jpg" alt="Una página de la rutina: el día 1, con cada ejercicio dibujado, sus series y su clave" loading="lazy"><span>Mira una página por dentro</span></a>
+        </div>
+        <div class="cuerpo">
+          <span class="formato">Programa de 12 semanas · PDF ilustrado de 17 páginas</span>
+          <h3>Rutina para principiantes</h3>
+          <p style="font-size:19px">Tu plan día por día para empezar con buena técnica y saber cuándo sumar repeticiones y cuándo subir el peso, sin adivinar.</p>
+          <ul class="lista">
+            <li><img src="img/visto.svg" alt="">Versión de 3, 5 o 6 días: eliges según tu tiempo</li>
+            <li><img src="img/visto.svg" alt="">Cada ejercicio dibujado con Tor, con series, repeticiones, descanso y su clave</li>
+            <li><img src="img/visto.svg" alt="">12 semanas en 3 fases: aprendes, construyes y progresas</li>
+            <li><img src="img/visto.svg" alt="">Abdominales cada día de entreno</li>
+            <li><img src="img/visto.svg" alt="">Registro para anotar, glosario e índice que se toca en el celular</li>
+          </ul>
+          <p class="equipo"><b>Necesitas:</b> mancuernas, barra, poleas, prensa, máquina Smith y banco, lo que tiene cualquier gimnasio.</p>
+          <div class="compra">
+            <span class="precio">$19.90<small>USD</small></span>
+            <a class="boton negro" data-producto="rutinas" href="#">La quiero</a>
+          </div>
+          <p class="confianza">Pago único · Acceso inmediato · Garantía de 7 días</p>
+        </div>
+      </article>
+
+      <!-- CATALOGO (oculto en el piloto): el pack con los libros que se deslizan -->
+      <div class="pack entra catalogo" id="pack">
         <span class="rotulo sello-oferta">Mejor oferta</span>
         <div>
           <h3>PACK TODO TOR</h3>
@@ -620,8 +679,8 @@
         </div>
       </div>
 
-      <!-- las guias sueltas -->
-      <div class="grilla">
+      <!-- CATALOGO (oculto en el piloto): las guias sueltas -->
+      <div class="grilla catalogo">
         <article class="producto entra" id="p-biomecanica">
           <div class="vitrina">
             <span class="etiqueta">Empieza aquí</span>
@@ -668,29 +727,11 @@
             <h3>Plantilla de plan de entrenamiento</h3>
             <p>Anota series, peso y repeticiones; la plantilla te dice cuándo subir el peso y te muestra tu progreso.</p>
             <ul class="lista">
-              <li><img src="img/visto.svg" alt="">Progresión automática semana a semana</li>
+              <li><img src="img/visto.svg" alt="">Te dice cuándo subir repeticiones o peso</li>
               <li><img src="img/visto.svg" alt="">Series por músculo y gráficas de fuerza</li>
               <li><img src="img/visto.svg" alt="">Funciona en el celular mientras entrenas</li>
             </ul>
             <div class="pie"><span class="precio">$9.90<small>USD</small></span><a class="boton" data-producto="plantilla" href="#">Lo quiero</a></div>
-          </div>
-        </article>
-
-        <article class="producto entra" id="p-rutinas">
-          <div class="vitrina">
-            <span class="etiqueta">Nuevo</span>
-            <div class="portada amarilla"><span class="p-tag">PROGRAMA</span><div class="p-titulo">Rutina para <em>principiantes</em></div><img class="p-fig" src="img/tor-medio.svg" alt="" style="left:18%;width:78%"></div>
-          </div>
-          <div class="cuerpo">
-            <span class="formato">Programa · PDF de 12 semanas</span>
-            <h3>Rutina para principiantes</h3>
-            <p>Tu plan día por día para empezar con buena técnica y subir el peso semana a semana, sin adivinar.</p>
-            <ul class="lista">
-              <li><img src="img/visto.svg" alt="">3 rutinas: pecho y hombro, espalda y bíceps, piernas y glúteos</li>
-              <li><img src="img/visto.svg" alt="">Series, repeticiones y cuánto peso usar</li>
-              <li><img src="img/visto.svg" alt="">Abdominales cada día y versión de 5 o 6 días</li>
-            </ul>
-            <div class="pie"><span class="precio">$19.90<small>USD</small></span><a class="boton" data-producto="rutinas" href="#">Lo quiero</a></div>
           </div>
         </article>
 
@@ -705,7 +746,7 @@
             <p>Hip thrust, búlgara y peso muerto rumano en un plan progresivo para hacer crecer tus glúteos.</p>
             <ul class="lista">
               <li><img src="img/visto.svg" alt="">Los 3 ejercicios con más evidencia</li>
-              <li><img src="img/visto.svg" alt="">Con progresión semana a semana</li>
+              <li><img src="img/visto.svg" alt="">Con un plan que progresa contigo</li>
             </ul>
             <div class="pie"><span class="precio" style="font-size:22px">Lista de espera</span><a class="boton blanco" href="#gratis" data-espera="gluteos">Avísame</a></div>
           </div>
@@ -731,7 +772,7 @@
 
       <div class="duda-final entra">
         <img src="img/tor-senala.svg" alt="">
-        <p style="font-size:20px;font-weight:600">¿Todavía no sabes cuál es para ti?</p>
+        <p style="font-size:20px;font-weight:600">¿No sabes si es para ti?</p>
         <button class="boton blanco" type="button" data-abrir-guia>Pregúntale a Tor</button>
       </div>
     </div>
@@ -743,15 +784,17 @@
       <div class="entra">
         <span class="rotulo">Comparte y gana</span>
         <h2 style="margin-top:14px">Invita a un amigo y llévate <span class="resalta">25 %</span> de descuento</h2>
-        <p style="margin-top:14px;font-size:20px">Si alguien compra con tu link, te regalamos un cupón para tu próxima guía. Entrenar acompañado también funciona mejor.</p>
+        <p style="margin-top:14px;font-size:20px">Si alguien compra la rutina con tu link, te regalamos un cupón de 25 % para la rutina o, si ya la tienes, para la próxima guía de Tor. Entrenar acompañado también funciona mejor.</p>
         <ol class="pasos">
+          <li><span>Sigue a <b>@entrenacontor</b> en Instagram o TikTok.
+            <span class="redes-mini" style="margin-top:8px"><a data-red="instagram" href="#"><img src="img/red-instagram.svg" alt="">Instagram</a><a data-red="tiktok" href="#"><img src="img/red-tiktok.svg" alt="">TikTok</a></span></span></li>
           <li>Escribe tu nombre y crea tu link.</li>
           <li>Mándalo por WhatsApp o compártelo en tus redes.</li>
-          <li>Cuando tu amigo compre, escríbenos con tu código y te mandamos el cupón.</li>
+          <li>Cuando tu amigo compre, mándanos tu link por mensaje directo y te enviamos el cupón.</li>
         </ol>
       </div>
       <div class="caja entra">
-        <span class="cupon" aria-hidden="true"><b>-25 %</b><span>en tu próxima<br>compra</span></span>
+        <span class="cupon" aria-hidden="true"><b>-25 %</b><span>en la rutina o<br>tu próxima guía</span></span>
         <div class="campo" style="margin-top:22px">
           <label for="ref-nombre">Tu nombre</label>
           <input class="campo-texto" id="ref-nombre" type="text" maxlength="24" placeholder="Ej.: Andrea" autocomplete="given-name">
@@ -789,7 +832,7 @@
           <input type="email" name="email" placeholder="Tu correo" autocomplete="email" required aria-label="Tu correo">
           <input type="hidden" name="interes" id="interes" value="guia-gratis">
           <button class="boton ancho" type="submit">Quiero la guía gratis</button>
-          <p class="aviso">Sin spam. Te puedes dar de baja con un clic.</p>
+          <p class="aviso">Sin spam. Te puedes dar de baja con un clic. Al enviarlo aceptas la <a href="privacidad.html">política de privacidad</a>.</p>
           <p class="mensaje" id="mensaje" role="status"></p>
         </form>
       </div>
@@ -800,9 +843,9 @@
   <section id="calculadora" class="fondo-gris">
     <div class="envoltura">
       <div class="titulo-seccion entra">
-        <span class="rotulo">Calculadora</span>
+        <span class="rotulo">Calculadora de ejemplo</span>
         <h2 style="margin-top:14px">¿Cuánto y <span class="resalta">qué</span> comer?</h2>
-        <p>Mueve tu peso, elige tu objetivo y lo que te gusta: Tor te arma un plato con tu proteína, tus carbohidratos y tu grasa saludable.</p>
+        <p>Mueve tu peso, elige tu objetivo y lo que te gusta: Tor te muestra un ejemplo de plato con tu proteína, tus carbohidratos y tu grasa saludable.</p>
       </div>
       <div class="calcu">
         <div class="caja entra">
@@ -834,7 +877,7 @@
             <div class="macro m-carb"><span>Carbohidratos</span><span class="barra"><i id="b-carb"></i></span><span class="num"><span id="g-carb">340</span> g</span></div>
             <div class="macro m-gras"><span>Grasa sana</span><span class="barra"><i id="b-gras"></i></span><span class="num"><span id="g-gras">63</span> g</span></div>
           </div>
-          <p class="nota-calcu">Proteína: 1,6 a 2,2 g por kilo (la usamos más alta si bajas grasa). Grasa: unos 0,8 a 0,9 g por kilo. Las calorías son una estimación para alguien que entrena de 4 a 6 días: tu cifra exacta depende de tu estatura, tu edad y tu actividad.</p>
+          <p class="nota-calcu">Es un ejemplo para armar tus porciones, no una dieta. Parte solo de tu peso y de entrenar varias veces por semana; tu cifra real depende de tu estatura, tu edad y tu actividad. Úsala como punto de partida: si en 2 a 3 semanas tu peso no va adonde quieres, sube o baja unas 150 kcal. Proteína: 1,6 a 2,2 g por kilo (más alta si bajas grasa). Grasa: 0,8 a 0,9 g por kilo.</p>
         </div>
 
         <div class="caja entra">
@@ -851,7 +894,7 @@
           <div class="grupo-comida"><p>Carbohidrato</p><div class="chips" id="g-c"></div></div>
           <div class="grupo-comida"><p>Grasa saludable</p><div class="chips" id="g-f"></div></div>
           <button class="boton blanco ancho" type="button" id="otra" style="margin-top:18px">Otra combinación</button>
-          <a class="boton ancho" style="margin-top:12px" href="#p-nutricion">Aprende a armar todo tu día</a>
+          <a class="boton ancho" style="margin-top:12px" href="#gratis">Llévate la guía gratis de los 7 errores</a>
           <p class="nota-calcu">Porciones aproximadas, en cocido salvo la avena. Si tienes una condición médica, consulta con un profesional.</p>
         </div>
       </div>
@@ -885,7 +928,7 @@
       <div class="escudo"><b>7</b><span>DÍAS</span></div>
       <div>
         <h2>Garantía de 7 días</h2>
-        <p style="margin-top:12px">Si en 7 días sientes que la guía no es para ti, pides el reembolso y te devuelven el 100% de tu dinero. Sin preguntas. El pago y el reembolso los gestiona Hotmart.</p>
+        <p style="margin-top:12px">Si en 7 días sientes que la rutina no es para ti, pides el reembolso y te devuelven el 100 % de tu dinero. Sin preguntas. El pago y el reembolso los gestiona Hotmart (<a href="reembolsos.html">cómo pedirlo</a>).</p>
       </div>
     </div>
   </section>
@@ -898,12 +941,12 @@
         <h2 style="margin-top:14px">Antes de que decidas</h2>
       </div>
       <div class="faq">
-        <details class="entra"><summary>¿Cómo recibo las guías?</summary><p>Apenas pagas, Hotmart te manda el acceso a tu correo. Descargas los PDF y las plantillas y los usas en el celular, la tablet o el computador.</p></details>
+        <details class="entra"><summary>¿Cómo recibo la rutina?</summary><p>Apenas pagas, Hotmart te manda el acceso a tu correo. Descargas el PDF y lo usas en el celular (el índice se toca para saltar a cada página), la tablet o el computador, o lo imprimes.</p></details>
         <details class="entra"><summary>¿Es un pago único o una suscripción?</summary><p>Pago único. Es tuyo para siempre, con las actualizaciones incluidas.</p></details>
-        <details class="entra"><summary>¿Sirve si estoy empezando?</summary><p>Sí. Todo está explicado desde cero, con dibujos, y la rutina para principiantes empieza suave las primeras semanas para que aprendas la técnica.</p></details>
-        <details class="entra"><summary>¿Necesito ir al gimnasio?</summary><p>La rutina y la guía de biomecánica están pensadas para el gimnasio (máquinas, poleas y mancuernas). La nutrición y la plantilla sirven entrenes donde entrenes.</p></details>
-        <details class="entra"><summary>¿Cómo puedo pagar?</summary><p>Con tarjeta, PayPal y pagos locales según tu país, como PSE, Nequi o Efecty en Colombia y OXXO o SPEI en México.</p></details>
-        <details class="entra"><summary>¿Cómo funciona lo de los referidos?</summary><p>Creas tu link en la sección "Comparte y gana" y lo compartes. Si alguien compra entrando por tu link, la compra queda marcada con tu código; nos escribes con ese código y te mandamos un cupón de 25 % para tu próxima guía.</p></details>
+        <details class="entra"><summary>¿Sirve si nunca entrené?</summary><p>Sí. Todo está explicado desde cero, con dibujos y un glosario de las palabras del gimnasio. Puedes empezar con la versión de 3 días, y las primeras semanas son suaves para que aprendas la técnica.</p></details>
+        <details class="entra"><summary>¿Necesito ir al gimnasio?</summary><p>Sí: la rutina usa máquinas, poleas, mancuernas y barra, lo que tiene cualquier gimnasio. La guía gratis y la calculadora sirven entrenes donde entrenes.</p></details>
+        <details class="entra"><summary>¿Cómo puedo pagar?</summary><p>Con tarjeta y con los medios de pago que Hotmart ofrece en tu país (en Colombia, por ejemplo, PSE o Efecty). Los ves todos al abrir el pago.</p></details>
+        <details class="entra"><summary>¿Cómo funciona lo de los referidos?</summary><p>Sigues a @entrenacontor, creas tu link en "Comparte y gana" y lo compartes. Si alguien compra entrando por tu link, la compra queda marcada con tu código; nos mandas tu link por mensaje directo y te enviamos un cupón de 25 % para la rutina o para la próxima guía de Tor.</p></details>
         <details class="entra"><summary>¿Y si no me gusta?</summary><p>Tienes 7 días de garantía: pides el reembolso desde Hotmart y te devuelven todo.</p></details>
         <details class="entra"><summary>¿Esto reemplaza a un médico o nutricionista?</summary><p>No. Son guías educativas. Si tienes una lesión, dolor o una enfermedad, consulta antes con un profesional de la salud.</p></details>
       </div>
@@ -915,9 +958,9 @@
     <div class="envoltura">
       <img class="tor-cierre" src="img/tor-flex.svg" alt="">
       <h2>Empieza hoy a entrenar con cabeza</h2>
-      <p style="font-size:20px">Las 4 guías y los 2 regalos en un solo pago.</p>
-      <a class="boton negro" data-producto="pack" href="#">Quiero el pack completo</a>
-      <p class="confianza"><b>$34.90 USD</b> · Acceso inmediato · Garantía de 7 días</p>
+      <p style="font-size:20px">Tu plan de 12 semanas, con cada ejercicio dibujado por Tor.</p>
+      <a class="boton negro" data-producto="rutinas" href="#">Quiero la rutina</a>
+      <p class="confianza"><b>$19.90 USD</b> · Pago único · Garantía de 7 días · <a href="#gratis">o empieza gratis con los 7 errores</a></p>
     </div>
   </section>
 </main>
@@ -967,30 +1010,32 @@
        (link a tu Instagram, WhatsApp o mailto:). El codigo del amigo viaja
        al checkout de Hotmart en el parametro sck, asi lo ves en tus ventas.
      Mientras un link este vacio, el boton lleva a la seccion de guias.
+     PILOTO: solo se vende la rutina (checkout.rutinas). El pack y las demas
+     guias estan en la pagina pero ocultas (clase "catalogo").
      ========================================================= */
   var ENLACES = {
     checkout: {
-      pack: '',          // https://pay.hotmart.com/XXXXXXXX
+      rutinas: '',       // https://pay.hotmart.com/XXXXXXXX  <- el link de pago de la rutina
+      pack: '',          // (catalogo, oculto en el piloto)
       biomecanica: '',
       nutricion: '',
       plantilla: '',
-      rutinas: '',
       asesoria: ''       // un formulario de solicitud o tu WhatsApp
     },
     redes: {
-      instagram: '',     // pendiente: el Instagram de Entrena con Tor
-      tiktok: '',        // pendiente: el TikTok de Entrena con Tor
+      instagram: 'https://www.instagram.com/entrenacontor/',
+      tiktok: 'https://www.tiktok.com/@entrenacontor',
       youtube: 'https://www.youtube.com/@eltorvick'
     },
-    legal: { terminos: '', privacidad: '', reembolsos: '' },
+    legal: { terminos: 'terminos.html', privacidad: 'privacidad.html', reembolsos: 'reembolsos.html' },
     formulario: '',
-    referidos: { descuento: 25, reclamar: '' }
+    referidos: { descuento: 25, reclamar: 'https://www.instagram.com/entrenacontor/' }
   };
 
   /* lo que Tor recomienda: nombre, a donde lleva y por que */
   var PRODUCTOS = {
     pack: { nombre: 'el Pack Todo Tor', sel: '#pack', precio: '$34.90', porque: 'Técnica, comida, rutina y plantilla en un solo pago: es lo más completo para empezar bien.' },
-    rutinas: { nombre: 'la Rutina para principiantes', sel: '#p-rutinas', precio: '$19.90', porque: 'Te dice qué hacer cada día, cuántas series y cuándo subir el peso.' },
+    rutinas: { nombre: 'la Rutina para principiantes', sel: '#p-rutinas', precio: '$19.90', porque: 'Te dice qué hacer cada día, cuántas series y cuándo subir el peso, y puedes empezar con 3 días por semana.' },
     plantilla: { nombre: 'la Plantilla de plan de entrenamiento', sel: '#p-plantilla', precio: '$9.90', porque: 'Si ya entrenas, lo que te falta es medir: la plantilla te dice cuándo subir el peso para salir del estancamiento.' },
     nutricion: { nombre: 'Nutrición para principiantes', sel: '#p-nutricion', precio: '$12.90', porque: 'Para bajar grasa sin perder músculo, primero hay que saber cuánto comer.' },
     biomecanica: { nombre: 'Biomecánica de los ejercicios', sel: '#p-biomecanica', precio: '$14.90', porque: 'Cada ejercicio con su error y su forma correcta, para que lo sientas en el músculo que toca.' },
@@ -1097,14 +1142,44 @@
       })();
     }
     var eleccion = {};
+    var piloto = document.body.classList.contains('piloto');
     function saludo() {
       eleccion = {};
+      if (piloto) {
+        habla('¡Hola! Soy <b>Tor</b>. ¿Qué quieres lograr? Te digo por dónde empezar.', [
+          { t: 'Ganar músculo', img: 'pesa.svg', f: function () { eleccion.obj = 'musculo'; nivel(); } },
+          { t: 'Bajar grasa', img: 'brocoli.svg', f: function () { eleccion.obj = 'grasa'; nivel(); } },
+          { t: 'Aprender a entrenar bien', img: 'visto.svg', f: function () { eleccion.obj = 'tecnica'; nivel(); } }
+        ]);
+        return;
+      }
       habla('¡Hola! Soy <b>Tor</b>. ¿Qué quieres lograr? Te digo por dónde empezar.', [
         { t: 'Ganar músculo', img: 'pesa.svg', f: function () { eleccion.obj = 'musculo'; nivel(); } },
         { t: 'Bajar grasa', img: 'brocoli.svg', f: function () { eleccion.obj = 'grasa'; nivel(); } },
         { t: 'Aprender técnica', img: 'visto.svg', f: function () { recomienda('biomecanica'); } },
         { t: 'Glúteos', img: 'corona.svg', f: function () { recomienda('gluteos'); } },
         { t: 'Quiero todo', img: 'cerebro.svg', f: function () { recomienda('pack'); } }
+      ]);
+    }
+    // en el piloto: quien empieza va a la rutina; quien ya entrena y no avanza, a la guia gratis
+    function decidePiloto(n) {
+      var porque = {
+        musculo: 'Te dice qué hacer cada día, cuántas series y cuándo subir el peso, y puedes empezar con 3 días por semana.',
+        grasa: 'Para bajar grasa sin perder músculo, lo primero es entrenar todo el cuerpo con un plan. Y la calculadora de abajo te da un ejemplo de cuánto comer.',
+        tecnica: 'Cada ejercicio viene dibujado, con su clave para hacerlo bien, y las primeras 4 semanas son para aprender la técnica.'
+      }[eleccion.obj];
+      if (n === 'mucho') {
+        habla('Si ya entrenas y no avanzas, empieza por la <b>guía gratis de los 7 errores</b>: casi siempre el freno es uno de esos. Te llega al correo.', [
+          { t: 'Llévame', principal: true, f: function () { irA('#gratis'); habla('Ahí está: pon tu correo y listo. ¿Quieres ver también la rutina?', [{ t: 'Ver la rutina', f: function () { tour('rutinas'); } }, { t: 'Empezar de nuevo', f: saludo }]); } },
+          { t: 'Ver la rutina', f: function () { tour('rutinas'); } },
+          { t: 'Volver', f: saludo }
+        ]);
+        return;
+      }
+      habla('Te recomiendo <b>la Rutina para principiantes</b>. ' + porque, [
+        { t: 'Llévame ahí', principal: true, f: function () { tour('rutinas'); } },
+        { t: 'Primero la guía gratis', f: function () { irA('#gratis'); } },
+        { t: 'Volver', f: saludo }
       ]);
     }
     function nivel() {
@@ -1115,6 +1190,7 @@
       ]);
     }
     function decide(n) {
+      if (piloto) { decidePiloto(n); return; }
       var tabla = { musculo: { cero: 'rutinas', poco: 'rutinas', mucho: 'plantilla' }, grasa: { cero: 'nutricion', poco: 'nutricion', mucho: 'pack' } };
       recomienda(tabla[eleccion.obj][n]);
     }
@@ -1154,6 +1230,15 @@
           { el: $('#pack-libros'), texto: 'Desliza los libros: cada uno muestra lo que vale por separado. Juntos te ahorras <b>$22.70</b>.' },
           { el: $('#pack-precio'), texto: 'Es un <b>pago único</b> y tienes <b>7 días de garantía</b>: si no te sirve, te devuelven todo.' },
           { el: $('#pack-boton'), texto: 'Cuando quieras, lo compras aquí y te llega al correo al instante.', compra: 'pack' }
+        ];
+      }
+      if (k === 'rutinas') {
+        return [
+          { el: base, texto: 'Esta es <b>la Rutina para principiantes</b>: tu plan de 12 semanas.' },
+          { el: $('.muestra', base), texto: 'Así se ve por dentro: cada ejercicio dibujado, con sus series, su descanso y su clave. Tócala para verla grande.' },
+          { el: $('.lista', base), texto: 'Esto es lo que trae. Eliges <b>3, 5 o 6 días</b>, y todo tiene los estudios detrás.' },
+          { el: $('.precio', base), texto: 'Cuesta <b>' + p.precio + '</b>, en un solo pago, con <b>7 días de garantía</b>.' },
+          { el: $('.boton', base), texto: 'Cuando quieras, la compras aquí y te llega al correo al instante. ¿Alguna duda? Mira las preguntas de abajo.', compra: k }
         ];
       }
       return [
@@ -1238,7 +1323,7 @@
     var ultimoToque = 0;
     function tocado() { ultimoToque = Date.now(); }
     setInterval(function () {
-      if (quieto || Date.now() - ultimoToque < 8000) return;
+      if (quieto || Date.now() - ultimoToque < 8000 || !car.offsetParent) return;
       var r = car.getBoundingClientRect();
       if (r.bottom < 0 || r.top > window.innerHeight) return;
       irLibro(activo() + 1);
@@ -1246,16 +1331,25 @@
     setTimeout(function () { irLibro(0); activo(); }, 50);
 
     /* ---------- video ---------- */
-    var video = $('#video');
-    function juega() { var p = video.play(); if (p && p.catch) p.catch(function () {}); }
+    // MP4 o WebM segun lo que el navegador pueda reproducir; si no arranca solo
+    // (ahorro de bateria, datos o un navegador sin autoplay), aparece el boton de play
+    var video = $('#video'), play = $('#play');
+    var ext = video.canPlayType('video/mp4; codecs="avc1.42E01E"') ? '.mp4' : '.webm';
+    function juega() {
+      var p = video.play();
+      if (p && p.then) p.then(function () { play.hidden = true; }, function () { play.hidden = false; });
+    }
+    video.addEventListener('playing', function () { play.hidden = true; });
+    video.addEventListener('error', function () { play.hidden = false; }, true);
+    play.addEventListener('click', function () { play.hidden = true; juega(); });
     if ('IntersectionObserver' in window) {
       new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) juega(); else video.pause(); }); }, { threshold: 0.4 }).observe(video);
-    }
+    } else { play.hidden = false; }
     $$('#pestanas .chip').forEach(function (b) {
       b.addEventListener('click', function () {
         $$('#pestanas .chip').forEach(function (o) { o.setAttribute('aria-pressed', o === b ? 'true' : 'false'); });
         var id = b.getAttribute('data-video');
-        video.poster = 'video/' + id + '.jpg'; video.src = 'video/' + id + '.mp4'; juega();
+        video.poster = 'video/' + id + '.jpg'; video.src = 'video/' + id + ext; juega();
       });
     });
 
@@ -1317,7 +1411,10 @@
       var P = kg * ({ ganar: 1.8, mantener: 1.6, bajar: 2.0 })[calc.obj];
       var F = kg * (calc.obj === 'bajar' ? 0.8 : 0.9);
       var Cc = Math.max(0, (kcal - P * 4 - F * 9) / 4);
-      return { kcal: Math.round(kcal / 10) * 10, P: Math.round(P), C: Math.round(Cc), F: Math.round(F) };
+      // las kcal que se muestran salen de sumar los macros redondeados: asi siempre cuadran
+      var m = { P: Math.round(P), C: Math.round(Cc), F: Math.round(F) };
+      m.kcal = m.P * 4 + m.C * 4 + m.F * 9;
+      return m;
     }
     // gramos de cada comida para llegar a la proteina, el carbohidrato y la grasa de una comida
     function plato(m) {
@@ -1423,7 +1520,7 @@
       if (location.protocol === 'file:') link = 'https://tu-pagina.com/?ref=' + cod;
       $('#ref-codigo').textContent = cod.toUpperCase();
       $('#ref-link').textContent = link;
-      var msj = 'Mira las guías de Tor para entrenar y comer bien, explicadas fácil: ' + link;
+      var msj = 'Mira la rutina de Tor para empezar a entrenar bien, explicada fácil (y una guía gratis): ' + link;
       $('#ref-whatsapp').href = 'https://wa.me/?text=' + encodeURIComponent(msj);
       $('#ref-compartir').style.display = navigator.share ? '' : 'none';
       $('#ref-compartir').onclick = function () { navigator.share({ title: 'Entrena con Tor', text: msj, url: link }).catch(function () {}); };
@@ -1432,8 +1529,8 @@
         if (navigator.clipboard) navigator.clipboard.writeText(link).then(ok, function () {}); else ok();
       };
       var donde = ENLACES.referidos.reclamar;
-      $('#ref-reclamo').innerHTML = 'Guarda tu código. Cuando tu amigo compre, ' + (donde ? '<a href="' + donde + '" target="_blank" rel="noopener">escríbenos aquí</a>' : 'escríbenos por Instagram') +
-        ' con tu código y te mandamos tu cupón de ' + ENLACES.referidos.descuento + ' %.';
+      $('#ref-reclamo').innerHTML = 'Guarda tu link. Cuando tu amigo compre, ' + (donde ? '<a href="' + donde + '" target="_blank" rel="noopener">mándanoslo por mensaje directo a @entrenacontor</a>' : 'mándanoslo por mensaje directo a @entrenacontor') +
+        ' (síguenos primero) y te enviamos tu cupón de ' + ENLACES.referidos.descuento + ' %.';
       $('#ref-caja').classList.add('si');
     }
     if (miCodigo) { $('#ref-nombre').value = miCodigo.replace(/-[a-z0-9]{3}$/, '').replace(/-/g, ' '); muestraLink(miCodigo); }
@@ -1450,8 +1547,9 @@
       var email = form.email.value.trim();
       if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { msj.className = 'mensaje pendiente'; msj.textContent = 'Escribe un correo válido.'; return; }
       if (!ENLACES.formulario) {
+        // mientras no este conectada la herramienta de correo, la guia se pide por Instagram
         msj.className = 'mensaje pendiente';
-        msj.textContent = 'El formulario aún no está conectado: falta poner la URL de tu herramienta de correo en ENLACES.formulario.';
+        msj.innerHTML = 'Estamos conectando el envío por correo. Mientras tanto, escríbenos la palabra <b>GUÍA</b> por mensaje directo a <a href="' + ENLACES.redes.instagram + '" target="_blank" rel="noopener">@entrenacontor</a> y te la mandamos.';
         return;
       }
       fetch(ENLACES.formulario, { method: 'POST', body: new FormData(form), mode: 'no-cors' })

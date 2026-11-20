@@ -627,6 +627,20 @@ exportarlos. Los cobros van por Hotmart: cada botón toma su link de
 `ENLACES.checkout`; sin link, lleva a la sección de guías. No poner
 testimonios ni cifras de ventas inventadas.
 
+**Modo piloto** (`<body class="piloto">`, el estado actual): el autor prueba
+primero con un solo producto, así que solo se ve la **Rutina para
+principiantes** (bloque destacado `#p-rutinas`, con una página de muestra
+`img/muestra-rutina.jpg`, el equipo que hace falta y el precio) y la guía
+gratis de los 7 errores. El pack y las demás guías siguen en el HTML con la
+clase `catalogo` (ocultas); sacar `piloto` del `<body>` las vuelve a mostrar.
+En el piloto, Tor recomienda la rutina a quien empieza y la guía gratis a quien
+ya entrena; los referidos piden seguir a @entrenacontor y dan un cupón de 25 %
+para la rutina o la próxima guía. Los videos van en MP4 y WebM (el script elige
+el que el navegador reproduce) con un botón de play si no arrancan solos; las
+kcal de la calculadora salen de sumar los macros. Las páginas legales
+(`privacidad.html`, `terminos.html`, `reembolsos.html`, estilo en `legal.css`)
+son textos base: falta un correo de contacto del responsable.
+
 ## E-books — `ebooks/`
 
 Cada e-book es un HTML con una `<section class="pagina">` por hoja A4 y el
@@ -641,6 +655,12 @@ escena). Los dibujos de Tor salen de `tienda/img/` y de `ebooks/img/eb-*.svg`.
 **El repositorio es público:** los e-books pagos (`rutina-principiantes.html`)
 viven en `ebooks/privado/`, que no va a git; la guía gratis sí.
 Cada dato lleva su estudio en la hoja y la lista completa al final.
+Los links `<a href="#id">` quedan clicables en el PDF: la rutina (17 hojas) tiene
+un índice que lleva a cada hoja, "Entrena con Tor" arriba de cada hoja vuelve
+al índice, y un glosario al final. Sus opciones de semana son A (6 días), B
+(5 días) y C (3 días de cuerpo completo, con su propio registro); la C es la
+recomendada para quien empieza de cero. El registro es por sesión (fecha y las
+repeticiones de cada serie), porque la doble progresión mira todas las series.
 
 ## Videos largos de YouTube — `largo.html`
 
