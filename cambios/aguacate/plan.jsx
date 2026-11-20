@@ -22,7 +22,10 @@
     lectura: 2,
     // el cierre dicho: mientras pregunta, arriba se arma @eltorvick con YouTube, Instagram y TikTok;
     // en «sígueme», SÍGUEME gigante abajo + «para más contenido». El queda a la vista.
-    firma: { estilo: 'grande', ini: pregunta - 0.1, sigueme: sigueme, texto: 'para más contenido', foco: [0.5, 0.32] },
+    // todo debajo de la cara (inclinado hacia la camara, la cara ocupa de y 80 a 690): SÍGUEME, las redes con
+    // @eltorvick y la pastilla; la camara apenas se acerca, fija en el menton
+    firma: { estilo: 'grande', ini: pregunta - 0.1, sigueme: sigueme, texto: 'para más contenido', zoom: 1.04, foco: [0.5, 0.36],
+      y: 860, yArriba: 1015, yTexto: 1160 },
     subs: {
       // mas abajo que de costumbre: el aguacate en la mano queda a la altura del pecho (y 1100-1400)
       y: 1440,
@@ -38,7 +41,8 @@
       p.rotulo(t('saludable'), t('tiene más') - 0.25, 'Aguacate', { sigue: 'aguacate-mano' }),
       // las calorias de otras frutas, para ver el «más que muchas frutas» (aprobada por el autor)
       p.barras(t('más calorías'), t('pero eso') - 0.05, {
-        titulo: 'Calorías por 100 g', pos: [540, 470], ancho: 820, compacta: true, colores: ['amarillo'], unidad: ' kcal', soloPrimera: true, fondo: false,
+        // mas arriba y un poco mas chica: que no le tape la cabeza
+        titulo: 'Calorías por 100 g', pos: [540, 415], ancho: 780, compacta: true, colores: ['amarillo'], unidad: ' kcal', soloPrimera: true, fondo: false,
         filas: [
           { nombre: 'Manzana', partes: [52, 108], t: t('más calorías') + 0.15 },
           { nombre: 'Banano', partes: [89, 71], t: t('muchas') },
@@ -62,6 +66,7 @@
 
       // ---- 3. LAS GRASAS (el con el aguacate partido en la mano) ----
       // las grasas del aguacate contra las del aceite de oliva (USDA; aprobada por el autor)
+      // se va antes de «su combinación» (ahi entra la toma de apoyo): la regla de los cortes la termina justo antes
       p.barras(t('sus grasas') - 0.1, t('su combinación') - 0.1, {
         titulo: '¿Qué grasas tiene?', sub: '% de sus ácidos grasos', pie: 'USDA FoodData Central',
         filas: [{ nombre: 'Aguacate', partes: [71, 13, 16], busca: 'monoinsaturadas' }, { nombre: 'Aceite de oliva', partes: [75, 11, 14], busca: 'aceite' }],
@@ -77,18 +82,18 @@
       // una sola pieza: la pregunta arriba y cada opción cuando la dice
       p.lista(t('cómo comerlo') - 0.05, t.fin('vegetales') + 0.6, {
         titulo: '¿Cómo comerlo?', pos: [60, 700, 'i', 's'], tam: 50,
-        items: [{ texto: 'Arepa', busca: 'arepa' }, { texto: 'Huevos', busca: 'huevos' }, { texto: 'Atún', busca: 'atún' }, { texto: 'Ensalada', busca: 'ensalada' }]
+        // un emoji chico al lado de cada opcion (pedido del autor)
+        items: [{ texto: 'Arepa', busca: 'arepa', emoji: 'arepa' }, { texto: 'Huevos', busca: 'huevos', emoji: 'huevo' },
+          { texto: 'Atún', busca: 'atún', emoji: 'pescado' }, { texto: 'Ensalada', busca: 'ensalada', emoji: 'ensalada' }]
       }),
 
       // ---- 6. VEREDICTO Y CTA (el con el aguacate partido y la cuchara) ----
       golpe(t('veredicto')),
-      p.veredicto(nueve - 0.24, t('con qué') - 0.15, {
-        nota: 9, de: 10, pos: [540, 640],
-        palabras: [{ texto: 'Nutritivo', busca: 'nutritivo' }, { texto: 'Versátil', busca: 'versátil' }, { texto: 'Delicioso', busca: 'delicioso' }],
-        criterio: 'nutrición · versatilidad · sabor', encoger: t('eso sí') - 0.1, esquina: [200, 420], tamFinal: 250
-      }),
-      p.etiqueta(t('porciones') - 0.05, t.fin('importan') + 1.2, 'Las porciones importan', { estilo: 'negro', icono: 'aviso', minus: true, letra: 'texto', tam: 52, pos: [540, 1090], rot: -2 }),
-      p.cta(t('con qué') - 0.05, t.fin('comentarios') + 0.5, '¿Con qué\nlo acompañas?', { pregunta: true, texto: 'te leo en los comentarios', y: 540 })
+      // el sello solo en «9 de 10» (con un segundo de pausa despues) y se va antes de «es nutritivo…»
+      p.veredicto(nueve - 0.24, t('es nutritivo'), { nota: 9, de: 10, pos: [540, 640] }),
+      p.etiqueta(t('porciones') - 0.05, t('con qué') - 0.3, 'Las porciones importan', { estilo: 'negro', icono: 'aviso', minus: true, letra: 'texto', tam: 52, pos: [540, 1090], rot: -2 }),
+      // la pregunta sin desenfoque y debajo de la cara (el menton queda en y ~870)
+      p.cta(t('con qué') - 0.05, t.fin('comentarios') + 0.5, '¿Con qué\nlo acompañas?', { pregunta: true, texto: 'te leo en los comentarios', y: 1120, fondo: false })
     ]
   });
 })(window);

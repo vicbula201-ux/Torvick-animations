@@ -235,6 +235,12 @@
     };
     t.palabras = tr.palabras;
     t.dur = tr.dur;
+    // los cambios de imagen del corte (montar.py los anota): t.corte(s) -> el primero despues de s
+    t.cortes = tr.cortes || [];
+    t.corte = function (desde) {
+      for (var i = 0; i < t.cortes.length; i++) if (t.cortes[i] > (desde || 0) + 0.01) return t.cortes[i];
+      return tr.dur;
+    };
     return t;
   }
 
@@ -1522,7 +1528,7 @@
         <Caja p={[540, y, 'c']} e={entra(T, sig, 'enfoque', 0.3)} dy={dy} esc={1 + 0.03 * k01(T, sig, 3)} z={45}>
           <LineaGigante fs={fsS} color={AMARILLO}>{f.grande || 'SÍGUEME'}</LineaGigante>
         </Caja>
-        <Caja p={[540, y + fsS * 0.43 + 76, 'c']} e={entra(T, f.cTexto == null ? sig + 0.38 : f.cTexto, 'pop', 0.3)} dy={dy} rot={-2} z={45}>
+        <Caja p={[540, f.yTexto == null ? y + fsS * 0.43 + 76 : f.yTexto, 'c']} e={entra(T, f.cTexto == null ? sig + 0.38 : f.cTexto, 'pop', 0.3)} dy={dy} rot={-2} z={45}>
           <Pastilla txt={f.texto || 'para más contenido'} estilo="blanco" tam={54} fuente={F} minus />
         </Caja>
       </React.Fragment>
@@ -2001,6 +2007,21 @@
       }
       puestos.push(b);
     });
+    // una tarjeta grande no cruza un cambio de imagen: termina de irse (con el desenfoque de atras) justo
+    // antes del primer corte que viene despues de su ultimo dato (pedido del autor: transiciones precisas)
+    if (d.cortes && d.cortes.length) {
+      puestos.filter(exclusiva).forEach(function (b) {
+        if (b.tipo === 'veredicto' && b.encoger != null) return;
+        var margen = b.fondo === false ? 0.24 : 0.42;
+        var desde = Math.max(armada(b) + 0.5, b.ini + 0.9);
+        for (var i = 0; i < d.cortes.length; i++) {
+          var c = d.cortes[i];
+          if (c <= desde) continue;
+          if (c < b.fin + margen) b.fin = Math.max(b.ini + 0.6, c - margen);
+          break;
+        }
+      });
+    }
     quitar.forEach(function (b) { b.quitado = true; });
     var fuera = function (b) { return !b.quitado; };
     d.encima = d.encima.filter(fuera); d.detras = d.detras.filter(fuera); d.rotulos = d.rotulos.filter(fuera);
@@ -2029,7 +2050,12 @@
     d.marcadas = {};
     (d.subs.marcadas || []).forEach(function (m) { d.marcadas[norm(m)] = true; });
     d.dur = crudo.dur || tr.dur || 30;
+    d.cortes = tr.cortes || [];
     d.bloques = armarBloques(tr.palabras, d.subs);
+    // el subtitulo de la frase que termino no pasa a la toma siguiente: se va justo en el cambio de imagen
+    d.cortes.forEach(function (c) {
+      d.bloques.forEach(function (bl) { if (bl.fin <= c + 0.02 && bl.hasta > c) bl.hasta = c; });
+    });
     taparViejos(d.bloques, d.subs.tapar);
     var beats = (crudo.plan || []).filter(Boolean).map(function (b) { return Object.assign({}, b); });
     d.camaras = beats.filter(function (b) { return b.tipo === 'camara'; });

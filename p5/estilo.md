@@ -95,6 +95,25 @@ En el plan es `lectura: 2` en el registro: el motor aplica las dos primeras regl
 solo (`CAMBIO.md`) y `grabar-cambio.js <id> --plan` muestra el horario que
 quedó.
 
+### Transiciones precisas y la cara libre
+
+Lo pidió el autor al ver la review del aguacate:
+
+- **Nada cruza un cambio de toma.** Una tarjeta grande (con la cámara desenfocada
+  detrás) termina de irse, con el desenfoque, justo antes del corte; la toma nueva
+  empieza limpia. Los subtítulos de la frase anterior tampoco pasan a la toma
+  siguiente. Lo hace el motor solo con los cortes que anota `montar.py`.
+- **La toma empieza mirando a cámara.** Si al arrancar la frase el autor mira a
+  otro lado, la pieza empieza donde ya mira (aunque se pierda un «¿y tú?»).
+- **Nada tapa la cara:** la pregunta del final va sin desenfoque y debajo del
+  mentón; las redes y el SÍGUEME del cierre, debajo de la cara; las tarjetas de
+  arriba, por encima de la cabeza.
+- **El sello del veredicto solo en la nota** («9 de 10»), con un segundo de pausa
+  en el corte para leerlo; lo que dice después («es nutritivo…») se ve con él a
+  cámara.
+- **Una frase no se corta a la mitad:** si lo que sigue no se entiende, se usa otra
+  toma con la frase completa.
+
 ### El cierre
 
 La última línea pide **una sola cosa** (comenta una palabra, guarda, sígueme) y la
@@ -192,7 +211,8 @@ construye cuando llegue el primer video que lo necesite.
 
 - **Sin música** (decisión del autor).
 - **Subtítulos del P4**, con la palabra grande encima cuando hace falta.
-- **Sin emojis** (al autor no le convencieron en la divagación): en su lugar, el
-  nombre encima de la cosa (`rotulo`) o una pastilla con ícono. Los 3D de
-  `cambio/emoji/` quedan para el P4.
+- **Sin emojis sueltos** (al autor no le convencieron en la divagación): en su lugar,
+  el nombre encima de la cosa (`rotulo`) o una pastilla con ícono. **La excepción**
+  (la pidió en el aguacate): en una lista de opciones, un emoji 3D chico de
+  `cambio/emoji/` al lado de cada una (arepa, huevo, pescado, ensalada).
 - **Sin memes** ni clips con derechos de terceros: en su lugar, reacciones de Tor.

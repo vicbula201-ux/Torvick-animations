@@ -366,6 +366,16 @@ carrusel, sin hueco. Para ver el horario que quedó, sin grabar nada:
 `node herramientas/grabar-cambio.js <id> --plan`. Los videos del P4 no llevan
 `lectura` y quedan como estaban.
 
+**Los cortes.** `montar.py` anota en la transcripción del corte (`cortes`) los
+segundos en que cambia la imagen: de una pieza a otra y al entrar o salir una toma
+de apoyo (los cortes que quedan debajo de una toma de apoyo no se ven y no cuentan).
+En el plan, `t.corte(s)` da el primero después de `s` y `t.cortes` la lista. Con
+`lectura`, una tarjeta grande termina de irse (con el desenfoque de atrás) justo
+antes del primer corte después de su último dato, y en cualquier video con cortes
+el subtítulo de la frase que terminó no pasa a la toma siguiente. El cierre dicho
+acepta `y` (SÍGUEME), `yArriba` (la pastilla de las redes) y `yTexto` (la pastilla
+de abajo) para dejar libre la cara.
+
 **Cuando el cierre
 lo dice el autor**, `firma: { estilo: 'grande', ini: t('quieres ver'), sigueme:
 t('sígueme'), texto: 'para más contenido' }`: mientras pregunta, arriba se arma la

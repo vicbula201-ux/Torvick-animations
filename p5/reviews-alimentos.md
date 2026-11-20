@@ -139,6 +139,15 @@ la dices.
 En este video los subtítulos van más abajo (y 1440): el aguacate en la mano queda
 a la altura del pecho.
 
+**Los ajustes del autor a la primera versión:** la tabla de las grasas se va antes
+de «su combinación» (ahí entra la toma de apoyo); el sello solo en «9 de 10», con
+un segundo de pausa y sin las palabras ni la esquina; «las porciones importan» con
+la frase completa de la toma principal («…y te estarás comiendo más o menos
+calorías del aguacate»); la pregunta desde «¿Con qué acompañas…?» (al decir «¿y
+tú?» miraba a otro lado), sin desenfoque y debajo de la cara; las redes y el
+SÍGUEME debajo de la cara; las calorías por 100 g más arriba; un emoji al lado de
+arepa, huevos, atún y ensalada. Quedó en 68 s.
+
 **Prueba con voz sintética** (`videos/aguacate-borrador-3.mp4`, fuera de git; el 3 ya con
 el ritmo nuevo):
 el guion leído en voz sintética, transcrito con la misma herramienta que tus

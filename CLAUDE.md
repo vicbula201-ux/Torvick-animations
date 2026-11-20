@@ -244,7 +244,8 @@ lienzo. El reel la usa para el guion y para exponer `window.REEL`.
 - No usar degradados, sombras internas, glassmorphism ni estética futurista.
 - No usar emoji en el lienzo. (La excepción es el P4, `cambio.html`: ahí sí,
   pero solo los emojis 3D de `cambio/emoji/`, nunca los del sistema. En los
-  videos del P5, tampoco.)
+  videos del P5, tampoco, salvo un emoji chico al lado de cada opción de una
+  lista, que el autor pidió en la review del aguacate.)
 - No tapar piezas con rectángulos opacos para "recortarlas": eso borra el
   trazo de abajo.
 - No agregar un bundler, ni TypeScript, ni un paso de compilación.
@@ -650,7 +651,9 @@ con `sigueme: t('sígueme')` es el cierre que dice el autor a cámara (las redes
 @eltorvick entran mientras pregunta). Los planes del P5 llevan **`lectura: 2`**
 (pedido del autor: «se va muy rápido», «muy saturado»): cada tarjeta se queda 2 s
 después de su último dato y entra una cosa a la vez; `grabar-cambio.js <id> --plan`
-muestra el horario que quedó. La barra de pasos arriba se probó y no le gustó.
+muestra el horario que quedó. Con los cortes que anota `montar.py` (`t.corte()`), una
+tarjeta grande y su desenfoque terminan justo antes del cambio de toma, y los
+subtítulos tampoco cruzan el corte. La barra de pasos arriba se probó y no le gustó.
 `cambios/aguacate/plan.jsx` es la referencia (armado sobre el guion antes de
 grabar) y `cambios/_muestrario/` muestra todas las piezas (carpeta local, fuera de
 git).

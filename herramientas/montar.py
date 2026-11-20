@@ -264,7 +264,10 @@ def cortar(cfg, salida):
             if ov > 0.02 and ov > duena.get((toma, i), (None, 0))[1]:
                 duena[(toma, i)] = (n, ov)
     nuevas, informe, pos = [], [], 0.0
+    cortes_piezas = []
     for n, (toma, a, b) in enumerate(piezas):
+        if n:
+            cortes_piezas.append(round(pos, 3))
         for i, wd in enumerate(tomas[toma]['palabras']):
             if duena.get((toma, i), (None,))[0] == n:
                 p = wd['p']
@@ -293,7 +296,8 @@ def cortar(cfg, salida):
     if congelar:
         informe.append(f'{pos:7.2f}  ultimo cuadro quieto ({congelar:4.2f} s)')
         pos += congelar
-    tr = {'dur': round(pos, 3), 'palabras': nuevas, 'frases': frases}
+    # los cambios de imagen (para que el plan termine las tarjetas justo antes: t.corte() en cambio.jsx)
+    tr = {'dur': round(pos, 3), 'palabras': nuevas, 'frases': frases, 'cortes_piezas': cortes_piezas, 'cortes': cortes_piezas}
     out = cfg['transcripcion']
     os.makedirs(os.path.dirname(out) or '.', exist_ok=True)
     json.dump(tr, open(out, 'w'), ensure_ascii=False, indent=1)
@@ -402,6 +406,13 @@ def insertar_apoyo(cfg, hablado, salida):
     os.rmdir(tmp)
     with open(salida + '.txt', 'a') as fh:
         fh.write('\ntomas de apoyo (segundos del corte):\n' + '\n'.join(informe) + '\n')
+    vistos = [c for c in tr.get('cortes_piezas', []) if not any(i['ini'] + 1e-3 < c < i['fin'] - 1e-3 for i in insertos)]
+    for i in insertos:
+        vistos += [i['ini'], i['fin']]
+    tr['cortes'] = sorted(set(round(c, 3) for c in vistos if 0 < c < dur - 1e-3))
+    json.dump(tr, open(cfg['transcripcion'], 'w'), ensure_ascii=False, indent=1)
+    raiz = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    subprocess.run([sys.executable, os.path.join(raiz, 'herramientas', 'transcribir.py'), '--solo-js', '--out', cfg['transcripcion'], salida], check=True)
     print('%d tomas de apoyo encima de la voz' % len(insertos))
 
 
