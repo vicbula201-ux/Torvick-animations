@@ -15,7 +15,11 @@ corte.json:
     },
     "encuadre": [600, 1067, 332, 623],      # recorte [ancho, alto, x, y] de la toma; sale en 1080x1920
     "piezas": [ ["1", 15.86, 19.22], ["1", 19.54, 20.58], ... ],   # en orden; segundos de la toma
+                                            # ["1", 19.54, 20.58, {"respiro": 0.8}]: deja 0,8 s mas despues
+                                            # de la ultima palabra (para leer una tabla; va con toma de apoyo)
     "cola": 3.2,                            # segundos de imagen despues de la ultima pieza (para la firma)
+    "congelar": 1.6,                        # o el ultimo cuadro quieto esos segundos (si despues de la ultima
+                                            # frase el autor se mueve o apaga la camara)
     "corregir": { "cotidiaridad": "cotidianidad" },
     "minusculas": true,                     # subtitulos en minuscula, como se habla (por defecto)
     "hdr": "auto",                          # tomas HDR del iPhone (HLG/PQ): se pasan a color normal (bt709)
@@ -74,8 +78,9 @@ def niveles(video):
 
 
 def voz(db):
-    """cuadros con voz: por encima del piso de ruido + 7 dB, con 60 ms de arrastre"""
-    umbral = np.percentile(db, 10) + 7
+    """cuadros con voz: por encima del piso de ruido + 7 dB, con 60 ms de arrastre. Los microfonos con
+    puerta de ruido dejan silencio digital entre frases (-180 dB): el piso no baja de -65 dB"""
+    umbral = max(float(np.percentile(db, 10)), -65.0) + 7
     v = db > umbral
     k = 6
     v2 = v.copy()
@@ -130,7 +135,9 @@ def cortar(cfg, salida):
 
     # ---- cada pieza: colchon, final por nivel, silencios internos ----
     tramos = []   # (toma, a, b) ya en segundos de la toma
-    for toma, ini, fin in cfg['piezas']:
+    for pz in cfg['piezas']:
+        toma, ini, fin = pz[0], pz[1], pz[2]
+        extra = pz[3] if len(pz) > 3 and isinstance(pz[3], dict) else {}
         t = tomas[str(toma)]
         pal = t['palabras']
         antes = [w['fin'] for w in pal if w['fin'] <= ini + 0.01]
@@ -147,6 +154,8 @@ def cortar(cfg, salida):
         ultimo = (i0 + idx[-1]) * PASO if len(idx) else fin
         b = min(max(ultimo + 0.06, min(fin, ultimo + 0.06)), b_lim)
         b = min(b, fin + COLCHON)
+        if extra.get('respiro'):
+            b = min(b + float(extra['respiro']), b_lim)
         # silencios internos largos
         cortes = []
         ia, ib = int(a / PASO), int(b / PASO)
@@ -191,7 +200,7 @@ def cortar(cfg, salida):
 
     # cola para la firma
     if cfg.get('cola'):
-        toma, _, _ = cfg['piezas'][-1]
+        toma = cfg['piezas'][-1][0]
         ta, tb = tramos[-1][1], tramos[-1][2]
         tramos[-1] = (tramos[-1][0], ta, tb + float(cfg['cola']))
 
@@ -209,15 +218,27 @@ def cortar(cfg, salida):
     hdr = any(color(t['video'], cfg) for t in tomas.values())
     os.makedirs(tmp, exist_ok=True)
     lista = []
+    congelar = float(cfg.get('congelar') or 0)
     for i, (toma, a, b) in enumerate(piezas):
         d = b - a
         cuadros = int(round(d * FPS))
         g = tomas[toma]['ganancia']
         f = os.path.join(tmp, '%04d.mkv' % i)
         vf = color(tomas[toma]['video'], cfg) + 'fps=%d,crop=%d:%d:%d:%d,scale=1080:1920:flags=lanczos,setsar=1' % (FPS, w, h, x0, y0)
+        quieto = congelar if i == len(piezas) - 1 else 0
+        if quieto:
+            # el ultimo cuadro de la ultima pieza se queda quieto (la voz, en silencio)
+            vf += ',tpad=stop_mode=clone:stop_duration=%.3f' % quieto
+            cuadros_q = cuadros + int(round(quieto * FPS))
+        else:
+            cuadros_q = cuadros
         af = ('aresample=48000,aformat=sample_rates=48000:channel_layouts=stereo,volume=%.2fdB,'
-              'afade=t=in:d=0.008,afade=t=out:st=%.4f:d=0.008,apad,atrim=end=%.4f' % (g, max(0, d - 0.008), cuadros / FPS))
-        subprocess.run(['ffmpeg', '-v', 'error', '-y', '-ss', '%.4f' % a, '-i', tomas[toma]['video'], '-t', '%.4f' % (d + 0.2),
+              'afade=t=in:d=0.008,afade=t=out:st=%.4f:d=0.008,apad,atrim=end=%.4f' % (g, max(0, d - 0.008), cuadros_q / FPS))
+        cuadros = cuadros_q
+        # con el ultimo cuadro quieto, la toma se lee solo hasta el corte (-t antes de -i) y la salida dura
+        # lo que piden los cuadros (si no, el -t de salida se come el cuadro quieto)
+        entrada = (['-t', '%.4f' % d, '-i', tomas[toma]['video']] if quieto else ['-i', tomas[toma]['video'], '-t', '%.4f' % (d + 0.2)])
+        subprocess.run(['ffmpeg', '-v', 'error', '-y', '-ss', '%.4f' % a] + entrada + [
                         '-vf', vf, '-af', af, '-frames:v', str(cuadros), '-r', str(FPS),
                         '-c:v', 'libx264', '-preset', 'medium', '-crf', '14', '-pix_fmt', 'yuv420p']
                        + (ETIQUETAS_709 if hdr else []) + ['-c:a', 'pcm_s16le', f], check=True)
@@ -269,6 +290,9 @@ def cortar(cfg, salida):
         if fin_frase or hueco or i == len(nuevas) - 1:
             frases.append({'ini': cur[0]['ini'], 'fin': cur[-1]['fin'], 'texto': ' '.join(x['p'] for x in cur)})
             cur = []
+    if congelar:
+        informe.append(f'{pos:7.2f}  ultimo cuadro quieto ({congelar:4.2f} s)')
+        pos += congelar
     tr = {'dur': round(pos, 3), 'palabras': nuevas, 'frases': frases}
     out = cfg['transcripcion']
     os.makedirs(os.path.dirname(out) or '.', exist_ok=True)

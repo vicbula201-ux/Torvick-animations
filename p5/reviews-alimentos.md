@@ -115,9 +115,29 @@ líneas) no se toman: los del P4 ya son la marca.
 
 ## El primer video: el aguacate
 
-**El plan ya está armado** en `cambios/aguacate/plan.jsx`, pieza por pieza sobre
-tu guion. Cuando llegue el material, solo falta cortar, seguir los objetos y
-ajustar posiciones a lo que se ve.
+**Editado (noviembre de 2026)** con las tomas del autor desde su Drive: «Video
+aguacate» (5:31 de tomas a cámara en la cocina, 4K a 60 fps, varias tomas por
+frase), «Parte final aguacate» (el veredicto probándolo) y cuatro tomas de apoyo
+(el aguacate entero en el plato, el partido de cerca y las dos mitades en la mano en
+el balcón). El corte (`cambios/aguacate/corte.json`) se queda con la mejor toma de
+cada frase (completa, sin trabarse, la más cercana al guion y mirando a cámara):
+el gancho con el aguacate en la mano, las calorías y los macros en dos frases (la
+segunda desde «15 gramos», sobre las tomas de apoyo), «lo interesante» con el
+aguacate partido en la mano, los beneficios hasta «…de otros alimentos» (sobre las
+tomas de apoyo), «¿Y cómo comerlo?» sin «te estarás preguntando», el bocado de la
+toma del veredicto mientras dice «…o incluso en una ensalada», el veredicto
+«honesto» de la parte final, «las porciones importan» (cortado ahí: lo que seguía
+no se entendía), la pregunta y el «sígueme» inclinado hacia la cámara, con su
+último gesto quieto 1,6 s para la firma. Dura 65,7 s.
+
+**Lo que no se grabó:** la frase de los micronutrientes (en la toma hay 23 s de
+silencio donde iba). La tabla de micronutrientes no va; si la quieres, se graba
+esa frase sola y se mete entre las grasas y los beneficios. Tampoco hay toma de la
+arepa con huevos: en su lugar, la lista «¿Cómo comerlo?» con cada opción cuando
+la dices.
+
+En este video los subtítulos van más abajo (y 1440): el aguacate en la mano queda
+a la altura del pecho.
 
 **Prueba con voz sintética** (`videos/aguacate-borrador-3.mp4`, fuera de git; el 3 ya con
 el ritmo nuevo):

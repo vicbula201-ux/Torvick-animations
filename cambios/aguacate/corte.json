@@ -1,0 +1,34 @@
+{
+  "salida": "cambios/aguacate/media/fuente.mp4",
+  "transcripcion": "cambios/aguacate/transcripcion.json",
+  "tomas": {
+    "P": { "video": "cambios/aguacate/media/drive/principal.mov", "transcripcion": "cambios/aguacate/media/t-principal/transcripcion.json" },
+    "F": { "video": "cambios/aguacate/media/drive/final.mov", "transcripcion": "cambios/aguacate/media/t-final/transcripcion.json" }
+  },
+  "encuadre": [2160, 3840, 0, 0],
+  "piezas": [
+    ["P", 1.76, 5.52],
+    ["P", 27.94, 33.46],
+    ["P", 47.64, 51.24],
+    ["P", 108.60, 113.96, { "respiro": 1.4 }],
+    ["P", 156.38, 165.18, { "respiro": 0.6 }],
+    ["P", 188.72, 198.08],
+    ["P", 233.84, 235.04],
+    ["P", 236.34, 242.50],
+    ["F", 13.44, 18.96],
+    ["F", 20.64, 23.84],
+    ["F", 28.58, 31.38],
+    ["P", 296.88, 301.36],
+    ["P", 326.10, 330.10]
+  ],
+  "congelar": 1.6,
+  "corregir": {},
+  "hdr": "auto",
+  "apoyo": [
+    { "video": "cambios/aguacate/media/drive/apoyo1.mov", "desde": 0.3, "frase": "por cada", "hasta": "calorías", "despues": 0.6 },
+    { "video": "cambios/aguacate/media/drive/apoyo2.mov", "desde": 0.2, "frase": "15 gramos", "hasta": "proteína", "antes": 0.05, "despues": 0.9 },
+    { "video": "cambios/aguacate/media/drive/apoyo4.mov", "desde": 3.5, "frase": "su combinación", "hasta": "satisfecho", "despues": 0.1 },
+    { "video": "cambios/aguacate/media/drive/apoyo3.mov", "desde": 0.0, "frase": "y que puede", "hasta": "alimentos", "antes": 0.05, "despues": 0.2 },
+    { "video": "cambios/aguacate/media/drive/final.mov", "desde": 17.5, "frase": "o incluso", "hasta": "vegetales", "antes": 0.05, "despues": 0.1 }
+  ]
+}

@@ -1,29 +1,27 @@
 /* GENERADO por compilar.js desde cambios/aguacate/plan.jsx — no editar a mano. */
 /* Review · «¿Qué tan saludable es realmente el aguacate?» (P5 · review de alimentos).
-   BORRADOR armado con el guion antes de grabar (p5/reviews-alimentos.md). Cada pieza entra cuando
-   se dice su frase (t('...')): si al grabar cambia una palabra, se cambia aca y listo.
+   Sobre el corte de las tomas del autor (cambios/aguacate/corte.json -> montar.py): la mejor toma
+   de cada frase, las tomas de apoyo encima de la voz y la prueba del aguacate. Cada pieza entra
+   cuando se dice su frase (t('...')).
    El ritmo (lectura: 2): una cosa a la vez y cada tarjeta se queda 2 s despues de su ultimo dato
-   (lo chico, 1,5 s); si la voz sigue, lo que viene espera. Pedido del autor despues del borrador 2.
-   Cuando llegue el material:
-     1. transcribir las tomas y armar cambios/aguacate/corte.json (tomas + tomas de apoyo) -> montar.py
-     2. seguir.py para los objetos con rotulo: aguacate-mano, arepa, huevos
-     3. ajustar posiciones a lo que se ve (pos de las tarjetas, lado de los rotulos) y exportar */
+   (lo chico, 1,5 s); si la voz sigue, lo que viene espera. La frase de los micronutrientes no se
+   grabo: esa tabla no va. */
 (function (global) {
   var C = global.CAMBIOS,
     p = C.plan;
   var id = 'aguacate';
   var t = C.buscador(id);
-  var CARA = [0.5, 0.34];
+  var CARA = [0.5, 0.39];
   function golpe(ini, foco) {
     return p.camara(ini, ini + 1.0, {
-      zoom: 1.28,
+      zoom: 1.25,
       foco: foco || CARA,
       mov: 'golpe'
     });
   }
-  // la transcripcion a veces escribe los numeros con cifras («9 de 10»)
+  // la transcripcion escribe los numeros con cifras («9 de 10», «15 gramos»)
   var nueve = t.alguna(['nueve', '9']);
-  // el cierre lo dices tú a cámara: «¿Quieres ver más videos similares? Sígueme para más contenido.»
+  // el cierre lo dice el autor a cámara: «¿Quieres ver más videos similares? Sígueme para más contenido.»
   var pregunta = t('quieres ver', t('comentarios'));
   var sigueme = t('sígueme', pregunta);
   C.registrar({
@@ -31,21 +29,28 @@
     titulo: 'Review · ¿Qué tan saludable es el aguacate?',
     video: 'cambios/' + id + '/media/fuente.mp4',
     lectura: 2,
-    // el cierre dicho: mientras preguntas, arriba se arma @eltorvick con YouTube, Instagram y TikTok;
-    // en «sígueme», SÍGUEME gigante abajo + «para más contenido». Tú sigues a la vista.
+    // el cierre dicho: mientras pregunta, arriba se arma @eltorvick con YouTube, Instagram y TikTok;
+    // en «sígueme», SÍGUEME gigante abajo + «para más contenido». El queda a la vista.
     firma: {
       estilo: 'grande',
       ini: pregunta - 0.1,
       sigueme: sigueme,
-      texto: 'para más contenido'
+      texto: 'para más contenido',
+      foco: [0.5, 0.32]
     },
     subs: {
-      y: 1260,
-      marcadas: ['saludable', 'calorías', 'grasas', 'fibra', 'proteína', 'monoinsaturadas', 'oliva', 'potasio', 'magnesio', 'folato', 'satisfecho', 'absorción', 'veredicto', 'nutritivo', 'versátil', 'delicioso', 'porciones']
+      // mas abajo que de costumbre: el aguacate en la mano queda a la altura del pecho (y 1100-1400)
+      y: 1440,
+      marcadas: ['saludable', 'calorías', 'grasa', 'grasas', 'fibra', 'proteína', 'monoinsaturadas', 'saludables', 'oliva', 'satisfecho', 'absorción', 'vitaminas', 'veredicto', 'nutritivo', 'versátil', 'delicioso', 'porciones']
     },
     plan: [
-    // ---- 1. GANCHO (tú con el aguacate entero en la mano) ----
-    p.detras(t('qué tan') - 0.05, t.fin('realmente') + 0.25, '¿SALUDABLE?'), golpe(t('realmente')), p.rotulo(t('aguacate'), t('tiene más') + 0.2, 'Aguacate', {
+    // ---- 1. GANCHO (el aguacate entero en la mano) ----
+    // un poco mas arriba que de costumbre: asi la cabeza tapa menos letras
+    p.detras(t('qué tan') - 0.05, t.fin('realmente') + 0.25, '¿SALUDABLE?', {
+      y: 455
+    }), golpe(t('realmente')),
+    // el nombre encima del aguacate que tiene en la mano, hasta el corte (despues lo deja en la mesa)
+    p.rotulo(t('saludable'), t('tiene más') - 0.25, 'Aguacate', {
       sigue: 'aguacate-mano'
     }),
     // las calorias de otras frutas, para ver el «más que muchas frutas» (aprobada por el autor)
@@ -80,8 +85,9 @@
       tam: 64,
       pos: [540, 520]
     }),
-    // ---- 2. CALORÍAS Y MACRONUTRIENTES (tomas de apoyo: el aguacate entero, luego partido) ----
-    p.tabla(t('por cada') - 0.1, t('aquí viene') - 0.1, {
+    // ---- 2. CALORÍAS Y MACRONUTRIENTES (toma de apoyo: el aguacate entero en el plato) ----
+    // la toma de apoyo se ve un segundo y entra la tabla cuando dice «tenemos»
+    p.tabla(t('tenemos') - 0.15, t('aquí viene') - 0.1, {
       titulo: 'Aguacate',
       sub: 'por 100 g de pulpa',
       pie: 'Valores aproximados · USDA FoodData Central',
@@ -97,7 +103,7 @@
         valor: 14.7,
         dec: 1,
         unidad: 'g',
-        busca: 'grasas'
+        busca: 'grasa'
       }, {
         nombre: 'Carbohidratos',
         valor: 8.5,
@@ -118,9 +124,9 @@
         busca: 'proteína'
       }]
     }),
-    // ---- 3. GRASAS SALUDABLES Y MICRONUTRIENTES (primer plano del aguacate cortado; tú señalando) ----
+    // ---- 3. LAS GRASAS (el con el aguacate partido en la mano) ----
     // las grasas del aguacate contra las del aceite de oliva (USDA; aprobada por el autor)
-    p.barras(t('la mayoría'), t('también aporta') - 0.1, {
+    p.barras(t('sus grasas') - 0.1, t('su combinación') - 0.1, {
       titulo: '¿Qué grasas tiene?',
       sub: '% de sus ácidos grasos',
       pie: 'USDA FoodData Central',
@@ -135,43 +141,11 @@
       }],
       leyenda: ['Monoinsaturadas', 'Poliinsaturadas', 'Saturadas'],
       remate: '¡Casi iguales!',
-      cRemate: t.fin('aceite') + 0.3,
-      sale: 'izquierda'
-    }), p.tabla(t('también aporta') - 0.1, t.fin('k', t('también aporta')) + 1.4, {
-      encabezado: 'Por 100 g',
-      titulo: 'Micronutrientes',
-      entra: 'derecha',
-      filas: [{
-        nombre: 'Potasio',
-        valor: 485,
-        unidad: 'mg',
-        busca: 'potasio'
-      }, {
-        nombre: 'Magnesio',
-        valor: 29,
-        unidad: 'mg',
-        busca: 'magnesio'
-      }, {
-        nombre: 'Folato',
-        valor: 81,
-        unidad: 'µg',
-        busca: 'folato'
-      }, {
-        nombre: 'Vitamina E',
-        valor: 2.1,
-        dec: 1,
-        unidad: 'mg',
-        busca: 'vitaminas'
-      }, {
-        nombre: 'Vitamina K',
-        valor: 21,
-        unidad: 'µg',
-        busca: 'k'
-      }]
+      cRemate: t('aceite') + 0.4
     }),
-    // ---- 4. BENEFICIOS Y ACOMPAÑAMIENTOS (el aguacate en el plato, la arepa con huevos) ----
+    // ---- 4. BENEFICIOS (tomas de apoyo: el aguacate partido, las dos mitades en la mano) ----
     // una idea a la vez, en el mismo lugar
-    p.etiqueta(t('satisfecho') - 0.05, t('absorción') - 0.3, 'Más saciedad', {
+    p.etiqueta(t('satisfecho') - 0.05, t('y que puede') - 0.1, 'Más saciedad', {
       estilo: 'blanco',
       icono: 'check',
       minus: true,
@@ -187,14 +161,28 @@
       tam: 54,
       pos: [540, 520],
       rot: -2
-    }), p.titulo(t('cómo comerlo') - 0.05, t('con arepa') + 0.1, '¿CÓMO\nCOMERLO?', {
-      pos: [540, 500]
-    }), p.rotulo(t('arepa') - 0.05, t.fin('ensalada') + 0.8, 'Arepa', {
-      sigue: 'arepa'
-    }), p.rotulo(t('huevos') - 0.05, t.fin('ensalada') + 0.8, 'Huevos', {
-      sigue: 'huevos'
     }),
-    // ---- 5. VEREDICTO Y CTA (tú con el aguacate cortado, probándolo) ----
+    // ---- 5. CÓMO COMERLO (el a cámara; despues el probándolo) ----
+    // una sola pieza: la pregunta arriba y cada opción cuando la dice
+    p.lista(t('cómo comerlo') - 0.05, t.fin('vegetales') + 0.6, {
+      titulo: '¿Cómo comerlo?',
+      pos: [60, 700, 'i', 's'],
+      tam: 50,
+      items: [{
+        texto: 'Arepa',
+        busca: 'arepa'
+      }, {
+        texto: 'Huevos',
+        busca: 'huevos'
+      }, {
+        texto: 'Atún',
+        busca: 'atún'
+      }, {
+        texto: 'Ensalada',
+        busca: 'ensalada'
+      }]
+    }),
+    // ---- 6. VEREDICTO Y CTA (el con el aguacate partido y la cuchara) ----
     golpe(t('veredicto')), p.veredicto(nueve - 0.24, t('con qué') - 0.15, {
       nota: 9,
       de: 10,
@@ -213,7 +201,7 @@
       encoger: t('eso sí') - 0.1,
       esquina: [200, 420],
       tamFinal: 250
-    }), p.etiqueta(t('porciones') - 0.05, t.fin('calórico') + 0.4, 'Las porciones importan', {
+    }), p.etiqueta(t('porciones') - 0.05, t.fin('importan') + 1.2, 'Las porciones importan', {
       estilo: 'negro',
       icono: 'aviso',
       minus: true,

@@ -189,7 +189,18 @@ arranques en falso; el corte decide qué historia se cuenta) y
   de apoyo), `"velocidad"` (0,5: cámara lenta; con tomas a 60 fps queda suave) y
   `"foco"` o `"encuadre"` (qué parte queda si hay que recortarla a 9:16). El corte
   hablado queda en `fuente-hablado.mp4`, y `--solo-apoyo` rehace solo los
-  insertos, sin volver a cortar.
+  insertos, sin volver a cortar. Una toma de apoyo puede ser otra toma del autor
+  (la review del aguacate muestra el bocado de la toma del veredicto mientras dice
+  «…o incluso en una ensalada»);
+- **un respiro** después de una frase (`["P", 108.6, 113.96, { "respiro": 1.4 }]`):
+  deja esos segundos de imagen después de la última palabra, sin voz, para leer una
+  tabla (va con una toma de apoyo encima);
+- **el último cuadro quieto** (`"congelar": 1.6`): cuando después de la última
+  frase el autor se mueve o apaga la cámara, la firma se lee sobre su último gesto;
+- `encuadre` es el recorte de la toma antes de escalar a 1080x1920: con tomas 4K
+  verticales del iPhone (2160x3840) va `[2160, 3840, 0, 0]` (si no, se queda con una
+  esquina). Los micrófonos con puerta de ruido (silencio digital entre frases) ya no
+  confunden la detección de la voz.
 
 ```
 python3 herramientas/transcribir.py cambios/<id>/media/toma1.mp4 --out cambios/<id>/media/t1/transcripcion.json
