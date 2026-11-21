@@ -369,8 +369,13 @@ tirón (sube apenas). Va en los videos nuevos de ahora en adelante.
 Tor, pero mejorado"): el mismo Tor con volumen, dibujado con three.js r149
 (`three.min.js` del CDN de cdnjs, cargado en `reels.html`; `grabar.js` lo
 sirve igual que React). Sombreado plano de dos tonos, contorno negro grueso
-(casco invertido), cara simple, short gris, el músculo que trabaja en
-amarillo (o rojo en el error) y mancuernas con agarre neutro. El esqueleto se
+(casco invertido), short gris, el músculo que trabaja en amarillo (o rojo
+en el error) y mancuernas con agarre neutro. Las proporciones copian al Tor
+dibujado (pedido del autor: "que se parezca más al original"): cabeza de
+huevo chica (~15 % del alto) con orejas en C, ojos de punto, nariz de rayita
+y sonrisa chica, sin cejas; cuello visible, torso en V con cintura angosta,
+brazos con la rayita gris del bíceps, short hasta medio muslo y la U de las
+rodillas. El sombreado es casi plano (el blanco apenas se apaga). El esqueleto se
 calcula como en `B.Perfil` (tobillos fijos, rodillas y codos por IK) con
 `bisagra`, `rodillas`, `remo`, `balanceo`, `respira` y `cabeza`; la cámara
 gira alrededor de Tor (`az` 0 de frente, 90 de costado, 180 de espaldas; `el`,

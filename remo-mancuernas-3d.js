@@ -33,7 +33,7 @@
     var c = Object.assign({}, TOR3D.tomaEn(tomas, t));
     c.az = (c.az || 0) + Math.sin(T * 0.7) * 1.4;
     c.el = (c.el || 0) + Math.sin(T * 0.9 + 1) * 0.7;
-    c.dist = (c.dist || 7) * (1 + Math.sin(T * 0.5 + 2) * 0.008);
+    c.dist = (c.dist || 7) * 0.92 * (1 + Math.sin(T * 0.5 + 2) * 0.008); // Tor es esbelto: la camara se acerca un poco
     return c;
   }
   // desenfoque: las mancuernas de unos instantes antes, si se mueven rapido
