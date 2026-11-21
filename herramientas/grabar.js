@@ -58,8 +58,8 @@ function fmtT(s) {
   if (vendor) {
     await p.route('**/*', r => {
       const u = r.request().url();
-      for (const f of ['react.production.min.js', 'react-dom.production.min.js']) {
-        if (u.endsWith(f)) return r.fulfill({ body: fs.readFileSync(path.join(vendor, f)), contentType: 'application/javascript' });
+      for (const f of ['react.production.min.js', 'react-dom.production.min.js', 'three.min.js']) {
+        if (u.endsWith(f) && fs.existsSync(path.join(vendor, f))) return r.fulfill({ body: fs.readFileSync(path.join(vendor, f)), contentType: 'application/javascript' });
       }
       return r.continue();
     });

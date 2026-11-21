@@ -56,6 +56,8 @@ triceps-top3.jsx, abdominales-top3.jsx (con Tor),
 gluteos-top3.jsx, isquios-top3.jsx,
 cuadriceps-top3.jsx (con la novia de Tor)   top 3 por músculo, ~16 s + acción
 remo-serrucho.jsx                primer reel del ESTILO FLUIDO (halo, destellos, desenfoque)
+tor3d.jsx                        window.TOR3D: Tor en 3D (three.js), el mismo trazo con volumen
+remo-mancuernas-3d.jsx           primer reel con Tor 3D (remo inclinado con dos mancuernas)
 novato-avanzado.jsx,
 calistenia-gym.jsx               pantalla dividida: los dos Tors en paralelo
 gluteos.jsx                      con la novia de Tor (público femenino)
@@ -362,6 +364,25 @@ difuminadas de la mancuerna o la barra unos instantes antes), `V.Sombra suave`
 y el equipo con volumen (el banco con su cara de arriba y sus patas de atrás).
 La repetición tira rápido (38 %), aguanta y baja lento; el tronco acompaña el
 tirón (sube apenas). Va en los videos nuevos de ahora en adelante.
+
+**Tor 3D** (`tor3d.jsx`, `window.TOR3D`; pedido del autor: "que siga siendo
+Tor, pero mejorado"): el mismo Tor con volumen, dibujado con three.js r149
+(`three.min.js` del CDN de cdnjs, cargado en `reels.html`; `grabar.js` lo
+sirve igual que React). Sombreado plano de dos tonos, contorno negro grueso
+(casco invertido), cara simple, short gris, el músculo que trabaja en
+amarillo (o rojo en el error) y mancuernas con agarre neutro. El esqueleto se
+calcula como en `B.Perfil` (tobillos fijos, rodillas y codos por IK) con
+`bisagra`, `rodillas`, `remo`, `balanceo`, `respira` y `cabeza`; la cámara
+gira alrededor de Tor (`az` 0 de frente, 90 de costado, 180 de espaldas; `el`,
+`dist`, `y`, `dz`) y las tomas se encadenan como en `V.Camara` (dos llaves
+casi pegadas = corte). `TOR3D.proyectar(vista, 'dorsalI' | 'manoD' | [x,y,z])`
+da el punto en el lienzo para poner encima los rótulos, X, vistos, flechas,
+`V.Halo` y `V.Destellos` en SVG. `remo-mancuernas-3d.jsx` es la referencia
+(su `escena3d` arma cámara en mano, estela de la mancuerna, golpe de las X y
+rótulos): error con balanceo, colocación de costado, ejecución con corte a
+primer plano, bajada lenta, giro a la espalda para los músculos, error contra
+corrección y un giro completo alrededor de Tor antes de la acción y el cierre.
+En el navegador sin GPU (el exportador) cada cuadro tarda ~0,25 s.
 
 **Top 3 por músculo** (formato de `biceps-top3.jsx`, ~16 s con la acción y
 el cierre): `TOP3.gancho({ musculo, fig, figura, tomas })` (el músculo
