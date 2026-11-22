@@ -63,48 +63,14 @@
   // o: { tomas, pose(T, f, t) -> { pose, musc, remoEn, vibra }, lienzo(T, f, t, pr, J, info),
   //      encima(T, f, t, pr, J, info), mal, bien, r1, r2 }
   function escena3d(o) {
-    return function Escena(props) {
-      var T = props.T, at = props.at, dur = props.dur;
-      var f = function (v) { return at + dur * v; };
-      var t = clamp((T - at) / dur, 0, 1);
-      var info = o.pose(T, f, t);
-      info.pose.respira = Math.sin(T * 2.3);
-      var vt = {
-        pose: info.pose, musc: info.musc,
-        fantasmas: info.remoEn ? fantasmas(info.pose, info.remoEn, T) : [],
-        camara: camara(o.tomas, t, T)
-      };
-      var J = TOR3D.esqueleto(info.pose);
-      var pr = function (q) { return TOR3D.proyectar(vt, q); };
-      var golpes = (o.mal || []).map(function (m) { return f(m.cuando); });
-      var golpe = 0;
-      golpes.forEach(function (g) { var u = (T - g) / 0.35; if (u > 0 && u < 1) golpe += (1 - u) * Math.sin(u * 40) * 10; });
-      var e = M.pop(T, at - 0.6, 0.5);
-      var rot = function (r, i) {
-        if (!r) return null;
-        return <E3.Rot key={'r' + i} T={T} text={r.text} y={r.y != null ? r.y : (i ? 1490 : 270)} s={r.s || 1} fase={i * 0.4} tono={r.tono}
-          cuando={r.cuando == null ? at - 0.6 : f(r.cuando)} />;
-      };
-      return (
-        <div style={{ position: 'absolute', inset: 0 }}>
-          <A.Pos x={0} y={0} e={e} origen="50% 55%" dx={(info.vibra ? M.vibra(T, 30, 4) : 0) + golpe}>
-            <div style={{ position: 'relative', width: 1080, height: 1920 }}><TOR3D.Lienzo vista={vt} /></div>
-          </A.Pos>
-          <svg width={1080} height={1920} style={{ position: 'absolute', left: 0, top: 0, overflow: 'visible' }}>
-            {o.lienzo ? o.lienzo(T, f, t, pr, J, info) : null}
-          </svg>
-          {o.encima ? o.encima(T, f, t, pr, J, info) : null}
-          {(o.mal || []).map(function (m, i) {
-            return <A.Mal key={'m' + i} T={T} cuando={f(m.cuando)} hasta={m.hasta == null ? null : f(m.hasta)} x={m.x} y={m.y} s={m.s || 0.5} />;
-          })}
-          {(o.bien || []).map(function (b, i) {
-            return <A.Bien key={'b' + i} T={T} cuando={f(b.cuando)} hasta={b.hasta == null ? null : f(b.hasta)} x={b.x} y={b.y} s={b.s || 0.55} fase={i * 0.4} />;
-          })}
-          {rot(o.r1, 0)}
-          {rot(o.r2, 1)}
-        </div>
-      );
-    };
+    // el mismo armador comun (E3.escena): encuadre automatico, temblor en la camara y rotulos pulidos
+    return E3.escena({
+      tomas: o.tomas, acerca: 0.92, mal: o.mal, bien: o.bien, golpes: o.golpes, zona: o.zona, encuadre: o.encuadre,
+      r1: o.r1, r2: o.r2,
+      vista: function (T, f, t) { return o.pose(T, f, t); },
+      lienzo: o.lienzo ? function (T, f, t, pr, info) { return o.lienzo(T, f, t, pr, TOR3D.esqueleto(info.pose), info); } : null,
+      encima: o.encima ? function (T, f, t, pr, info) { return o.encima(T, f, t, pr, TOR3D.esqueleto(info.pose), info); } : null
+    });
   }
   // el musculo que trabaja: resplandor y destellos sobre los dos dorsales
   function brillaDorsal(T, pr, v, destellos) {
@@ -177,7 +143,7 @@
         lienzo: function (T, f, t, pr, J, info) {
           return info.k > 0.9 ? <V.Destellos T={T} c={pr('manoD')} r={110} v={(info.k - 0.9) * 10} n={5} /> : null;
         },
-        encima: function (T, f) { return contador(T, f(0.06), f(0.97), 2); },
+        encima: function (T, f) { return contador(T, f(0.06), f(0.97), 2); }, zona: [200, 378, 1036, 1452],
         r1: { text: 'REMA AL *ABDOMEN*' }, r2: { text: 'CODOS *CERCA*', cuando: 0.46 }
       }) },
     { nombre: 'Bajada', dur: 4.4, vo: 'Baja despacio hasta estirar los brazos y deja que las escápulas se separen.',

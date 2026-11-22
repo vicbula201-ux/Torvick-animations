@@ -171,26 +171,164 @@
   }
 
   /* ---------------- armador de escenas ---------------- */
+  function armarVista(o, T, f, t) {
+    var info = o.vista(T, f, t) || {};
+    var figs = info.figuras || [{ quien: info.quien || 'tor', pose: info.pose, musc: info.musc, cara: info.cara, ropa: info.ropa, pesas: info.pesas, fantasmas: info.fantasmas }];
+    var legado = info.pose && (info.pose.bisagra != null || info.pose.remo != null);
+    figs.forEach(function (fg, i) {
+      if (fg.pose && fg.pose.respira == null) fg.pose.respira = Math.sin(T * 2.3 + i);
+      fg.cara = Object.assign({ parpadeo: V.parpadeo(T, i * 0.9) }, fg.cara || {});
+      fg.T = T;
+    });
+    var vt = legado ? { pose: info.pose, musc: info.musc, cara: figs[0].cara, fantasmas: info.fantasmas, objetos: info.objetos, T: T }
+      : { figuras: figs, objetos: info.objetos, T: T };
+    return { info: info, vt: vt };
+  }
+  // la zona donde tiene que quedar el avatar entero: debajo del rotulo de arriba y encima del de abajo
+  function zonaDe(o) {
+    if (o.zona) return o.zona;
+    return [44, 250, 1036, 1600];
+  }
+  // el rectangulo que ocupa un rotulo (mismas medidas que Rot); i 0 arriba, 1 abajo
+  function rectRot(r, i) {
+    var s = r.s || 1, px = 62 * s, tw = 0;
+    trozos(r.text).forEach(function (q) { tw += medir(q.t, px) + 1.2 * s * q.t.length; });
+    var W = tw + 70 * s + 38 * s, H = 94 * s;
+    var x = r.x == null ? (1080 - W) / 2 : r.x, y = r.y != null ? r.y : (i ? 1470 : 262);
+    return [x - 10, y - 10, x + W + 18, y + H + 20];
+  }
+  // tamano (a escala 1) de las piezas 2D que no miden 240 x 240
+  var TAM = null;
+  function tamPieza(Cmp) {
+    if (!TAM) {
+      var P2 = global.P || {}, MU = global.MU || {}, B = global.B || {}, N = global.N || {};
+      TAM = [[P2.Medidor, 300, 108], [MU.Despertador, 240, 260], [B.Cuenta, 220, 220], [N.Dial, 300, 220], [P2.Pesa, 420, 160],
+        [P2.Parlante, 220, 230], [P2.Nube, 620, 460], [P2.Corazon, 110, 100], [MU.Mesita, 220, 240]].filter(function (q) { return q[0]; });
+    }
+    for (var i = 0; i < TAM.length; i++) if (TAM[i][0] === Cmp) return [TAM[i][1], TAM[i][2]];
+    return [240, 240];
+  }
+  // donde quedan las piezas fijas de la escena (sin el aire de cada icono); libre: true = puede ir encima del avatar
+  function rectsPiezas(o) {
+    return (o.piezas || []).map(function (pz) {
+      if (pz.libre || typeof pz.x !== 'number' || typeof pz.y !== 'number') return null;
+      var s = pz.s == null ? 1 : pz.s, t = tamPieza(pz.C);
+      var w = pz.plato ? 420 * pz.plato : t[0] * s, h = pz.plato ? 420 * pz.plato : t[1] * s, m = 0.1;
+      return [pz.x + w * m, pz.y + h * m, pz.x + w * (1 - m), pz.y + h * (1 - m)];
+    }).filter(Boolean);
+  }
+  // el rectangulo libre de la zona (sin piezas) donde el avatar (ancho/alto = asp) entra mas grande
+  function zonaLibre(zona, rects, asp) {
+    rects = rects.filter(function (r) { return r[0] < zona[2] && r[2] > zona[0] && r[1] < zona[3] && r[3] > zona[1]; });
+    if (!rects.length) return zona;
+    var aire = 18, xs = [zona[0], zona[2]], ys = [zona[1], zona[3]];
+    rects.forEach(function (r) { xs.push(r[0] - aire, r[2] + aire); ys.push(r[1] - aire, r[3] + aire); });
+    xs = xs.filter(function (x) { return x >= zona[0] && x <= zona[2]; });
+    ys = ys.filter(function (y) { return y >= zona[1] && y <= zona[3]; });
+    var mejor = zona, alto = -1;
+    xs.forEach(function (a) { xs.forEach(function (b) { if (b < a + 80) return;
+      ys.forEach(function (c) { ys.forEach(function (d) { if (d < c + 120) return;
+        for (var k = 0; k < rects.length; k++) { var r = rects[k]; if (r[0] < b && r[2] > a && r[1] < d && r[3] > c) return; }
+        var h = Math.min((b - a) / asp, d - c);
+        if (h > alto + 0.5) { alto = h; mejor = [a, c, b, d]; }
+      }); });
+    }); });
+    return mejor;
+  }
+  // el ajuste de camara de toda la escena: se mide en 25 momentos (el avatar entero adentro en
+  // todos) y se suaviza, asi la camara no respira con cada repeticion
+  function ajusteEscena(o, at, dur, cache) {
+    var key = at.toFixed(3) + '|' + dur.toFixed(3);
+    if (cache[key]) return cache[key];
+    var N = 24, zona = zonaDe(o), crudo = [], muestras = [];
+    var f = function (x) { return at + dur * x; };
+    var caja = null;
+    for (var i = 0; i <= N; i++) {
+      var ts = i / N, Ts = at + dur * ts;
+      var a = armarVista(o, Ts, f, ts);
+      var c0 = camara(o.tomas, ts, Ts, o.acerca);
+      var P = TOR3D.puntosVista(a.vt);
+      muestras.push({ a: a, c0: c0, P: P });
+      if (P.length) {
+        var bb = TOR3D.cajaEnPantalla(P, c0);
+        caja = caja ? { x0: Math.min(caja.x0, bb.x0), y0: Math.min(caja.y0, bb.y0), x1: Math.max(caja.x1, bb.x1), y1: Math.max(caja.y1, bb.y1) } : bb;
+      }
+    }
+    // las piezas 2D fijas no van encima del avatar: se le deja la parte libre de la zona
+    // o.ocupa: otros rectangulos de pantalla que dibuja la escena (un termometro, una grilla) [x0, y0, x1, y1]
+    var rots = o.zona ? [] : [o.r1, o.r2].map(function (r, i) { return r ? rectRot(r, i) : null; }).filter(Boolean);
+    if (caja) zona = zonaLibre(zona, rectsPiezas(o).concat(o.ocupa || [], rots), Math.max(0.15, (caja.x1 - caja.x0) / Math.max(1, caja.y1 - caja.y0)));
+    muestras.forEach(function (q) {
+      // sin puntos (el avatar no esta o se va del cuadro a proposito): se completa con los vecinos
+      if (!q.P.length) { crudo.push(null); return; }
+      var c1 = TOR3D.encuadrar(q.a.vt, zona, q.c0, q.P), c0 = q.c0;
+      crudo.push({ m: c1.dist / c0.dist, dx: (c1.dx || 0) - (c0.dx || 0), dy: (c1.y == null ? 0.95 : c1.y) - (c0.y == null ? 0.95 : c0.y), dz: (c1.dz == null ? -0.05 : c1.dz) - (c0.dz == null ? -0.05 : c0.dz) });
+    });
+    var primero = null;
+    crudo.forEach(function (q) { if (q && !primero) primero = q; });
+    if (!primero) primero = { m: 1, dx: 0, dy: 0, dz: 0 };
+    var ultimo = null;
+    crudo = crudo.map(function (q) { if (q) { ultimo = q; return q; } return Object.assign({}, ultimo || primero); });
+    // el mayor alejamiento de los vecinos (anticipa) y un promedio (suaviza)
+    var dil = crudo.map(function (q, i) {
+      var r = { m: q.m, dx: q.dx, dy: q.dy, dz: q.dz };
+      for (var k = -2; k <= 2; k++) { var w = crudo[i + k]; if (w && w.m > r.m) { r.m = w.m; } }
+      return r;
+    });
+    var suave = dil.map(function (q, i) {
+      var acc = { m: 0, dx: 0, dy: 0, dz: 0 }, n = 0;
+      for (var k = -2; k <= 2; k++) { var w = dil[i + k]; if (!w) continue; acc.m += w.m; acc.dx += w.dx; acc.dy += w.dy; acc.dz += w.dz; n++; }
+      return { m: Math.max(q.m, acc.m / n), dx: acc.dx / n, dy: acc.dy / n, dz: acc.dz / n };
+    });
+    cache[key] = suave;
+    return suave;
+  }
+  function aplicarAjuste(c, aj, t) {
+    var N = aj.length - 1, x = clamp(t, 0, 1) * N, i = Math.min(N - 1, Math.floor(x)), u = x - i;
+    var a = aj[i], b = aj[i + 1] || a, k = 0.5 - 0.5 * Math.cos(Math.PI * u);
+    var r = Object.assign({}, c);
+    r.dist = (c.dist || 7) * (a.m + (b.m - a.m) * k);
+    r.dx = (c.dx || 0) + a.dx + (b.dx - a.dx) * k;
+    r.y = (c.y == null ? 0.95 : c.y) + a.dy + (b.dy - a.dy) * k;
+    r.dz = (c.dz == null ? -0.05 : c.dz) + a.dz + (b.dz - a.dz) * k;
+    return r;
+  }
+  // las X y los vistos no tapan al avatar: si caen encima, se corren al costado libre
+  function correrMarca(m, caja, ancho) {
+    if (!caja) return m;
+    var w = ancho, x = m.x, y = m.y;
+    var choca = x < caja.x1 + 12 && x + w > caja.x0 - 12 && y < caja.y1 && y + w > caja.y0;
+    if (!choca) return m;
+    var izq = caja.x0 - 24 - w, der = caja.x1 + 24;
+    if (izq >= 16 && (der + w > 1064 || Math.abs(izq - x) < Math.abs(der - x))) x = izq;
+    else if (der + w <= 1064) x = der;
+    else y = caja.y0 - w - 20 > 380 ? caja.y0 - w - 20 : Math.min(1450 - w, caja.y1 + 20);
+    return Object.assign({}, m, { x: x, y: y });
+  }
+
   function escena(o) {
+    var cache = {};
     return function Escena(props) {
       var T = props.T, at = props.at, dur = props.dur;
       var f = function (v) { return at + dur * v; };
       var t = clamp((T - at) / dur, 0, 1);
-      var info = o.vista(T, f, t) || {};
-      var figs = info.figuras || [{ quien: info.quien || 'tor', pose: info.pose, musc: info.musc, cara: info.cara, ropa: info.ropa, pesas: info.pesas, fantasmas: info.fantasmas }];
-      var legado = info.pose && (info.pose.bisagra != null || info.pose.remo != null);
-      figs.forEach(function (fg, i) {
-        if (fg.pose && fg.pose.respira == null) fg.pose.respira = Math.sin(T * 2.3 + i);
-        fg.cara = Object.assign({ parpadeo: V.parpadeo(T, i * 0.9) }, fg.cara || {});
-        fg.T = T;
-      });
-      var vt = legado ? { pose: info.pose, musc: info.musc, cara: figs[0].cara, fantasmas: info.fantasmas, objetos: info.objetos, T: T }
-        : { figuras: figs, objetos: info.objetos, T: T };
+      var a0 = armarVista(o, T, f, t), info = a0.info, vt = a0.vt;
       vt.camara = camara(o.tomas, t, T, o.acerca);
-      var pr = function (q, i) { return TOR3D.proyectar(vt, q, i); };
+      var caja = null;
+      if (o.encuadre !== false) {
+        vt.camara = aplicarAjuste(vt.camara, ajusteEscena(o, at, dur, cache), t);
+        var P = TOR3D.puntosVista(vt);
+        if (P.length) caja = TOR3D.cajaEnPantalla(P, vt.camara);
+      }
       var golpe = 0;
       (o.mal || []).map(function (m) { return m.cuando; }).concat(o.golpes || []).forEach(function (c) { var u = (T - f(c)) / 0.35; if (u > 0 && u < 1) golpe += (1 - u) * Math.sin(u * 40) * 10; });
+      // el temblor va en la camara 3D (mover la imagen la volvia borrosa)
+      var sacude = (info.vibra ? M.vibra(T, 30, 4) : 0) + golpe;
+      if (sacude) vt.camara = Object.assign({}, vt.camara, { az: (vt.camara.az || 0) + sacude * 0.016 });
+      var pr = function (q, i) { return TOR3D.proyectar(vt, q, i); };
       var e = M.pop(T, at - 0.6, 0.5);
+      var mal = (o.mal || []).map(function (m) { return correrMarca(m, caja, 240 * (m.s || 0.5)); });
+      var bien = (o.bien || []).map(function (b) { return correrMarca(b, caja, 240 * (b.s || 0.55)); });
       var rot = function (r, i) {
         if (!r) return null;
         return <Rot key={'r' + i} T={T} text={r.text} y={r.y != null ? r.y : (i ? 1470 : 262)} x={r.x} s={r.s || 1} fase={i * 0.4}
@@ -198,7 +336,7 @@
       };
       return (
         <div style={{ position: 'absolute', inset: 0 }}>
-          <A.Pos x={0} y={0} e={e} origen="50% 55%" dx={(info.vibra ? M.vibra(T, 30, 4) : 0) + golpe}>
+          <A.Pos x={0} y={0} e={e} origen="50% 55%">
             <div style={{ position: 'relative', width: 1080, height: 1920 }}><TOR3D.Lienzo vista={vt} /></div>
           </A.Pos>
           <svg width={1080} height={1920} style={{ position: 'absolute', left: 0, top: 0, overflow: 'visible' }}>
@@ -206,10 +344,10 @@
           </svg>
           {(o.piezas || []).map(function (pz, i) { return <Pieza key={'p' + i} o={pz} T={T} f={f} at={at} i={i} />; })}
           {o.encima ? o.encima(T, f, t, pr, info) : null}
-          {(o.mal || []).map(function (m, i) {
+          {mal.map(function (m, i) {
             return <A.Mal key={'m' + i} T={T} cuando={f(m.cuando)} hasta={m.hasta == null ? null : f(m.hasta)} x={m.x} y={m.y} s={m.s || 0.5} />;
           })}
-          {(o.bien || []).map(function (b, i) {
+          {bien.map(function (b, i) {
             return <A.Bien key={'b' + i} T={T} cuando={f(b.cuando)} hasta={b.hasta == null ? null : f(b.hasta)} x={b.x} y={b.y} s={b.s || 0.55} fase={i * 0.4} />;
           })}
           {rot(o.r1, 0)}
@@ -264,6 +402,7 @@
       },
       lienzo: function (T, f, t, pr) { return brilla(T, pr, o.brillo, 1, true, o.r || 95); },
       encima: cuenta(3, 40, 1060, 0.3),
+      zona: o.zona || [200, 378, 880, 1452],
       r1: { text: 'TOP 3 *' + o.musculo + '*', s: o.s1 || 1.1, cuando: 0.02 },
       r2: { text: 'SEGÚN LA *CIENCIA*', cuando: 0.4 }
     });
@@ -289,6 +428,7 @@
         );
       },
       encima: cuenta(o.n, 40, 380),
+      zona: o.zona || [200, 378, 1036, 1452],
       r1: { text: o.r1, s: o.s1 || 1.05, cuando: null },
       r2: { text: o.r2, s: o.s2 || 1, cuando: 0.2 }
     });

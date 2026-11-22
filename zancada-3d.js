@@ -280,6 +280,7 @@
       encima: function (T, f) {
         return E3.contador(T, f(0.02), f(0.98), 2, 40, 1150);
       },
+      zona: [200, 378, 1036, 1452],
       bien: [{
         x: 860,
         y: 560,

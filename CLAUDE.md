@@ -67,6 +67,8 @@ isquios-top3-3d.jsx, cuadriceps-top3-3d.jsx,
 cerveza-3d.jsx, ex-3d.jsx, vape-3d.jsx,
 chatarra-3d.jsx, novato-avanzado-3d.jsx   los mismos videos rehechos en 3D (mismo guion)
 tabla-nutricional-3d.jsx         video nuevo en 3D: como leer la tabla nutricional
+plancha-3d.jsx, abduccion-3d.jsx los primeros grabados con la voz real de Víctor
+                                 (sincronizar.py); la abducción usa la máquina 'abductora'
 novato-avanzado.jsx,
 calistenia-gym.jsx               pantalla dividida: los dos Tors en paralelo
 gluteos.jsx                      con la novia de Tor (público femenino)
@@ -88,7 +90,9 @@ largos/perfil.jpg     foto de perfil del botón de suscripción
 LARGOS.md         guía de estilo y flujo de los videos largos
 compilar.js       regenera los .js desde los .jsx
 prueba-piezas.html  verificación: motor + las 21 piezas + las piezas de B
-herramientas/     grabar.js (exporta MP4 con música y efectos; --voz dobla), locutor.py
+herramientas/     grabar.js (exporta MP4 con música y efectos; --voz dobla; --tiempos y
+                  --pista graban con una voz ya hecha), sincronizar.py (TU voz grabada:
+                  elige tomas, corta y sincroniza), locutor.py
                   (la voz de Torvick: perfil y líneas), audio.py
                   (sintetiza la música y los efectos), imagenes.js (exporta
                   los PNG de identidad.html) y las de los largos: transcribir.py,
@@ -396,7 +400,34 @@ da el punto en el lienzo para poner encima los rótulos, X, vistos, flechas,
 rótulos): error con balanceo, colocación de costado, ejecución con corte a
 primer plano, bajada lenta, giro a la espalda para los músculos, error contra
 corrección y un giro completo alrededor de Tor antes de la acción y el cierre.
-En el navegador sin GPU (el exportador) cada cuadro tarda ~0,25 s.
+En el navegador sin GPU (el exportador) cada cuadro tarda ~0,5 s: se dibuja al doble
+de resolución (2160x3840) y se achica, para que los bordes salgan nítidos
+(`TOR3D_SS = 1` en la página vuelve al tamaño simple). Las mancuernas fantasma están
+apagadas (`SIN_FANTASMAS`) y el temblor va en la cámara 3D: correr la imagen con CSS la
+volvía borrosa (pedido del autor: "más nítido").
+
+**Correcciones del autor al avatar 3D** (siguen valiendo para todo lo nuevo):
+
+- **El avatar nunca se sale del cuadro.** `E3.escena` mide la escena en 25 momentos y
+  aleja o corre la cámara (suavizado, sin "respirar") para que el cuerpo entero quede en
+  la zona libre: debajo del sello, sin tocar los rótulos (se miden de verdad, estén donde
+  estén), ni las `piezas` 2D fijas, ni lo que la escena declare en `ocupa: [[x0, y0, x1,
+  y1]]` (un termómetro, una grilla, la tabla nutricional). `zona: [x0, y0, x1, y1]`
+  reemplaza la zona (por ejemplo, para dejar lugar a un contador). Las barras entran
+  enteras (sus discos), y `vista.encuadreExtra: [[x, y, z, r]]` suma puntos que también
+  tienen que verse (el tope de una repetición). Una figura que se va caminando a
+  propósito lleva `encuadre: false` y la cámara se queda quieta. Las X y los vistos se
+  corren solos si caen encima del avatar. Una pieza 2D que va encima del avatar a
+  propósito lleva `libre: true`.
+- **No atraviesa nada.** Las manos y los codos se empujan fuera del torso, la cabeza, los
+  muslos y las canillas (con mancuernas, con el margen del disco); `_libre: true` en la
+  pose lo apaga (manos apoyadas en el piso, como en la plancha). Si un disco tapa la
+  cara, se cambia el ángulo de la cámara (sentadillas con barra: desde atrás o de frente).
+- **Cuerpo:** trapecios marcados, hombros más chicos, six pack, la V de los oblicuos y
+  tetillas (Tor). Los glúteos son parte del short o de la calza (un solo volumen con dos
+  lóbulos, sin bolas sueltas) y se pintan desde el shader cuando trabajan. La novia:
+  cintura más fina, caderas anchas que bajan redondas a los muslos, glúteos redondos con
+  la raya del medio, busto en el top; siempre deportiva y con buen gusto.
 
 **El estilo 3D es el de ahora en adelante** (pedido del autor: "rehacé los
 videos con ese estilo"). Los videos rehechos llevan el mismo id con `-3d` y el
@@ -422,7 +453,9 @@ mismo guion que el original; el original 2D sigue en el repo.
   `agarre` o `manos` para la cuerda en V), barraFija, paralelas, rueda, rodillo
   (con `pivote`: la palanca de extension/femoral), smith, prensa, y la
   escenografia: farol, jarra, balde, cama (`manta`), sofa, manta, nevera
-  (`abre`), tacho (`abre`), celular, helado, vape, paquete y brazo.
+  (`abre`), tacho (`abre`), celular, helado, vape, paquete y brazo; y la máquina de
+  abducción `abductora` (`alto`, `respaldo`, `rodillas` y `pies` de la figura: las
+  almohadillas van solas por afuera de las rodillas).
 - **E3.escena** arma la escena: `tomas` (camara que gira), `vista(T, f, t)`,
   `lienzo(T, f, t, pr, info)` (SVG encima: `pr(que, i)` proyecta un punto de la
   figura i, `'m:pecho'` el centro de un musculo), `encima`, `piezas` (los iconos
@@ -576,6 +609,25 @@ clon** (parecido 0,74 contra 0,94 de la voz real consigo misma, WeSpeaker).
 Para el timbre real hace falta un conversor de voz (kNN-VC) o un servicio
 de clonación; ver la conversación del abdominal. `abdominal.jsx` es el
 primer reel armado para esto.
+
+**Tu voz grabada, sincronizada sola** (pedido del autor: "no cambias mi voz, simplemente es
+sincronización"): `python3 herramientas/sincronizar.py <id> <audio> [carpeta]`. Víctor
+graba cada línea con las tomas que quiera (puede cambiar las palabras: manda lo que
+dijo, el guion solo orienta). La herramienta transcribe (`transcribir.py`, tiempos por
+palabra), reparte lo dicho entre las escenas en orden, parte los reintentos ("los
+músculos principales... los músculos principales son...") y elige en cada escena la
+**última toma completa y limpia** (descarta las cortadas al final, las trabadas y los
+fragmentos; si una escena se grabó en dos partes, junta la mejor de cada una). Corta
+donde de verdad empieza y termina el sonido (no se come la última sílaba), acorta las
+pausas largas, pega las escenas con un respiro corto (sin silencios) y graba el video con
+cada escena del largo de su toma (`grabar.js --tiempos --pista`). La voz no se procesa:
+solo cortes y una ganancia pareja. Deja `<id>-voz.mp4`, `<id>-voz.wav` (la pista sola,
+para Premiere) y `<id>-voz.txt` (las tomas de cada escena, la elegida con `>>`);
+`--elegir 3=2` cambia una toma (`4=2+5` para dos partes) y `--plan` solo elige y corta.
+El cierre de marca dice su línea de siempre ("¿Quieres ver más videos similares? Sígueme
+para más contenido."); con escena de acción, la pregunta va en la acción y "Sígueme para
+más contenido." en el cierre (`plancha-3d.jsx`).
+
 
 **Formato corto:** 30 a 35 s *con* el cierre
 de 3 s; la retención de Shorts/Reels está en 20-25 s, así que nada

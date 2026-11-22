@@ -83,7 +83,7 @@
           var c = E3.medio(pr('manoI'), pr('manoD'));
           return <g><V.Chispa T={T} c={c} cuando={f(0.22)} r={110} /><V.Chispa T={T} c={c} cuando={f(0.68)} r={110} /></g>;
         },
-        encima: function (T, f) { return E3.contador(T, f(0.04), f(0.96), 2, 40, 1150); },
+        encima: function (T, f) { return E3.contador(T, f(0.04), f(0.96), 2, 40, 1150); }, zona: [200, 378, 1036, 1452],
         bien: [{ x: 860, y: 560, cuando: 0.5 }],
         r1: { text: 'BRAZOS *ESTIRADOS*', cuando: 0.08 },
         r2: { text: 'BAJA *CONTROLADO*', cuando: 0.52 }
@@ -137,7 +137,10 @@
           var bien = animate({ from: 0, to: 1, start: f(0.44), end: f(0.56), ease: Easing.easeInOutCubic })(T);
           var k = reps(T, f(0), f(1), bien < 0.5 ? 3 : 2, 0.4);
           var tope = 0.5 + 0.5 * bien;
-          return cuadro(k * tope, 0, { musc: bien < 0.5 ? { deltoides: 'rojo' } : { deltoides: true }, cara: { boca: bien < 0.5 ? 'recta' : 'sonrisa' } });
+          var vt = cuadro(k * tope, 0, { musc: bien < 0.5 ? { deltoides: 'rojo' } : { deltoides: true }, cara: { boca: bien < 0.5 ? 'recta' : 'sonrisa' } });
+          var arriba = global.TOR3D.esqueleto(pose(1, 0));
+          vt.encuadreExtra = [[-0.75, arriba.manoI.y + 0.2, 0, 0.1], [0.75, arriba.manoD.y + 0.2, 0, 0.1]];
+          return vt;
         },
         lienzo: function (T, f, t, pr) {
           var arriba = global.TOR3D.esqueleto(pose(1, 0));

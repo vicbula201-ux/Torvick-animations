@@ -69,7 +69,7 @@
     { nombre: '1. Sentadilla en máquina', dur: 2.2, vo: 'Uno: sentadilla en máquina, bajando bien.',
       C: E3.ejercicio({
         n: 1, r1: 'SENTADILLA EN *MÁQUINA*', r2: 'BIEN *ABAJO*', brillo: CUAD, r: 80, s1: 0.95,
-        tomas: [[0, { az: 50, el: 6, dist: 7.0, y: 1.1, dz: 0 }], [1, { az: 40, el: 4, dist: 5.8, y: 0.95, dz: 0 }]],
+        tomas: [[0, { az: 30, el: 6, dist: 7.0, y: 1.1, dz: 0 }], [1, { az: 22, el: 4, dist: 5.8, y: 0.95, dz: 0 }]],
         vista: function (T, f, k) {
           var p = smith(k);
           return { figuras: [{ quien: 'novia', pose: p, musc: { cuadriceps: true, gluteos: 'claro', brillo: 0.35 * k }, cara: { boca: k < 0.5 ? 'dientes' : 'sonrisa' } }],

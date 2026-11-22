@@ -960,7 +960,7 @@
       dur: 3.5,
       C: EscMarca2,
       marca: true,
-      vo: 'Tu cierre: sígueme en Torvick y entrena con Tor en Instagram y TikTok.'
+      vo: '¿Quieres ver más videos similares? Sígueme para más contenido.'
     }
   };
 })(window);

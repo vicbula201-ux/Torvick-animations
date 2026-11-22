@@ -327,6 +327,8 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
     y: 400,
     s: 0.98
   };
+  // donde queda la tabla en pantalla: Tor no va debajo de ella
+  var OCUPA_TABLA = [510, 390, 1050, 1140];
   function tabla(T, f, extra) {
     return /*#__PURE__*/React.createElement(Tabla, _extends({
       T: T,
@@ -350,6 +352,7 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
     dur: 3,
     vo: 'Estás leyendo mal la tabla nutricional.',
     C: E3.escena({
+      ocupa: [OCUPA_TABLA],
       tomas: [[0, {
         az: 20,
         el: 6,
@@ -407,6 +410,7 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
     dur: 5.4,
     vo: 'Primero, la porción: todos los números son por porción, y el paquete puede traer varias.',
     C: E3.escena({
+      ocupa: [OCUPA_TABLA],
       tomas: [[0, CAM], [1, CAM2]],
       vista: function (T) {
         var p = leyendo();
@@ -455,6 +459,7 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
     dur: 5,
     vo: 'Después, las calorías y la proteína: la que te llena y te ayuda a construir músculo.',
     C: E3.escena({
+      ocupa: [OCUPA_TABLA],
       tomas: [[0, CAM2], [1, CAM]],
       vista: function (T, f) {
         var fl = Easing.easeOutBack(animate({
@@ -510,6 +515,7 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
     dur: 5.2,
     vo: 'Ojo con los azúcares añadidos: la OMS recomienda menos de 50 gramos al día.',
     C: E3.escena({
+      ocupa: [OCUPA_TABLA],
       tomas: [[0, CAM], [1, CAM2]],
       vista: function (T) {
         var p = leyendo();
@@ -585,6 +591,7 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
     dur: 4.6,
     vo: 'Y el sodio: menos de 2000 miligramos al día, y aquí una porción ya trae 800.',
     C: E3.escena({
+      ocupa: [OCUPA_TABLA],
       tomas: [[0, CAM2], [1, CAM]],
       vista: function (T) {
         var p = leyendo();

@@ -154,7 +154,7 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
     return /*#__PURE__*/React.createElement("g", null, out);
   }
   function antojos(c0, T, v) {
-    var c = [c0[0], c0[1] - 230],
+    var c = [c0[0], c0[1] - 175],
       out = [];
     [N.COMIDA.pizza, N.COMIDA.dona, N.COMIDA.hamburguesa].forEach(function (Cmp, i) {
       var a = T * 2.2 + i * 2 * Math.PI / 3,
@@ -162,7 +162,7 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
       out.push(/*#__PURE__*/React.createElement("g", {
         key: i,
         opacity: v * (atras ? 0.55 : 1)
-      }, icono(Cmp, [c[0] + 250 * Math.cos(a), c[1] + 70 * Math.sin(a)], atras ? 0.62 : 0.8, 0)));
+      }, icono(Cmp, [c[0] + 240 * Math.cos(a), c[1] + 55 * Math.sin(a)], atras ? 0.56 : 0.7, 0)));
     });
     return /*#__PURE__*/React.createElement("g", null, out);
   }
@@ -434,6 +434,8 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
     dur: 5.6,
     vo: 'Y a las 2 de la mañana no es hambre: es sueño. Dormir poco dispara los antojos.',
     C: E3.escena({
+      zona: [44, 650, 1036, 1452],
+      // arriba de la cabeza giran los antojos
       tomas: [[0, {
         az: 12,
         el: 4,
@@ -800,6 +802,7 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
           figuras: [{
             quien: 'tor',
             pose: p,
+            encuadre: sale > 0.01 ? false : true,
             cara: bost > 0.05 ? {
               ojos: 'cerrados',
               boca: 'abierta'

@@ -88,7 +88,7 @@
             </g>
           );
         },
-        encima: function (T, f) { return E3.contador(T, f(0.02), f(0.98), 2, 40, 1150); },
+        encima: function (T, f) { return E3.contador(T, f(0.02), f(0.98), 2, 40, 1150); }, zona: [200, 378, 1036, 1452],
         bien: [{ x: 860, y: 560, cuando: 0.5 }],
         r1: { text: 'PASO *ADELANTE*', s: 1.1, cuando: 0.06 },
         r2: { text: 'MUSLO *PARALELO*', s: 1.1, cuando: 0.3 }

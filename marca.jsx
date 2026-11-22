@@ -511,7 +511,7 @@
     // estilo 2: Torvick (con su foto) + Entrena con Tor (con Tor)
     escena2: {
       nombre: 'Torvick + Tor', dur: 3.5, C: EscMarca2, marca: true,
-      vo: 'Tu cierre: sígueme en Torvick y entrena con Tor en Instagram y TikTok.'
+      vo: '¿Quieres ver más videos similares? Sígueme para más contenido.'
     }
   };
 })(window);

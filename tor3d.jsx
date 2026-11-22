@@ -44,6 +44,7 @@
   var INK = 0x14110F, YEL = 0xFFD400, GRY = 0xC9C3B8, BLANCO = 0xffffff, RED = 0xE03A2F, GRN = 0x16A06A;
   var G = 0.027;            // grosor del contorno (en unidades del mundo; Tor mide ~2)
   var MOTOR = null;
+  var SIN_FANTASMAS = true;   // las copias difuminadas de las mancuernas se leian como video borroso (pedido del autor)
   // [base, sombra] de cada color con que se pinta un musculo o la ropa
   var TONOS = {
     amarillo: [YEL, 0xEBBE00], rojo: [RED, 0xB82A21], gris: [GRY, 0xB7AFA2], claro: [0xFFE680, 0xEBCB55],
@@ -65,6 +66,23 @@
       fragmentShader: 'uniform vec3 base; uniform vec3 sombra; uniform float brillo; uniform vec3 colorBrillo; uniform vec3 luz; varying vec3 vN;' +
         'void main(){ float l = dot(normalize(vN), luz); float k = smoothstep(-0.22, -0.1, l);' +
         'vec3 c = mix(sombra, base, k); c = mix(c, colorBrillo, brillo); gl_FragColor = vec4(c, 1.0); }'
+    });
+  }
+  // el short con los gluteos: la zona de cada gluteo (peso por vertice 'glu') se pinta sola cuando trabaja
+  function toonGlu(base, sombra) {
+    var THREE = global.THREE;
+    return new THREE.ShaderMaterial({
+      uniforms: {
+        base: { value: hex3(base) }, sombra: { value: hex3(sombra) },
+        brillo: { value: 0 }, colorBrillo: { value: hex3(0xFFF3A6) },
+        mus: { value: hex3(YEL) }, musS: { value: hex3(0xEBBE00) }, on: { value: 0 }, brilloMus: { value: 0 },
+        luz: { value: new THREE.Vector3(-0.55, 0.75, 0.6).normalize() }
+      },
+      vertexShader: 'attribute float glu; varying vec3 vN; varying float vG; void main(){ vN = normalize(normalMatrix * normal); vG = glu; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+      fragmentShader: 'uniform vec3 base; uniform vec3 sombra; uniform float brillo; uniform vec3 colorBrillo; uniform vec3 mus; uniform vec3 musS; uniform float on; uniform float brilloMus; uniform vec3 luz; varying vec3 vN; varying float vG;' +
+        'void main(){ float l = dot(normalize(vN), luz); float k = smoothstep(-0.22, -0.1, l);' +
+        'float g = on * smoothstep(0.2, 0.26, vG);' +
+        'vec3 c = mix(mix(sombra, base, k), mix(musS, mus, k), g); c = mix(c, colorBrillo, brillo + brilloMus * g); gl_FragColor = vec4(c, 1.0); }'
     });
   }
   function pintar(mat, c, mezcla) {
@@ -124,12 +142,23 @@
     return conBorde(geo(0), geo(G * 0.8), mat);
   }
   // cuerpo de revolucion con seccion eliptica: perfil [[y, r]], ez = profundidad / ancho
-  function tuboEliptico(perfil, ez, extra) {
-    var THREE = global.THREE, seg = 48, pos = [], idx = [];
+  function tuboEliptico(perfil, ez, extra, bulto) {
+    var THREE = global.THREE, seg = bulto ? 96 : 48, pos = [], idx = [], pesos = [];
+    if (bulto) {
+      // perfil mas fino para que el bulto quede redondo
+      var fino = [];
+      perfil.forEach(function (p, i) {
+        if (i === 0) { fino.push(p); return; }
+        var q = perfil[i - 1], n = Math.max(1, Math.ceil(Math.abs(p[0] - q[0]) / 0.008));
+        for (var k = 1; k <= n; k++) fino.push([q[0] + (p[0] - q[0]) * k / n, q[1] + (p[1] - q[1]) * k / n]);
+      });
+      perfil = fino;
+    }
     perfil.forEach(function (p) {
       for (var j = 0; j <= seg; j++) {
-        var a = j / seg * Math.PI * 2, r = p[1] + extra;
-        pos.push(Math.cos(a) * r, p[0], Math.sin(a) * (p[1] * ez + extra));
+        var a = j / seg * Math.PI * 2, r = p[1] + extra, b = bulto && p[1] > 0.01 ? bulto(p[0], a) : null, d = b ? b.d : 0;
+        pos.push(Math.cos(a) * (r + d * 0.5), p[0], Math.sin(a) * (p[1] * ez + extra + d));
+        pesos.push(b ? b.w : 0);
       }
     });
     for (var i = 0; i < perfil.length - 1; i++) {
@@ -140,13 +169,27 @@
     }
     var geo = new THREE.BufferGeometry();
     geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    if (bulto) geo.setAttribute('glu', new THREE.Float32BufferAttribute(pesos, 1));
     geo.setIndex(idx); geo.computeVertexNormals();
     return geo;
   }
-  function tubo(perfil, ez, mat) {
+  function tubo(perfil, ez, mat, bulto) {
     var ext = perfil.slice();
     ext.unshift([perfil[0][0] - G, 0.001]); ext.push([perfil[perfil.length - 1][0] + G, 0.001]);
-    return conBorde(tuboEliptico(perfil, ez, 0), tuboEliptico(ext, ez, G), mat);
+    return conBorde(tuboEliptico(perfil, ez, 0, bulto), tuboEliptico(ext, ez, G, bulto), mat);
+  }
+  // los gluteos como parte del short: dos lobulos atras (a = 270 grados), con la raya del medio
+  function bultoGluteos(q) {
+    var atras = Math.PI * 1.5;
+    return function (y, a) {
+      var vy = y - q.yc, wy = Math.exp(-(vy * vy) / ((vy > 0 ? q.sup : q.sdn) * (vy > 0 ? q.sup : q.sdn)));
+      var w = 0;
+      [-1, 1].forEach(function (lado) {
+        var da = a - (atras + lado * q.d); while (da > Math.PI) da -= 2 * Math.PI; while (da < -Math.PI) da += 2 * Math.PI;
+        w = Math.max(w, Math.exp(-(da * da) / (q.sa * q.sa)) * wy);
+      });
+      return { d: q.A * w, w: w };
+    };
   }
   function radioEn(perfil, y) {
     for (var i = 0; i < perfil.length - 1; i++) {
@@ -188,22 +231,24 @@
   /* ---------------- medidas de cada personaje ---------------- */
   var TIPOS = {
     tor: {
-      torso: [[0.0, 0.238], [0.1, 0.232], [0.2, 0.248], [0.3, 0.282], [0.4, 0.31], [0.48, 0.318], [0.55, 0.305], [0.6, 0.272], [0.632, 0.205], [0.652, 0.135], [0.665, 0.07]],
+      torso: [[0.0, 0.238], [0.1, 0.228], [0.2, 0.24], [0.3, 0.278], [0.4, 0.305], [0.48, 0.314], [0.55, 0.304], [0.6, 0.282], [0.64, 0.245], [0.675, 0.192], [0.705, 0.135], [0.722, 0.088]],
       ez: 0.62,
       short: [[-0.13, 0.02], [-0.125, 0.155], [-0.09, 0.245], [-0.03, 0.272], [0.03, 0.272], [0.08, 0.264], [0.12, 0.258], [0.16, 0.254], [0.17, 0.02]],
+      gluteo: { A: 0.026, d: 0.36, sa: 0.42, yc: -0.06, sup: 0.1, sdn: 0.075 },
       cabeza: [0.135, 0.158, 0.145], ojoX: 0.052,
       brazo: [[0, 0.08], [0.45, 0.088], [1, 0.066]], ante: [[0, 0.068], [0.3, 0.071], [1, 0.054]],
       muslo: [[0, 0.07], [0.1, 0.122], [0.55, 0.106], [1, 0.08]], pierna: [[0, 0.078], [0.3, 0.086], [1, 0.056]],
-      delt: 0.098, mano: 0.07, hx: 0.3, cx: 0.135, pernera: 0.148, finPernera: 0.4
+      delt: 0.084, mano: 0.07, hx: 0.3, cx: 0.135, pernera: 0.148, finPernera: 0.4, cuello: 0.082
     },
     novia: {
-      torso: [[0.0, 0.25], [0.1, 0.222], [0.2, 0.2], [0.3, 0.21], [0.4, 0.238], [0.48, 0.252], [0.55, 0.245], [0.6, 0.222], [0.632, 0.17], [0.652, 0.11], [0.665, 0.062]],
-      ez: 0.64,
-      short: [[-0.13, 0.02], [-0.125, 0.165], [-0.09, 0.268], [-0.03, 0.29], [0.03, 0.278], [0.08, 0.258], [0.12, 0.24], [0.14, 0.232], [0.15, 0.02]],
+      torso: [[0.0, 0.262], [0.1, 0.206], [0.18, 0.174], [0.26, 0.182], [0.34, 0.214], [0.42, 0.24], [0.5, 0.246], [0.56, 0.238], [0.6, 0.218], [0.635, 0.178], [0.665, 0.13], [0.688, 0.075]],
+      ez: 0.62,
+      short: [[-0.155, 0.02], [-0.152, 0.12], [-0.14, 0.2], [-0.115, 0.262], [-0.08, 0.308], [-0.03, 0.336], [0.03, 0.318], [0.08, 0.278], [0.12, 0.244], [0.15, 0.226], [0.16, 0.02]],
+      gluteo: { A: 0.062, d: 0.42, sa: 0.45, yc: -0.075, sup: 0.11, sdn: 0.08 }, busto: [0.078, 0.07, 0.06],
       cabeza: [0.124, 0.148, 0.134], ojoX: 0.048,
       brazo: [[0, 0.062], [0.45, 0.064], [1, 0.05]], ante: [[0, 0.052], [0.3, 0.054], [1, 0.042]],
-      muslo: [[0, 0.07], [0.1, 0.128], [0.55, 0.1], [1, 0.072]], pierna: [[0, 0.07], [0.3, 0.078], [1, 0.05]],
-      delt: 0.074, mano: 0.058, hx: 0.25, cx: 0.13, pernera: 0, finPernera: 0
+      muslo: [[0, 0.08], [0.1, 0.146], [0.5, 0.114], [1, 0.074]], pierna: [[0, 0.07], [0.3, 0.08], [1, 0.05]],
+      delt: 0.07, mano: 0.058, hx: 0.24, cx: 0.138, pernera: 0, finPernera: 0, cuello: 0.064
     }
   };
 
@@ -267,20 +312,49 @@
           pts.push([x, y, surf(x, y, 1) + 0.004]);
         }
         p.torso.add(trazo(pts, 0.011));
+        // la tetilla: un punto chico arriba de la linea del pecho
+        var tx = s * 0.138, ty = 0.418;
+        var te = new THREE.Mesh(new THREE.SphereGeometry(1, 14, 10), m.tinta); te.scale.set(0.013, 0.013, 0.006);
+        te.position.set(tx, ty, surf(tx, ty, 1) + 0.001); te.lookAt(tx * 3, ty, surf(tx, ty, 1) * 3); p.torso.add(te);
+      });
+      // el six pack: la linea del medio y tres pares de cuadritos (siempre se ven)
+      var enT = function (x, y) { return [x, y, surf(x, y, 1) + 0.003]; };
+      var med = []; for (var k = 0; k <= 8; k++) med.push(enT(0, 0.185 + 0.2 * k / 8));
+      p.torso.add(trazo(med, 0.0068));
+      [0.235, 0.29, 0.345].forEach(function (y) {
+        [-1, 1].forEach(function (s) {
+          var q = []; for (var k = 0; k <= 6; k++) { var x = s * (0.012 + 0.075 * k / 6); q.push(enT(x, y - 0.006 * Math.sin(Math.PI * k / 6))); }
+          p.torso.add(trazo(q, 0.0062));
+        });
+      });
+      // el borde de los oblicuos (la V que baja al short)
+      [-1, 1].forEach(function (s) {
+        var q = []; for (var k = 0; k <= 6; k++) { var u = k / 6; q.push(enT(s * (0.125 - 0.04 * u), 0.37 - 0.19 * u)); }
+        p.torso.add(trazo(q, 0.006, m.linea));
       });
     }
     raiz.add(p.torso);
     // short (o la calza de la novia)
-    p.short = tubo(D.short, 0.68, mats.short); raiz.add(p.short);
+    mats.shortG = toonGlu(GRY, 0xB7AFA2);
+    p.short = tubo(D.short, 0.68, mats.shortG, bultoGluteos(D.gluteo)); raiz.add(p.short);
     p.cinturon = new THREE.Mesh(new THREE.TorusGeometry(1, 0.012, 8, 48), m.tinta);
     var rc = radioEn(D.short, 0.095);
     p.cinturon.rotation.x = Math.PI / 2; p.cinturon.scale.set(rc + 0.004, (rc + 0.004) * 0.68, 1); p.cinturon.position.y = 0.095; p.short.add(p.cinturon);
+    // los gluteos: el short (o la calza) tiene dos lobulos atras; se pintan desde el shader cuando trabajan.
+    // objs: dos marcas invisibles en el centro de cada uno (para proyectar 'm:gluteos')
+    musculo('gluteos', null); fig.mus.gluteos.esPieza = true; fig.mus.gluteos.base = 'short';
     [-1, 1].forEach(function (s) {
-      var gl = parche('gluteos', 0.118, 0.115, 0.04);
-      var rg = radioEn(D.short, -0.04);
-      gl.position.set(s * 0.12, -0.04, -Math.sqrt(Math.max(rg * rg - 0.0144, 0.001)) * 0.68 * 0.9); gl.rotation.set(0.15, s * -0.35, 0);
-      p.short.add(gl);
+      var gq = D.gluteo, a = Math.PI * 1.5 + s * gq.d, rg = radioEn(D.short, gq.yc);
+      var ancla = new THREE.Object3D();
+      ancla.position.set(Math.cos(a) * (rg + gq.A * 0.5), gq.yc, Math.sin(a) * (rg * 0.68 + gq.A));
+      ancla.userData.relleno = { material: null };
+      p.short.add(ancla); fig.mus.gluteos.objs.push(ancla);
     });
+    if (quien === 'novia') {
+      // la raya del medio, corta y fina
+      var rq = [], ym; for (var k = 0; k <= 5; k++) { ym = -0.015 - 0.1 * k / 5; rq.push([0, ym, -(radioEn(D.short, ym) * 0.68 + D.gluteo.A * 0.42 * Math.exp(-Math.pow((ym - D.gluteo.yc) / (ym > D.gluteo.yc ? D.gluteo.sup : D.gluteo.sdn), 2))) - 0.002]); }
+      p.short.add(trazo(rq, 0.0042));
+    }
     // la camiseta (solo si lleva ropa)
     var perfC = TOR.filter(function (q) { return q[0] >= 0.08 && q[0] <= 0.645; }).map(function (q) { return [q[0], q[1] + 0.016]; });
     p.camiseta = tubo(perfC, EZ + 0.02, mats.camiseta); p.camiseta.visible = false; raiz.add(p.camiseta);
@@ -289,8 +363,13 @@
       var perfT = TOR.filter(function (q) { return q[0] >= 0.36 && q[0] <= 0.6; }).map(function (q) { return [q[0], q[1] + 0.014]; });
       perfT.unshift([0.36, radioEn(TOR, 0.36) + 0.014]);
       p.top = tubo(perfT, EZ + 0.03, m.amarillo); p.torso.add(p.top);
+      [-1, 1].forEach(function (s) {
+        var bq = D.busto, bx = s * 0.082, by = 0.47;
+        var bu = elipsoide(bq[0], bq[1], bq[2], m.amarillo, 0.016);
+        bu.position.set(bx, by, surf(bx, by, 1) * 0.78 + 0.02); bu.rotation.set(0.1, s * 0.25, 0); p.torso.add(bu);
+      });
     }
-    p.cuello = capsula(quien === 'novia' ? 0.064 : 0.078, 0.12, mats.piel); raiz.add(p.cuello);
+    p.cuello = capsula(D.cuello, 0.12, mats.piel); raiz.add(p.cuello);
 
     // cabeza y cara
     var cx = D.cabeza[0], cy = D.cabeza[1], cz = D.cabeza[2];
@@ -441,7 +520,8 @@
     if (MOTOR) return MOTOR;
     var THREE = global.THREE;
     var R = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true, alpha: false });
-    R.setPixelRatio(1); R.setSize(ANCHO, ALTO, false); R.setClearColor(0xffffff, 1);
+    var SS = global.TOR3D_SS || 2;
+    R.setPixelRatio(1); R.setSize(ANCHO * SS, ALTO * SS, false); R.setClearColor(0xffffff, 1);
     var cv = document.createElement('canvas'); cv.width = cv.height = 256;
     var cx = cv.getContext('2d'), gr = cx.createRadialGradient(128, 128, 10, 128, 128, 128);
     gr.addColorStop(0, 'rgba(20,17,15,0.34)'); gr.addColorStop(0.55, 'rgba(20,17,15,0.14)'); gr.addColorStop(1, 'rgba(20,17,15,0)');
@@ -510,7 +590,7 @@
       var arriba = J.cadera.clone().add(d.clone().multiplyScalar(0.2)).add(X.clone().multiplyScalar(s * 0.3)).add(fr.clone().multiplyScalar(0.06));
       var W = abajo.clone().lerp(arriba, k).add(X.clone().multiplyScalar(s * 0.04 * Math.sin(Math.PI * k)));
       var polo = fr.clone().multiplyScalar(-1).add(X.clone().multiplyScalar(s * 0.35)).add(v(0, 0.2, 0));
-      var a = ik(S, W, 0.41, 0.39, polo);
+      var a = brazoSinChoques(J, TIPOS.tor, { X: X, d: d, fr: fr }, S, W, 0.41, 0.39, polo, 0.12);
       J['codo' + L] = a.codo; J['mano' + L] = a.fin;
     });
     var ca = (o.cabeza != null ? o.cabeza : 24 * b) * RAD;
@@ -520,6 +600,55 @@
     J.cabeza = J.cuello.clone().add(d.clone().multiplyScalar(0.25)).add(fr.clone().multiplyScalar(0.02));
     J.giro = 0;
     return J;
+  }
+
+  /* ---------------- que el cuerpo no se atraviese a si mismo ----------------
+     Las manos y los codos no entran al tronco, al short, a los muslos ni a la
+     cabeza: si un objetivo cae adentro se empuja a la superficie (mas el radio de
+     la mano, o el de la mancuerna si la lleva) y se vuelve a resolver el brazo. */
+  function fueraCapsula(p, a, b, r) {
+    var ab = b.clone().sub(a), t = clamp01(p.clone().sub(a).dot(ab) / Math.max(ab.lengthSq(), 1e-6));
+    var c = a.clone().add(ab.multiplyScalar(t)), d = p.clone().sub(c), l = d.length();
+    if (l >= r) return p;
+    if (l < 1e-4) d = v(1, 0, 0);
+    return c.add(d.normalize().multiplyScalar(r));
+  }
+  function fueraDelCuerpo(J, D, F, p, margen) {
+    var q = p.clone();
+    var v0 = q.clone().sub(J.cadera), y = v0.dot(F.d);
+    if (y > -0.14 && y < 0.74) {
+      var x = v0.dot(F.X), z = v0.dot(F.fr);
+      var enShort = y < 0.15;
+      var r = enShort ? Math.max(radioEn(D.short, y), y > 0 ? radioEn(D.torso, y) : 0) : radioEn(D.torso, Math.min(y, 0.72));
+      var ez = enShort ? 0.68 : D.ez;
+      var rx = r + margen, rz = r * ez + margen;
+      var k = (x * x) / (rx * rx) + (z * z) / (rz * rz);
+      if (k < 1 && r > 0.03) {
+        if (k < 1e-6) { x = rx; z = 0; } else { var fk = 1 / Math.sqrt(k); x *= fk; z *= fk; }
+        q = J.cadera.clone().add(F.d.clone().multiplyScalar(y)).add(F.X.clone().multiplyScalar(x)).add(F.fr.clone().multiplyScalar(z));
+      }
+    }
+    if (J.cabeza) {
+      var rh = 0.165 + margen, dv = q.clone().sub(J.cabeza), dl = dv.length();
+      if (dl < rh) { if (dl < 1e-4) dv = F.fr.clone(); q = J.cabeza.clone().add(dv.normalize().multiplyScalar(rh)); }
+    }
+    ['I', 'D'].forEach(function (L) {
+      if (J['caderaJ' + L] && J['rodilla' + L]) q = fueraCapsula(q, J['caderaJ' + L], J['rodilla' + L], (D.pernera || 0.13) + margen);
+      if (J['rodilla' + L] && J['tobillo' + L]) q = fueraCapsula(q, J['rodilla' + L], J['tobillo' + L], 0.075 + margen);
+    });
+    return q;
+  }
+  function brazoSinChoques(J, D, F, S, W, l1, l2, polo, margen) {
+    var W2 = fueraDelCuerpo(J, D, F, W, margen);
+    var a = ik(S, W2, l1, l2, polo);
+    var E2 = fueraDelCuerpo(J, D, F, a.codo, 0.085);
+    if (E2.distanceTo(a.codo) > 0.005) {
+      var mid = S.clone().add(a.fin).multiplyScalar(0.5);
+      a = ik(S, W2, l1, l2, E2.clone().sub(mid));
+    }
+    var fin2 = fueraDelCuerpo(J, D, F, a.fin, margen);
+    if (fin2.distanceTo(a.fin) > 0.005) a = ik(S, fin2, l1, l2, a.codo.clone().sub(S.clone().add(fin2).multiplyScalar(0.5)));
+    return a;
   }
 
   // pose general: puntos explicitos y codos y rodillas por IK
@@ -535,21 +664,12 @@
     var hs = o.hombros || {}, sube = hs.sube || 0, junta = hs.junta || 0;
     ['I', 'D'].forEach(function (L, i) {
       var s = i ? 1 : -1;
-      // piernas
       var Hj = J.cadera.clone().add(F.X.clone().multiplyScalar(s * D.cx)).sub(F.d.clone().multiplyScalar(0.04));
       var A = vec(o['pie' + L], Hj.clone().add(Fy.X.clone().multiplyScalar(s * 0.02)).setY(0.115));
       var pr = o['rodilla' + L] || [0.15, 0, 1];
       var r = ik(Hj, A, 0.43, 0.43, enMarco(F, s * pr[0], pr[1], pr[2]));
       J['caderaJ' + L] = Hj; J['rodilla' + L] = r.codo; J['tobillo' + L] = r.fin;
       J['pieAng' + L] = (o.pies || [])[i] || 0;
-      // brazos
-      var S = J.cuello.clone().sub(F.d.clone().multiplyScalar(0.1 - 0.06 * sube)).add(F.X.clone().multiplyScalar(s * (D.hx - 0.03 * junta)))
-        .add(F.fr.clone().multiplyScalar(0.03 - 0.06 * junta));
-      J['hombro' + L] = S;
-      var W = vec(o['mano' + L], S.clone().add(v(0, -0.74, 0)).add(F.X.clone().multiplyScalar(s * 0.04)).add(F.fr.clone().multiplyScalar(0.05)));
-      var pc = o['codo' + L] || [0.35, 0.2, -1];
-      var a = ik(S, W, 0.41, 0.39, enMarco(F, s * pc[0], pc[1], pc[2]));
-      J['codo' + L] = a.codo; J['mano' + L] = a.fin;
     });
     // cabeza: mira arriba (+), gira, ladea respecto del tronco
     var c = o.cabeza || [0, 0, 0];
@@ -557,6 +677,18 @@
     var qh = F.q.clone().multiply(new THREE.Quaternion().setFromEuler(new THREE.Euler(-(c[0] || 0) * RAD, (c[1] || 0) * RAD, (c[2] || 0) * RAD, 'YXZ')));
     J.hd = v(0, 1, 0).applyQuaternion(qh); J.hf = v(0, 0, 1).applyQuaternion(qh); J.hX = v(1, 0, 0).applyQuaternion(qh);
     J.cabeza = J.cuello.clone().add(J.hd.clone().multiplyScalar(0.23)).add(F.d.clone().multiplyScalar(0.02)).add(J.hf.clone().multiplyScalar(0.02));
+    // brazos, sin atravesar el cuerpo (con mancuernas, el margen es el del disco)
+    var margen = o._pesas ? 0.12 : 0.075;
+    ['I', 'D'].forEach(function (L, i) {
+      var s = i ? 1 : -1;
+      var S = J.cuello.clone().sub(F.d.clone().multiplyScalar(0.1 - 0.06 * sube)).add(F.X.clone().multiplyScalar(s * (D.hx - 0.03 * junta)))
+        .add(F.fr.clone().multiplyScalar(0.03 - 0.06 * junta));
+      J['hombro' + L] = S;
+      var W = vec(o['mano' + L], S.clone().add(v(0, -0.74, 0)).add(F.X.clone().multiplyScalar(s * 0.04)).add(F.fr.clone().multiplyScalar(0.05)));
+      var pc = o['codo' + L] || [0.35, 0.2, -1];
+      var a = o._libre ? ik(S, W, 0.41, 0.39, enMarco(F, s * pc[0], pc[1], pc[2])) : brazoSinChoques(J, D, F, S, W, 0.41, 0.39, enMarco(F, s * pc[0], pc[1], pc[2]), margen);
+      J['codo' + L] = a.codo; J['mano' + L] = a.fin;
+    });
     return J;
   }
 
@@ -591,7 +723,7 @@
   }
 
   function posarFigura(fig, f, legado) {
-    var THREE = global.THREE, p = fig.p, D = fig.D, J = esqueleto(f.pose || {}, fig.quien);
+    var THREE = global.THREE, p = fig.p, D = fig.D, J = esqueleto(Object.assign({ _pesas: !!f.pesas }, f.pose || {}), fig.quien);
     fig.raiz.visible = !f.oculto;
     var X = J.X;
     conMarco(p.torso, J.cadera, X, J.d, J.fr);
@@ -601,7 +733,7 @@
     conMarco(p.cabeza, J.cabeza, J.hX || X, J.hd, J.hf);
     ['I', 'D'].forEach(function (L, i) {
       var s = i ? 1 : -1;
-      p['delt' + L].position.copy(J['hombro' + L]).add(X.clone().multiplyScalar(s * 0.025)).add(J.d.clone().multiplyScalar(0.01));
+      p['delt' + L].position.copy(J['hombro' + L]).add(X.clone().multiplyScalar(s * 0.018)).sub(J.d.clone().multiplyScalar(0.004));
       p['delt' + L].quaternion.copy(p.torso.quaternion);
       var anteDir = J['mano' + L].clone().sub(J['codo' + L]).normalize();
       entre(p['brazo' + L], J['hombro' + L], J['codo' + L], anteDir.clone().add(J.fr.clone().multiplyScalar(0.6)));
@@ -635,7 +767,7 @@
     }
     // desenfoque: mancuernas de unos instantes antes
     p.fantasmas.forEach(function (fa) { fa.visible = false; });
-    (f.fantasmas || []).forEach(function (fp, i) {
+    (SIN_FANTASMAS ? [] : (f.fantasmas || [])).forEach(function (fp, i) {
       if (i * 2 + 1 >= p.fantasmas.length) return;
       var Jf = esqueleto(fp, fig.quien);
       ['I', 'D'].forEach(function (L, j) { var fa = p.fantasmas[i * 2 + j]; pesaEnMano(fa, Jf, L, f.pesas || 'neutro'); fa.visible = true; });
@@ -647,6 +779,12 @@
     Object.keys(fig.mus).forEach(function (n) {
       var g = fig.mus[n], t = tono(mu[n]);
       if (g.esPieza) {
+        if (g.base === 'short') {
+          var ms = fig.mats.shortG.uniforms, tt = t || TONOS.amarillo;
+          ms.on.value = t ? 1 : 0; ms.mus.value.setHex(tt[0]); ms.musS.value.setHex(tt[1]);
+          ms.brilloMus.value = t && mu[n] !== 'rojo' && mu[n] !== 'gris' ? (mu.brillo || 0) : 0;
+          return;
+        }
         var colorDelt = t ? null : (ropa.camiseta && ropa.mangas !== false ? ropa.camiseta : null);
         pintar(g.mat, t ? mu[n] : (colorDelt || 'blanco'));
         g.mat.uniforms.brillo.value = t && mu[n] !== 'rojo' && mu[n] !== 'gris' ? (mu.brillo || 0) : 0;
@@ -662,7 +800,7 @@
     p.camiseta.visible = !!ropa.camiseta;
     if (ropa.camiseta) pintar(fig.mats.camiseta, ropa.camiseta);
     ['I', 'D'].forEach(function (L) { p['manga' + L].visible = !!ropa.camiseta && ropa.mangas !== false; });
-    pintar(fig.mats.short, ropa.short || 'gris');
+    pintar(fig.mats.short, ropa.short || 'gris'); pintar(fig.mats.shortG, ropa.short || 'gris');
     // cara
     var cara = f.cara || {}, c = fig.cara;
     var ojos = cara.ojos || 'normal';
@@ -873,6 +1011,55 @@
     var barra = OBJ.barra(); g.add(barra.g);
     return { g: g, poner: function (o) { ubicar(g, o); barra.poner({ c: [0, o.barra || 1.5, 0], eje: [1, 0, 0] }); } };
   };
+  // maquina de abduccion (sentado): asiento, respaldo, la torre de pesas atras y dos brazos con
+  // almohadillas que van por afuera de las rodillas. o = { p, giro, alto (asiento), respaldo (grados desde
+  // la vertical, hacia atras), rodillas: [[x,y,z] izq, [x,y,z] der], pies: [[x,y,z], [x,y,z]] } (mundo)
+  OBJ.abductora = function () {
+    var THREE = global.THREE, m = MOTOR.mat, g = new THREE.Group();
+    var asiento = cojin(0.52, 0.1, 0.5, m.gris); g.add(asiento);
+    var resp = cojin(0.52, 0.1, 0.72, m.gris); g.add(resp);
+    var col = cilindro(0.05, 1, 16, m.tinta, 0); g.add(col);
+    var base = caja(0.64, 0.05, 1.05, m.oscuro, 0.01); g.add(base);
+    var torre = caja(0.2, 1.55, 0.16, m.gris); g.add(torre);
+    var pesas = [0, 1, 2, 3, 4, 5].map(function () { var q = caja(0.3, 0.07, 0.22, m.gris, 0.008); g.add(q); return q; });
+    var poste = cilindro(0.03, 1, 12, m.tinta, 0); g.add(poste);
+    var pivote = cilindro(0.06, 0.1, 18, m.tinta, 0); g.add(pivote);
+    var pads = [0, 1].map(function () { var c = cojin(0.1, 0.26, 0.24, m.gris); g.add(c); return c; });
+    var brazos = [0, 1].map(function () { var b = cilindro(0.026, 1, 12, m.tinta, 0); g.add(b); return b; });
+    var bajadas = [0, 1].map(function () { var b = cilindro(0.022, 1, 12, m.tinta, 0); g.add(b); return b; });
+    var apoyos = [0, 1].map(function () { var a = caja(0.15, 0.035, 0.22, m.oscuro, 0.01); g.add(a); return a; });
+    var sombra = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), m.sombra); sombra.rotation.x = -Math.PI / 2; sombra.position.y = 0.002; g.add(sombra);
+    return {
+      g: g, poner: function (o) {
+        ubicar(g, o); g.updateMatrixWorld(true);
+        var alto = o.alto || 0.5, ar = (o.respaldo == null ? 12 : o.respaldo) * RAD;
+        asiento.position.set(0, alto - 0.05, 0.02);
+        var bis = v(0, alto - 0.02, -0.24), dir = v(0, Math.cos(ar), -Math.sin(ar));
+        resp.position.copy(bis.clone().add(dir.clone().multiplyScalar(0.38)).add(v(0, 0, -0.05)));
+        resp.rotation.set(Math.PI / 2 - ar, 0, 0);
+        entre(col, v(0, 0.05, 0.02), v(0, alto - 0.1, 0.02));
+        base.position.set(0, 0.025, -0.05);
+        torre.position.set(0, 0.775, -0.66);
+        pesas.forEach(function (q, i) { q.position.set(0, 0.12 + i * 0.075, -0.52); });
+        entre(poste, v(0, 0.05, -0.52), v(0, 0.6, -0.52));
+        var piv = v(0, alto - 0.17, 0.2); pivote.position.copy(piv);
+        var rod = o.rodillas || [[-0.2, alto + 0.08, 0.42], [0.2, alto + 0.08, 0.42]];
+        [-1, 1].forEach(function (s, i) {
+          var k = g.worldToLocal(vec(rod[i]));
+          var yaw = Math.atan2(k.x, k.z - piv.z);
+          var lado = v(Math.cos(yaw), 0, -Math.sin(yaw)).multiplyScalar(s);
+          var c = k.clone().add(lado.clone().multiplyScalar(0.135)).add(v(0, -0.01, 0));
+          pads[i].position.copy(c); pads[i].rotation.set(0, yaw, 0);
+          var pie = c.clone().add(lado.clone().multiplyScalar(0.02)); pie.y = piv.y;
+          entre(brazos[i], piv, pie);
+          entre(bajadas[i], pie, c.clone().add(v(0, -0.12, 0)));
+          var pp = o.pies && o.pies[i] ? g.worldToLocal(vec(o.pies[i])) : v(s * 0.2, 0.12, 0.55);
+          apoyos[i].position.set(pp.x, Math.max(0.05, pp.y - 0.1), pp.z + 0.04); apoyos[i].rotation.set(0, yaw, 0);
+        });
+        sombra.scale.set(0.9, 1.4, 1); sombra.position.z = -0.1;
+      }
+    };
+  };
   // prensa a 45°: asiento y respaldo, rieles y la plataforma donde van los pies (plato)
   OBJ.prensa = function () {
     var THREE = global.THREE, m = MOTOR.mat, g = new THREE.Group();
@@ -1063,6 +1250,87 @@
     cam.updateMatrixWorld();
   }
 
+  /* ---------------- encuadre: el avatar siempre entero dentro del cuadro ----------------
+     puntosVista da los puntos del cuerpo (con su radio) de las figuras visibles;
+     cajaEnPantalla los proyecta con una camara (sin tocar la de three.js);
+     encuadrar aleja la camara y corre el punto que mira hasta que todo entra en zona. */
+  function puntosCuerpo(J, f) {
+    var P = [], add = function (p, r) { P.push({ p: p, r: r }); };
+    if (J.hd) {
+      add(J.cabeza.clone().add(J.hd.clone().multiplyScalar(0.17)), 0.03);
+      add(J.cabeza.clone().sub(J.hd.clone().multiplyScalar(0.16)), 0.03);
+      add(J.cabeza.clone().add(J.hX.clone().multiplyScalar(0.16)), 0.03);
+      add(J.cabeza.clone().sub(J.hX.clone().multiplyScalar(0.16)), 0.03);
+      add(J.cabeza.clone().add(J.hf.clone().multiplyScalar(0.16)), 0.03);
+      add(J.cabeza.clone().sub(J.hf.clone().multiplyScalar(0.16)), 0.03);
+    }
+    ['I', 'D'].forEach(function (L) {
+      add(J['hombro' + L], 0.13); add(J['codo' + L], 0.1); add(J['mano' + L], f.pesas ? 0.21 : 0.1);
+      add(J['caderaJ' + L], 0.18); add(J['rodilla' + L], 0.11); add(J['tobillo' + L], 0.1);
+      var g = (J.giro || 0) * RAD, pa = (J['pieAng' + L] || 0) * RAD;
+      var fw = v(Math.sin(g) * Math.cos(pa), -Math.sin(pa), Math.cos(g) * Math.cos(pa));
+      add(J['tobillo' + L].clone().add(fw.clone().multiplyScalar(0.25)).add(v(0, -0.05, 0)), 0.06);
+      add(J['tobillo' + L].clone().sub(fw.clone().multiplyScalar(0.12)).add(v(0, -0.05, 0)), 0.06);
+    });
+    add(J.cadera, 0.29); add(J.cuello, 0.3);
+    if (f.quien === 'novia' && J.hf) add(J.cabeza.clone().sub(J.hf.clone().multiplyScalar(0.22)).add(v(0, -0.3, 0)), 0.08);
+    return P;
+  }
+  function puntosVista(vt) {
+    var lista = figurasDe(vt), P = [];
+    lista.forEach(function (f) {
+      if (f.oculto || f.encuadre === false) return;
+      var legado = f.legado;
+      var J = esqueleto(Object.assign({ _pesas: !!f.pesas }, f.pose || {}), f.quien === 'novia' ? 'novia' : 'tor');
+      P = P.concat(puntosCuerpo(J, Object.assign({ pesas: f.pesas || legado }, f)));
+    });
+    // puntos que tambien tienen que entrar (una guia dibujada encima, el tope de una repeticion)
+    if (P.length) (vt.encuadreExtra || []).forEach(function (q) { P.push({ p: v(q[0], q[1], q[2]), r: q[3] || 0.06 }); });
+    // las barras que lleva el avatar: sus discos tambien entran en cuadro
+    if (P.length) (vt.objetos || []).forEach(function (o) {
+      if ((o.tipo !== 'barra' && o.tipo !== 'ez') || o.encuadre === false || !o.c) return;
+      var c = vec(o.c), e = vec(o.eje, v(1, 0, 0)).normalize(), L = o.tipo === 'barra' ? 0.78 : 0.53, r = o.tipo === 'barra' ? (o.discos === 0 ? 0.05 : 0.235) : 0.14;
+      P.push({ p: c.clone().add(e.clone().multiplyScalar(L)), r: r }); P.push({ p: c.clone().sub(e.clone().multiplyScalar(L)), r: r });
+    });
+    return P;
+  }
+  function baseCamara(c) {
+    var az = (c.az || 0) * RAD, el = (c.el || 0) * RAD, dist = c.dist || 5;
+    var obj = v(c.dx || 0, c.y == null ? 0.95 : c.y, c.dz == null ? -0.05 : c.dz);
+    var pos = v(obj.x + dist * Math.sin(az) * Math.cos(el), obj.y + dist * Math.sin(el), obj.z + dist * Math.cos(az) * Math.cos(el));
+    var fw = obj.clone().sub(pos).normalize(), r = fw.clone().cross(v(0, 1, 0)).normalize(), u = r.clone().cross(fw).normalize();
+    if (c.giro) { var q = new global.THREE.Quaternion().setFromAxisAngle(fw, -c.giro * RAD); r.applyQuaternion(q); u.applyQuaternion(q); }
+    return { pos: pos, fw: fw, r: r, u: u, obj: obj, fpx: (ALTO / 2) / Math.tan((c.fov || 30) * RAD / 2) };
+  }
+  function cajaEnPantalla(P, c) {
+    var b = baseCamara(c), x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+    P.forEach(function (q) {
+      var d = q.p.clone().sub(b.pos), z = Math.max(0.05, d.dot(b.fw));
+      var sx = ANCHO / 2 + d.dot(b.r) / z * b.fpx, sy = ALTO / 2 - d.dot(b.u) / z * b.fpx, rr = q.r / z * b.fpx + 6;
+      x0 = Math.min(x0, sx - rr); x1 = Math.max(x1, sx + rr); y0 = Math.min(y0, sy - rr); y1 = Math.max(y1, sy + rr);
+    });
+    return { x0: x0, y0: y0, x1: x1, y1: y1 };
+  }
+  function encuadrar(vt, zona, cam0, P) {
+    P = P || puntosVista(vt);
+    var c = Object.assign({}, cam0);
+    if (!P.length) return c;
+    for (var it = 0; it < 10; it++) {
+      var bb = cajaEnPantalla(P, c);
+      var zw = zona[2] - zona[0], zh = zona[3] - zona[1];
+      var sc = Math.max((bb.x1 - bb.x0) / zw, (bb.y1 - bb.y0) / zh);
+      if (sc > 1.002) { c.dist = (c.dist || 5) * Math.min(3, sc * 1.015); continue; }
+      var mx = 0, my = 0;
+      if (bb.x0 < zona[0]) mx = zona[0] - bb.x0; else if (bb.x1 > zona[2]) mx = zona[2] - bb.x1;
+      if (bb.y0 < zona[1]) my = zona[1] - bb.y0; else if (bb.y1 > zona[3]) my = zona[3] - bb.y1;
+      if (Math.abs(mx) < 0.5 && Math.abs(my) < 0.5) break;
+      var b = baseCamara(c), wpp = 2 * b.pos.distanceTo(b.obj) * Math.tan((c.fov || 30) * RAD / 2) / ALTO;
+      var o2 = b.obj.clone().sub(b.r.clone().multiplyScalar(mx * wpp * 1.02)).add(b.u.clone().multiplyScalar(my * wpp * 1.02));
+      c.dx = o2.x; c.y = o2.y; c.dz = o2.z;
+    }
+    return c;
+  }
+
   /* ---------------- API ---------------- */
   function vista(o) { return o; }
   function preparar(vt) { motor(); var Js = posar(vt); ponerCamara(vt.camara || {}); return Js; }
@@ -1070,6 +1338,7 @@
     var M = motor(); preparar(vt);
     M.R.render(M.escena, M.camara);
     var cx = canvas.getContext('2d');
+    cx.imageSmoothingEnabled = true; cx.imageSmoothingQuality = 'high';
     cx.clearRect(0, 0, ANCHO, ALTO); cx.drawImage(M.R.domElement, 0, 0, ANCHO, ALTO);
   }
   // punto del cuerpo (o [x,y,z]) a coordenadas del lienzo; i = la figura
@@ -1121,6 +1390,7 @@
 
   global.TOR3D = {
     Lienzo: Lienzo, vista: vista, proyectar: proyectar, tomaEn: tomaEn, esqueleto: esqueleto,
+    encuadrar: encuadrar, puntosVista: puntosVista, cajaEnPantalla: cajaEnPantalla,
     v: v, lerpV: function (a, b, k) { return [lerp(a[0], b[0], k), lerp(a[1], b[1], k), lerp(a[2], b[2], k)]; }
   };
 })(window);

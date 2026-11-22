@@ -260,6 +260,7 @@
       encima: function (T, f) {
         return E3.contador(T, f(0.04), f(0.96), 2, 40, 1150);
       },
+      zona: [200, 378, 1036, 1452],
       bien: [{
         x: 860,
         y: 560,
@@ -440,7 +441,7 @@
         })(T);
         var k = reps(T, f(0), f(1), bien < 0.5 ? 3 : 2, 0.4);
         var tope = 0.5 + 0.5 * bien;
-        return cuadro(k * tope, 0, {
+        var vt = cuadro(k * tope, 0, {
           musc: bien < 0.5 ? {
             deltoides: 'rojo'
           } : {
@@ -450,6 +451,9 @@
             boca: bien < 0.5 ? 'recta' : 'sonrisa'
           }
         });
+        var arriba = global.TOR3D.esqueleto(pose(1, 0));
+        vt.encuadreExtra = [[-0.75, arriba.manoI.y + 0.2, 0, 0.1], [0.75, arriba.manoD.y + 0.2, 0, 0.1]];
+        return vt;
       },
       lienzo: function (T, f, t, pr) {
         var arriba = global.TOR3D.esqueleto(pose(1, 0));

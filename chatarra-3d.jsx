@@ -72,10 +72,10 @@
     return <g>{out}</g>;
   }
   function antojos(c0, T, v) {
-    var c = [c0[0], c0[1] - 230], out = [];
+    var c = [c0[0], c0[1] - 175], out = [];
     [N.COMIDA.pizza, N.COMIDA.dona, N.COMIDA.hamburguesa].forEach(function (Cmp, i) {
       var a = T * 2.2 + i * 2 * Math.PI / 3, atras = Math.sin(a) < 0;
-      out.push(<g key={i} opacity={v * (atras ? 0.55 : 1)}>{icono(Cmp, [c[0] + 250 * Math.cos(a), c[1] + 70 * Math.sin(a)], atras ? 0.62 : 0.8, 0)}</g>);
+      out.push(<g key={i} opacity={v * (atras ? 0.55 : 1)}>{icono(Cmp, [c[0] + 240 * Math.cos(a), c[1] + 55 * Math.sin(a)], atras ? 0.56 : 0.7, 0)}</g>);
     });
     return <g>{out}</g>;
   }
@@ -169,6 +169,7 @@
 
     { nombre: 'Es sueño', dur: 5.6, vo: 'Y a las 2 de la mañana no es hambre: es sueño. Dormir poco dispara los antojos.',
       C: E3.escena({
+        zona: [44, 650, 1036, 1452],   // arriba de la cabeza giran los antojos
         tomas: [[0, { az: 12, el: 4, dist: 7.0, y: 1.45 }], [1, { az: 22, el: 4, dist: 7.6, y: 1.45 }]],
         vista: function (T, f) {
           var bost = Math.max(pulso(T, f(0.1), 1.4), pulso(T, f(0.62), 1.4));
@@ -252,7 +253,7 @@
             manoD: E3.lerp3([0.34, 0.83, 0.08], [0.78, 1.25, 0.25], empuja), codoD: [0.8, -0.6, 0],
             manoI: E3.lerp3([-0.34, 0.83, 0.08], [-0.04, 1.5, 0.28], bost), codoI: [0.8, -1, 0], cabeza: [12 * bost, 0, 0] });
           return {
-            figuras: [{ quien: 'tor', pose: p, cara: bost > 0.05 ? { ojos: 'cerrados', boca: 'abierta' } : (T < f(0.34) ? { ojos: 'grandes', boca: 'ondulada', cejas: 'triste' } : { ojos: 'rojos', boca: 'sonrisa' }) }],
+            figuras: [{ quien: 'tor', pose: p, encuadre: sale > 0.01 ? false : true, cara: bost > 0.05 ? { ojos: 'cerrados', boca: 'abierta' } : (T < f(0.34) ? { ojos: 'grandes', boca: 'ondulada', cejas: 'triste' } : { ojos: 'rojos', boca: 'sonrisa' }) }],
             objetos: [{ tipo: 'nevera', p: [1.0, 0, -0.35], abre: 1.9 * abre }], sale: sale
           };
         },

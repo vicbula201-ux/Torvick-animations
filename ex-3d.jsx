@@ -146,6 +146,7 @@
           return { figuras: [{ quien: 'tor', pose: E3.poseFlex(fl), musc: { biceps: g > 0.5 ? 'gris' : true, brillo: 0.2 * (1 - g) }, cara: { boca: 'triste', cejas: 'triste' } }], gota: g };
         },
         lienzo: function (T, f, t, pr, info) { return <g>{barraCortisol(T, f)}<V.Gotas T={T} c={pr('cabeza')} v={clamp(info.gota * 3, 0, 1)} /></g>; },
+        ocupa: [[95, 525, 205, 995]],
         piezas: [{ C: N.ICONOS.luna, s: 0.8, x: 850, y: 400, cuando: 0.26 }, { C: N.ICONOS.helado, s: 0.8, x: 850, y: 640, cuando: 0.4 }],
         mal: [{ x: 880, y: 430, cuando: 0.32, s: 0.5 }, { x: 880, y: 670, cuando: 0.46, s: 0.5 }],
         r1: { text: 'SUBE EL *CORTISOL*', s: 1.05, cuando: 0.04, tono: 'rojo' },
@@ -188,6 +189,7 @@
           return { figuras: [{ quien: 'tor', oculto: !entra, pose: E3.poseFlex(0.4 + 0.6 * k), musc: { biceps: true, brillo: 0.3 * k }, cara: { boca: 'dientes', cejas: 'enojo' } }], k: k };
         },
         lienzo: function (T, f, t, pr, info) { return <g>{semanaGym(T, f)}{T > f(0.3) ? E3.brilla(T, pr, ['m:biceps:0', 'm:biceps:1'], info.k, false, 60) : null}</g>; },
+        ocupa: [[100, 450, 980, 840]],
         r1: { text: 'MODO *RUPTURA*', s: 1.15, cuando: 0.02 },
         r2: { text: 'GYM LOS *7 DÍAS*', s: 1.05, cuando: 0.6 }
       }) },
@@ -233,7 +235,7 @@
           var obj = [SOFA, { tipo: 'helado', p: [0.5, 0.6, 0.05], s: 1.1 }, { tipo: 'celular', p: aArr(tira < 1 ? cc : c1), inclina: tira < 1 ? 10 - 94 * tira : -84, giro: 180 - 160 * tira, prendido: !apaga }];
           if (para > 0.6) obj.push({ tipo: 'mancuerna', p: aArr(J.manoD), eje: [0, 0, 1] });
           return {
-            figuras: [{ quien: 'tor', pose: p, musc: { biceps: para > 0.5 ? true : null }, cara: triste ? { ojos: 'grandes', boca: 'ondulada', cejas: 'triste' } : { boca: para > 0.5 ? 'sonrisa' : 'recta', cejas: para > 0.3 ? 'enojo' : null } }],
+            figuras: [{ quien: 'tor', pose: p, encuadre: sale > 0.01 ? false : true, musc: { biceps: para > 0.5 ? true : null }, cara: triste ? { ojos: 'grandes', boca: 'ondulada', cejas: 'triste' } : { boca: para > 0.5 ? 'sonrisa' : 'recta', cejas: para > 0.3 ? 'enojo' : null } }],
             objetos: obj, triste: triste, sale: sale
           };
         },

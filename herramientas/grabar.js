@@ -3,6 +3,8 @@
 
        node herramientas/grabar.js <id> [carpeta-salida] [--con-musica]
        node herramientas/grabar.js <id> [carpeta-salida] --voz [--musica tema.wav]
+       node herramientas/grabar.js <id> [carpeta-salida] --tiempos 2.4,5.1,... --pista voz.wav
+       node herramientas/grabar.js <id> --solo-guion guion.json
 
    Deja en la carpeta (por defecto ./videos):
      <id>.mp4              video + los sonidos de las X (error) y los vistos ("tin"),
@@ -14,6 +16,9 @@
    alarga cada escena a lo que dura su linea (las escenas usan f(fraccion), la
    coreografia se estira sola) y deja <id>-voz.mp4 con voz + musica + efectos; la
    musica baja sola cuando se habla. --musica usa ese tema en vez del sintetizado.
+   Con --tiempos y --pista (lo usa herramientas/sincronizar.py con tu voz grabada): cada escena
+   dura lo que dice --tiempos y deja <id>-voz.mp4 con esa pista de voz tal cual + las X y los
+   vistos. --solo-guion escribe las escenas (nombre, duracion, linea) en un JSON y termina.
    Los videos de estilo 2 se graban a 60 cuadros por segundo (mas fluidos); los demas a 30.
 
    Necesita: Node, Playwright (npm i -g playwright && npx playwright install chromium),
@@ -42,9 +47,13 @@ function fmtT(s) {
   const args = process.argv.slice(2);
   const conMusica = args.includes('--con-musica');
   const conVoz = args.includes('--voz');
-  const iMus = args.indexOf('--musica');
-  const tema = iMus >= 0 ? path.resolve(args[iMus + 1]) : null;
-  const [id, dirSalida = 'videos'] = args.filter((a, i) => !a.startsWith('--') && (iMus < 0 || i !== iMus + 1));
+  const valor = (op) => { const i = args.indexOf(op); return i >= 0 ? args[i + 1] : null; };
+  const conValor = ['--musica', '--tiempos', '--pista', '--solo-guion'];
+  const tema = valor('--musica') ? path.resolve(valor('--musica')) : null;
+  const pista = valor('--pista') ? path.resolve(valor('--pista')) : null;
+  const soloGuion = valor('--solo-guion') ? path.resolve(valor('--solo-guion')) : null;
+  const tiempos = valor('--tiempos') ? valor('--tiempos').split(',').map(Number) : null;
+  const [id, dirSalida = 'videos'] = args.filter((a, i) => !a.startsWith('--') && !(i > 0 && conValor.indexOf(args[i - 1]) >= 0));
   if (!id) { console.error('uso: node herramientas/grabar.js <id> [carpeta]'); process.exit(1); }
   const raiz = path.resolve(__dirname, '..');
   const salida = path.resolve(dirSalida);
@@ -71,7 +80,14 @@ function fmtT(s) {
     await p.evaluate(() => window.REEL.setPlaying(false));
     await p.waitForTimeout(300);
   };
-  await abrir(null);
+  await abrir(tiempos);
+  if (soloGuion) {
+    const g = await p.evaluate(() => window.REEL.guion);
+    fs.writeFileSync(soloGuion, JSON.stringify(g, null, 1));
+    await b.close();
+    console.log('guion:', soloGuion, '·', g.length, 'escenas');
+    return;
+  }
 
   // doblaje: la voz de cada linea manda la duracion de su escena
   const locutor = path.join(raiz, 'herramientas', 'locutor.py');
@@ -99,7 +115,7 @@ function fmtT(s) {
 
   const mudo = path.join(salida, id + '.mudo.mp4');
   const ff = spawn('ffmpeg', ['-y', '-loglevel', 'error', '-f', 'image2pipe', '-framerate', String(fps),
-    '-i', '-', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '18', '-preset', 'medium', mudo],
+    '-i', '-', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '16', '-preset', 'slow', '-tune', 'animation', mudo],
   { stdio: ['pipe', 'inherit', 'inherit'] });
   for (let i = 0; i < n; i++) {
     await p.evaluate((t) => window.REEL.seek(t), i / fps);
@@ -135,7 +151,9 @@ function fmtT(s) {
     'Lee cada linea dentro de su tramo; el video ya esta cortado a ese ritmo.\n\n' + lineas.join('\n'));
 
   const audio = path.join(raiz, 'herramientas', 'audio.py');
-  const variantes = [[id + '.mp4', fCues, ['--sin-musica']]];
+  const variantes = pista ? [] : [[id + '.mp4', fCues, ['--sin-musica']]];
+  // tu voz grabada (sincronizar.py): va tal cual, con las X y los vistos debajo
+  if (pista) variantes.push([id + '-voz.mp4', fCues, ['--sin-musica', '--base', pista]]);
   if (conMusica) variantes.push([id + '-con-musica.mp4', fCuesTodos, []]);
   if (conVoz) {
     // pista de voz: cada linea 0,2 s despues del comienzo de su escena
@@ -156,5 +174,5 @@ function fmtT(s) {
   }
   fs.unlinkSync(mudo);
   fs.unlinkSync(fCuesTodos);
-  console.log('listo:', path.join(salida, id + '.mp4'), '·', total.toFixed(1), 's ·', fps, 'fps');
+  console.log('listo:', variantes.map(v => path.join(salida, v[0])).join(', '), '·', total.toFixed(1), 's ·', fps, 'fps');
 })().catch(e => { console.error(e); process.exit(1); });

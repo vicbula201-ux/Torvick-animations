@@ -146,12 +146,15 @@
   var CAM = { az: 14, el: 4, dist: 8.0, y: 1.2, dx: 0.66 };
   var CAM2 = { az: 22, el: 4, dist: 7.6, y: 1.2, dx: 0.62 };
   var TAB = { x: 520, y: 400, s: 0.98 };
+  // donde queda la tabla en pantalla: Tor no va debajo de ella
+  var OCUPA_TABLA = [510, 390, 1050, 1140];
   function tabla(T, f, extra) { return <Tabla T={T} x={TAB.x} y={TAB.y} s={TAB.s} e={M.pop(T, f(0) - 0.6, 0.5)} {...(extra || {})} />; }
   function marca(T, f, a, b) { return animate({ from: 0, to: 1, start: f(a), end: f(b), ease: Easing.easeOutCubic })(T); }
 
   var ESCENAS = [
     { nombre: 'Gancho', dur: 3, vo: 'Estás leyendo mal la tabla nutricional.',
       C: E3.escena({
+        ocupa: [OCUPA_TABLA],
         tomas: [[0, { az: 20, el: 6, dist: 5.0, y: 1.45, dx: 0.4 }], [1, CAM]],
         vista: function (T) {
           var p = leyendo({ cabeza: [-10, 14 * Math.sin(T * 3), 8 * Math.sin(T * 2)] });
@@ -165,6 +168,7 @@
 
     { nombre: 'La porción', dur: 5.4, vo: 'Primero, la porción: todos los números son por porción, y el paquete puede traer varias.',
       C: E3.escena({
+        ocupa: [OCUPA_TABLA],
         tomas: [[0, CAM], [1, CAM2]],
         vista: function (T) { var p = leyendo(); return { figuras: [{ quien: 'tor', pose: p, cara: { ojos: 'grandes', boca: 'o', cejas: 'alzadas' } }], objetos: [paquete(p, 180)] }; },
         lienzo: function (T, f) {
@@ -177,6 +181,7 @@
 
     { nombre: 'Calorías y proteína', dur: 5, vo: 'Después, las calorías y la proteína: la que te llena y te ayuda a construir músculo.',
       C: E3.escena({
+        ocupa: [OCUPA_TABLA],
         tomas: [[0, CAM2], [1, CAM]],
         vista: function (T, f) {
           var fl = Easing.easeOutBack(animate({ from: 0, to: 1, start: f(0.5), end: f(0.7) })(T));
@@ -191,6 +196,7 @@
 
     { nombre: 'Azúcares', dur: 5.2, vo: 'Ojo con los azúcares añadidos: la OMS recomienda menos de 50 gramos al día.',
       C: E3.escena({
+        ocupa: [OCUPA_TABLA],
         tomas: [[0, CAM], [1, CAM2]],
         vista: function (T) { var p = leyendo(); return { figuras: [{ quien: 'tor', pose: p, cara: { ojos: 'grandes', boca: 'ondulada', cejas: 'triste' } }], objetos: [paquete(p, 180)] }; },
         lienzo: function (T, f) {
@@ -207,6 +213,7 @@
 
     { nombre: 'Sodio', dur: 4.6, vo: 'Y el sodio: menos de 2000 miligramos al día, y aquí una porción ya trae 800.',
       C: E3.escena({
+        ocupa: [OCUPA_TABLA],
         tomas: [[0, CAM2], [1, CAM]],
         vista: function (T) { var p = leyendo(); return { figuras: [{ quien: 'tor', pose: p, cara: { ojos: 'grandes', boca: 'o', cejas: 'alzadas' } }], objetos: [paquete(p, 180)] }; },
         lienzo: function (T, f) {

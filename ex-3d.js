@@ -374,6 +374,7 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
           v: clamp(info.gota * 3, 0, 1)
         }));
       },
+      ocupa: [[95, 525, 205, 995]],
       piezas: [{
         C: N.ICONOS.luna,
         s: 0.8,
@@ -591,6 +592,7 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
       lienzo: function (T, f, t, pr, info) {
         return /*#__PURE__*/React.createElement("g", null, semanaGym(T, f), T > f(0.3) ? E3.brilla(T, pr, ['m:biceps:0', 'm:biceps:1'], info.k, false, 60) : null);
       },
+      ocupa: [[100, 450, 980, 840]],
       r1: {
         text: 'MODO *RUPTURA*',
         s: 1.15,
@@ -776,6 +778,7 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
           figuras: [{
             quien: 'tor',
             pose: p,
+            encuadre: sale > 0.01 ? false : true,
             musc: {
               biceps: para > 0.5 ? true : null
             },

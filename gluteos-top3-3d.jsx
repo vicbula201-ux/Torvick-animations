@@ -66,7 +66,7 @@
     { nombre: '2. Sentadilla profunda', dur: 2.2, vo: 'Dos: sentadilla profunda, más glúteo que la corta.',
       C: E3.ejercicio({
         n: 2, r1: 'SENTADILLA *PROFUNDA*', r2: 'BAJA *COMPLETO*', brillo: GLU, r: 80, s1: 0.98,
-        tomas: [[0, { az: 64, el: 6, dist: 6.6, y: 1.0, dz: 0 }], [1, { az: 48, el: 4, dist: 5.6, y: 0.9, dz: 0 }]],
+        tomas: [[0, { az: 148, el: 8, dist: 6.6, y: 1.0, dz: 0 }], [1, { az: 160, el: 6, dist: 5.8, y: 0.9, dz: 0 }]],
         vista: function (T, f, k) {
           var p = sentadilla(k);
           return { figuras: [{ quien: 'novia', pose: p, musc: { gluteos: true, cuadriceps: 'gris', brillo: 0.35 * k }, cara: { boca: k < 0.5 ? 'dientes' : 'sonrisa' } }],
@@ -76,7 +76,7 @@
     { nombre: '3. Búlgara', dur: 2.2, vo: 'Tres: sentadilla búlgara, con el torso adelante.',
       C: E3.ejercicio({
         n: 3, r1: 'SENTADILLA *BÚLGARA*', r2: 'TORSO *ADELANTE*', brillo: GLU, r: 80, s1: 0.98,
-        tomas: [[0, { az: 88, el: 6, dist: 6.4, y: 0.85, dz: -0.05 }], [1, { az: 120, el: 6, dist: 5.4, y: 0.8, dz: -0.05 }]],
+        tomas: [[0, { az: 132, el: 8, dist: 6.2, y: 0.85, dz: -0.05 }], [1, { az: 150, el: 6, dist: 5.4, y: 0.8, dz: -0.05 }]],
         vista: function (T, f, k) {
           return { figuras: [{ quien: 'novia', pose: bulgara(k), pesas: 'neutro', musc: { gluteos: true, cuadriceps: 'gris', brillo: 0.35 * k }, cara: { boca: k < 0.5 ? 'dientes' : 'sonrisa' } }],
             objetos: [{ tipo: 'banco', p: [0, 0, -0.62], largo: 0.6, alto: 0.45 }] };
