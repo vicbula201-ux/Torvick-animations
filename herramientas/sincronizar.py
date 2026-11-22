@@ -41,7 +41,7 @@ import numpy as np
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SR = 48000
 PAUSA_TOMA = 0.6      # una pausa mas larga separa dos tomas
-RESPIRO = 0.14        # silencio entre la linea de una escena y la de la siguiente
+RESPIRO = 0.1         # silencio entre la linea de una escena y la de la siguiente
 RESPIRO_PARTES = 0.16  # entre dos partes de una misma escena que vienen de tomas distintas
 PAUSA_MAX = 0.32      # las pausas largas dentro de una toma se acortan a esto
 STOP = set(('el la los las lo de del y e a al en tu tus te que con por para un una uno unos unas es se '
@@ -133,24 +133,31 @@ class Sonido:
     def fr(self, t):
         return int(max(0, min(len(self.db) - 1, round(t * 100))))
 
-    def inicio(self, t, limite):
-        """donde arranca de verdad el sonido de una palabra que empieza cerca de t"""
+    def inicio(self, t, limite, hasta=None):
+        """donde arranca de verdad el sonido de una palabra que el reconocedor ubica en t.
+        Despues de una pausa, t suele llegar ~0,3 s antes que la voz: se avanza hasta el
+        sonido claro. Si en t ya suena, se retrocede (sin la respiracion, maximo 0,12 s)."""
         f = self.fr(t)
-        lim = self.fr(max(limite, t - 0.35))
-        while f > lim and self.db[f - 1] > self.umbral - 4:
+        if self.db[f] <= self.umbral + 4:
+            tope = self.fr(min(hasta if hasta else t + 0.6, t + 0.6))
+            while f < tope and self.db[f] <= self.umbral + 4:
+                f += 1
+            return max(limite, f / 100 - 0.05)
+        lim = self.fr(max(limite, t - 0.12))
+        while f > lim and self.db[f - 1] > self.umbral + 4:
             f -= 1
-        return max(limite, f / 100 - 0.05)
+        return max(limite, f / 100 - 0.04)
 
     def fin(self, ini_ultima, fin_asr, limite):
-        """donde termina de verdad el sonido: 150 ms seguidos por debajo del umbral"""
+        """donde termina de verdad el sonido: 120 ms seguidos por debajo del umbral"""
         f = self.fr(ini_ultima + 0.12)
         tope = self.fr(min(limite, ini_ultima + 2.4))
         quietos = 0
         while f < tope:
             if self.db[f] < self.umbral - 3:
                 quietos += 1
-                if quietos >= 15:
-                    return min(limite, (f - 14) / 100 + 0.09)
+                if quietos >= 12:
+                    return min(limite, (f - 11) / 100 + 0.08)
             else:
                 quietos = 0
             f += 1
@@ -331,12 +338,12 @@ def tramos_de_toma(W, idx, son, todos_idx):
     a, b = idx[0], idx[-1]
     prev_fin = max([W[i]['fin'] for i in range(0, a) if i not in dentro] or [0.0])
     sig_ini = min([W[i]['ini'] for i in range(b + 1, len(W)) if i not in dentro] or [len(son.x) / SR])
-    ini = son.inicio(W[a]['ini'], prev_fin + 0.02)
+    ini = son.inicio(W[a]['ini'], prev_fin + 0.02, W[a]['fin'])
     fin = son.fin(W[b]['ini'], W[b]['fin'], sig_ini - 0.03)
     tramos, t0 = [], ini
     for x, y in zip(idx[:-1], idx[1:]):
         g0 = son.fin(W[x]['ini'], W[x]['fin'], W[y]['ini'])
-        g1 = son.inicio(W[y]['ini'], g0)
+        g1 = son.inicio(W[y]['ini'], g0, W[y]['fin'])
         if g1 - g0 > PAUSA_MAX:
             tramos.append([t0, g0 + PAUSA_MAX / 2])
             t0 = g1 - PAUSA_MAX / 2
