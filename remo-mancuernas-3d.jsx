@@ -13,7 +13,7 @@
   'use strict';
 
   var React = global.React;
-  var M = global.M, V = global.V, B = global.B, TOR3D = global.TOR3D;
+  var M = global.M, V = global.V, B = global.B, TOR3D = global.TOR3D, E3 = global.E3;
   var Easing = global.Easing, clamp = global.clamp;
   var A = global.REELS.ayudas;
   var C = global.P.C;
@@ -82,7 +82,7 @@
       var e = M.pop(T, at - 0.6, 0.5);
       var rot = function (r, i) {
         if (!r) return null;
-        return <V.Rot key={'r' + i} T={T} text={r.text} y={r.y != null ? r.y : (i ? 1490 : 270)} s={r.s || 1.1} fase={i * 0.4}
+        return <E3.Rot key={'r' + i} T={T} text={r.text} y={r.y != null ? r.y : (i ? 1490 : 270)} s={r.s || 1} fase={i * 0.4} tono={r.tono}
           cuando={r.cuando == null ? at - 0.6 : f(r.cuando)} />;
       };
       return (
@@ -138,7 +138,7 @@
           return { pose: { bisagra: 1, remo: k, balanceo: k }, musc: { rojo: 1 }, remoEn: remoEn, vibra: true };
         },
         mal: [{ x: 760, y: 560, cuando: 0.2 }, { x: 150, y: 1180, cuando: 0.55 }],
-        r1: { text: 'REMO CON MANCUERNAS' }
+        r1: { text: 'REMO CON *MANCUERNAS*', tono: 'rojo' }
       }) },
     { nombre: 'Posición', dur: 4.8, vo: 'Lleva la cadera atrás, dobla un poco las rodillas y mantén la espalda recta.',
       C: escena3d({
@@ -163,7 +163,7 @@
           );
         },
         bien: [{ x: 790, y: 640, cuando: 0.7 }],
-        r1: { text: 'CADERA ATRÁS' }, r2: { text: 'ESPALDA RECTA', cuando: 0.5 }
+        r1: { text: 'CADERA *ATRÁS*' }, r2: { text: 'ESPALDA *RECTA*', cuando: 0.5 }
       }) },
     { nombre: 'Ejecución', dur: 6, vo: 'Palmas enfrentadas: lleva las mancuernas al abdomen, con los codos cerca del cuerpo.',
       C: escena3d({
@@ -178,7 +178,7 @@
           return info.k > 0.9 ? <V.Destellos T={T} c={pr('manoD')} r={110} v={(info.k - 0.9) * 10} n={5} /> : null;
         },
         encima: function (T, f) { return contador(T, f(0.06), f(0.97), 2); },
-        r1: { text: 'REMA AL ABDOMEN' }, r2: { text: 'CODOS CERCA', cuando: 0.46 }
+        r1: { text: 'REMA AL *ABDOMEN*' }, r2: { text: 'CODOS *CERCA*', cuando: 0.46 }
       }) },
     { nombre: 'Bajada', dur: 4.4, vo: 'Baja despacio hasta estirar los brazos y deja que las escápulas se separen.',
       C: escena3d({
@@ -196,7 +196,7 @@
           return <Flecha a={[x, a[1] - 10]} b={[x, b[1] + 20]} p={clamp((T - f(0.14)) / (f(0.86) - f(0.14)), 0, 1)} />;
         },
         bien: [{ x: 800, y: 660, cuando: 0.86 }],
-        r1: { text: 'BAJA CON CONTROL' }, r2: { text: 'BRAZOS ESTIRADOS', cuando: 0.55 }
+        r1: { text: 'BAJA CON *CONTROL*' }, r2: { text: 'BRAZOS *ESTIRADOS*', cuando: 0.55 }
       }) },
     { nombre: 'Músculos', dur: 4.4, vo: 'El dorsal ancho lidera el tirón; también trabajan los romboides y el trapecio.',
       C: escena3d({
@@ -207,7 +207,7 @@
           return { pose: { bisagra: 1, remo: k }, musc: { brillo: 0.25 + 0.35 * k, romboides: 1 }, remoEn: remoEn, k: k };
         },
         lienzo: function (T, f, t, pr, J, info) { return brillaDorsal(T, pr, 0.5 + 0.5 * info.k, true); },
-        r1: { text: 'DORSAL ANCHO' }, r2: { text: 'ROMBOIDES Y TRAPECIO', cuando: 0.45 }
+        r1: { text: 'DORSAL *ANCHO*' }, r2: { text: 'ROMBOIDES Y *TRAPECIO*', cuando: 0.45 }
       }) },
     { nombre: 'Error', dur: 5.6, vo: 'Si levantas el torso para subir las mancuernas, baja el peso y mantén el tronco firme.',
       C: escena3d({
@@ -225,7 +225,7 @@
         },
         mal: [{ x: 770, y: 600, cuando: 0.12, hasta: 0.47 }],
         bien: [{ x: 790, y: 620, cuando: 0.66 }],
-        r1: { text: 'SIN BALANCEO' }, r2: { text: 'TORSO FIRME', cuando: 0.5 }
+        r1: { text: 'SIN *BALANCEO*', tono: 'rojo' }, r2: { text: 'TORSO *FIRME*', tono: 'verde', cuando: 0.5 }
       }) },
     { nombre: 'Cierre', dur: 4.2, vo: 'Sube sin impulso, baja con control: técnica antes que peso.',
       C: escena3d({
@@ -237,7 +237,7 @@
           return { pose: { bisagra: 1, remo: k }, musc: { brillo: 0.3 * k }, remoEn: remoEn };
         },
         bien: [{ x: 800, y: 600, cuando: 0.78 }],
-        r1: { text: 'TÉCNICA ANTES QUE PESO' }
+        r1: { text: 'TÉCNICA ANTES QUE *PESO*' }
       }) }
   ];
 

@@ -17,7 +17,8 @@
   var M = global.M,
     V = global.V,
     B = global.B,
-    TOR3D = global.TOR3D;
+    TOR3D = global.TOR3D,
+    E3 = global.E3;
   var Easing = global.Easing,
     clamp = global.clamp;
   var A = global.REELS.ayudas;
@@ -123,13 +124,14 @@
       var e = M.pop(T, at - 0.6, 0.5);
       var rot = function (r, i) {
         if (!r) return null;
-        return /*#__PURE__*/React.createElement(V.Rot, {
+        return /*#__PURE__*/React.createElement(E3.Rot, {
           key: 'r' + i,
           T: T,
           text: r.text,
           y: r.y != null ? r.y : i ? 1490 : 270,
-          s: r.s || 1.1,
+          s: r.s || 1,
           fase: i * 0.4,
+          tono: r.tono,
           cuando: r.cuando == null ? at - 0.6 : f(r.cuando)
         });
       };
@@ -271,7 +273,8 @@
         cuando: 0.55
       }],
       r1: {
-        text: 'REMO CON MANCUERNAS'
+        text: 'REMO CON *MANCUERNAS*',
+        tono: 'rojo'
       }
     })
   }, {
@@ -328,10 +331,10 @@
         cuando: 0.7
       }],
       r1: {
-        text: 'CADERA ATRÁS'
+        text: 'CADERA *ATRÁS*'
       },
       r2: {
-        text: 'ESPALDA RECTA',
+        text: 'ESPALDA *RECTA*',
         cuando: 0.5
       }
     })
@@ -393,10 +396,10 @@
         return contador(T, f(0.06), f(0.97), 2);
       },
       r1: {
-        text: 'REMA AL ABDOMEN'
+        text: 'REMA AL *ABDOMEN*'
       },
       r2: {
-        text: 'CODOS CERCA',
+        text: 'CODOS *CERCA*',
         cuando: 0.46
       }
     })
@@ -462,10 +465,10 @@
         cuando: 0.86
       }],
       r1: {
-        text: 'BAJA CON CONTROL'
+        text: 'BAJA CON *CONTROL*'
       },
       r2: {
-        text: 'BRAZOS ESTIRADOS',
+        text: 'BRAZOS *ESTIRADOS*',
         cuando: 0.55
       }
     })
@@ -507,10 +510,10 @@
         return brillaDorsal(T, pr, 0.5 + 0.5 * info.k, true);
       },
       r1: {
-        text: 'DORSAL ANCHO'
+        text: 'DORSAL *ANCHO*'
       },
       r2: {
-        text: 'ROMBOIDES Y TRAPECIO',
+        text: 'ROMBOIDES Y *TRAPECIO*',
         cuando: 0.45
       }
     })
@@ -586,10 +589,12 @@
         cuando: 0.66
       }],
       r1: {
-        text: 'SIN BALANCEO'
+        text: 'SIN *BALANCEO*',
+        tono: 'rojo'
       },
       r2: {
-        text: 'TORSO FIRME',
+        text: 'TORSO *FIRME*',
+        tono: 'verde',
         cuando: 0.5
       }
     })
@@ -632,7 +637,7 @@
         cuando: 0.78
       }],
       r1: {
-        text: 'TÉCNICA ANTES QUE PESO'
+        text: 'TÉCNICA ANTES QUE *PESO*'
       }
     })
   }];

@@ -57,7 +57,16 @@ gluteos-top3.jsx, isquios-top3.jsx,
 cuadriceps-top3.jsx (con la novia de Tor)   top 3 por músculo, ~16 s + acción
 remo-serrucho.jsx                primer reel del ESTILO FLUIDO (halo, destellos, desenfoque)
 tor3d.jsx                        window.TOR3D: Tor en 3D (three.js), el mismo trazo con volumen
+escena3d.jsx                     window.E3: armador de escenas 3D, rotulos pulidos, formato top 3 en 3D
 remo-mancuernas-3d.jsx           primer reel con Tor 3D (remo inclinado con dos mancuernas)
+press-militar-3d.jsx, flexiones-3d.jsx,
+zancada-3d.jsx, abdominal-polea-3d.jsx,
+pecho-top3-3d.jsx, triceps-top3-3d.jsx,
+abdominales-top3-3d.jsx, gluteos-top3-3d.jsx,
+isquios-top3-3d.jsx, cuadriceps-top3-3d.jsx,
+cerveza-3d.jsx, ex-3d.jsx, vape-3d.jsx,
+chatarra-3d.jsx, novato-avanzado-3d.jsx   los mismos videos rehechos en 3D (mismo guion)
+tabla-nutricional-3d.jsx         video nuevo en 3D: como leer la tabla nutricional
 novato-avanzado.jsx,
 calistenia-gym.jsx               pantalla dividida: los dos Tors en paralelo
 gluteos.jsx                      con la novia de Tor (público femenino)
@@ -388,6 +397,49 @@ rótulos): error con balanceo, colocación de costado, ejecución con corte a
 primer plano, bajada lenta, giro a la espalda para los músculos, error contra
 corrección y un giro completo alrededor de Tor antes de la acción y el cierre.
 En el navegador sin GPU (el exportador) cada cuadro tarda ~0,25 s.
+
+**El estilo 3D es el de ahora en adelante** (pedido del autor: "rehacé los
+videos con ese estilo"). Los videos rehechos llevan el mismo id con `-3d` y el
+mismo guion que el original; el original 2D sigue en el repo.
+
+- **Pose general** (`TOR3D.esqueleto(pose, quien)`): todo en el mundo (y arriba,
+  piso en 0, Tor mira a +z): `cadera`, `tronco` [inclina, gira, ladea] (90 boca
+  abajo, -90 boca arriba), `cabeza` [mira arriba, gira, ladea], `manoI/D` y
+  `pieI/D` (tobillos), `codoI/D` y `rodillaI/D` (hacia donde doblan, en el marco
+  del cuerpo [afuera, arriba, adelante]), `hombros { sube, junta }`, `pies`
+  (punta abajo +) y `panza` 0..1. Se dan los extremos; codos y rodillas salen
+  por IK, asi que la profundidad sale sola (sentado, acostado, de rodillas).
+- **Figuras** (`vista.figuras`): `{ quien: 'tor' | 'novia', pose, musc, cara, ropa,
+  pesas: 'neutro' | 'prono', fantasmas, oculto }`. Musculos: pecho, abdomen,
+  oblicuos, dorsal, romboides, trapecio (atras y la bajada del cuello), lumbar,
+  deltoides, biceps, triceps, gluteos, cuadriceps, isquios, gemelos, con
+  `true`/'rojo'/'gris'/'claro' y `brillo`. Caras: los ojos, bocas, cejas, color,
+  mejillas y nariz roja del Tor 2D (ver la cabecera de `tor3d.jsx`). Ropa:
+  `{ camiseta, mangas, short }` con nombres de color. La novia: pelo negro con
+  cola de caballo, top amarillo y calzas grises.
+- **Objetos** (`vista.objetos`, cada uno `{ tipo, ... }`): mancuerna, barra, ez,
+  banco (con `respaldo { ang, largo }`), colchoneta, polea (`alto`, `fin`,
+  `agarre` o `manos` para la cuerda en V), barraFija, paralelas, rueda, rodillo
+  (con `pivote`: la palanca de extension/femoral), smith, prensa, y la
+  escenografia: farol, jarra, balde, cama (`manta`), sofa, manta, nevera
+  (`abre`), tacho (`abre`), celular, helado, vape, paquete y brazo.
+- **E3.escena** arma la escena: `tomas` (camara que gira), `vista(T, f, t)`,
+  `lienzo(T, f, t, pr, info)` (SVG encima: `pr(que, i)` proyecta un punto de la
+  figura i, `'m:pecho'` el centro de un musculo), `encima`, `piezas` (los iconos
+  2D de `N`/`P`/`MU` en pantalla, como en `PL`), `mal`, `bien`, `golpes`, `r1`,
+  `r2`. Ayudas: `E3.poseFlex`, `E3.poseNovia`, `E3.Flecha`, `E3.Guia`,
+  `E3.brilla` (V.Halo y destellos sobre musculos), `E3.contador`,
+  `E3.fantasmas`, y el top 3: `E3.gancho({ musculo, musc, brillo, figura })` y
+  `E3.ejercicio({ n, r1, r2, brillo, tomas, vista(T, f, k, kEn) })`.
+- **Rotulos pulidos** (`E3.Rot`, pedido del autor): negro con punta, Barlow
+  Semi Condensed 800 (cargada en `reels.html`), ancho medido de verdad, sombra
+  dura de color (`tono`: amarillo por defecto, 'rojo' en los errores, 'verde'
+  en la correccion, 'gris'), la palabra entre asteriscos en amarillo
+  (`'REMA AL *ABDOMEN*'`) y entrada abriendose de izquierda a derecha. La
+  pregunta de `accion` no lleva asteriscos (la dibuja `MARCA`).
+- En vertical, un cuerpo acostado es ancho: para flexiones, banca o prensa,
+  camaras en diagonal (az 40-70) y `dist` 6-8; para que Tor quede mas abajo en
+  pantalla se SUBE `y` de la camara.
 
 **Top 3 por músculo** (formato de `biceps-top3.jsx`, ~16 s con la acción y
 el cierre): `TOP3.gancho({ musculo, fig, figura, tomas })` (el músculo

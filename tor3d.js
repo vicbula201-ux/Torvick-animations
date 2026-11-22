@@ -391,6 +391,11 @@
       ob.rotation.set(0, s * 0.9, 0);
       p.torso.add(ob);
     });
+    // la panza que crece (panza 0..1): un ovalo blanco al frente
+    p.panza = elipsoide(0.2, 0.17, 0.12, mats.piel);
+    p.panza.position.set(0, 0.2, surf(0, 0.2, 1) * 0.55);
+    p.panza.visible = false;
+    p.torso.add(p.panza);
     var ab = parche('abdomen', 0.095, 0.16, 0.04);
     ab.position.set(0, 0.24, surf(0, 0.24, 1) * 0.94);
     p.torso.add(ab);
@@ -673,6 +678,16 @@
     [-1, 1].forEach(function (s) {
       punto(o, s * ex, ey - 0.004, 0.022, 0.011, m.rojo);
       linea(o, [[s * ex - 0.026, ey + 0.004], [s * ex + 0.026, ey + 0.004]], 0.0075);
+    });
+    o = c.ojos.espiral = grupo();
+    [-1, 1].forEach(function (s) {
+      var pts = [];
+      for (var i = 0; i <= 28; i++) {
+        var a = i / 28 * Math.PI * 4.2,
+          r = 0.003 + 0.022 * i / 28;
+        pts.push([s * ex + Math.cos(a * s) * r, ey + Math.sin(a * s) * r]);
+      }
+      linea(o, pts, 0.0055);
     });
     o = c.ojos.corazon = grupo();
     [-1, 1].forEach(function (s) {
@@ -1119,6 +1134,11 @@
     if (cara.color) pintar(fig.mats.cabeza, cara.color.c, {
       v: cara.color.v == null ? 0.4 : cara.color.v
     });else pintar(fig.mats.cabeza, 'blanco');
+    var pz = f.pose && f.pose.panza || f.panza || 0;
+    p.panza.visible = pz > 0.02;
+    if (pz > 0.02) {
+      p.panza.scale.set(0.7 + 0.7 * pz, 0.8 + 0.45 * pz, 0.3 + 1.5 * pz);
+    }
     p.sombra.visible = f.sombra !== false;
     p.sombra.position.set(J.cadera.x, 0.003, J.cadera.z * 0.5 + 0.05);
     return J;
@@ -1473,6 +1493,450 @@
       poner: function (o) {
         ubicar(g, o);
         g.position.y = vec(o.p, v(0, 0, 0)).y || 0.11;
+      }
+    };
+  };
+
+  // rodillo acolchado (a lo largo de x) en c; con pivote, la palanca negra que lo sostiene
+  OBJ.rodillo = function () {
+    var THREE = global.THREE,
+      m = MOTOR.mat,
+      g = new THREE.Group();
+    var r = cilindro(0.07, 0.46, 32, m.gris);
+    r.rotation.z = Math.PI / 2;
+    g.add(r);
+    var eje = cilindro(0.02, 0.62, 12, m.oscuro, 0.006);
+    eje.rotation.z = Math.PI / 2;
+    g.add(eje);
+    var palanca = cilindro(0.025, 1, 12, m.oscuro, 0.008);
+    palanca.userData.largo = 1;
+    var piv = elipsoide(0.05, 0.05, 0.05, m.oscuro, 0.01);
+    var raiz = new THREE.Group();
+    raiz.add(g);
+    raiz.add(palanca);
+    raiz.add(piv);
+    return {
+      g: raiz,
+      poner: function (o) {
+        var c = vec(o.c);
+        g.position.copy(c);
+        g.scale.set((o.ancho || 0.46) / 0.46, 1, 1);
+        palanca.visible = piv.visible = !!o.pivote;
+        if (o.pivote) {
+          var lx = ((o.ancho || 0.46) / 2 + 0.06) * (o.lado || 1);
+          var pv = vec(o.pivote);
+          pv.x = c.x + lx;
+          entre(palanca, pv, v(c.x + lx, c.y, c.z));
+          piv.position.copy(pv);
+        }
+      }
+    };
+  };
+  // Smith: dos rieles verticales y la barra que corre por ellos a la altura barra
+  OBJ.smith = function () {
+    var THREE = global.THREE,
+      m = MOTOR.mat,
+      g = new THREE.Group();
+    [-1, 1].forEach(function (s) {
+      var r = caja(0.07, 2.35, 0.07, m.gris);
+      r.position.set(s * 0.82, 1.175, 0);
+      g.add(r);
+      var pie = caja(0.12, 0.05, 0.7, m.oscuro, 0.01);
+      pie.position.set(s * 0.82, 0.025, 0);
+      g.add(pie);
+    });
+    var arriba = caja(1.75, 0.08, 0.08, m.gris);
+    arriba.position.set(0, 2.35, 0);
+    g.add(arriba);
+    var barra = OBJ.barra();
+    g.add(barra.g);
+    return {
+      g: g,
+      poner: function (o) {
+        ubicar(g, o);
+        barra.poner({
+          c: [0, o.barra || 1.5, 0],
+          eje: [1, 0, 0]
+        });
+      }
+    };
+  };
+  // prensa a 45°: asiento y respaldo, rieles y la plataforma donde van los pies (plato)
+  OBJ.prensa = function () {
+    var THREE = global.THREE,
+      m = MOTOR.mat,
+      g = new THREE.Group();
+    var asiento = cojin(0.5, 0.1, 0.5, m.gris);
+    g.add(asiento);
+    var resp = cojin(0.5, 0.1, 0.95, m.gris);
+    g.add(resp);
+    var base = caja(0.55, 0.35, 0.6, m.oscuro, 0.01);
+    g.add(base);
+    var rieles = [-1, 1].map(function (s) {
+      var r = cilindro(0.03, 1, 12, m.oscuro, 0.008);
+      r.userData.largo = 1;
+      g.add(r);
+      return r;
+    });
+    var plato = cojin(0.75, 0.06, 0.6, m.gris);
+    g.add(plato);
+    var carro = caja(0.6, 0.1, 0.4, m.blanco);
+    g.add(carro);
+    return {
+      g: g,
+      poner: function (o) {
+        var cad = vec(o.cadera),
+          u = vec(o.u, v(0, 0.7071, 0.7071)).normalize(),
+          pl = vec(o.plato);
+        // el asiento bajo la cadera, el respaldo acostado a 45° hacia atras
+        asiento.position.set(0, cad.y - 0.24, cad.z + 0.06);
+        asiento.rotation.set(-0.35, 0, 0);
+        var atras = v(0, Math.sin(45 * RAD), -Math.cos(45 * RAD));
+        resp.position.copy(cad.clone().add(atras.clone().multiplyScalar(0.5)).add(v(0, -0.17, -0.17)));
+        resp.rotation.set(45 * RAD - Math.PI, 0, 0);
+        base.position.set(0, (cad.y - 0.29) / 2, cad.z - 0.05);
+        base.scale.set(1, Math.max(0.2, cad.y - 0.29) / 0.35, 1);
+        var a0 = cad.clone().add(v(0, -0.2, 0.3)),
+          a1 = a0.clone().add(u.clone().multiplyScalar(1.9));
+        rieles.forEach(function (r, i) {
+          var dx = v((i ? 1 : -1) * 0.36, 0, 0);
+          entre(r, a0.clone().add(dx), a1.clone().add(dx));
+        });
+        var pp = pl.clone().add(u.clone().multiplyScalar(0.07));
+        plato.position.copy(pp);
+        plato.quaternion.setFromUnitVectors(v(0, 1, 0), u);
+        carro.position.copy(pp.clone().add(u.clone().multiplyScalar(0.1)));
+        carro.quaternion.copy(plato.quaternion);
+      }
+    };
+  };
+
+  /* ---------------- objetos: escenografia de los videos con Tor ---------------- */
+  function luzMat(c, op) {
+    return new global.THREE.MeshBasicMaterial({
+      color: c,
+      transparent: true,
+      opacity: op,
+      depthWrite: false,
+      side: global.THREE.DoubleSide
+    });
+  }
+  // farol: poste, brazo y la lampara con su cono de luz
+  OBJ.farol = function () {
+    var THREE = global.THREE,
+      m = MOTOR.mat,
+      g = new THREE.Group();
+    var poste = cilindro(0.055, 2.75, 20, m.oscuro);
+    poste.position.y = 1.375;
+    g.add(poste);
+    var base = cilindro(0.13, 0.16, 20, m.oscuro);
+    base.position.y = 0.08;
+    g.add(base);
+    var brazo = cilindro(0.035, 0.55, 12, m.oscuro);
+    brazo.rotation.z = Math.PI / 2;
+    brazo.position.set(-0.26, 2.72, 0);
+    g.add(brazo);
+    var lamp = cilindro(0.16, 0.14, 24, m.oscuro);
+    lamp.position.set(-0.5, 2.62, 0);
+    g.add(lamp);
+    var vidrio = elipsoide(0.12, 0.08, 0.12, m.amarillo, 0.01);
+    vidrio.position.set(-0.5, 2.52, 0);
+    g.add(vidrio);
+    var cono = new THREE.Mesh(new THREE.ConeGeometry(1.0, 2.5, 40, 1, true), luzMat(YEL, 0.16));
+    cono.position.set(-0.5, 1.27, 0);
+    g.add(cono);
+    return {
+      g: g,
+      poner: function (o) {
+        ubicar(g, o);
+        cono.visible = o.luz !== false;
+      }
+    };
+  };
+  // jarra de cerveza: vaso con cerveza amarilla, espuma y el asa
+  OBJ.jarra = function () {
+    var THREE = global.THREE,
+      m = MOTOR.mat,
+      g = new THREE.Group(),
+      cuerpo = new THREE.Group();
+    g.add(cuerpo);
+    var vaso = cilindro(0.08, 0.22, 28, m.amarillo);
+    cuerpo.add(vaso);
+    var espuma = elipsoide(0.088, 0.045, 0.088, m.blanco, 0.012);
+    espuma.position.y = 0.115;
+    cuerpo.add(espuma);
+    var asa = new THREE.Mesh(new THREE.TorusGeometry(0.06, 0.018, 10, 24, Math.PI), m.blanco);
+    asa.rotation.z = -Math.PI / 2;
+    asa.position.x = 0.085;
+    cuerpo.add(asa);
+    var asaB = new THREE.Mesh(new THREE.TorusGeometry(0.06, 0.03, 10, 24, Math.PI), MOTOR.mat.borde);
+    asaB.rotation.z = -Math.PI / 2;
+    asaB.position.x = 0.085;
+    cuerpo.add(asaB);
+    return {
+      g: g,
+      poner: function (o) {
+        g.position.copy(vec(o.p));
+        g.rotation.set((o.inclina || 0) * RAD, (o.giro || 0) * RAD, (o.ladea || 0) * RAD, 'YXZ');
+        var k = o.s || 1;
+        g.scale.set(k, k, k);
+      }
+    };
+  };
+  // balde: cuerpo gris, el borde y lo que tiene adentro (nivel 0..1, amarillo)
+  OBJ.balde = function () {
+    var THREE = global.THREE,
+      m = MOTOR.mat,
+      g = new THREE.Group();
+    var geo = new THREE.CylinderGeometry(0.2, 0.15, 0.34, 32),
+      geoB = new THREE.CylinderGeometry(0.2 + G * 0.8, 0.15 + G * 0.8, 0.34 + G * 1.6, 32);
+    g.add(conBorde(geo, geoB, m.gris));
+    var hueco = new THREE.Mesh(new THREE.CircleGeometry(0.175, 32), m.oscuro);
+    hueco.rotation.x = -Math.PI / 2;
+    hueco.position.y = 0.172;
+    g.add(hueco);
+    var liq = new THREE.Mesh(new THREE.CircleGeometry(0.17, 32), m.amarillo);
+    liq.rotation.x = -Math.PI / 2;
+    liq.position.y = 0.174;
+    g.add(liq);
+    var aro = new THREE.Mesh(new THREE.TorusGeometry(0.195, 0.012, 8, 40), m.tinta);
+    aro.rotation.x = Math.PI / 2;
+    aro.position.y = 0.17;
+    g.add(aro);
+    return {
+      g: g,
+      poner: function (o) {
+        ubicar(g, o);
+        g.position.y = vec(o.p).y + 0.17;
+        var n = clamp01(o.nivel || 0);
+        liq.visible = n > 0.02;
+        liq.scale.set(0.3 + 0.7 * n, 0.3 + 0.7 * n, 1);
+      }
+    };
+  };
+  function clamp01(x) {
+    return Math.max(0, Math.min(1, x));
+  }
+  // cama: colchon, cabecera, almohada y la manta (cubre de los pies hasta manta 0..1)
+  OBJ.cama = function () {
+    var THREE = global.THREE,
+      m = MOTOR.mat,
+      g = new THREE.Group();
+    var marco = cojin(1.15, 0.2, 2.2, m.gris);
+    marco.position.set(0, 0.25, 0);
+    g.add(marco);
+    var colchon = cojin(1.05, 0.2, 2.1, m.blanco);
+    colchon.position.set(0, 0.45, 0);
+    g.add(colchon);
+    var cabecera = cojin(1.2, 0.9, 0.1, m.gris);
+    cabecera.position.set(0, 0.75, -1.12);
+    g.add(cabecera);
+    var almohada = cojin(0.62, 0.14, 0.36, m.blanco);
+    almohada.position.set(0, 0.6, -0.82);
+    g.add(almohada);
+    var manta = cojin(1.12, 0.12, 1, m.amarillo);
+    g.add(manta);
+    [-1, 1].forEach(function (sx) {
+      [-1, 1].forEach(function (sz) {
+        var pa = caja(0.08, 0.15, 0.08, m.oscuro, 0.01);
+        pa.position.set(sx * 0.5, 0.075, sz * 1.0);
+        g.add(pa);
+      });
+    });
+    return {
+      g: g,
+      poner: function (o) {
+        ubicar(g, o);
+        var c = clamp01(o.manta == null ? 0.7 : o.manta),
+          L = 2.1 * c;
+        manta.scale.set(1, 1, Math.max(0.05, L));
+        manta.position.set(0, o.mantaY || 0.62, 1.05 - L / 2);
+        manta.visible = c > 0.02;
+      }
+    };
+  };
+  // sofa: base, respaldo, brazos y almohadones
+  OBJ.sofa = function () {
+    var THREE = global.THREE,
+      m = MOTOR.mat,
+      g = new THREE.Group();
+    var base = cojin(1.9, 0.3, 0.85, m.gris);
+    base.position.set(0, 0.25, 0);
+    g.add(base);
+    var asiento = cojin(1.5, 0.14, 0.72, m.gris);
+    asiento.position.set(0, 0.46, 0.05);
+    g.add(asiento);
+    var resp = cojin(1.9, 0.75, 0.22, m.gris);
+    resp.position.set(0, 0.75, -0.36);
+    resp.rotation.x = -0.12;
+    g.add(resp);
+    [-1, 1].forEach(function (s) {
+      var br = cojin(0.22, 0.6, 0.85, m.gris);
+      br.position.set(s * 0.86, 0.5, 0);
+      g.add(br);
+    });
+    [-1, 0, 1].forEach(function (k) {
+      var a = new THREE.Mesh(new THREE.BoxGeometry(0.008, 0.62, 0.012), m.tinta);
+      a.position.set(k * 0.5, 0.78, -0.235);
+      a.rotation.x = -0.12;
+      if (k) g.add(a);
+    });
+    return {
+      g: g,
+      poner: function (o) {
+        ubicar(g, o);
+      }
+    };
+  };
+  // manta suelta (sobre las piernas en el sofa)
+  OBJ.manta = function () {
+    var g = cojin(1, 0.1, 1, MOTOR.mat.amarillo);
+    return {
+      g: g,
+      poner: function (o) {
+        g.position.copy(vec(o.p));
+        g.rotation.set((o.inclina || 0) * RAD, (o.giro || 0) * RAD, 0);
+        g.scale.set(o.ancho || 0.8, o.alto || 1, o.largo || 0.7);
+      }
+    };
+  };
+  // nevera abierta vista de frente: caja, puerta abierta, estantes y la luz de adentro
+  OBJ.nevera = function () {
+    var THREE = global.THREE,
+      m = MOTOR.mat,
+      g = new THREE.Group();
+    var cuerpo = caja(0.9, 1.9, 0.7, m.blanco);
+    cuerpo.position.set(0, 0.95, 0);
+    g.add(cuerpo);
+    var adentro = new THREE.Mesh(new THREE.PlaneGeometry(0.78, 1.7), luzMat(0xFFF3A6, 1));
+    adentro.position.set(0, 0.95, 0.352);
+    g.add(adentro);
+    [0.45, 0.85, 1.25, 1.6].forEach(function (y) {
+      var e = caja(0.78, 0.025, 0.05, m.gris, 0.008);
+      e.position.set(0, y, 0.33);
+      g.add(e);
+    });
+    var puerta = new THREE.Group();
+    var pu = caja(0.9, 1.9, 0.08, m.blanco);
+    pu.position.set(-0.45, 0, 0);
+    puerta.add(pu);
+    var mani = caja(0.04, 0.4, 0.04, m.oscuro, 0.008);
+    mani.position.set(-0.8, 0.2, 0.07);
+    puerta.add(mani);
+    puerta.position.set(0.45, 0.95, 0.39);
+    g.add(puerta);
+    return {
+      g: g,
+      poner: function (o) {
+        ubicar(g, o);
+        puerta.rotation.y = o.abre == null ? 1.9 : o.abre;
+      }
+    };
+  };
+  // tacho de basura con la tapa (abre 0..1)
+  OBJ.tacho = function () {
+    var THREE = global.THREE,
+      m = MOTOR.mat,
+      g = new THREE.Group();
+    var geo = new THREE.CylinderGeometry(0.24, 0.2, 0.62, 32),
+      geoB = new THREE.CylinderGeometry(0.24 + G * 0.8, 0.2 + G * 0.8, 0.62 + G * 1.6, 32);
+    var c = conBorde(geo, geoB, m.gris);
+    c.position.y = 0.31;
+    g.add(c);
+    var hueco = new THREE.Mesh(new THREE.CircleGeometry(0.22, 32), m.oscuro);
+    hueco.rotation.x = -Math.PI / 2;
+    hueco.position.y = 0.622;
+    g.add(hueco);
+    var bisagra = new THREE.Group();
+    bisagra.position.set(0, 0.63, -0.24);
+    g.add(bisagra);
+    var tapa = cilindro(0.26, 0.05, 32, m.oscuro);
+    tapa.position.set(0, 0.02, 0.24);
+    bisagra.add(tapa);
+    return {
+      g: g,
+      poner: function (o) {
+        ubicar(g, o);
+        bisagra.rotation.x = -1.6 * clamp01(o.abre || 0);
+      }
+    };
+  };
+  // cosas chicas en la mano: celular, helado, vape (p, giro, inclina, ladea, s)
+  function chico(construye) {
+    return function () {
+      var THREE = global.THREE,
+        g = new THREE.Group();
+      construye(g, MOTOR.mat, THREE);
+      return {
+        g: g,
+        poner: function (o) {
+          g.position.copy(vec(o.p));
+          g.rotation.set((o.inclina || 0) * RAD, (o.giro || 0) * RAD, (o.ladea || 0) * RAD, 'YXZ');
+          var k = o.s || 1;
+          g.scale.set(k, k, k);
+          if (g.userData.act) g.userData.act(o);
+        }
+      };
+    };
+  }
+  OBJ.celular = chico(function (g, m) {
+    g.add(caja(0.085, 0.165, 0.014, m.oscuro, 0.008));
+    var pant = caja(0.07, 0.14, 0.004, m.amarillo, 0);
+    pant.position.z = 0.009;
+    g.add(pant);
+    g.userData.act = function (o) {
+      pant.visible = o.prendido !== false;
+    };
+  });
+  OBJ.helado = chico(function (g, m) {
+    g.add(cilindro(0.09, 0.13, 28, m.blanco));
+    var banda = cilindro(0.093, 0.04, 28, m.amarillo, 0);
+    g.add(banda);
+    var bola = elipsoide(0.08, 0.04, 0.08, m.amarillo, 0.01);
+    bola.position.y = 0.07;
+    g.add(bola);
+    var cuch = cilindro(0.01, 0.16, 8, m.gris, 0.006);
+    cuch.position.set(0.03, 0.1, 0);
+    cuch.rotation.z = -0.5;
+    g.add(cuch);
+  });
+  OBJ.vape = chico(function (g, m) {
+    g.add(cilindro(0.018, 0.13, 16, m.oscuro, 0.008));
+    var punta = cilindro(0.012, 0.03, 12, m.amarillo, 0.006);
+    punta.position.y = 0.075;
+    g.add(punta);
+  });
+  // paquete de un snack: caja amarilla con su etiqueta blanca (la tabla) atras
+  OBJ.paquete = chico(function (g, m) {
+    g.add(caja(0.3, 0.4, 0.08, m.amarillo, 0.01));
+    var frente = caja(0.2, 0.12, 0.004, m.blanco, 0.006);
+    frente.position.set(0, 0.06, 0.042);
+    g.add(frente);
+    var tabla = caja(0.22, 0.3, 0.004, m.blanco, 0.006);
+    tabla.position.set(0, 0, -0.042);
+    g.add(tabla);
+    [0.08, 0.03, -0.02, -0.07].forEach(function (y) {
+      var l = caja(0.16, 0.008, 0.002, m.tinta, 0);
+      l.position.set(0, y, -0.046);
+      g.add(l);
+    });
+  });
+  // un brazo que entra a cuadro (el que ofrece "la ultima"): de a (hombro, afuera) a b (la mano)
+  OBJ.brazo = function () {
+    var THREE = global.THREE,
+      m = MOTOR.mat,
+      g = new THREE.Group();
+    var b = capsula(0.075, 1, m.blanco);
+    g.add(b);
+    var mano = elipsoide(0.075, 0.075, 0.075, m.blanco);
+    g.add(mano);
+    return {
+      g: g,
+      poner: function (o) {
+        var a = vec(o.a),
+          c = vec(o.b);
+        entre(b, a, c);
+        mano.position.copy(c);
       }
     };
   };

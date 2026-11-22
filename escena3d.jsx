@@ -144,6 +144,32 @@
   function medio(a, b) { return [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]; }
   function arr(p) { return [p.x, p.y, p.z]; }
 
+  /* ---------------- piezas 2D encima (iconos de los videos con Tor, como en PL) ---------------- */
+  function valor(v, T, f) { return typeof v === 'function' ? v(T, f) : v; }
+  function Pieza(props) {
+    var o = props.o, T = props.T, f = props.f, at = props.at;
+    var e = o.cuando == null ? M.pop(T, at - 0.6, 0.5) : M.pop(T, f(o.cuando), 0.42);
+    if (o.hasta != null) e = A.junta(e, A.sale(T, f(o.hasta)));
+    var Cmp = o.C;
+    var p = Object.assign({ s: o.s == null ? 1 : o.s }, valor(o.p, T, f) || {});
+    var cuerpo = <Cmp {...p} />;
+    if (o.plato) {
+      var N = global.N, lado = 420 * o.plato;
+      cuerpo = (
+        <div style={{ position: 'relative', width: lado, height: lado }}>
+          <N.Plato s={o.plato} />
+          <div style={{ position: 'absolute', left: (lado - 240 * p.s) / 2, top: (lado - 240 * p.s) / 2 }}>{cuerpo}</div>
+        </div>
+      );
+    }
+    return (
+      <A.Pos x={valor(o.x, T, f)} y={valor(o.y, T, f)} e={e} dx={o.vibra ? M.vibra(T, 30, 3) : 0}
+        dy={o.quieto ? 0 : M.life(T, 3, 6, o.fase != null ? o.fase : props.i * 0.13)}>
+        {cuerpo}
+      </A.Pos>
+    );
+  }
+
   /* ---------------- armador de escenas ---------------- */
   function escena(o) {
     return function Escena(props) {
@@ -163,7 +189,7 @@
       vt.camara = camara(o.tomas, t, T, o.acerca);
       var pr = function (q, i) { return TOR3D.proyectar(vt, q, i); };
       var golpe = 0;
-      (o.mal || []).forEach(function (m) { var u = (T - f(m.cuando)) / 0.35; if (u > 0 && u < 1) golpe += (1 - u) * Math.sin(u * 40) * 10; });
+      (o.mal || []).map(function (m) { return m.cuando; }).concat(o.golpes || []).forEach(function (c) { var u = (T - f(c)) / 0.35; if (u > 0 && u < 1) golpe += (1 - u) * Math.sin(u * 40) * 10; });
       var e = M.pop(T, at - 0.6, 0.5);
       var rot = function (r, i) {
         if (!r) return null;
@@ -178,6 +204,7 @@
           <svg width={1080} height={1920} style={{ position: 'absolute', left: 0, top: 0, overflow: 'visible' }}>
             {o.lienzo ? o.lienzo(T, f, t, pr, info) : null}
           </svg>
+          {(o.piezas || []).map(function (pz, i) { return <Pieza key={'p' + i} o={pz} T={T} f={f} at={at} i={i} />; })}
           {o.encima ? o.encima(T, f, t, pr, info) : null}
           {(o.mal || []).map(function (m, i) {
             return <A.Mal key={'m' + i} T={T} cuando={f(m.cuando)} hasta={m.hasta == null ? null : f(m.hasta)} x={m.x} y={m.y} s={m.s || 0.5} />;
@@ -203,6 +230,15 @@
       p['codo' + L] = lerp3([0.35, 0.2, -1], [0.5, -1, 0.05], e);
     });
     return p;
+  }
+
+  // la novia de pie con las manos en la cadera; abre 0..1 las manos un poco
+  function poseNovia(extra) {
+    return Object.assign({
+      cadera: [0, 1.0, 0], tronco: [0, 0, 2], cabeza: [3, 0, -4],
+      pieI: [-0.17, 0.115, 0.02], pieD: [0.11, 0.115, 0.1],
+      manoI: [-0.33, 1.06, -0.02], manoD: [0.33, 1.06, -0.02], codoI: [1, -0.1, -0.4], codoD: [1, -0.1, -0.4]
+    }, extra || {});
   }
 
   /* ---------------- formato top 3 ---------------- */
@@ -269,6 +305,6 @@
   global.E3 = {
     escena: escena, Rot: Rot, rep: rep, camara: camara, Flecha: Flecha, Guia: Guia, brilla: brilla, contador: contador,
     suma: suma, arr: arr, lerp3: lerp3, medio: medio,
-    poseFlex: poseFlex, cuenta: cuenta, gancho: gancho, ejercicio: ejercicio, fantasmas: fantasmas
+    poseFlex: poseFlex, poseNovia: poseNovia, cuenta: cuenta, gancho: gancho, ejercicio: ejercicio, fantasmas: fantasmas
   };
 })(window);
