@@ -7,7 +7,7 @@
 
    Uso:
      var vista = TOR3D.vista({
-       figuras: [{ quien: 'tor' | 'novia', pose, musc, cara, ropa, pesas }],
+       figuras: [{ quien: 'tor' | 'novia', pose, musc, cara, ropa, pesas }],   // pesas: 'neutro' | 'prono' | [x,y,z] | { I, D } (una por mano)
        objetos: [{ tipo: 'banco' | 'barra' | 'polea' | ..., ... }],
        camara: { az, el, dist, y, dx, dz, fov, giro }
      });
@@ -750,7 +750,7 @@
       var g = (J.giro || 0) * RAD, pa = (J['pieAng' + L] || 0) * RAD;
       p['pie' + L].position.copy(J['tobillo' + L]).add(v(0, -0.04, 0));
       p['pie' + L].rotation.set(pa, g, 0, 'YXZ');
-      if (f.pesas) { p['pesa' + L].visible = true; pesaEnMano(p['pesa' + L], J, L, f.pesas); } else p['pesa' + L].visible = false;
+      if (f.pesas) { p['pesa' + L].visible = true; pesaEnMano(p['pesa' + L], J, L, f.pesas.I !== undefined ? f.pesas[L] : f.pesas); } else p['pesa' + L].visible = false;
     });
     // la cola de caballo cuelga con la gravedad
     if (p.cola) {

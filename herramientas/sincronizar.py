@@ -71,7 +71,14 @@ def raiz(t):
     return t
 
 
-def igual(a, b):
+def fon(t):
+    """como suena (el reconocedor a veces escribe 'brachial' por 'braquial' u 'ocempic' por 'Ozempic')"""
+    t = t.replace('qu', 'k').replace('ch', 'k').replace('ll', 'y').replace('rr', 'r').replace('z', 's').replace('v', 'b').replace('h', '')
+    t = re.sub(r'c([aou])', r'k\1', t)
+    return re.sub(r'c([ei])', r's\1', t)
+
+
+def parecidas(a, b):
     if a == b:
         return True
     if min(len(a), len(b)) < 4:
@@ -84,22 +91,38 @@ def igual(a, b):
     return difflib.SequenceMatcher(None, a, b).ratio() >= 0.82
 
 
+def igual(a, b):
+    return parecidas(a, b) or (min(len(a), len(b)) >= 4 and parecidas(fon(a), fon(b)))
+
+
 def peso(t):
     return 0.25 if t in STOP else 1.0
 
 
 def cobertura(take_t, obj_t):
-    """que parte del objetivo (peso de sus palabras) aparece, en orden, en la toma"""
+    """que parte del objetivo (peso de sus palabras) aparece, en orden, en la toma, y en que
+    lugar de la toma (el promedio de las palabras que coinciden, 0..1)"""
     n, m = len(obj_t), len(take_t)
-    if not n:
-        return 0.0
+    if not n or not m:
+        return 0.0, 0.0
     dp = np.zeros((n + 1, m + 1))
     for i in range(1, n + 1):
         for j in range(1, m + 1):
             dp[i, j] = max(dp[i - 1, j], dp[i, j - 1],
                            dp[i - 1, j - 1] + (peso(obj_t[i - 1]) if igual(obj_t[i - 1], take_t[j - 1]) else 0))
     total = sum(peso(t) for t in obj_t)
-    return dp[n, m] / total if total else 0.0
+    i, j, js = n, m, []
+    while i > 0 and j > 0:
+        if dp[i, j] == dp[i - 1, j]:
+            i -= 1
+        elif dp[i, j] == dp[i, j - 1]:
+            j -= 1
+        else:
+            js.append(j - 1)
+            i -= 1
+            j -= 1
+    centro = (sum(js) / len(js) / max(1, m - 1)) if js else 0.0
+    return (dp[n, m] / total if total else 0.0), centro
 
 
 # ---------------------------------------------------------------- audio
@@ -114,7 +137,7 @@ def envolvente(x):
     hop = SR // 100
     n = len(x) // hop
     a = x[:n * hop].reshape(n, hop)
-    hp = np.diff(x[:n * hop + 1]).reshape(n, hop)
+    hp = np.diff(np.concatenate([x[:n * hop], [0.0]])).reshape(n, hop)
     e1 = np.sqrt(np.mean(a ** 2, axis=1) + 1e-12)
     e2 = np.sqrt(np.mean(hp ** 2, axis=1) + 1e-12) * 2.0
     return 20 * np.log10(np.maximum(e1, e2))
@@ -240,7 +263,7 @@ def repartir(W, escenas):
     return etiquetas
 
 
-def tomas_de(W, etiquetas, k):
+def tomas_de(W, etiquetas, k, vocs=None):
     """las tomas de la escena k: palabras seguidas suyas, cortadas en las pausas largas"""
     tomas, cur = [], None
     for i, w in enumerate(W):
@@ -258,20 +281,53 @@ def tomas_de(W, etiquetas, k):
         cur.append(i)
     if cur:
         tomas.append(cur)
-    return tomas
+
+    def corte(i):
+        # hay corte natural antes de la palabra i: puntuacion o una pausa
+        return i <= 0 or i >= len(W) or bool(re.search(r'[.?!,;:…]$', W[i - 1]['p'])) or W[i]['ini'] - W[i - 1]['fin'] >= 0.25
+    def ajena(i):
+        # una palabra de contenido de OTRA escena (y no de esta): ahi empieza otra cosa
+        if not vocs or peso(W[i]['t']) < 1:
+            return False
+        return (not any(igual(W[i]['t'], v) for v in vocs[k]) and
+                any(igual(W[i]['t'], v) for q, vv in enumerate(vocs) if q != k for v in vv))
+    out = []
+    for t in tomas:
+        a, b = t[0], t[-1]
+        while not corte(a) and etiquetas[a - 1] == -1 and not ajena(a - 1) and t[0] - a < 8:
+            a -= 1
+        while not corte(b + 1) and b + 1 < len(W) and etiquetas[b + 1] == -1 and not ajena(b + 1) and b - t[-1] < 4:
+            b += 1
+        out.append(list(range(a, t[0])) + t + list(range(t[-1] + 1, b + 1)))
+    return out
 
 
 def partir_reinicios(W, idx):
     """'los musculos principales... los musculos principales son...': cada intento queda como su
     propia toma (el primero puede estar completo o haberse cortado; lo decide la cobertura)"""
     t = [W[i]['t'] for i in idx]
+    puntuada = any(re.search(r'[.?!]$', W[i]['p']) for i in idx)
+
+    def inicio(q):
+        return (q == cortes[-1] or bool(re.search(r'[.?!,;:]$', W[idx[q] - 1]['p']))
+                or W[idx[q]]['ini'] - W[idx[q] - 1]['fin'] >= 0.3)
     cortes, j = [0], 1
     while j < len(t) - 2:
+        # un reinicio repite el COMIENZO de una oracion ("los musculos principales... los musculos...");
+        # sin puntuacion en la transcripcion no se sabe donde empiezan, y vale cualquier lugar
         hay = any(all(igual(t[i + q], t[j + q]) for q in range(3)) and sum(peso(t[j + q]) for q in range(3)) >= 1.5
+                  and (not puntuada or inicio(i))
                   for i in range(cortes[-1], j))
         if hay:
-            cortes.append(j)
-            j += 3
+            c = j
+            while c - 1 > cortes[-1] and not re.search(r'[.?!]$', W[idx[c - 1]]['p']) and j - c < 8:
+                c -= 1
+            if c - 1 > cortes[-1] and re.search(r'[.?!]$', W[idx[c - 1]]['p']):
+                j2 = c
+            else:
+                j2 = j
+            cortes.append(j2)
+            j = j2 + 3
         else:
             j += 1
     cortes.append(len(idx))
@@ -286,13 +342,14 @@ def evaluar(W, idx, escena, vocab_total, cuenta):
     trabada = '...' in texto[:-3] or '…' in texto[:-1]
     dudosas = []
     for x in t:
-        if len(x) < 5 or any(x == v for v in escena['voc']) or cuenta.get(x, 0) > 1:
+        if len(x) < 5 or any(igual(x, v) for v in escena['voc']):
             continue
         r = max([difflib.SequenceMatcher(None, x, v).ratio() for v in escena['voc'] if len(v) >= 4] or [0])
-        if 0.6 <= r < 0.82:
+        if (0.6 <= r < 0.82 and cuenta.get(x, 0) <= 1) or 0.72 <= r < 0.82:
             dudosas.append(x)
-    cub = [cobertura(t, p['t']) for p in escena['partes']]
-    return {'texto': texto, 'cortada': cortada, 'trabada': trabada or bool(dudosas), 'dudosas': dudosas, 'cub': cub}
+    cc = [cobertura(t, p['t']) for p in escena['partes']]
+    return {'texto': texto, 'cortada': cortada, 'trabada': trabada or bool(dudosas), 'dudosas': dudosas,
+            'cub': [q[0] for q in cc], 'centro': [q[1] for q in cc]}
 
 
 def elegir(tomas, P):
@@ -304,8 +361,9 @@ def elegir(tomas, P):
         return not tm['ev']['cortada'] and not tm['ev']['trabada']
 
     def racha(tm, p):
+        # partes seguidas que la toma dice, y en el mismo orden que el guion
         n = 0
-        while p + n < max(P, 1) and cubre(tm, p + n):
+        while p + n < max(P, 1) and cubre(tm, p + n) and (n == 0 or tm['ev']['centro'][p + n] > tm['ev']['centro'][p + n - 1]):
             n += 1
         return n
 
@@ -315,8 +373,10 @@ def elegir(tomas, P):
         lim = [tm for tm in tomas if limpia(tm)] or tomas
         return [lim[-1]]
     elegidas, p = [], 0
+    def libre(tm):
+        return all(tm['fin'] < q['ini'] or tm['ini'] > q['fin'] for q in elegidas)
     while p < P:
-        c = [tm for tm in tomas if cubre(tm, p)]
+        c = [tm for tm in tomas if cubre(tm, p) and libre(tm)]
         if not c:
             p += 1
             continue
@@ -421,13 +481,57 @@ def main():
         k, n = par.split('=')
         forzar[int(k)] = [int(x) for x in n.split('+')]
     son = Sonido(leer_audio(a.audio))
-    plan = []
+    tomas_por = []
     for k, e in enumerate(escenas):
         tomas = []
-        for idx in tomas_de(W, etiquetas, k):
+        for idx in tomas_de(W, etiquetas, k, [e['voc'] for e in escenas]):
             for idx2, rein in partir_reinicios(W, idx):
                 ev = evaluar(W, idx2, e, None, cuenta)
                 tomas.append({'idx': idx2, 'ini': W[idx2[0]]['ini'], 'fin': W[idx2[-1]]['fin'], 'recortada': rein, 'ev': ev})
+                # cada oracion de la toma tambien puede ir sola (si dijo las partes en otro orden)
+                frases, cur = [], []
+                for i in idx2:
+                    cur.append(i)
+                    if re.search(r'[.?!]$', W[i]['p']):
+                        frases.append(cur)
+                        cur = []
+                if cur:
+                    frases.append(cur)
+                if len(frases) > 1 and len(e['partes']) > 1:
+                    for fr in frases:
+                        if sum(peso(W[i]['t']) for i in fr) >= 2:
+                            tomas.append({'idx': fr, 'ini': W[fr[0]]['ini'], 'fin': W[fr[-1]]['fin'], 'recortada': True, 'frase': True,
+                                          'ev': evaluar(W, fr, e, None, cuenta)})
+        tomas_por.append(tomas)
+    # lo que quedo sin escena (por ejemplo, la accion grabada despues del cierre): si se parece
+    # claramente a una escena, entra como otra toma suya
+    sueltas, cur = [], []
+    for i, w in enumerate(W):
+        if etiquetas[i] == -1 and (not cur or w['ini'] - W[cur[-1]]['fin'] < PAUSA_TOMA):
+            cur.append(i)
+            continue
+        if cur:
+            sueltas.append(cur)
+        cur = [i] if etiquetas[i] == -1 else []
+    if cur:
+        sueltas.append(cur)
+    for idx in sueltas:
+        for idx2, rein in partir_reinicios(W, idx):
+            if sum(peso(W[i]['t']) for i in idx2) < 2.5:
+                continue
+            notas = []
+            for k, e in enumerate(escenas):
+                if not e['partes']:
+                    continue
+                ev = evaluar(W, idx2, e, None, cuenta)
+                notas.append((sum(ev['cub']) / len(ev['cub']), k, ev))
+            notas.sort(key=lambda q: -q[0])
+            if notas and notas[0][0] >= 0.6 and (len(notas) < 2 or notas[0][0] - notas[1][0] >= 0.2):
+                _, k, ev = notas[0]
+                tomas_por[k].append({'idx': idx2, 'ini': W[idx2[0]]['ini'], 'fin': W[idx2[-1]]['fin'], 'recortada': rein, 'ev': ev})
+    plan = []
+    for k, e in enumerate(escenas):
+        tomas = sorted(tomas_por[k], key=lambda tm: tm['ini'])
         if k + 1 in forzar:
             elegidas = [tomas[n - 1] for n in forzar[k + 1] if 0 < n <= len(tomas)]
         else:
@@ -498,7 +602,9 @@ def main():
                 notas.append('cortada')
             if ev['trabada']:
                 notas.append('trabada' + (' (' + ', '.join(ev['dudosas']) + ')' if ev['dudosas'] else ''))
-            if tm['recortada']:
+            if tm.get('frase'):
+                notas.append('una oracion de la toma')
+            elif tm['recortada']:
                 notas.append('otro intento sin pausa')
             lin.append('   %s toma %d  %s  "%s"%s' % (marca, n + 1, fmt(tm['ini']), ev['texto'],
                                                     ('  · ' + ', '.join(notas)) if notas else ''))

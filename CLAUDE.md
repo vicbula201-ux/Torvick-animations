@@ -69,6 +69,11 @@ chatarra-3d.jsx, novato-avanzado-3d.jsx   los mismos videos rehechos en 3D (mism
 tabla-nutricional-3d.jsx         video nuevo en 3D: como leer la tabla nutricional
 plancha-3d.jsx, abduccion-3d.jsx los primeros grabados con la voz real de Víctor
                                  (sincronizar.py); la abducción usa la máquina 'abductora'
+curl-mancuernas-3d.jsx, peso-muerto-3d.jsx,
+peptidos-3d.jsx, creatina-3d.jsx,
+calistenia-gym-3d.jsx            rehechos en 3D con el guion como lo grabó Víctor (su voz,
+                                 sincronizada); el de calistenia en 3D no lleva la escena
+                                 de flexibilidad (no la grabó)
 novato-avanzado.jsx,
 calistenia-gym.jsx               pantalla dividida: los dos Tors en paralelo
 gluteos.jsx                      con la novia de Tor (público femenino)
@@ -431,7 +436,11 @@ volvía borrosa (pedido del autor: "más nítido").
 
 **El estilo 3D es el de ahora en adelante** (pedido del autor: "rehacé los
 videos con ese estilo"). Los videos rehechos llevan el mismo id con `-3d` y el
-mismo guion que el original; el original 2D sigue en el repo.
+mismo guion que el original; el original 2D sigue en el repo. **Solo se entregan
+los 3D** (pedido del autor: "no los mandes 2D, solo 3D a partir de ahora"): si un
+video que manda a sincronizar no tiene versión 3D, primero se arma el `-3d` y
+después se sincroniza. Cuando Víctor graba con otras palabras, el `vo` del `-3d`
+se pasa a su manera de decirlo (así el reparto de la voz encuentra cada oración).
 
 - **Pose general** (`TOR3D.esqueleto(pose, quien)`): todo en el mundo (y arriba,
   piso en 0, Tor mira a +z): `cadera`, `tronco` [inclina, gira, ladea] (90 boca
@@ -441,7 +450,8 @@ mismo guion que el original; el original 2D sigue en el repo.
   (punta abajo +) y `panza` 0..1. Se dan los extremos; codos y rodillas salen
   por IK, asi que la profundidad sale sola (sentado, acostado, de rodillas).
 - **Figuras** (`vista.figuras`): `{ quien: 'tor' | 'novia', pose, musc, cara, ropa,
-  pesas: 'neutro' | 'prono', fantasmas, oculto }`. Musculos: pecho, abdomen,
+  pesas: 'neutro' | 'prono' | [x, y, z] (el eje de la mancuerna) | { I, D } (una por
+  mano, como el curl alternado), fantasmas, oculto }`. Musculos: pecho, abdomen,
   oblicuos, dorsal, romboides, trapecio (atras y la bajada del cuello), lumbar,
   deltoides, biceps, triceps, gluteos, cuadriceps, isquios, gemelos, con
   `true`/'rojo'/'gris'/'claro' y `brillo`. Caras: los ojos, bocas, cejas, color,
@@ -627,6 +637,15 @@ para Premiere) y `<id>-voz.txt` (las tomas de cada escena, la elegida con `>>`);
 El cierre de marca dice su línea de siempre ("¿Quieres ver más videos similares? Sígueme
 para más contenido."); con escena de acción, la pregunta va en la acción y "Sígueme para
 más contenido." en el cierre (`plancha-3d.jsx`).
+
+Cómo decide (por si una elección sale rara): las palabras se comparan también por cómo
+suenan (el reconocedor escribe "brachial" o "ocempic"); una toma cuenta como completa
+solo si dice las partes de la escena **en orden**; un reintento es una frase que repite
+el comienzo de una oración (no "te da más fuerza máxima... te da más fuerza relativa");
+las tomas no empiezan ni terminan en medio de una oración, pero tampoco se estiran sobre
+palabras de otra escena; y una línea que Víctor grabó fuera de orden (la acción después
+del cierre, por ejemplo) se rescata si se parece claramente a una sola escena. Antes de
+grabar el video conviene correr `--plan` y leer `<id>-voz.txt`.
 
 
 **Formato corto:** 30 a 35 s *con* el cierre
