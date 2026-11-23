@@ -71,7 +71,7 @@
         T: T,
         cuando: f(cuando),
         x: 540 - 104,
-        y: 270 - 104,
+        y: 305 - 104,
         s: 0.9
       });
     };
@@ -510,7 +510,7 @@
         cuando: 0.62,
         s: 0.75
       }],
-      encima: tachaMito(0.3),
+      sobreRot: tachaMito(0.3),
       r1: {
         text: 'MITO: DAÑA LOS *RIÑONES*',
         s: 1.0,
@@ -576,7 +576,7 @@
         cuando: 0.64,
         s: 0.75
       }],
-      encima: tachaMito(0.32),
+      sobreRot: tachaMito(0.32),
       r1: {
         text: 'MITO: SE CAE EL *PELO*',
         s: 1.05,
@@ -673,7 +673,7 @@
         cuando: 0.76,
         s: 0.62
       }],
-      encima: tachaMito(0.3),
+      sobreRot: tachaMito(0.3),
       r1: {
         text: 'MITO: TE *HINCHA*',
         s: 1.15,

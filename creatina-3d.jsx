@@ -35,7 +35,7 @@
   }
   // la X que tacha el rotulo del mito (va encima de los rotulos)
   function tachaMito(cuando) {
-    return function (T, f) { return <A.Mal T={T} cuando={f(cuando)} x={540 - 104} y={270 - 104} s={0.9} />; };
+    return function (T, f) { return <A.Mal T={T} cuando={f(cuando)} x={540 - 104} y={305 - 104} s={0.9} />; };
   }
   // el mito del pelo: pelos que caen y vuelven
   var CAB = { x: 300, y: 400, s: 1.8 };
@@ -179,7 +179,7 @@
         piezas: [{ C: N.ICONOS.rinones, s: 1.8, x: 324, y: 420, p: function (T, f) { return { color: T < f(0.5) ? C.RED : BLANCO }; } }],
         lienzo: function (T, f) { return <V.Halo T={T} c={[540, 636]} r={200} color={C.GRN} v={animate({ from: 0, to: 0.9, start: f(0.5), end: f(0.6) })(T)} />; },
         bien: [{ x: 860, y: 1060, cuando: 0.62, s: 0.75 }],
-        encima: tachaMito(0.3),
+        sobreRot: tachaMito(0.3),
         r1: { text: 'MITO: DAÑA LOS *RIÑONES*', s: 1.0, cuando: 0.02 },
         r2: { text: 'FALSO EN PERSONAS *SANAS*', s: 0.95, cuando: 0.5, tono: 'verde' }
       }) },
@@ -194,7 +194,7 @@
         piezas: [{ C: N.ICONOS.cabeza, s: CAB.s, x: CAB.x, y: CAB.y }],
         lienzo: function (T, f) { return <g>{pelos(T, f)}<V.Halo T={T} c={[CAB.x + 216, CAB.y + 180]} r={200} color={C.GRN} v={animate({ from: 0, to: 0.9, start: f(0.56), end: f(0.66) })(T)} /></g>; },
         bien: [{ x: 860, y: 1060, cuando: 0.64, s: 0.75 }],
-        encima: tachaMito(0.32),
+        sobreRot: tachaMito(0.32),
         r1: { text: 'MITO: SE CAE EL *PELO*', s: 1.05, cuando: 0.02 },
         r2: { text: 'NO HAY *PRUEBAS*', s: 1.15, cuando: 0.5, tono: 'verde' }
       }) },
@@ -213,7 +213,7 @@
         },
         piezas: [{ C: N.Dial, s: 0.75, x: 40, y: 1180, cuando: 0.4, p: function (T, f) { return { p: animate({ from: 0.42, to: 0.56, start: f(0.5), end: f(0.72), ease: Easing.easeOutBack })(T) }; } }],
         bien: [{ x: 860, y: 1170, cuando: 0.76, s: 0.62 }],
-        encima: tachaMito(0.3),
+        sobreRot: tachaMito(0.3),
         r1: { text: 'MITO: TE *HINCHA*', s: 1.15, cuando: 0.02 },
         r2: { text: 'AGUA EN EL *MÚSCULO*', cuando: 0.5, tono: 'verde' }
       }) },

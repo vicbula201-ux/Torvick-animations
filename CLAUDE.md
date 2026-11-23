@@ -470,7 +470,8 @@ se pasa a su manera de decirlo (así el reparto de la voz encuentra cada oració
   `lienzo(T, f, t, pr, info)` (SVG encima: `pr(que, i)` proyecta un punto de la
   figura i, `'m:pecho'` el centro de un musculo), `encima`, `piezas` (los iconos
   2D de `N`/`P`/`MU` en pantalla, como en `PL`), `mal`, `bien`, `golpes`, `r1`,
-  `r2`. Ayudas: `E3.poseFlex`, `E3.poseNovia`, `E3.Flecha`, `E3.Guia`,
+  `r2` y `sobreRot` (encima de los rótulos: la X que tacha el rótulo de un mito;
+  `encima` queda debajo de ellos). Ayudas: `E3.poseFlex`, `E3.poseNovia`, `E3.Flecha`, `E3.Guia`,
   `E3.brilla` (V.Halo y destellos sobre musculos), `E3.contador`,
   `E3.fantasmas`, y el top 3: `E3.gancho({ musculo, musc, brillo, figura })` y
   `E3.ejercicio({ n, r1, r2, brillo, tomas, vista(T, f, k, kEn) })`.

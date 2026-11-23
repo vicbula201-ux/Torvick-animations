@@ -9,6 +9,7 @@
        vista: function (T, f, t) { return { figuras | pose, musc, cara, pesas, objetos, fantasmas, vibra }; },
        lienzo: function (T, f, t, pr, info) { return <g>...</g>; },   // SVG sobre la figura
        encima: function (T, f, t, pr, info) { ... },                   // fuera del SVG (B.Cuenta)
+      sobreRot: function (T, f, t, pr, info) { ... },                 // encima de los rotulos (la X que tacha un mito)
        mal: [{ x, y, cuando, hasta }], bien: [...],
        r1: { text: 'REMA AL *ABDOMEN*', cuando, tono }, r2: {...}
      })
@@ -352,6 +353,7 @@
           })}
           {rot(o.r1, 0)}
           {rot(o.r2, 1)}
+          {o.sobreRot ? o.sobreRot(T, f, t, pr, info) : null}
         </div>
       );
     };
