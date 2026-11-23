@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Entrena con Tor · Guías de ejercicio y nutrición con ciencia</title>
-<meta name="description" content="Guías ilustradas con Tor: biomecánica de los ejercicios, nutrición para principiantes, plantilla de entrenamiento y rutina para principiantes. Pago único, acceso inmediato y garantía de 7 días.">
+<meta name="description" content="Entrena con Tor: la guía de los 7 errores que frenan tu progreso (US$1,99) y la Rutina para principiantes de 12 semanas (US$9,99). Explicado fácil, con dibujos y con estudios. Pago único y garantía de 7 días.">
 <meta property="og:title" content="Entrena con Tor">
 <meta property="og:description" content="Lo que nadie te explica del ejercicio, Tor te lo explica fácil.">
 <meta property="og:image" content="img/tor-perfil.png">
@@ -16,10 +16,11 @@
 <!--
   LANDING DE ENTRENA CON TOR (tienda/)
   Pagina estatica: se sube tal cual la carpeta tienda/ (Netlify, GitHub Pages, cualquier hosting).
-  Lo que tienes que cambiar esta en el bloque ENLACES del <script> de abajo de todo:
-  los links de pago de Hotmart de cada producto, tus redes, el formulario del regalo
-  y donde se reclama el cupon de referidos.
-  Los precios estan en el HTML de cada tarjeta (busca class="precio") y en PRODUCTOS (el guia de Tor).
+  Lo que tienes que cambiar esta en enlaces.js (lo comparten las tres paginas de la tienda):
+  los links de pago de Hotmart, los precios, tus redes, el formulario de correo, el cupon
+  de referidos y la medicion (pixeles). tienda.js arma los botones de pago con el origen
+  de la visita. Las otras paginas: 7-errores.html (la de los anuncios) y
+  gracias-7-errores.html (despues de comprar la guia).
   Los videos de la seccion "Asi explica Tor" estan en video/ (540x960, sin audio).
 -->
 <style>
@@ -233,7 +234,7 @@
   .duda-final { margin-top: 36px; display: flex; gap: 18px; align-items: center; justify-content: center; flex-wrap: wrap; text-align: center; }
   .duda-final img { width: 70px; }
 
-  /* MODO PILOTO: solo la rutina y la guia gratis. Para volver a mostrar el
+  /* MODO PILOTO: solo la guia de los 7 errores y la rutina. Para volver a mostrar el
      catalogo (pack y demas guias), sacar la clase "piloto" del <body>. */
   .piloto .catalogo { display: none !important; }
   [id] { scroll-margin-top: 88px; }
@@ -254,6 +255,16 @@
   .equipo { background: var(--papel); border: 2px dashed var(--ink); border-radius: 12px; padding: 10px 14px; font-size: 17px; }
   .compra { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 18px; margin-top: 4px; }
   .compra .boton { flex: 1 1 200px; text-align: center; justify-content: center; }
+  /* los dos pasos: la guia (1) lleva a la rutina (2) */
+  .paso-n { display: inline-flex; align-items: center; gap: 8px; font-family: 'Archivo Black', sans-serif; font-size: 15px; letter-spacing: 0.06em; text-transform: uppercase; }
+  .paso-n b { width: 34px; height: 34px; border-radius: 50%; background: var(--yel); border: var(--borde); display: inline-flex; align-items: center; justify-content: center; font-weight: 400; }
+  .entre-pasos { display: flex; flex-direction: column; align-items: center; gap: 2px; margin: 18px 0; font-weight: 700; font-size: 17px; text-align: center; }
+  .entre-pasos i { width: 0; height: 0; border-left: 16px solid transparent; border-right: 16px solid transparent; border-top: 22px solid var(--ink); margin-top: 4px; }
+  .destacado .vitrina-doble .tapa-real { width: 100%; transform: rotate(-4deg); border: var(--borde); border-radius: 6px; overflow: hidden; box-shadow: 5px 5px 0 var(--ink); }
+  .compra .boton.blanco { flex: 0 1 auto; }
+  .lanza { display: inline-block; background: var(--red); color: var(--blanco); font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; font-size: 13px; padding: 3px 9px; border-radius: 8px; transform: rotate(-3deg); }
+  .permiso { display: grid; grid-template-columns: 28px 1fr; gap: 10px; align-items: start; font-size: 16px; cursor: pointer; }
+  .permiso input { width: 24px; height: 24px; margin: 2px 0 0; accent-color: var(--grn); padding: 0; }
 
   /* video: boton de play cuando el navegador no lo arranca solo */
   .play { position: absolute; inset: 0; margin: auto; width: 84px; height: 84px; border-radius: 50%; border: var(--borde); background: var(--yel); box-shadow: 4px 4px 0 var(--ink); cursor: pointer; z-index: 3; display: flex; align-items: center; justify-content: center; }
@@ -479,12 +490,12 @@
   }
 </style>
 </head>
-<body class="piloto">
+<body class="piloto" data-pagina="tienda">
 
 <header class="cabecera">
   <div class="envoltura">
     <a class="marca" href="#inicio"><img src="img/tor-perfil.png" alt=""><span>ENTRENA CON TOR</span></a>
-    <a class="boton" href="#p-rutinas">Ver la rutina</a>
+    <a class="boton" href="#guias">Ver las guías</a>
   </div>
 </header>
 <p class="aviso-ref" id="aviso-ref" role="status"></p>
@@ -501,7 +512,7 @@
       <div class="hero-texto">
         <span class="rotulo">Ciencia + dibujos simples</span>
         <h1>Lo que nadie te explica del ejercicio, <span class="resalta">Tor</span> te lo explica fácil.</h1>
-        <p class="bajada">Una rutina ilustrada para empezar con buena técnica: qué hacer cada día, cuántas series y cuándo subir el peso. Cada ejercicio con su error y su forma correcta. Todo basado en estudios, nada de opiniones.</p>
+        <p class="bajada">Empieza por la guía de los 7 errores para saber qué te frena, y sigue con la rutina de 12 semanas: qué hacer cada día, cuántas series y cuándo subir el peso. Todo dibujado con Tor y basado en estudios, nada de opiniones.</p>
       </div>
 
       <div class="guia" id="guia" aria-live="polite">
@@ -525,10 +536,10 @@
 
       <div class="hero-acciones">
         <div class="acciones">
-          <a class="boton" href="#gratis">Descargar los 7 errores</a>
-          <a class="boton blanco" href="#p-rutinas">Ver la rutina de 12 semanas</a>
+          <a class="boton" href="#p-errores">Los 7 errores · <span data-precio="errores">US$1,99</span></a>
+          <a class="boton blanco" href="#p-rutinas">La rutina de 12 semanas</a>
         </div>
-        <p class="confianza"><b>La guía es gratis</b> · La rutina: pago único y garantía de 7 días</p>
+        <p class="confianza"><b>Pago único</b> · PDF al instante en tu correo · Garantía de 7 días</p>
         <div class="redes-mini" aria-label="Redes">
           <a data-red="instagram" href="#"><img src="img/red-instagram.svg" alt="">Instagram</a>
           <a data-red="tiktok" href="#"><img src="img/red-tiktok.svg" alt="">TikTok</a>
@@ -540,8 +551,8 @@
 
   <div class="tira" aria-hidden="true">
     <div class="tira-pista">
-      <span>Rutina para principiantes</span><span>12 semanas</span><span>Técnica primero</span><span>3, 5 o 6 días</span><span>Basado en ciencia</span><span>Guía gratis</span>
-      <span>Rutina para principiantes</span><span>12 semanas</span><span>Técnica primero</span><span>3, 5 o 6 días</span><span>Basado en ciencia</span><span>Guía gratis</span>
+      <span>Rutina para principiantes</span><span>12 semanas</span><span>Técnica primero</span><span>3, 5 o 6 días</span><span>Basado en ciencia</span><span>Los 7 errores</span>
+      <span>Rutina para principiantes</span><span>12 semanas</span><span>Técnica primero</span><span>3, 5 o 6 días</span><span>Basado en ciencia</span><span>Los 7 errores</span>
     </div>
   </div>
 
@@ -607,24 +618,52 @@
   <section id="guias">
     <div class="envoltura">
       <div class="titulo-seccion entra">
-        <span class="rotulo">La rutina de Tor</span>
-        <h2 style="margin-top:14px">Tu plan para los próximos <span class="resalta">3 meses</span></h2>
-        <p>Un PDF ilustrado para el celular o para imprimir. Lo descargas apenas pagas.</p>
+        <span class="rotulo">Por dónde empezar</span>
+        <h2 style="margin-top:14px">Dos pasos para entrenar <span class="resalta">con cabeza</span></h2>
+        <p>Primero sabes qué te frena; después sigues un plan. PDF ilustrados para el celular o para imprimir: los descargas apenas pagas.</p>
       </div>
 
-      <!-- la rutina: el producto del piloto -->
+      <!-- paso 1: la guia de los 7 errores (el producto de entrada) -->
+      <article class="destacado entra" id="p-errores">
+        <div class="vitrina-doble">
+          <span class="etiqueta">Empieza aquí</span>
+          <div class="tapa-real"><img src="img/errores/portada.jpg" alt="Portada de la guía Los 7 errores que frenan tu progreso en el gimnasio"></div>
+          <a class="muestra" href="7-errores.html#por-dentro"><img src="img/errores/hoja-11.jpg" alt="Una página de la guía: tu primera semana, una tarea por día" loading="lazy"><span>Mira las hojas por dentro</span></a>
+        </div>
+        <div class="cuerpo">
+          <span class="paso-n"><b>1</b>Guía · PDF ilustrado de 12 páginas</span>
+          <h3>Los 7 errores que frenan tu progreso en el gimnasio</h3>
+          <p style="font-size:19px">Si entrenas y no cambias, casi siempre es uno de estos 7 errores. Tor te enseña a darte cuenta si los cometes y cómo arreglarlos desde mañana.</p>
+          <ul class="lista">
+            <li><img src="img/visto.svg" alt="">Cada error: por qué te frena, cómo darte cuenta, qué dice la ciencia y cómo arreglarlo</li>
+            <li><img src="img/visto.svg" alt="">Checklist de 4 semanas para imprimir</li>
+            <li><img src="img/visto.svg" alt="">Tu primera semana: una tarea por día</li>
+            <li><img src="img/visto.svg" alt="">Sirve entrenes donde entrenes</li>
+          </ul>
+          <div class="compra">
+            <span class="precio"><span data-precio="errores">US$1,99</span><small>pago único</small></span>
+            <a class="boton negro" data-producto="errores" data-sin-link="7-errores.html" href="7-errores.html">La quiero</a>
+            <a class="boton blanco" href="7-errores.html">Ver por dentro</a>
+          </div>
+          <p class="confianza"><span class="lanza">Precio de lanzamiento</span> · Acceso inmediato · Garantía de 7 días</p>
+        </div>
+      </article>
+
+      <p class="entre-pasos entra" aria-hidden="true">Cuando quieras un plan día por día<i></i></p>
+
+      <!-- paso 2: la rutina -->
       <article class="destacado entra" id="p-rutinas">
         <div class="vitrina-doble">
-          <span class="etiqueta">Nuevo</span>
+          <span class="etiqueta">Paso 2</span>
           <div class="portada amarilla"><span class="p-tag">PROGRAMA</span><div class="p-titulo">Rutina para <em>principiantes</em></div><img class="p-fig" src="img/tor-medio.svg" alt="" style="left:18%;width:78%"></div>
           <a class="muestra" href="img/muestra-rutina.jpg" target="_blank" rel="noopener"><img src="img/muestra-rutina.jpg" alt="Una página de la rutina: el día 1, con cada ejercicio dibujado, sus series y su clave" loading="lazy"><span>Mira una página por dentro</span></a>
         </div>
         <div class="cuerpo">
-          <span class="formato">Programa de 12 semanas · PDF ilustrado de 17 páginas</span>
+          <span class="paso-n"><b>2</b>Programa de 12 semanas · PDF ilustrado de 17 páginas</span>
           <h3>Rutina para principiantes</h3>
           <p style="font-size:19px">Tu plan día por día para empezar con buena técnica y saber cuándo sumar repeticiones y cuándo subir el peso, sin adivinar.</p>
           <ul class="lista">
-            <li><img src="img/visto.svg" alt="">Versión de 3, 5 o 6 días: eliges según tu tiempo</li>
+            <li><img src="img/visto.svg" alt="">Versión de 6, 5 o 3 días (la de 3 es de cuerpo completo): eliges según tu tiempo</li>
             <li><img src="img/visto.svg" alt="">Cada ejercicio dibujado con Tor, con series, repeticiones, descanso y su clave</li>
             <li><img src="img/visto.svg" alt="">12 semanas en 3 fases: aprendes, construyes y progresas</li>
             <li><img src="img/visto.svg" alt="">Abdominales cada día de entreno</li>
@@ -632,8 +671,8 @@
           </ul>
           <p class="equipo"><b>Necesitas:</b> mancuernas, barra, poleas, prensa, máquina Smith y banco, lo que tiene cualquier gimnasio.</p>
           <div class="compra">
-            <span class="precio">$9.99<small>USD</small></span>
-            <a class="boton negro" data-producto="rutinas" href="#">La quiero</a>
+            <span class="precio"><span data-precio="rutinas">US$9,99</span><small>pago único</small></span>
+            <a class="boton negro" data-producto="rutinas" data-sin-link="#p-rutinas" href="#p-rutinas">La quiero</a>
           </div>
           <p class="confianza">Pago único · Acceso inmediato · Garantía de 7 días</p>
         </div>
@@ -748,7 +787,7 @@
               <li><img src="img/visto.svg" alt="">Los 3 ejercicios con más evidencia</li>
               <li><img src="img/visto.svg" alt="">Con un plan que progresa contigo</li>
             </ul>
-            <div class="pie"><span class="precio" style="font-size:22px">Lista de espera</span><a class="boton blanco" href="#gratis" data-espera="gluteos">Avísame</a></div>
+            <div class="pie"><span class="precio" style="font-size:22px">Lista de espera</span><a class="boton blanco" href="#correo" data-espera="gluteos">Avísame</a></div>
           </div>
         </article>
 
@@ -814,25 +853,21 @@
     </div>
   </section>
 
-  <!-- ===================== REGALO ===================== -->
-  <section id="gratis">
+  <!-- ===================== CONSEJOS POR CORREO ===================== -->
+  <section id="correo">
     <div class="envoltura regalo">
-      <div class="portada amarilla errores entra" aria-hidden="true">
-        <span class="p-tag">GRATIS</span>
-        <div class="p-titulo">Los 7 <em>errores</em> que frenan tu progreso</div>
-        <img class="p-fig" src="img/comp-sin.svg" alt="">
-        <img class="p-x" src="img/tacha.svg" alt="">
-      </div>
+      <div class="entra" aria-hidden="true"><img src="img/tor-senala.svg" alt="" style="width:min(70%,260px);margin:0 auto"></div>
       <div class="entra">
-        <span class="rotulo">Regalo</span>
-        <h2 style="margin-top:14px">Descarga <span class="resalta">gratis</span> la guía de los 7 errores</h2>
-        <p style="margin-top:14px">Los errores más comunes al entrenar, dibujados con Tor, y cómo corregirlos desde mañana. Te la mandamos a tu correo.</p>
+        <span class="rotulo">Por correo</span>
+        <h2 style="margin-top:14px">Los consejos de Tor, <span class="resalta">cada semana</span></h2>
+        <p style="margin-top:14px">Un correo corto por semana: un ejercicio explicado, un error común y lo nuevo de Entrena con Tor. Sin spam.</p>
         <form class="formulario" id="formulario" novalidate>
           <input type="text" name="nombre" placeholder="Tu nombre" autocomplete="given-name" aria-label="Tu nombre">
           <input type="email" name="email" placeholder="Tu correo" autocomplete="email" required aria-label="Tu correo">
-          <input type="hidden" name="interes" id="interes" value="guia-gratis">
-          <button class="boton ancho" type="submit">Quiero la guía gratis</button>
-          <p class="aviso">Sin spam. Te puedes dar de baja con un clic. Al enviarlo aceptas la <a href="privacidad.html">política de privacidad</a>.</p>
+          <input type="hidden" name="interes" id="interes" value="consejos">
+          <label class="permiso"><input type="checkbox" name="acepta" value="si" required><span>Quiero recibir los correos de Entrena con Tor (consejos y novedades). Me puedo dar de baja con un clic.</span></label>
+          <button class="boton ancho" type="submit">Quiero los consejos</button>
+          <p class="aviso">Lee cómo cuidamos tus datos en la <a href="privacidad.html">política de privacidad</a>.</p>
           <p class="mensaje" id="mensaje" role="status"></p>
         </form>
       </div>
@@ -894,7 +929,7 @@
           <div class="grupo-comida"><p>Carbohidrato</p><div class="chips" id="g-c"></div></div>
           <div class="grupo-comida"><p>Grasa saludable</p><div class="chips" id="g-f"></div></div>
           <button class="boton blanco ancho" type="button" id="otra" style="margin-top:18px">Otra combinación</button>
-          <a class="boton ancho" style="margin-top:12px" href="#gratis">Llévate la guía gratis de los 7 errores</a>
+          <a class="boton ancho" style="margin-top:12px" href="#p-errores">Los 7 errores · <span data-precio="errores">US$1,99</span></a>
           <p class="nota-calcu">Porciones aproximadas, en cocido salvo la avena. Si tienes una condición médica, consulta con un profesional.</p>
         </div>
       </div>
@@ -928,7 +963,7 @@
       <div class="escudo"><b>7</b><span>DÍAS</span></div>
       <div>
         <h2>Garantía de 7 días</h2>
-        <p style="margin-top:12px">Si en 7 días sientes que la rutina no es para ti, pides el reembolso y te devuelven el 100 % de tu dinero. Sin preguntas. El pago y el reembolso los gestiona Hotmart (<a href="reembolsos.html">cómo pedirlo</a>).</p>
+        <p style="margin-top:12px">Si en 7 días sientes que la guía o la rutina no es para ti, pides el reembolso y te devuelven el 100 % de tu dinero. Sin preguntas. El pago y el reembolso los gestiona Hotmart (<a href="reembolsos.html">cómo pedirlo</a>).</p>
       </div>
     </div>
   </section>
@@ -941,10 +976,11 @@
         <h2 style="margin-top:14px">Antes de que decidas</h2>
       </div>
       <div class="faq">
-        <details class="entra"><summary>¿Cómo recibo la rutina?</summary><p>Apenas pagas, Hotmart te manda el acceso a tu correo. Descargas el PDF y lo usas en el celular (el índice se toca para saltar a cada página), la tablet o el computador, o lo imprimes.</p></details>
-        <details class="entra"><summary>¿Es un pago único o una suscripción?</summary><p>Pago único. Es tuyo para siempre, con las actualizaciones incluidas.</p></details>
+        <details class="entra"><summary>¿Qué diferencia hay entre la guía y la rutina?</summary><p>La guía de los 7 errores (<span data-precio="errores">US$1,99</span>) te muestra qué te está frenando y cómo arreglarlo, con una checklist y un plan para tu primera semana. La rutina (<span data-precio="rutinas">US$9,99</span>) te dice qué hacer cada día durante 12 semanas: ejercicios, series, repeticiones y cuándo subir el peso. Puedes empezar por la guía y seguir con la rutina, o ir directo a la rutina.</p></details>
+        <details class="entra"><summary>¿Cómo recibo lo que compro?</summary><p>Apenas pagas, Hotmart te manda el acceso a tu correo. Descargas el PDF y lo usas en el celular (en la rutina, el índice se toca para saltar a cada página), la tablet o el computador, o lo imprimes.</p></details>
+        <details class="entra"><summary>¿Es un pago único o una suscripción?</summary><p>Pago único, en las dos. Lo que compras es tuyo, con las actualizaciones incluidas.</p></details>
         <details class="entra"><summary>¿Sirve si nunca entrené?</summary><p>Sí. Todo está explicado desde cero, con dibujos y un glosario de las palabras del gimnasio. Puedes empezar con la versión de 3 días, y las primeras semanas son suaves para que aprendas la técnica.</p></details>
-        <details class="entra"><summary>¿Necesito ir al gimnasio?</summary><p>Sí: la rutina usa máquinas, poleas, mancuernas y barra, lo que tiene cualquier gimnasio. La guía gratis y la calculadora sirven entrenes donde entrenes.</p></details>
+        <details class="entra"><summary>¿Necesito ir al gimnasio?</summary><p>Sí: la rutina usa máquinas, poleas, mancuernas y barra, lo que tiene cualquier gimnasio. La guía de los 7 errores y la calculadora sirven entrenes donde entrenes.</p></details>
         <details class="entra"><summary>¿Cómo puedo pagar?</summary><p>Con tarjeta y con los medios de pago que Hotmart ofrece en tu país (en Colombia, por ejemplo, PSE o Efecty). Los ves todos al abrir el pago.</p></details>
         <details class="entra"><summary>¿Cómo funciona lo de los referidos?</summary><p>Sigues a @entrenacontor, creas tu link en "Comparte y gana" y lo compartes. Si alguien compra entrando por tu link, la compra queda marcada con tu código; nos mandas tu link por mensaje directo y te enviamos un cupón de 25 % para la rutina o para la próxima guía de Tor.</p></details>
         <details class="entra"><summary>¿Y si no me gusta?</summary><p>Tienes 7 días de garantía: pides el reembolso desde Hotmart y te devuelven todo.</p></details>
@@ -959,8 +995,8 @@
       <img class="tor-cierre" src="img/tor-flex.svg" alt="">
       <h2>Empieza hoy a entrenar con cabeza</h2>
       <p style="font-size:20px">Tu plan de 12 semanas, con cada ejercicio dibujado por Tor.</p>
-      <a class="boton negro" data-producto="rutinas" href="#">Quiero la rutina</a>
-      <p class="confianza"><b>$9.99 USD</b> · Pago único · Garantía de 7 días · <a href="#gratis">o empieza gratis con los 7 errores</a></p>
+      <a class="boton negro" data-producto="rutinas" data-sin-link="#p-rutinas" href="#p-rutinas">Quiero la rutina</a>
+      <p class="confianza"><b data-precio="rutinas">US$9,99</b> · Pago único · Garantía de 7 días · <a href="#p-errores">o empieza por los 7 errores (<span data-precio="errores">US$1,99</span>)</a></p>
     </div>
   </section>
 </main>
@@ -974,7 +1010,7 @@
         <a data-legal="terminos" href="#">Términos</a>
         <a data-legal="privacidad" href="#">Privacidad</a>
         <a data-legal="reembolsos" href="#">Reembolsos</a>
-        <span>© <span id="anio">2026</span> Entrena con Tor · Torvick</span>
+        <span>© <span data-anio>2026</span> Entrena con Tor · Torvick</span>
       </div>
     </div>
     <div class="redes-mini">
@@ -997,45 +1033,16 @@
 </div>
 <button class="ayuda" type="button" id="ayuda" data-abrir-guia><img src="img/tor-perfil.png" alt="">¿Te ayudo?</button>
 
+<script src="enlaces.js"></script>
+<script src="tienda.js"></script>
 <script>
-  /* =========================================================
-     ENLACES: lo unico que hay que llenar antes de publicar.
-     - checkout: el link de pago de cada producto en Hotmart
-       (Hotmart > Productos > tu producto > Herramientas > Links / Checkout)
-     - redes: tus perfiles (Instagram y TikTok de Entrena con Tor: pendientes)
-     - formulario: la URL que te da tu herramienta de correo (Brevo,
-       MailerLite...) para recibir los suscriptores del regalo. Se manda
-       por POST con los campos nombre, email e interes.
-     - referidos.reclamar: donde te escriben para pedir el cupon
-       (link a tu Instagram, WhatsApp o mailto:). El codigo del amigo viaja
-       al checkout de Hotmart en el parametro sck, asi lo ves en tus ventas.
-     Mientras un link este vacio, el boton lleva a la seccion de guias.
-     PILOTO: solo se vende la rutina (checkout.rutinas). El pack y las demas
-     guias estan en la pagina pero ocultas (clase "catalogo").
-     ========================================================= */
-  var ENLACES = {
-    checkout: {
-      rutinas: '',       // https://pay.hotmart.com/XXXXXXXX  <- el link de pago de la rutina
-      pack: '',          // (catalogo, oculto en el piloto)
-      biomecanica: '',
-      nutricion: '',
-      plantilla: '',
-      asesoria: ''       // un formulario de solicitud o tu WhatsApp
-    },
-    redes: {
-      instagram: 'https://www.instagram.com/entrenacontor/',
-      tiktok: 'https://www.tiktok.com/@entrenacontor',
-      youtube: 'https://www.youtube.com/@eltorvick'
-    },
-    legal: { terminos: 'terminos.html', privacidad: 'privacidad.html', reembolsos: 'reembolsos.html' },
-    formulario: '',
-    referidos: { descuento: 25, reclamar: 'https://www.instagram.com/entrenacontor/' }
-  };
-
+  /* los links de pago, los precios, las redes y la medicion estan en enlaces.js;
+     tienda.js arma los botones (data-producto) con el origen de la visita */
   /* lo que Tor recomienda: nombre, a donde lleva y por que */
   var PRODUCTOS = {
     pack: { nombre: 'el Pack Todo Tor', sel: '#pack', precio: '$34.90', porque: 'Técnica, comida, rutina y plantilla en un solo pago: es lo más completo para empezar bien.' },
-    rutinas: { nombre: 'la Rutina para principiantes', sel: '#p-rutinas', precio: '$9.99', porque: 'Te dice qué hacer cada día, cuántas series y cuándo subir el peso, y puedes empezar con 3 días por semana.' },
+    errores: { nombre: 'la guía de los 7 errores', sel: '#p-errores', precio: ENLACES.precios.errores, porque: 'Te muestra qué te está frenando y cómo arreglarlo, con una checklist y un plan para tu primera semana.' },
+    rutinas: { nombre: 'la Rutina para principiantes', sel: '#p-rutinas', precio: ENLACES.precios.rutinas, porque: 'Te dice qué hacer cada día, cuántas series y cuándo subir el peso, y puedes empezar con 3 días por semana.' },
     plantilla: { nombre: 'la Plantilla de plan de entrenamiento', sel: '#p-plantilla', precio: '$9.90', porque: 'Si ya entrenas, lo que te falta es medir: la plantilla te dice cuándo subir el peso para salir del estancamiento.' },
     nutricion: { nombre: 'Nutrición para principiantes', sel: '#p-nutricion', precio: '$12.90', porque: 'Para bajar grasa sin perder músculo, primero hay que saber cuánto comer.' },
     biomecanica: { nombre: 'Biomecánica de los ejercicios', sel: '#p-biomecanica', precio: '$14.90', porque: 'Cada ejercicio con su error y su forma correcta, para que lo sientas en el músculo que toca.' },
@@ -1051,11 +1058,8 @@
     };
     var quieto = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    /* ---------- referido que llega: ?ref=codigo ---------- */
-    var refLlega = null;
-    try { refLlega = new URLSearchParams(location.search).get('ref'); } catch (e) {}
-    if (refLlega && /^[a-z0-9-]{3,40}$/.test(refLlega)) guarda.pon('tor-ref', refLlega); else refLlega = guarda.lee('tor-ref');
-    if (refLlega && !/^[a-z0-9-]{3,40}$/.test(refLlega)) refLlega = null;
+    /* ---------- referido que llega: ?ref=codigo (lo guarda tienda.js) ---------- */
+    var refLlega = TIENDA.ref;
     if (refLlega) {
       var quien = refLlega.replace(/-[a-z0-9]{3}$/, '').replace(/-/g, ' ');
       var aviso = $('#aviso-ref');
@@ -1063,26 +1067,8 @@
       aviso.classList.add('si');
     }
 
-    /* ---------- links ---------- */
-    function conRef(url) {
-      if (!url || !refLlega) return url;
-      return url + (url.indexOf('?') >= 0 ? '&' : '?') + 'sck=ref_' + encodeURIComponent(refLlega);
-    }
-    $$('[data-producto]').forEach(function (a) {
-      var url = conRef(ENLACES.checkout[a.getAttribute('data-producto')]);
-      a.href = url || '#guias';
-      if (url) { a.target = '_blank'; a.rel = 'noopener'; }
-    });
-    $$('[data-red]').forEach(function (a) {
-      var url = ENLACES.redes[a.getAttribute('data-red')];
-      if (url) { a.href = url; a.target = '_blank'; a.rel = 'noopener'; }
-      else { a.href = '#'; a.title = 'Muy pronto'; a.addEventListener('click', function (e) { e.preventDefault(); }); }
-    });
-    $$('[data-legal]').forEach(function (a) {
-      var url = ENLACES.legal[a.getAttribute('data-legal')];
-      if (url) a.href = url; else a.style.display = 'none';
-    });
-    $('#anio').textContent = new Date().getFullYear();
+    /* ---------- links: los botones de pago sin link propio llevan a la seccion de guias ---------- */
+    $$('[data-producto]').forEach(function (a) { if (!a.hasAttribute('data-sin-link')) a.setAttribute('data-sin-link', '#guias'); });
     $$('[data-espera]').forEach(function (a) {
       a.addEventListener('click', function () { $('#interes').value = 'espera-' + a.getAttribute('data-espera'); });
     });
@@ -1161,7 +1147,7 @@
         { t: 'Quiero todo', img: 'cerebro.svg', f: function () { recomienda('pack'); } }
       ]);
     }
-    // en el piloto: quien empieza va a la rutina; quien ya entrena y no avanza, a la guia gratis
+    // en el piloto: quien empieza va a la rutina; quien ya entrena y no avanza, a la guia de los 7 errores
     function decidePiloto(n) {
       var porque = {
         musculo: 'Te dice qué hacer cada día, cuántas series y cuándo subir el peso, y puedes empezar con 3 días por semana.',
@@ -1169,8 +1155,8 @@
         tecnica: 'Cada ejercicio viene dibujado, con su clave para hacerlo bien, y las primeras 4 semanas son para aprender la técnica.'
       }[eleccion.obj];
       if (n === 'mucho') {
-        habla('Si ya entrenas y no avanzas, empieza por la <b>guía gratis de los 7 errores</b>: casi siempre el freno es uno de esos. Te llega al correo.', [
-          { t: 'Llévame', principal: true, f: function () { irA('#gratis'); habla('Ahí está: pon tu correo y listo. ¿Quieres ver también la rutina?', [{ t: 'Ver la rutina', f: function () { tour('rutinas'); } }, { t: 'Empezar de nuevo', f: saludo }]); } },
+        habla('Si ya entrenas y no avanzas, empieza por la <b>guía de los 7 errores</b> (' + ENLACES.precios.errores + '): casi siempre el freno es uno de esos.', [
+          { t: 'Llévame', principal: true, f: function () { tour('errores'); } },
           { t: 'Ver la rutina', f: function () { tour('rutinas'); } },
           { t: 'Volver', f: saludo }
         ]);
@@ -1178,7 +1164,7 @@
       }
       habla('Te recomiendo <b>la Rutina para principiantes</b>. ' + porque, [
         { t: 'Llévame ahí', principal: true, f: function () { tour('rutinas'); } },
-        { t: 'Primero la guía gratis', f: function () { irA('#gratis'); } },
+        { t: 'Primero la guía de ' + ENLACES.precios.errores, f: function () { tour('errores'); } },
         { t: 'Volver', f: saludo }
       ]);
     }
@@ -1197,8 +1183,8 @@
     function recomienda(k) {
       var p = PRODUCTOS[k];
       if (k === 'gluteos') {
-        habla('El plan de <b>glúteos</b> está por salir. Déjame tu correo y te aviso primero (y te regalo la guía de los 7 errores).', [
-          { t: 'Llévame', principal: true, f: function () { $('#interes').value = 'espera-gluteos'; irA('#gratis'); habla('Ahí está: pon tu correo y listo. ¿Algo más?', [{ t: 'Empezar de nuevo', f: saludo }]); } },
+        habla('El plan de <b>glúteos</b> está por salir. Déjame tu correo y te aviso primero.', [
+          { t: 'Llévame', principal: true, f: function () { $('#interes').value = 'espera-gluteos'; irA('#correo'); habla('Ahí está: pon tu correo y listo. ¿Algo más?', [{ t: 'Empezar de nuevo', f: saludo }]); } },
           { t: 'Ver otra cosa', f: saludo }
         ]);
         return;
@@ -1267,8 +1253,8 @@
       function boton(t, clase, f) { var b = document.createElement('button'); b.type = 'button'; b.className = 'boton chico ' + clase; b.textContent = t; b.addEventListener('click', f); acc.appendChild(b); }
       if (nPaso > 0) boton('Atrás', 'blanco', function () { nPaso--; muestraPaso(); });
       if (p.compra) {
-        var url = conRef(ENLACES.checkout[p.compra]);
-        if (url) boton('Comprar', '', function () { window.open(url, '_blank', 'noopener'); });
+        var url = TIENDA.urlPago(p.compra), k = p.compra;
+        if (url) boton('Comprar', '', function () { TIENDA.evento('InitiateCheckout', { content_name: k, value: TIENDA.valor(k), currency: 'USD' }); window.open(url, '_blank', 'noopener'); });
         boton('Seguir mirando', 'blanco', cierraTour);
       } else {
         boton('Siguiente', '', function () { nPaso++; muestraPaso(); });
@@ -1516,11 +1502,11 @@
     }
     var miCodigo = guarda.lee('tor-mi-codigo');
     function muestraLink(cod) {
-      var link = location.origin + location.pathname + '?ref=' + cod;
-      if (location.protocol === 'file:') link = 'https://tu-pagina.com/?ref=' + cod;
+      var link = (ENLACES.sitio || (location.origin + location.pathname)) + '?ref=' + cod;
+      if (!ENLACES.sitio && location.protocol === 'file:') link = 'https://tu-pagina.com/?ref=' + cod;
       $('#ref-codigo').textContent = cod.toUpperCase();
       $('#ref-link').textContent = link;
-      var msj = 'Mira la rutina de Tor para empezar a entrenar bien, explicada fácil (y una guía gratis): ' + link;
+      var msj = 'Mira cómo explica Tor el ejercicio, fácil y con estudios (la guía de los 7 errores y la rutina de 12 semanas): ' + link;
       $('#ref-whatsapp').href = 'https://wa.me/?text=' + encodeURIComponent(msj);
       $('#ref-compartir').style.display = navigator.share ? '' : 'none';
       $('#ref-compartir').onclick = function () { navigator.share({ title: 'Entrena con Tor', text: msj, url: link }).catch(function () {}); };
@@ -1540,20 +1526,21 @@
       miCodigo = codigoDe(n); guarda.pon('tor-mi-codigo', miCodigo); muestraLink(miCodigo);
     });
 
-    /* ---------- formulario del regalo ---------- */
+    /* ---------- consejos por correo (con permiso) ---------- */
     var form = $('#formulario'), msj = $('#mensaje');
     form.addEventListener('submit', function (ev) {
       ev.preventDefault();
       var email = form.email.value.trim();
       if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { msj.className = 'mensaje pendiente'; msj.textContent = 'Escribe un correo válido.'; return; }
+      if (!form.acepta.checked) { msj.className = 'mensaje pendiente'; msj.textContent = 'Marca la casilla para darnos permiso de escribirte.'; return; }
       if (!ENLACES.formulario) {
-        // mientras no este conectada la herramienta de correo, la guia se pide por Instagram
+        // mientras no este conectada la herramienta de correo
         msj.className = 'mensaje pendiente';
-        msj.innerHTML = 'Estamos conectando el envío por correo. Mientras tanto, escríbenos la palabra <b>GUÍA</b> por mensaje directo a <a href="' + ENLACES.redes.instagram + '" target="_blank" rel="noopener">@entrenacontor</a> y te la mandamos.';
+        msj.innerHTML = 'Estamos conectando los correos. Mientras tanto, síguenos en <a href="' + ENLACES.redes.instagram + '" target="_blank" rel="noopener">@entrenacontor</a>: ahí sale un consejo nuevo cada semana.';
         return;
       }
       fetch(ENLACES.formulario, { method: 'POST', body: new FormData(form), mode: 'no-cors' })
-        .then(function () { msj.className = 'mensaje ok'; msj.textContent = '¡Listo! Revisa tu correo (y la carpeta de promociones).'; form.reset(); })
+        .then(function () { msj.className = 'mensaje ok'; msj.textContent = '¡Listo! Revisa tu correo (y la carpeta de promociones).'; form.reset(); TIENDA.evento('Lead', { content_name: $('#interes').value }); })
         .catch(function () { msj.className = 'mensaje pendiente'; msj.textContent = 'No se pudo enviar. Intenta de nuevo en un momento.'; });
     });
   })();

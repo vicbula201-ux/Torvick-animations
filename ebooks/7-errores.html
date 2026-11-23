@@ -8,10 +8,24 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Barlow+Semi+Condensed:ital,wght@0,500;0,600;0,700;1,500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="ebook.css">
+<script src="../tienda/enlaces.js"></script>
+<script>
+  // la edicion: ?edicion=regalo (la pone herramientas/ebook.js con --edicion regalo)
+  var EDICION = /[?&]edicion=regalo\b/.test(location.search) ? 'regalo' : 'venta';
+  document.documentElement.setAttribute('data-edicion', EDICION);
+</script>
 <!--
-  GUIA GRATIS: Los 7 errores que frenan tu progreso en el gimnasio. 12 hojas A4.
-  Es el regalo de la landing (a cambio del correo).
-  PDF: node herramientas/ebook.js ebooks/7-errores.html
+  LOS 7 ERRORES QUE FRENAN TU PROGRESO EN EL GIMNASIO. 12 hojas A4 (13 en la edición regalo).
+  Dos ediciones del mismo archivo:
+    venta  (la que se sube a Hotmart, US$1,99):  node herramientas/ebook.js ebooks/7-errores.html
+                                                 -> ebooks/pdf/7-errores.pdf
+    regalo (para los seguidores del comienzo):   node herramientas/ebook.js ebooks/7-errores.html --edicion regalo
+                                                 -> ebooks/pdf/7-errores-regalo.pdf
+  Lo que es de una sola edición lleva la clase solo-venta o solo-regalo.
+  El botón "Quiero la rutina" (hoja 12) toma su link de tienda/enlaces.js: la tienda
+  publicada (ENLACES.sitio + #p-rutinas) o, si no hay sitio, el pago de la rutina
+  (ENLACES.checkout.rutinas); si falta todo, el perfil de Instagram. El exportador avisa.
+  Los precios de la hoja 12 también salen de ENLACES.precios.
 -->
 <style>
   .error-cab { display: grid; grid-template-columns: 120px 1fr; gap: 14px; align-items: center; margin-top: 10px; }
@@ -47,6 +61,16 @@
   .redes { display: flex; gap: 10px; flex-wrap: wrap; }
   .redes span, .redes a { display: inline-flex; align-items: center; gap: 7px; border: 2px solid var(--ink); border-radius: 999px; padding: 3px 12px 3px 4px; font-weight: 700; font-size: 14px; background: #fff; color: var(--ink); text-decoration: none; }
   .redes img { width: 26px; height: 26px; }
+  [data-edicion="venta"] .solo-regalo, [data-edicion="regalo"] .solo-venta { display: none !important; }
+  .portada .incluye { display: inline-flex; gap: 8px; flex-wrap: wrap; margin-top: 22px; }
+  .portada .incluye span { background: var(--blanco); border: 3px solid var(--ink); border-radius: 999px; padding: 5px 14px; font-weight: 700; font-size: 16px; box-shadow: 3px 3px 0 var(--ink); }
+  .portada .dedicatoria { margin-top: 30px; width: 290px; background: var(--blanco); border: 3px solid var(--ink); border-radius: 14px; box-shadow: 4px 4px 0 var(--ink); padding: 12px 16px; font-size: 16px; line-height: 1.3; transform: rotate(-2deg); }
+  .portada .dedicatoria b { display: block; font-family: 'Archivo Black', sans-serif; font-weight: 400; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 4px; }
+  .precio-rutina { display: inline-block; font-family: 'Archivo Black', sans-serif; font-size: 18px; margin-left: 10px; vertical-align: middle; }
+  .preguntas { list-style: none; padding: 0; margin: 12px 0 0; display: grid; gap: 12px; counter-reset: pr; }
+  .preguntas li { border: 2.5px solid var(--ink); border-radius: 14px; box-shadow: 3px 3px 0 var(--ink); padding: 12px 14px 14px 60px; position: relative; background: var(--blanco); font-size: 17px; font-weight: 700; }
+  .preguntas li::before { counter-increment: pr; content: counter(pr); position: absolute; left: 12px; top: 12px; width: 34px; height: 34px; border-radius: 50%; background: var(--yel); border: 2.5px solid var(--ink); font-family: 'Archivo Black', sans-serif; display: flex; align-items: center; justify-content: center; }
+  .preguntas li i { display: block; height: 26px; border-bottom: 2px dashed var(--gry); }
   .boton-pdf { display: inline-block; background: var(--ink); color: var(--yel); text-decoration: none; font-family: 'Archivo Black', sans-serif; font-size: 16px; padding: 8px 18px; border-radius: 10px; box-shadow: 3px 3px 0 var(--blanco), 3px 3px 0 2px var(--ink); }
 </style>
 </head>
@@ -56,9 +80,12 @@
 <section class="pagina portada">
   <div class="lomo"></div>
   <div class="dentro">
-    <span class="tag">GUÍA GRATIS</span>
+    <span class="tag solo-venta">GUÍA ILUSTRADA</span>
+    <span class="tag solo-regalo">EDICIÓN DE AGRADECIMIENTO</span>
     <h1 style="font-size:60px">Los 7 <em>errores</em> que frenan tu progreso en el gimnasio</h1>
     <p class="sub">Por qué entrenas y no cambias, y cómo arreglarlo desde mañana. Explicado fácil, con Tor y con los estudios detrás.</p>
+    <div class="incluye"><span>7 errores y su arreglo</span><span>Checklist de 4 semanas</span><span>Plan de 7 días</span></div>
+    <div class="dedicatoria solo-regalo"><b>Para ti</b>Gracias por estar desde el comienzo. Esta guía es mi regalo. —Torvick</div>
   </div>
   <img src="../tienda/img/comp-sin.svg" alt="" style="position:absolute;right:56px;bottom:120px;width:330px">
   <img src="../tienda/img/tacha.svg" alt="" style="position:absolute;left:96px;bottom:170px;width:150px;transform:rotate(-8deg)">
@@ -94,7 +121,7 @@
     <p class="globo">Lee <b>un error por día</b> y arregla ese. En una semana entrenas distinto.</p>
   </div>
   <div class="estudio"><span class="tag">IMPORTANTE</span>Esta guía es educativa. Si tienes una lesión, dolor o una enfermedad, consulta con un profesional de la salud antes de cambiar tu entrenamiento o tu alimentación.</div>
-  <div class="pie"><span>Los 7 errores · Entrena con Tor · Guía gratis</span><span class="num">2</span></div>
+  <div class="pie"><span>Los 7 errores · Entrena con Tor</span><span class="num">2</span></div>
 </section>
 
 <!-- =============================== 3 · ERROR 1 =============================== -->
@@ -130,7 +157,7 @@
     <img src="../tienda/img/tor-senala.svg" alt="">
     <p class="globo">Un plan normal que <b>sigues</b> le gana a un plan perfecto que cambias cada semana.</p>
   </div>
-  <div class="pie"><span>Los 7 errores · Entrena con Tor · Guía gratis</span><span class="num">3</span></div>
+  <div class="pie"><span>Los 7 errores · Entrena con Tor</span><span class="num">3</span></div>
 </section>
 
 <!-- =============================== 4 · ERROR 2 =============================== -->
@@ -166,7 +193,7 @@
     <img src="../tienda/img/tor-senala.svg" alt="">
     <p class="globo">Una repetición más que la semana pasada <b>ya es progreso</b>.</p>
   </div>
-  <div class="pie"><span>Los 7 errores · Entrena con Tor · Guía gratis</span><span class="num">4</span></div>
+  <div class="pie"><span>Los 7 errores · Entrena con Tor</span><span class="num">4</span></div>
 </section>
 
 <!-- =============================== 5 · ERROR 3 =============================== -->
@@ -207,7 +234,7 @@
       <div style="border:2px solid var(--ink);border-radius:10px;padding:4px;text-align:center"><img src="img/pml-bien.png" alt="" style="height:96px;margin:0 auto"><p class="chico" style="font-weight:700;color:var(--grn)">Hombros abajo</p></div>
     </div>
   </div>
-  <div class="pie"><span>Los 7 errores · Entrena con Tor · Guía gratis</span><span class="num">5</span></div>
+  <div class="pie"><span>Los 7 errores · Entrena con Tor</span><span class="num">5</span></div>
 </section>
 
 <!-- =============================== 6 · ERROR 4 =============================== -->
@@ -252,7 +279,7 @@
     <tr><td><b>Total</b></td><td></td><td class="num si">≈ 113 g</td></tr>
   </table>
   <div class="estudio mt14"><span class="tag">LA CIENCIA</span>Un análisis de 49 estudios encontró que el músculo ganado con pesas deja de subir a partir de unos 1,6 g de proteína por kilo al día; los autores sugieren llegar hasta 2,2 g para ir a lo seguro (Morton y cols., 2018).</div>
-  <div class="pie"><span>Los 7 errores · Entrena con Tor · Guía gratis</span><span class="num">6</span></div>
+  <div class="pie"><span>Los 7 errores · Entrena con Tor</span><span class="num">6</span></div>
 </section>
 
 <!-- =============================== 7 · ERROR 5 =============================== -->
@@ -292,7 +319,7 @@
     <img src="../tienda/img/tor-senala.svg" alt="">
     <p class="globo">Dormir también es entrenar. Es la parte en la que <b>creces</b>.</p>
   </div>
-  <div class="pie"><span>Los 7 errores · Entrena con Tor · Guía gratis</span><span class="num">7</span></div>
+  <div class="pie"><span>Los 7 errores · Entrena con Tor</span><span class="num">7</span></div>
 </section>
 
 <!-- =============================== 8 · ERROR 6 =============================== -->
@@ -328,7 +355,7 @@
     <img src="../tienda/img/tor-senala.svg" alt="">
     <p class="globo">Los abdominales se hacen en el gimnasio, pero se <b>marcan en la cocina</b>.</p>
   </div>
-  <div class="pie"><span>Los 7 errores · Entrena con Tor · Guía gratis</span><span class="num">8</span></div>
+  <div class="pie"><span>Los 7 errores · Entrena con Tor</span><span class="num">8</span></div>
 </section>
 
 <!-- =============================== 9 · ERROR 7 =============================== -->
@@ -364,7 +391,7 @@
     <div class="estudio"><span class="tag">LA CIENCIA</span>En principiantes, el músculo ya crece de forma medible a las 3 o 4 semanas de entrenar (Seynnes y cols., 2007), aunque en el espejo se note más tarde.</div>
     <div class="estudio"><span class="tag">LA CIENCIA</span>Registrar lo que haces se asocia con mejores resultados: en los estudios de pérdida de peso, quienes se anotan más, logran más (Burke y cols., 2011).</div>
   </div>
-  <div class="pie"><span>Los 7 errores · Entrena con Tor · Guía gratis</span><span class="num">9</span></div>
+  <div class="pie"><span>Los 7 errores · Entrena con Tor</span><span class="num">9</span></div>
 </section>
 
 <!-- =============================== 10 · CHECKLIST =============================== -->
@@ -399,7 +426,7 @@
     <img src="../tienda/img/tor-senala.svg" alt="">
     <p class="globo">No tienes que arreglar los 7 hoy. Empieza por <b>uno</b> y súmale otro cada semana.</p>
   </div>
-  <div class="pie"><span>Los 7 errores · Entrena con Tor · Guía gratis</span><span class="num">10</span></div>
+  <div class="pie"><span>Los 7 errores · Entrena con Tor</span><span class="num">10</span></div>
 </section>
 
 <!-- =============================== 11 · PRIMERA SEMANA =============================== -->
@@ -423,7 +450,7 @@
       <p style="font-size:16px"><b>Cuéntame cómo te fue.</b> Escríbeme en Instagram o TikTok, <b>@entrenacontor</b>, con la palabra <b>"SEMANA 1"</b> y dime cuál de los 7 errores te costó más.</p>
     </div>
   </div>
-  <div class="pie"><span>Los 7 errores · Entrena con Tor · Guía gratis</span><span class="num">11</span></div>
+  <div class="pie"><span>Los 7 errores · Entrena con Tor</span><span class="num">11</span></div>
 </section>
 
 <!-- =============================== 12 · CIERRE =============================== -->
@@ -436,16 +463,15 @@
       <div class="mini-libro"><span class="t">PROGRAMA</span><div class="h">Rutina para <em>principiantes</em></div><img src="../tienda/img/tor-medio.svg" alt=""></div>
       <div>
         <h2>Rutina para principiantes · 12 semanas</h2>
-        <p>Los 7 arreglos de esta guía, convertidos en un plan: qué hacer cada día, cuántas series y repeticiones, cómo subir el peso y tu registro para anotar.</p>
+        <p>Esta guía te muestra qué te frena. La rutina te dice <b>qué hacer cada día</b>: los ejercicios, las series, las repeticiones y cuándo subir el peso.</p>
         <ul class="checks">
-          <li>3 rutinas: pecho y hombro, espalda y bíceps, piernas y glúteos.</li>
-          <li>Versión de 3, 5 o 6 días, con abdominales cada día.</li>
-          <li>Cada ejercicio dibujado con Tor, con sus claves.</li>
+          <li>6, 5 o 3 días por semana (la de 3 es de cuerpo completo).</li>
+          <li>12 semanas en 3 fases, con la doble progresión de la página 4.</li>
+          <li>Cada ejercicio dibujado con Tor, con su clave y tu registro para anotar.</li>
         </ul>
-        <!-- LINK A LA RUTINA: hoy lleva al perfil de Instagram (el link de la bio).
-             Cuando la landing tenga su direccion (o con el link de Hotmart), cambiar este href. -->
-        <a class="boton-pdf mt10" id="link-rutina" href="https://www.instagram.com/entrenacontor/">Quiero la rutina →</a>
-        <p class="chico mt6">O búscala en el link de mi perfil, @entrenacontor.</p>
+        <!-- el link sale de tienda/enlaces.js (ver la cabecera de este archivo) -->
+        <a class="boton-pdf mt10" id="link-rutina" href="https://www.instagram.com/entrenacontor/">Quiero la rutina →</a><span class="precio-rutina" id="precio-rutina">US$9,99</span>
+        <p class="chico mt6">Pago único y 7 días de garantía. También está en el link de mi perfil, @entrenacontor.</p>
       </div>
     </div>
   </div>
@@ -470,13 +496,51 @@
     <li>Vispute SS y cols. (2011). The effect of abdominal exercise on abdominal fat. <i>J Strength Cond Res</i>, 25(9), 2559–2564.</li>
     <li>Watson NF y cols. (2015). Recommended amount of sleep for a healthy adult. <i>Sleep</i>, 38(6), 843–844.</li>
   </ol>
-  <p class="chico gris-t mt10">© Torvick · Entrena con Tor. Guía gratis: compártela con quien quieras, tal cual está.</p>
+  <p class="chico gris-t mt10 solo-venta">© Torvick · Entrena con Tor. Esta guía es para tu uso personal: no la compartas ni la publiques. Si a un amigo le puede servir, recomiéndale @entrenacontor.</p>
+  <p class="chico gris-t mt10 solo-regalo">© Torvick · Entrena con Tor. Es un regalo para ti. Si a alguien le puede servir, pásale el link de mi perfil, @entrenacontor: así me ayudas a seguir haciendo esto.</p>
   <div class="tor-dice" style="position:absolute;right:52px;bottom:72px;width:360px;grid-template-columns:96px 1fr">
     <img src="../tienda/img/tor-saludo-a.svg" alt="" style="width:96px">
     <p class="globo">¡Nos vemos en el <b>próximo video</b>!</p>
   </div>
-  <div class="pie"><span>Los 7 errores · Entrena con Tor · Guía gratis</span><span class="num">12</span></div>
+  <div class="pie"><span>Los 7 errores · Entrena con Tor</span><span class="num">12</span></div>
 </section>
 
+<!-- =============================== 13 · GRACIAS (solo la edición regalo) =============================== -->
+<section class="pagina solo-regalo">
+  <div class="cabeza"><span class="marca"><img src="../tienda/img/tor-perfil.png" alt="">Entrena con Tor</span><span>Gracias</span></div>
+  <span class="rotulo">De Torvick para ti</span>
+  <h1>Gracias por estar <span class="resalta">desde el comienzo</span></h1>
+  <div class="fila mt14" style="align-items:center;gap:22px">
+    <img src="../tienda/img/torvick.jpg" alt="" style="width:120px;height:120px;border-radius:50%;border:3px solid var(--ink);object-fit:cover;flex:none">
+    <p class="bajada" style="margin:0">Fuiste de las primeras personas en seguir a Tor. Esta guía es mi forma de agradecértelo. Ahora te pido algo a cambio: <b>tu opinión sincera</b>. Con tus respuestas voy a mejorar la guía y lo que viene después.</p>
+  </div>
+  <h2 class="mt20">Cuando la termines, cuéntame:</h2>
+  <ol class="preguntas">
+    <li>¿Qué aprendiste que no sabías?<i></i></li>
+    <li>¿Qué parte te confundió o te costó entender?<i></i></li>
+    <li>¿Qué pudiste aplicar en tu entrenamiento esta semana?<i></i></li>
+    <li>¿Qué necesitas para seguir avanzando?<i></i></li>
+  </ol>
+  <div class="caja amarilla mt20">
+    <div class="fila" style="align-items:center">
+      <img src="../tienda/img/tor-flex.svg" alt="" style="width:86px;flex:none">
+      <p style="font-size:16px">Respóndeme en el mismo chat donde te mandé la guía o por mensaje directo a <b>@entrenacontor</b>. Una línea por pregunta es suficiente.</p>
+    </div>
+  </div>
+  <div class="estudio mt14"><span class="tag">TU PERMISO</span>Si quiero mostrar tu comentario en la página o en las redes, primero te voy a preguntar si estás de acuerdo y cómo quieres aparecer. Sin tu sí, no se publica nada.</div>
+  <div class="pie"><span>Los 7 errores · Entrena con Tor · Edición de agradecimiento</span><span class="num">13</span></div>
+</section>
+
+<script>
+  // el boton de la rutina (hoja 12): la tienda publicada o el pago de la rutina, con su origen
+  (function () {
+    var E = window.ENLACES || {}, campana = EDICION === 'regalo' ? 'regalo' : '7errores';
+    var a = document.getElementById('link-rutina'), url = '';
+    if (E.sitio) url = E.sitio.replace(/\/?$/, '/') + '?utm_source=pdf&utm_medium=ebook&utm_campaign=' + campana + '#p-rutinas';
+    else if (E.checkout && E.checkout.rutinas) url = E.checkout.rutinas + (E.checkout.rutinas.indexOf('?') >= 0 ? '&' : '?') + 'sck=pdf-' + campana;
+    if (url) a.href = url;
+    if (E.precios && E.precios.rutinas) document.getElementById('precio-rutina').textContent = E.precios.rutinas;
+  })();
+</script>
 </body>
 </html>

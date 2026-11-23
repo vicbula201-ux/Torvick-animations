@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>¡Gracias por tu compra! · Entrena con Tor</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#FFD400">
+<link rel="icon" href="img/tor-perfil.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Barlow+Semi+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<!--
+  PÁGINA DE GRACIAS DE LOS 7 ERRORES: a donde Hotmart manda al comprador después de pagar.
+  En Hotmart: Productos > Los 7 errores > Página de agradecimiento > externa:
+    compra aprobada:            <sitio>/gracias-7-errores.html
+    pago pendiente (PSE, Efecty...): <sitio>/gracias-7-errores.html?estado=pendiente
+  Hace tres cosas: dice dónde llega la guía, pide permiso para escribirle por correo
+  (el seguimiento) y presenta la rutina como el paso siguiente (sin descuentos inventados).
+-->
+<style>
+  :root { --ink: #14110F; --yel: #FFD400; --red: #E03A2F; --grn: #16A06A; --gry: #C9C3B8; --blanco: #ffffff; --papel: #F4F1EC; --menta: #DDF3EA; --borde: 3px solid var(--ink); --sombra: 6px 6px 0 var(--ink); }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  body { margin: 0; background: var(--blanco); color: var(--ink); font-family: 'Barlow Semi Condensed', system-ui, sans-serif; font-weight: 500; font-size: 19px; line-height: 1.45; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+  img { display: block; max-width: 100%; }
+  a { color: inherit; }
+  button, input { font: inherit; color: inherit; }
+  .envoltura { width: 100%; max-width: 1000px; margin: 0 auto; padding: 0 16px; }
+  section { padding: 52px 0; }
+  h1, h2, h3, .impacto { font-family: 'Archivo Black', sans-serif; font-weight: 400; letter-spacing: -0.01em; line-height: 1.05; margin: 0; }
+  h1 { font-size: clamp(34px, 7vw, 56px); }
+  h2 { font-size: clamp(28px, 5.4vw, 42px); }
+  p { margin: 0; }
+  .rotulo { display: inline-block; background: var(--ink); color: var(--blanco); text-transform: uppercase; font-weight: 700; font-size: 18px; letter-spacing: 0.07em; padding: 8px 34px 8px 16px; clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 50%, calc(100% - 20px) 100%, 0 100%); }
+  .rotulo.verde { background: var(--grn); }
+  .resalta { position: relative; z-index: 0; white-space: nowrap; }
+  .resalta::before { content: ''; position: absolute; z-index: -1; left: -0.06em; right: -0.06em; bottom: 0.04em; height: 0.46em; background: var(--yel); transform: skew(-8deg) rotate(-1deg); }
+  .boton { display: inline-flex; align-items: center; justify-content: center; background: var(--yel); color: var(--ink); text-decoration: none; text-transform: uppercase; font-family: 'Archivo Black', sans-serif; font-size: 18px; padding: 15px 24px; border: var(--borde); border-radius: 14px; box-shadow: 4px 4px 0 var(--ink); cursor: pointer; text-align: center; transition: transform 0.12s ease, box-shadow 0.12s ease; }
+  .boton:hover { transform: translate(-1px, -1px); box-shadow: 6px 6px 0 var(--ink); }
+  .boton.negro { background: var(--ink); color: var(--yel); box-shadow: 4px 4px 0 var(--yel), 4px 4px 0 3px var(--ink); }
+  .boton.ancho { width: 100%; }
+  .caja { background: var(--blanco); border: var(--borde); border-radius: 18px; box-shadow: var(--sombra); padding: 22px; }
+  .lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+  .lista li { display: grid; grid-template-columns: 26px 1fr; gap: 10px; }
+  .lista li img { width: 22px; margin-top: 3px; }
+  .fondo-gris { background: var(--papel); border-top: var(--borde); border-bottom: var(--borde); }
+  .cabecera { border-bottom: var(--borde); }
+  .cabecera .envoltura { display: flex; align-items: center; height: 60px; }
+  .marca { display: flex; align-items: center; gap: 10px; text-decoration: none; font-family: 'Archivo Black', sans-serif; font-size: 17px; }
+  .marca img { width: 38px; height: 38px; border-radius: 50%; border: var(--borde); }
+
+  .listo { display: grid; gap: 24px; align-items: center; }
+  .listo .tor { width: min(60%, 230px); margin: 0 auto; animation: festeja 2.4s ease-in-out infinite; transform-origin: 50% 100%; }
+  @keyframes festeja { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.04) translateY(-6px); } }
+  .pasos { list-style: none; padding: 0; margin: 22px 0 0; display: grid; gap: 12px; counter-reset: paso; }
+  .pasos li { display: grid; grid-template-columns: 44px 1fr; gap: 12px; align-items: center; font-size: 19px; }
+  .pasos li::before { counter-increment: paso; content: counter(paso); width: 44px; height: 44px; border-radius: 50%; background: var(--yel); border: var(--borde); display: flex; align-items: center; justify-content: center; font-family: 'Archivo Black', sans-serif; font-size: 19px; }
+  .aviso-pendiente { display: none; background: #FFF4BF; border: var(--borde); border-radius: 14px; padding: 14px 16px; margin-top: 18px; font-weight: 600; }
+  .pendiente .aviso-pendiente { display: block; }
+  .pendiente .solo-aprobado { display: none; }
+
+  .formulario { display: grid; gap: 12px; margin-top: 18px; }
+  .formulario input[type="text"], .formulario input[type="email"] { font-size: 19px; padding: 14px 16px; border: var(--borde); border-radius: 12px; background: var(--blanco); width: 100%; }
+  .formulario input:focus { outline: 4px solid var(--yel); outline-offset: 0; }
+  .permiso { display: grid; grid-template-columns: 28px 1fr; gap: 10px; align-items: start; font-size: 17px; cursor: pointer; }
+  .permiso input { width: 24px; height: 24px; margin: 2px 0 0; accent-color: var(--grn); }
+  .aviso { font-size: 15px; color: #5a534b; }
+  .mensaje { display: none; font-weight: 700; padding: 12px 14px; border: var(--borde); border-radius: 12px; }
+  .mensaje.ok { display: block; background: var(--menta); }
+  .mensaje.pendiente-msj { display: block; background: #FFF4BF; }
+  .semanas { display: grid; gap: 8px; margin-top: 14px; }
+  .semanas p { display: grid; grid-template-columns: 84px 1fr; gap: 10px; align-items: center; font-size: 17px; }
+  .semanas b { font-family: 'Archivo Black', sans-serif; font-weight: 400; font-size: 13px; text-transform: uppercase; text-align: center; background: var(--yel); border: 2px solid var(--ink); border-radius: 8px; padding: 3px 0; }
+
+  .siguiente { display: grid; gap: 24px; align-items: center; background: var(--blanco); border: var(--borde); border-radius: 24px; box-shadow: 8px 8px 0 var(--ink); padding: 22px; }
+  .vitrina { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: center; background: var(--papel); border: var(--borde); border-radius: 18px; padding: 24px 16px; }
+  .portada { position: relative; aspect-ratio: 3 / 4; background: var(--yel); border: 4px solid var(--ink); border-radius: 8px 16px 16px 8px; box-shadow: 6px 6px 0 var(--ink); overflow: hidden; container-type: inline-size; transform: rotate(-4deg); }
+  .portada::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 10%; background: var(--ink); }
+  .portada .p-tag { position: absolute; top: 7%; left: 16%; font-family: 'Archivo Black', sans-serif; font-size: 5cqi; letter-spacing: 0.1em; background: var(--ink); color: var(--blanco); padding: 2px 6px; }
+  .portada .p-titulo { position: absolute; top: 17%; left: 16%; right: 6%; font-family: 'Archivo Black', sans-serif; font-size: 9cqi; line-height: 1; text-transform: uppercase; }
+  .portada .p-titulo em { font-style: normal; background: var(--blanco); padding: 0 3px; }
+  .portada img { position: absolute; bottom: 3%; left: 18%; width: 78%; }
+  .muestra { display: block; transform: rotate(3deg); border: var(--borde); border-radius: 6px; overflow: hidden; box-shadow: 5px 5px 0 var(--ink); background: var(--blanco); }
+  .comparar { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 14px 0; }
+  .comparar div { border: 2px solid var(--ink); border-radius: 12px; padding: 10px 12px; font-size: 16px; background: var(--blanco); }
+  .comparar div.si { background: var(--yel); }
+  .comparar b { display: block; font-family: 'Archivo Black', sans-serif; font-weight: 400; font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .precio { font-family: 'Archivo Black', sans-serif; font-size: 40px; line-height: 1; }
+  .precio small { font-family: 'Barlow Semi Condensed', sans-serif; font-weight: 700; font-size: 15px; margin-left: 6px; }
+  .compra { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 18px; margin-top: 16px; }
+  .confianza { font-size: 16px; font-weight: 600; color: #4a443e; margin-top: 10px; }
+  .redes-mini { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; justify-content: center; }
+  .redes-mini a { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; text-decoration: none; border: 2px solid var(--ink); border-radius: 999px; padding: 5px 14px 5px 6px; font-size: 16px; background: var(--blanco); }
+  .redes-mini a img { width: 28px; height: 28px; }
+  .pie-pagina { background: var(--ink); color: var(--gry); padding: 28px 0 40px; font-size: 15px; }
+  .pie-pagina a { color: var(--gry); }
+  .legal { display: flex; flex-wrap: wrap; gap: 14px; }
+  @media (min-width: 760px) {
+    .listo { grid-template-columns: 1.3fr 0.7fr; }
+    .dos { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
+    .siguiente { grid-template-columns: 0.9fr 1.1fr; padding: 32px; }
+  }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+</style>
+</head>
+<body data-pagina="gracias-errores">
+
+<header class="cabecera"><div class="envoltura"><a class="marca" href="index.html"><img src="img/tor-perfil.png" alt="">ENTRENA CON TOR</a></div></header>
+
+<main>
+  <!-- ===================== LISTO ===================== -->
+  <section>
+    <div class="envoltura listo">
+      <div>
+        <span class="rotulo verde solo-aprobado">Compra lista</span>
+        <span class="rotulo aviso-pendiente-rotulo" hidden>Pago en proceso</span>
+        <h1 style="margin-top:16px" class="solo-aprobado">¡Gracias! Tu guía va <span class="resalta">en camino</span></h1>
+        <h1 style="margin-top:16px" class="solo-pendiente" hidden>Tu pago está <span class="resalta">en proceso</span></h1>
+        <p class="aviso-pendiente">Pagaste con un medio que tarda en confirmarse (como PSE, Efecty o una transferencia). Apenas Hotmart lo apruebe, te llega el correo con la guía. Si en un día hábil no llega, escríbenos por mensaje directo a <a data-red="instagram" href="#">@entrenacontor</a>.</p>
+        <ol class="pasos">
+          <li><span><b>Revisa tu correo.</b> Hotmart te manda el acceso al correo con el que pagaste (mira también en promociones y en spam).</span></li>
+          <li><span><b>Descarga el PDF</b> y guárdalo en tu celular, o imprímelo.</span></li>
+          <li><span><b>Empieza por la hoja 11:</b> tu primera semana, con una tarea por día. Hoy te toca el lunes.</span></li>
+        </ol>
+      </div>
+      <img class="tor" src="img/tor-flex.svg" alt="">
+    </div>
+  </section>
+
+  <!-- ===================== SEGUIMIENTO POR CORREO ===================== -->
+  <section class="fondo-gris">
+    <div class="envoltura dos">
+      <div>
+        <span class="rotulo">Te acompaño</span>
+        <h2 style="margin-top:14px">¿Te escribo durante tu <span class="resalta">primer mes</span>?</h2>
+        <p style="margin-top:12px">Si quieres, te mando un correo corto por semana para que no te quedes en la primera: qué revisar, el error que más cuesta y qué hacer cuando termines la guía.</p>
+        <div class="semanas">
+          <p><b>Semana 1</b>Cómo usar la checklist sin abrumarte.</p>
+          <p><b>Semana 2</b>La doble progresión, con un ejemplo de verdad.</p>
+          <p><b>Semana 3</b>Tu opinión: qué te sirvió y qué te confundió.</p>
+          <p><b>Semana 4</b>El siguiente paso: un plan día por día.</p>
+        </div>
+      </div>
+      <div class="caja">
+        <form class="formulario" id="formulario" novalidate>
+          <input type="text" name="nombre" placeholder="Tu nombre" autocomplete="given-name" aria-label="Tu nombre">
+          <input type="email" name="email" placeholder="El correo con el que compraste" autocomplete="email" required aria-label="Tu correo">
+          <input type="hidden" name="interes" value="compra-7errores">
+          <label class="permiso"><input type="checkbox" name="acepta" value="si" required><span>Quiero recibir los correos de Entrena con Tor: el acompañamiento del primer mes y, después, consejos y novedades. Me puedo dar de baja con un clic.</span></label>
+          <button class="boton ancho" type="submit">Sí, acompáñame</button>
+          <p class="aviso">Lee cómo cuidamos tus datos en la <a data-legal="privacidad" href="privacidad.html">política de privacidad</a>.</p>
+          <p class="mensaje" id="mensaje" role="status"></p>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== EL SIGUIENTE PASO: LA RUTINA ===================== -->
+  <section id="rutina">
+    <div class="envoltura">
+      <div class="siguiente">
+        <div class="vitrina">
+          <div class="portada"><span class="p-tag">PROGRAMA</span><div class="p-titulo">Rutina para <em>principiantes</em></div><img src="img/tor-medio.svg" alt=""></div>
+          <a class="muestra" href="img/muestra-rutina.jpg" target="_blank" rel="noopener"><img src="img/muestra-rutina.jpg" alt="Una página de la rutina: el día 1, con cada ejercicio dibujado, sus series y su clave" loading="lazy"></a>
+        </div>
+        <div>
+          <span class="rotulo">Cuando estés listo</span>
+          <h2 style="margin-top:14px">De saber qué te frena a saber <span class="resalta">qué hacer</span></h2>
+          <div class="comparar">
+            <div><b>La guía</b>Te muestra los 7 errores y cómo arreglarlos.</div>
+            <div class="si"><b>La rutina</b>Te dice qué hacer cada día durante 12 semanas.</div>
+          </div>
+          <ul class="lista">
+            <li><img src="img/visto.svg" alt="">6, 5 o 3 días por semana (la de 3 es de cuerpo completo)</li>
+            <li><img src="img/visto.svg" alt="">Cada ejercicio dibujado con Tor, con series, repeticiones, descanso y su clave</li>
+            <li><img src="img/visto.svg" alt="">12 semanas en 3 fases, con la doble progresión ya aplicada</li>
+            <li><img src="img/visto.svg" alt="">Tu registro para anotar, sesión por sesión</li>
+          </ul>
+          <div class="compra">
+            <span class="precio"><span data-precio="rutinas">US$9,99</span><small>pago único</small></span>
+            <a class="boton negro" data-producto="rutinas" data-sin-link="index.html#p-rutinas" href="index.html#p-rutinas">Quiero la rutina</a>
+          </div>
+          <p class="confianza">PDF ilustrado de 17 páginas · Garantía de 7 días · Necesitas un gimnasio (máquinas, poleas, mancuernas y barra)</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="fondo-gris" style="text-align:center">
+    <div class="envoltura">
+      <h2>Mientras tanto, mira a Tor en acción</h2>
+      <p style="margin-top:10px">Cada semana, un ejercicio explicado con su error y su forma correcta.</p>
+      <div class="redes-mini">
+        <a data-red="instagram" href="#"><img src="img/red-instagram.svg" alt="">Instagram</a>
+        <a data-red="tiktok" href="#"><img src="img/red-tiktok.svg" alt="">TikTok</a>
+        <a data-red="youtube" href="#"><img src="img/red-youtube.svg" alt="">YouTube</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="pie-pagina">
+  <div class="envoltura legal">
+    <a href="index.html">La tienda</a>
+    <a data-legal="terminos" href="terminos.html">Términos</a>
+    <a data-legal="privacidad" href="privacidad.html">Privacidad</a>
+    <a data-legal="reembolsos" href="reembolsos.html">Reembolsos</a>
+    <span>© <span data-anio>2026</span> Entrena con Tor · Torvick</span>
+  </div>
+</footer>
+
+<script src="enlaces.js"></script>
+<script src="tienda.js"></script>
+<script>
+  (function () {
+    var $ = function (s) { return document.querySelector(s); };
+    var pendiente = /[?&]estado=pendiente\b/.test(location.search);
+    if (pendiente) {
+      document.body.classList.add('pendiente');
+      Array.prototype.forEach.call(document.querySelectorAll('.solo-pendiente, .aviso-pendiente-rotulo'), function (el) { el.hidden = false; });
+    }
+    TIENDA.evento(pendiente ? 'GraciasGuiaPendiente' : 'GraciasGuia', { content_name: 'errores' });
+
+    var form = $('#formulario'), msj = $('#mensaje');
+    form.addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      var email = form.email.value.trim();
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { msj.className = 'mensaje pendiente-msj'; msj.textContent = 'Escribe un correo válido.'; return; }
+      if (!form.acepta.checked) { msj.className = 'mensaje pendiente-msj'; msj.textContent = 'Marca la casilla para darnos permiso de escribirte.'; return; }
+      if (!ENLACES.formulario) {
+        msj.className = 'mensaje pendiente-msj';
+        msj.innerHTML = 'Estamos conectando los correos. Mientras tanto, escríbenos <b>SEMANA 1</b> por mensaje directo a <a href="' + ENLACES.redes.instagram + '" target="_blank" rel="noopener">@entrenacontor</a> y te acompañamos por ahí.';
+        return;
+      }
+      fetch(ENLACES.formulario, { method: 'POST', body: new FormData(form), mode: 'no-cors' })
+        .then(function () { msj.className = 'mensaje ok'; msj.textContent = '¡Listo! El primer correo te llega en unos minutos (revisa promociones).'; form.reset(); TIENDA.evento('Lead', { content_name: 'seguimiento-7errores' }); })
+        .catch(function () { msj.className = 'mensaje pendiente-msj'; msj.textContent = 'No se pudo enviar. Intenta de nuevo en un momento.'; });
+    });
+  })();
+</script>
+</body>
+</html>

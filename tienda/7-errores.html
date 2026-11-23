@@ -1,0 +1,518 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Los 7 errores que frenan tu progreso en el gimnasio · Entrena con Tor</title>
+<meta name="description" content="Guía ilustrada con Tor: los 7 errores que te frenan en el gimnasio, cómo darte cuenta si los cometes y cómo arreglarlos. Con checklist de 4 semanas y plan para tu primera semana. US$1,99, pago único.">
+<meta property="og:title" content="Los 7 errores que frenan tu progreso en el gimnasio">
+<meta property="og:description" content="Si entrenas y no cambias, casi siempre es uno de estos 7 errores. Tor te enseña a arreglarlos. US$1,99.">
+<meta property="og:image" content="img/errores/portada.jpg">
+<meta name="theme-color" content="#FFD400">
+<link rel="icon" href="img/tor-perfil.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Barlow+Semi+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<!--
+  LANDING DE LOS 7 ERRORES (US$1,99): la página a la que llevan los anuncios.
+  Un solo producto y un solo botón: comprar la guía. Los links de pago, los precios
+  y la medición salen de enlaces.js (la misma configuración de toda la tienda).
+  Las muestras de img/errores/ son las hojas reales del PDF de venta: si cambia la
+  guía, se vuelven a sacar con  node herramientas/ebook.js ebooks/7-errores.html --hojas <carpeta>
+  (ver CLAUDE.md, "Landing de la tienda").
+  Para los anuncios, usar el link con sus utm: 7-errores.html?utm_source=meta&utm_campaign=errores-1
+  (el origen llega solo a Hotmart en sck y en los utm).
+-->
+<style>
+  :root {
+    --ink: #14110F; --yel: #FFD400; --red: #E03A2F; --grn: #16A06A; --gry: #C9C3B8; --blanco: #ffffff;
+    --papel: #F4F1EC; --rosa: #FBE3E1; --menta: #DDF3EA;
+    --borde: 3px solid var(--ink); --sombra: 6px 6px 0 var(--ink); --radio: 18px;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--blanco); color: var(--ink); font-family: 'Barlow Semi Condensed', system-ui, sans-serif; font-weight: 500; font-size: 19px; line-height: 1.45; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+  img { display: block; max-width: 100%; }
+  a { color: inherit; }
+  button { font: inherit; color: inherit; }
+  .envoltura { width: 100%; max-width: 1100px; margin: 0 auto; padding: 0 16px; }
+  section { padding: 60px 0; position: relative; }
+  h1, h2, h3, .impacto { font-family: 'Archivo Black', sans-serif; font-weight: 400; letter-spacing: -0.01em; line-height: 1.04; margin: 0; }
+  h1 { font-size: clamp(36px, 7.6vw, 64px); }
+  h2 { font-size: clamp(30px, 6vw, 48px); }
+  h3 { font-size: 22px; }
+  p { margin: 0; }
+  [id] { scroll-margin-top: 84px; }
+
+  .rotulo { display: inline-block; background: var(--ink); color: var(--blanco); text-transform: uppercase; font-weight: 700; font-size: clamp(16px, 2.4vw, 20px); letter-spacing: 0.07em; line-height: 1.2; padding: 8px 36px 8px 16px; clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 50%, calc(100% - 20px) 100%, 0 100%); }
+  .rotulo.rojo { background: var(--red); }
+  .rotulo.verde { background: var(--grn); }
+  .resalta { position: relative; z-index: 0; white-space: nowrap; }
+  .resalta::before { content: ''; position: absolute; z-index: -1; left: -0.06em; right: -0.06em; bottom: 0.04em; height: 0.46em; background: var(--yel); transform: skew(-8deg) rotate(-1deg); transform-origin: left center; }
+  .visto .resalta::before, .hero .resalta::before { animation: subraya 0.9s 0.25s cubic-bezier(.2, .9, .3, 1) both; }
+  @keyframes subraya { from { transform: skew(-8deg) rotate(-1deg) scaleX(0); } to { transform: skew(-8deg) rotate(-1deg) scaleX(1); } }
+
+  .boton { display: inline-flex; align-items: center; justify-content: center; gap: 10px; background: var(--yel); color: var(--ink); text-decoration: none; text-transform: uppercase; font-family: 'Archivo Black', sans-serif; font-size: 18px; letter-spacing: 0.02em; padding: 16px 24px; border: var(--borde); border-radius: 14px; box-shadow: 4px 4px 0 var(--ink); cursor: pointer; transition: transform 0.12s ease, box-shadow 0.12s ease; text-align: center; }
+  .boton:hover { transform: translate(-1px, -1px); box-shadow: 6px 6px 0 var(--ink); }
+  .boton:active { transform: translate(3px, 3px); box-shadow: 1px 1px 0 var(--ink); }
+  .boton:focus-visible, .muestra:focus-visible { outline: 4px solid var(--grn); outline-offset: 3px; }
+  .boton.negro { background: var(--ink); color: var(--yel); box-shadow: 4px 4px 0 var(--yel), 4px 4px 0 3px var(--ink); }
+  .boton.ancho { width: 100%; }
+  .boton.chico { padding: 9px 14px; font-size: 14px; border-radius: 10px; box-shadow: 3px 3px 0 var(--ink); }
+  .confianza { font-size: 16px; font-weight: 600; color: #4a443e; margin-top: 12px; }
+  .confianza b { color: var(--ink); }
+  .caja { background: var(--blanco); border: var(--borde); border-radius: var(--radio); box-shadow: var(--sombra); padding: 22px; }
+  .lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+  .lista li { display: grid; grid-template-columns: 28px 1fr; gap: 10px; align-items: start; }
+  .lista li img { width: 24px; margin-top: 3px; }
+  .fondo-gris { background: var(--papel); border-top: var(--borde); border-bottom: var(--borde); }
+  .titulo-seccion { text-align: center; max-width: 760px; margin: 0 auto 34px; }
+  .titulo-seccion p { margin-top: 14px; font-size: 20px; }
+
+  /* cabecera */
+  .cabecera { position: sticky; top: 0; z-index: 40; background: var(--blanco); border-bottom: var(--borde); }
+  .cabecera .envoltura { display: flex; align-items: center; justify-content: space-between; height: 62px; gap: 10px; }
+  .marca { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+  .marca img { width: 38px; height: 38px; border-radius: 50%; border: var(--borde); }
+  .marca span { font-family: 'Archivo Black', sans-serif; font-size: 17px; white-space: nowrap; }
+  .cabecera .boton { white-space: nowrap; }
+  @media (max-width: 479px) { .solo-ancho { display: none; } }
+  @media (max-width: 400px) { .marca span { font-size: 14px; } }
+
+  /* portada */
+  .hero { padding: 28px 0 54px; overflow: hidden; }
+  .hero .envoltura { display: grid; gap: 26px; align-items: center; }
+  .hero h1 { margin: 16px 0 14px; }
+  .hero .bajada { font-size: 21px; max-width: 32em; }
+  .oferta { display: flex; align-items: center; gap: 14px 18px; flex-wrap: wrap; margin: 22px 0 16px; }
+  .precio { font-family: 'Archivo Black', sans-serif; font-size: 46px; line-height: 1; }
+  .precio small { font-family: 'Barlow Semi Condensed', sans-serif; font-weight: 700; font-size: 16px; margin-left: 6px; }
+  .lanzamiento { display: inline-block; background: var(--red); color: var(--blanco); font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; font-size: 14px; padding: 4px 10px; border-radius: 8px; transform: rotate(-3deg); }
+  .vitrina { position: relative; width: min(100%, 460px); margin: 0 auto; aspect-ratio: 1 / 1.02; }
+  .vitrina .disco { position: absolute; left: 6%; right: 6%; top: 6%; bottom: 4%; background: var(--yel); border: var(--borde); border-radius: 50%; }
+  .vitrina .tapa, .vitrina .atras { position: absolute; border: var(--borde); border-radius: 8px; box-shadow: 6px 6px 0 var(--ink); overflow: hidden; background: var(--blanco); }
+  .vitrina .atras { width: 46%; right: 6%; top: 15%; transform: rotate(7deg); animation: flota 5s ease-in-out infinite -2s; }
+  .vitrina .tapa { width: 52%; left: 12%; top: 10%; transform: rotate(-5deg); animation: flota 4.4s ease-in-out infinite; }
+  .vitrina .tor { position: absolute; width: 30%; left: -2%; bottom: 0; animation: respira 3.2s ease-in-out infinite; }
+  .vitrina .marca-v { position: absolute; width: 18%; right: 2%; bottom: 10%; background: var(--blanco); border: var(--borde); border-radius: 50%; padding: 3.2%; box-shadow: 4px 4px 0 var(--ink); animation: flota 2.8s ease-in-out infinite -1s; }
+  @keyframes flota { 0%, 100% { translate: 0 0; } 50% { translate: 0 -10px; } }
+  @keyframes respira { 0%, 100% { scale: 1; } 50% { scale: 1.02; } }
+
+  .tira { background: var(--ink); color: var(--blanco); overflow: hidden; border-top: var(--borde); border-bottom: var(--borde); }
+  .tira-pista { display: flex; gap: 30px; width: max-content; padding: 12px 0; animation: tira 24s linear infinite; font-family: 'Archivo Black', sans-serif; font-size: 15px; letter-spacing: 0.06em; text-transform: uppercase; }
+  .tira-pista span::after { content: '•'; color: var(--yel); margin-left: 30px; }
+  @keyframes tira { to { transform: translateX(-50%); } }
+
+  /* te suena */
+  .senales { display: grid; gap: 14px; }
+  .senal { display: grid; grid-template-columns: 40px 1fr; gap: 12px; align-items: center; background: var(--blanco); border: var(--borde); border-radius: 14px; box-shadow: 4px 4px 0 var(--ink); padding: 12px 16px; font-size: 19px; font-weight: 600; }
+  .senal img { width: 34px; }
+  .remate { margin: 28px auto 0; max-width: 680px; display: grid; grid-template-columns: 90px 1fr; gap: 14px; align-items: center; }
+  .remate img { width: 90px; }
+  .globo { background: var(--blanco); border: var(--borde); border-radius: 18px; box-shadow: 4px 4px 0 var(--ink); padding: 14px 18px; font-size: 20px; font-weight: 600; position: relative; }
+  .globo b { background: var(--yel); padding: 0 3px; }
+
+  /* los 7 errores */
+  .errores { display: grid; gap: 16px; }
+  .error { display: grid; grid-template-columns: 54px 1fr; gap: 14px; align-items: start; background: var(--blanco); border: var(--borde); border-radius: 16px; box-shadow: 4px 4px 0 var(--ink); padding: 16px; }
+  .error .n { width: 54px; height: 54px; border-radius: 50%; background: var(--red); color: var(--blanco); border: var(--borde); font-family: 'Archivo Black', sans-serif; font-size: 24px; display: flex; align-items: center; justify-content: center; }
+  .error h3 { font-size: 21px; margin-bottom: 6px; }
+  .error p { font-size: 18px; }
+  .error p b { color: var(--grn); }
+  .cada { text-align: center; margin-top: 26px; font-size: 19px; font-weight: 600; }
+  .cada span { display: inline-block; border: 2px solid var(--ink); border-radius: 999px; padding: 3px 12px; margin: 4px 3px; background: var(--blanco); }
+
+  /* muestras */
+  .galeria { display: flex; gap: 18px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 10px 16px 26px; margin: 0 -16px; scrollbar-width: thin; }
+  .muestra { flex: 0 0 min(72vw, 290px); scroll-snap-align: center; border: 0; padding: 0; background: none; cursor: zoom-in; text-align: left; }
+  .muestra .hojita { border: var(--borde); border-radius: 6px; overflow: hidden; box-shadow: 5px 5px 0 var(--ink); background: var(--blanco); transition: transform 0.25s cubic-bezier(.34, 1.56, .64, 1); }
+  .muestra:hover .hojita { transform: translateY(-4px) rotate(-1deg); }
+  .muestra span { display: block; margin-top: 12px; font-weight: 700; font-size: 17px; line-height: 1.25; }
+  .muestra span b { display: block; font-family: 'Archivo Black', sans-serif; font-weight: 400; font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; color: #6a6259; }
+  .pista { text-align: center; font-size: 15px; font-weight: 600; color: #4a443e; }
+  dialog.zoom { border: var(--borde); border-radius: 12px; padding: 0; max-width: min(94vw, 760px); max-height: 92vh; background: var(--blanco); box-shadow: 8px 8px 0 var(--ink); }
+  dialog.zoom::backdrop { background: rgba(20, 17, 15, 0.72); }
+  dialog.zoom img { width: 100%; height: auto; }
+  dialog.zoom .cerrar { position: sticky; top: 8px; float: right; margin: 8px; z-index: 2; width: 44px; height: 44px; border-radius: 50%; border: var(--borde); background: var(--yel); font-family: 'Archivo Black', sans-serif; font-size: 22px; cursor: pointer; line-height: 1; }
+
+  /* herramientas */
+  .herramientas { display: grid; gap: 22px; }
+  .semana { display: grid; gap: 8px; margin-top: 14px; }
+  .dia { display: grid; grid-template-columns: 96px 1fr; gap: 10px; align-items: center; font-size: 17px; }
+  .dia b { font-family: 'Archivo Black', sans-serif; font-weight: 400; font-size: 13px; text-transform: uppercase; text-align: center; background: var(--yel); border: 2px solid var(--ink); border-radius: 8px; padding: 3px 0; }
+  .casillas { display: grid; grid-template-columns: 1fr repeat(4, 34px); gap: 6px 8px; align-items: center; margin-top: 14px; font-size: 16px; font-weight: 600; }
+  .casillas i { width: 28px; height: 28px; border: 2.5px solid var(--ink); border-radius: 6px; background: var(--blanco); justify-self: center; }
+  .casillas i.si { background: var(--grn); position: relative; }
+  .casillas i.si::after { content: ''; position: absolute; left: 8px; top: 3px; width: 7px; height: 13px; border: solid var(--blanco); border-width: 0 3px 3px 0; transform: rotate(45deg); }
+  .casillas .sem { font-size: 12px; text-transform: uppercase; text-align: center; font-weight: 700; color: #6a6259; }
+
+  /* ciencia */
+  .datos { display: grid; gap: 18px; }
+  .dato { background: var(--blanco); border: var(--borde); border-radius: 16px; box-shadow: 4px 4px 0 var(--ink); padding: 18px; }
+  .dato .cifra { font-family: 'Archivo Black', sans-serif; font-size: 40px; line-height: 1; }
+  .dato .cifra em { font-style: normal; background: var(--yel); padding: 0 4px; }
+  .dato p { margin-top: 8px; font-size: 18px; }
+  .dato small { display: block; margin-top: 10px; font-size: 14px; font-weight: 700; color: #6a6259; }
+
+  /* compra */
+  .compra { display: grid; gap: 24px; align-items: center; background: var(--blanco); border: var(--borde); border-radius: 24px; box-shadow: 8px 8px 0 var(--ink); padding: 22px; position: relative; }
+  .compra .tapa { width: min(70%, 260px); margin: 8px auto 0; border: var(--borde); border-radius: 8px; overflow: hidden; box-shadow: 6px 6px 0 var(--ink); transform: rotate(-4deg); }
+  .compra h2 { font-size: clamp(26px, 4.6vw, 38px); }
+  .compra .lista li { font-size: 18px; }
+  .compra .pago { display: flex; align-items: center; gap: 12px 16px; flex-wrap: wrap; margin: 18px 0 14px; }
+  .garantia { display: grid; grid-template-columns: 70px 1fr; gap: 14px; align-items: center; background: var(--menta); border: 2px solid var(--ink); border-radius: 14px; padding: 12px 14px; margin-top: 14px; font-size: 17px; }
+  .escudo { width: 70px; height: 70px; border-radius: 50%; background: var(--grn); border: var(--borde); color: var(--blanco); display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Archivo Black', sans-serif; line-height: 1; }
+  .escudo b { font-size: 26px; }
+  .escudo span { font-size: 10px; letter-spacing: 0.06em; }
+
+  /* autor */
+  .autor { display: grid; gap: 22px; align-items: center; }
+  .autor .fotos { position: relative; width: min(100%, 300px); margin: 0 auto; aspect-ratio: 1; }
+  .autor .foto { position: absolute; left: 0; top: 0; width: 72%; aspect-ratio: 1; border-radius: 50%; overflow: hidden; border: 4px solid var(--ink); box-shadow: var(--sombra); }
+  .autor .foto img { width: 100%; height: 100%; object-fit: cover; }
+  .autor .mini-tor { position: absolute; right: 0; bottom: 0; width: 52%; aspect-ratio: 1; border-radius: 50%; background: var(--yel); border: 4px solid var(--ink); display: flex; align-items: flex-end; justify-content: center; overflow: hidden; }
+  .autor .mini-tor img { width: 82%; transform: translateY(8%); }
+  .autor p + p { margin-top: 12px; }
+
+  /* preguntas */
+  .faq { max-width: 820px; margin: 0 auto; display: grid; gap: 12px; }
+  .faq details { border: var(--borde); border-radius: 14px; background: var(--blanco); padding: 0 18px; }
+  .faq details[open] { box-shadow: 4px 4px 0 var(--ink); }
+  .faq summary { cursor: pointer; list-style: none; font-weight: 700; font-size: 20px; padding: 15px 30px 15px 0; position: relative; }
+  .faq summary::-webkit-details-marker { display: none; }
+  .faq summary::after { content: '+'; position: absolute; right: 0; top: 50%; transform: translateY(-50%); font-family: 'Archivo Black', sans-serif; font-size: 26px; }
+  .faq details[open] summary::after { content: '–'; }
+  .faq details p { padding: 0 0 16px; }
+
+  .cierre { background: var(--yel); border-top: var(--borde); text-align: center; }
+  .cierre img { width: 130px; margin: 0 auto 10px; }
+  .cierre h2 { margin-bottom: 12px; }
+  .pie-pagina { background: var(--ink); color: var(--blanco); padding: 34px 0 120px; font-size: 16px; }
+  .pie-pagina a { color: var(--gry); }
+  .legal { display: flex; flex-wrap: wrap; gap: 14px; color: var(--gry); margin-top: 10px; }
+  .descargo { color: var(--gry); font-size: 14px; margin-top: 6px; }
+
+  /* barra de compra fija (celular) */
+  .barra { position: fixed; left: 0; right: 0; bottom: 0; z-index: 50; background: var(--blanco); border-top: var(--borde); padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); display: flex; align-items: center; gap: 12px; transform: translateY(110%); visibility: hidden; transition: transform 0.3s cubic-bezier(.34, 1.3, .64, 1), visibility 0s 0.3s; }
+  .barra.si { transform: none; visibility: visible; transition: transform 0.3s cubic-bezier(.34, 1.3, .64, 1); }
+  .barra .que { flex: 1; min-width: 0; line-height: 1.15; }
+  .barra .que b { display: block; font-family: 'Archivo Black', sans-serif; font-weight: 400; font-size: 20px; }
+  .barra .que span { font-size: 14px; font-weight: 600; color: #4a443e; }
+  .barra .boton { padding: 12px 16px; font-size: 15px; }
+
+  .entra { opacity: 0; transform: translateY(16px) scale(0.97); }
+  .entra.visto { animation: pop 0.6s cubic-bezier(.34, 1.56, .64, 1) both; }
+  @keyframes pop { from { opacity: 0; transform: translateY(16px) scale(0.97); } to { opacity: 1; transform: none; } }
+
+  @media (min-width: 760px) {
+    section { padding: 84px 0; }
+    .hero .envoltura { grid-template-columns: 1.08fr 0.92fr; }
+    .senales { grid-template-columns: 1fr 1fr; }
+    .errores { grid-template-columns: 1fr 1fr; }
+    .errores .error:last-child { grid-column: 1 / -1; max-width: 540px; justify-self: center; width: 100%; }
+    .galeria { margin: 0; padding: 10px 4px 26px; }
+    .herramientas, .autor { grid-template-columns: 1fr 1fr; }
+    .datos { grid-template-columns: repeat(3, 1fr); }
+    .compra { grid-template-columns: 0.8fr 1.2fr; padding: 34px; }
+    .barra { display: none; }
+    .pie-pagina { padding-bottom: 40px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+    .entra { opacity: 1; transform: none; }
+    html { scroll-behavior: auto; }
+  }
+</style>
+</head>
+<body data-pagina="landing-errores">
+
+<header class="cabecera">
+  <div class="envoltura">
+    <a class="marca" href="#inicio"><img src="img/tor-perfil.png" alt=""><span>ENTRENA CON TOR</span></a>
+    <a class="boton chico" data-producto="errores" data-sin-link="#comprar" href="#comprar">Comprar<span class="solo-ancho">&nbsp;·&nbsp;<span data-precio="errores">US$1,99</span></span></a>
+  </div>
+</header>
+
+<main id="inicio">
+
+  <!-- ===================== PORTADA ===================== -->
+  <section class="hero">
+    <div class="envoltura">
+      <div>
+        <span class="rotulo">Guía ilustrada · PDF de 12 páginas</span>
+        <h1>¿Entrenas y no cambias? Casi siempre es uno de estos <span class="resalta">7 errores</span>.</h1>
+        <p class="bajada">Tor te enseña a darte cuenta si cometes cada error y cómo arreglarlo. Trae una checklist para 4 semanas y un plan para tu primera semana, con una tarea por día.</p>
+        <div class="oferta">
+          <span class="lanzamiento">Precio de lanzamiento</span>
+          <span class="precio"><span data-precio="errores">US$1,99</span><small>pago único</small></span>
+        </div>
+        <a class="boton negro" id="cta-hero" data-producto="errores" data-sin-link="#comprar" href="#comprar">Quiero la guía</a>
+        <p class="confianza"><b>PDF al instante en tu correo</b> · Garantía de 7 días · Pago seguro con Hotmart</p>
+      </div>
+      <div class="vitrina" aria-hidden="true">
+        <div class="disco"></div>
+        <div class="atras"><img src="img/errores/hoja-11.jpg" alt=""></div>
+        <div class="tapa"><img src="img/errores/portada.jpg" alt=""></div>
+        <img class="tor" src="img/tor-senala.svg" alt="">
+        <img class="marca-v" src="img/visto.svg" alt="">
+      </div>
+    </div>
+  </section>
+
+  <div class="tira" aria-hidden="true">
+    <div class="tira-pista">
+      <span>7 errores y su arreglo</span><span>Checklist de 4 semanas</span><span>Plan de 7 días</span><span>10 estudios citados</span><span>Explicado fácil</span>
+      <span>7 errores y su arreglo</span><span>Checklist de 4 semanas</span><span>Plan de 7 días</span><span>10 estudios citados</span><span>Explicado fácil</span>
+    </div>
+  </div>
+
+  <!-- ===================== TE SUENA ===================== -->
+  <section class="fondo-gris">
+    <div class="envoltura">
+      <div class="titulo-seccion entra">
+        <span class="rotulo rojo">¿Te suena?</span>
+        <h2 style="margin-top:14px">Entrenas, pero no <span class="resalta">avanzas</span></h2>
+      </div>
+      <div class="senales">
+        <p class="senal entra"><img src="img/tacha.svg" alt="">Llevas meses levantando los mismos pesos.</p>
+        <p class="senal entra"><img src="img/tacha.svg" alt="">Cambias de rutina cada semana y llegas al gimnasio sin saber qué hacer.</p>
+        <p class="senal entra"><img src="img/tacha.svg" alt="">Sientes el ejercicio en el cuello o la zona lumbar, no en el músculo.</p>
+        <p class="senal entra"><img src="img/tacha.svg" alt="">Haces cientos de abdominales y la panza no baja.</p>
+        <p class="senal entra"><img src="img/tacha.svg" alt="">No tienes idea de cuánta proteína comes.</p>
+        <p class="senal entra"><img src="img/tacha.svg" alt="">A las 4 semanas sientes que no pasa nada y te dan ganas de dejarlo.</p>
+      </div>
+      <div class="remate entra">
+        <img src="img/tor-triste.svg" alt="">
+        <p class="globo">Si te pasa alguna, no es falta de ganas. Es uno de los 7 errores, y <b>todos tienen arreglo</b>.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== LO QUE APRENDES ===================== -->
+  <section>
+    <div class="envoltura">
+      <div class="titulo-seccion entra">
+        <span class="rotulo">Lo que vas a aprender</span>
+        <h2 style="margin-top:14px">Los 7 errores y <span class="resalta">cómo arreglarlos</span></h2>
+        <p>Cada uno en una hoja, con dibujos de Tor y sin palabras raras.</p>
+      </div>
+      <div class="errores">
+        <div class="error entra"><span class="n">1</span><div><h3>Entrenar sin un plan</h3><p><b>Aprendes:</b> cuántos días entrenar y por qué repetir los mismos ejercicios por lo menos 8 semanas.</p></div></div>
+        <div class="error entra"><span class="n">2</span><div><h3>No subir las cargas</h3><p><b>Aprendes:</b> la doble progresión, para saber cuándo sumar repeticiones y cuándo subir el peso.</p></div></div>
+        <div class="error entra"><span class="n">3</span><div><h3>Mala técnica y recorridos a medias</h3><p><b>Aprendes:</b> qué revisar cuando te grabas: bajar en 2 segundos, todo el recorrido y sin balanceo.</p></div></div>
+        <div class="error entra"><span class="n">4</span><div><h3>Comer poca proteína</h3><p><b>Aprendes:</b> tu cifra al día (1,6 a 2,2 g por kilo) y un día de ejemplo con sus porciones.</p></div></div>
+        <div class="error entra"><span class="n">5</span><div><h3>Dormir poco</h3><p><b>Aprendes:</b> por qué el músculo crece mientras te recuperas y 5 hábitos para dormir 7 horas o más.</p></div></div>
+        <div class="error entra"><span class="n">6</span><div><h3>Hacer abdominales para quemar la panza</h3><p><b>Aprendes:</b> por qué no se baja grasa de un solo lugar y qué hacer en cambio.</p></div></div>
+        <div class="error entra"><span class="n">7</span><div><h3>No medir tu progreso (y rendirte antes de tiempo)</h3><p><b>Aprendes:</b> qué anotar y medir, y cuánto esperar antes de juzgar un plan.</p></div></div>
+      </div>
+      <p class="cada entra">En cada error: <span>por qué te frena</span><span>cómo darte cuenta</span><span>qué dice la ciencia</span><span>cómo arreglarlo</span></p>
+    </div>
+  </section>
+
+  <!-- ===================== POR DENTRO ===================== -->
+  <section class="fondo-gris" id="por-dentro">
+    <div class="envoltura">
+      <div class="titulo-seccion entra">
+        <span class="rotulo">Así es por dentro</span>
+        <h2 style="margin-top:14px">Míralo antes de <span class="resalta">comprarlo</span></h2>
+        <p>Son hojas reales de la guía. Tócalas para verlas grandes.</p>
+      </div>
+      <div class="galeria" id="galeria">
+        <button class="muestra" type="button" data-grande="img/errores/hoja-02.jpg"><div class="hojita"><img src="img/errores/hoja-02.jpg" alt="Hoja 2: el índice de los 7 errores" loading="lazy"></div><span><b>Hoja 2</b>Los 7 errores: lee uno por día</span></button>
+        <button class="muestra" type="button" data-grande="img/errores/hoja-04.jpg"><div class="hojita"><img src="img/errores/hoja-04.jpg" alt="Hoja 4: el error 2, no subir las cargas, con la doble progresión" loading="lazy"></div><span><b>Hoja 4</b>Error 2: la doble progresión, paso a paso</span></button>
+        <button class="muestra" type="button" data-grande="img/errores/hoja-06.jpg"><div class="hojita"><img src="img/errores/hoja-06.jpg" alt="Hoja 6: el error 4, comer poca proteína, con un día de ejemplo" loading="lazy"></div><span><b>Hoja 6</b>Error 4: tu proteína, con un día de ejemplo</span></button>
+        <button class="muestra" type="button" data-grande="img/errores/hoja-10.jpg"><div class="hojita"><img src="img/errores/hoja-10.jpg" alt="Hoja 10: la checklist de los 7 arreglos para 4 semanas" loading="lazy"></div><span><b>Hoja 10</b>Tu checklist de 4 semanas</span></button>
+        <button class="muestra" type="button" data-grande="img/errores/hoja-11.jpg"><div class="hojita"><img src="img/errores/hoja-11.jpg" alt="Hoja 11: tu primera semana, una tarea por día" loading="lazy"></div><span><b>Hoja 11</b>Tu primera semana, día por día</span></button>
+      </div>
+      <p class="pista">Desliza para ver más hojas</p>
+    </div>
+  </section>
+  <dialog class="zoom" id="zoom" aria-label="Hoja de la guía en grande">
+    <button class="cerrar" type="button" id="zoom-cerrar" aria-label="Cerrar">&times;</button>
+    <img id="zoom-img" src="" alt="">
+  </dialog>
+
+  <!-- ===================== HERRAMIENTAS ===================== -->
+  <section>
+    <div class="envoltura">
+      <div class="titulo-seccion entra">
+        <span class="rotulo verde">Para usar desde hoy</span>
+        <h2 style="margin-top:14px">No es solo para leer: es para <span class="resalta">hacer</span></h2>
+      </div>
+      <div class="herramientas">
+        <div class="caja entra">
+          <h3>Tu primera semana sin errores</h3>
+          <p style="margin-top:6px">Una sola tarea por día, ninguna te lleva más de 15 minutos fuera del entrenamiento.</p>
+          <div class="semana">
+            <p class="dia"><b>Lunes</b>Elige tu plan y escribe qué haces cada día.</p>
+            <p class="dia"><b>Martes</b>Calcula tu proteína y repártela en tus comidas.</p>
+            <p class="dia"><b>Miércoles</b>Entrena y anota el peso y las repeticiones.</p>
+            <p class="dia"><b>Jueves</b>Pon una alarma para acostarte.</p>
+            <p class="dia"><b>Viernes</b>Grábate de perfil y revisa tu técnica.</p>
+            <p class="dia"><b>Sábado</b>Foto y medidas de inicio.</p>
+            <p class="dia"><b>Domingo</b>Descansa y marca tu checklist.</p>
+          </div>
+        </div>
+        <div class="caja entra">
+          <h3>Tu checklist de 4 semanas</h3>
+          <p style="margin-top:6px">Para imprimir o llenar en el celular. Si marcas los 7 arreglos cuatro semanas seguidas, quitaste los frenos más comunes.</p>
+          <div class="casillas" aria-hidden="true">
+            <span></span><span class="sem">S1</span><span class="sem">S2</span><span class="sem">S3</span><span class="sem">S4</span>
+            <span>Subí repeticiones o peso</span><i class="si"></i><i class="si"></i><i></i><i></i>
+            <span>Llegué a mi proteína</span><i class="si"></i><i></i><i></i><i></i>
+            <span>Dormí 7 horas o más</span><i class="si"></i><i class="si"></i><i></i><i></i>
+            <span>Anoté mis pesos</span><i class="si"></i><i class="si"></i><i></i><i></i>
+          </div>
+          <p style="margin-top:14px;font-size:17px">Y dos cuadros para tus números: <b>tu proteína del día</b> y <b>tus medidas de inicio</b>.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== CIENCIA ===================== -->
+  <section class="fondo-gris">
+    <div class="envoltura">
+      <div class="titulo-seccion entra">
+        <span class="rotulo">Con la ciencia detrás</span>
+        <h2 style="margin-top:14px">Nada de opiniones: <span class="resalta">estudios</span></h2>
+        <p>Cada arreglo tiene su estudio, y la lista completa (10 estudios) está al final de la guía. Tres ejemplos:</p>
+      </div>
+      <div class="datos">
+        <div class="dato entra"><p class="cifra"><em>1,6 g</em></p><p>de proteína por kilo al día: a partir de ahí, comer más casi no suma músculo. La guía te dice cómo llegar.</p><small>Morton y cols., 2018 · análisis de 49 estudios</small></div>
+        <div class="dato entra"><p class="cifra"><em>−18 %</em></p><p>de fabricación de proteína muscular al día siguiente de una noche sin dormir.</p><small>Lamon y cols., 2021</small></div>
+        <div class="dato entra"><p class="cifra"><em>6 sem.</em></p><p>de abdominales no bajaron la grasa del abdomen frente a no hacerlos.</p><small>Vispute y cols., 2011</small></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== COMPRA ===================== -->
+  <section id="comprar">
+    <div class="envoltura">
+      <div class="compra entra">
+        <div class="tapa"><img src="img/errores/portada.jpg" alt="Portada de la guía Los 7 errores que frenan tu progreso en el gimnasio"></div>
+        <div>
+          <span class="lanzamiento">Precio de lanzamiento</span>
+          <h2 style="margin-top:12px">Los 7 errores que frenan tu progreso en el gimnasio</h2>
+          <ul class="lista" style="margin-top:16px">
+            <li><img src="img/visto.svg" alt="">PDF ilustrado de 12 páginas, para el celular o para imprimir</li>
+            <li><img src="img/visto.svg" alt="">Los 7 errores: por qué te frenan, cómo darte cuenta y cómo arreglarlos</li>
+            <li><img src="img/visto.svg" alt="">Checklist de 4 semanas y cuadros para tu proteína y tus medidas</li>
+            <li><img src="img/visto.svg" alt="">Plan para tu primera semana: una tarea por día</li>
+            <li><img src="img/visto.svg" alt="">10 estudios citados, con la lista completa</li>
+          </ul>
+          <div class="pago">
+            <span class="precio"><span data-precio="errores">US$1,99</span><small>pago único</small></span>
+            <a class="boton negro" id="cta-compra" data-producto="errores" data-sin-link="#comprar" href="#comprar">Quiero la guía</a>
+          </div>
+          <p class="confianza">Sin suscripción. Pagas con tarjeta o con los medios de pago que Hotmart ofrece en tu país, y el PDF te llega al correo.</p>
+          <div class="garantia">
+            <div class="escudo"><b>7</b><span>DÍAS</span></div>
+            <p><b>Garantía de 7 días.</b> Si no te sirve, pides el reembolso desde Hotmart y te devuelven todo. <a href="reembolsos.html" data-legal="reembolsos">Cómo pedirlo</a>.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== QUIEN ===================== -->
+  <section class="fondo-gris">
+    <div class="envoltura autor">
+      <div class="fotos entra" aria-hidden="true">
+        <div class="foto"><img src="img/torvick.jpg" alt=""></div>
+        <div class="mini-tor"><img src="img/tor-flex.svg" alt=""></div>
+      </div>
+      <div class="entra">
+        <span class="rotulo">Quién está detrás</span>
+        <h2 style="margin-top:14px">Soy Torvick, y él es <span class="resalta">Tor</span></h2>
+        <p style="margin-top:14px">Creé a Tor para explicar el entrenamiento como me hubiera gustado que me lo explicaran: simple, con dibujos y con la ciencia detrás.</p>
+        <p>Esta guía junta los errores que más veo y que más frenan a quien entrena. Es la forma más rápida de conocer cómo explica Tor y de arreglar algo esta misma semana.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== PREGUNTAS ===================== -->
+  <section>
+    <div class="envoltura">
+      <div class="titulo-seccion entra">
+        <span class="rotulo">Preguntas</span>
+        <h2 style="margin-top:14px">Antes de que decidas</h2>
+      </div>
+      <div class="faq">
+        <details class="entra"><summary>¿Cómo la recibo?</summary><p>Apenas pagas, Hotmart te manda el acceso a tu correo (revisa también la carpeta de promociones). Descargas el PDF y lo lees en el celular o lo imprimes.</p></details>
+        <details class="entra"><summary>¿Es una suscripción?</summary><p>No. Es un pago único de <span data-precio="errores">US$1,99</span> y la guía es tuya.</p></details>
+        <details class="entra"><summary>¿Por qué cuesta tan poco?</summary><p>Es el precio de lanzamiento. Quiero que conozcas cómo explica Tor con algo que puedas aplicar desde el primer día.</p></details>
+        <details class="entra"><summary>¿Sirve si estoy empezando?</summary><p>Sí: así evitas estos errores desde el principio. Y si ya entrenas y no avanzas, es justo para ti.</p></details>
+        <details class="entra"><summary>¿Sirve si entreno en casa?</summary><p>Sí. Los 7 errores (el plan, subir las cargas, la técnica, la proteína, el sueño, los abdominales y medir tu progreso) valen entrenes donde entrenes. Algunos ejemplos usan ejercicios de gimnasio.</p></details>
+        <details class="entra"><summary>¿Y si después quiero un plan completo?</summary><p>Para eso está la <a href="index.html#p-rutinas">Rutina para principiantes</a>: 12 semanas, día por día. La guía te muestra qué te frena; la rutina te dice qué hacer cada día.</p></details>
+        <details class="entra"><summary>¿Y si no me gusta?</summary><p>Tienes 7 días de garantía: pides el reembolso desde Hotmart y te devuelven todo.</p></details>
+        <details class="entra"><summary>¿Esto reemplaza a un médico o nutricionista?</summary><p>No. Es una guía educativa. Si tienes una lesión, dolor o una enfermedad, consulta antes con un profesional de la salud.</p></details>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== CIERRE ===================== -->
+  <section class="cierre">
+    <div class="envoltura">
+      <img src="img/tor-flex.svg" alt="">
+      <h2>Arregla un error esta semana</h2>
+      <p style="font-size:20px">La guía completa, la checklist y tu plan de 7 días.</p>
+      <a class="boton negro" style="margin-top:20px" id="cta-cierre" data-producto="errores" data-sin-link="#comprar" href="#comprar">Quiero la guía · <span data-precio="errores">US$1,99</span></a>
+      <p class="confianza">Pago único · PDF al instante · Garantía de 7 días</p>
+    </div>
+  </section>
+</main>
+
+<footer class="pie-pagina">
+  <div class="envoltura">
+    <p class="impacto" style="font-size:20px">ENTRENA CON TOR</p>
+    <p class="descargo">Contenido educativo. No reemplaza la consulta con un profesional de la salud.</p>
+    <div class="legal">
+      <a href="index.html">La tienda</a>
+      <a data-legal="terminos" href="terminos.html">Términos</a>
+      <a data-legal="privacidad" href="privacidad.html">Privacidad</a>
+      <a data-legal="reembolsos" href="reembolsos.html">Reembolsos</a>
+      <span>© <span data-anio>2026</span> Entrena con Tor · Torvick</span>
+    </div>
+  </div>
+</footer>
+
+<div class="barra" id="barra">
+  <p class="que"><b data-precio="errores">US$1,99</b><span>Los 7 errores · PDF al instante</span></p>
+  <a class="boton negro" data-producto="errores" data-sin-link="#comprar" href="#comprar">Comprar</a>
+</div>
+
+<script src="enlaces.js"></script>
+<script src="tienda.js"></script>
+<script>
+  (function () {
+    var $ = function (s) { return document.querySelector(s); };
+    var $$ = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+    TIENDA.evento('ViewContent', { content_name: 'errores', value: TIENDA.valor('errores'), currency: 'USD' });
+
+    // entradas con rebote
+    var vistos = $$('.entra');
+    if ('IntersectionObserver' in window) {
+      var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('visto'); io.unobserve(e.target); } }); }, { threshold: 0.12 });
+      vistos.forEach(function (el) { io.observe(el); });
+      // la barra de compra aparece cuando el boton de arriba ya no se ve (y se va en la seccion de compra)
+      var arriba = true, compra = false, barra = $('#barra');
+      var pon = function () { barra.classList.toggle('si', !arriba && !compra); };
+      new IntersectionObserver(function (es) { arriba = es[0].isIntersecting; pon(); }).observe($('#cta-hero'));
+      new IntersectionObserver(function (es) { compra = es[0].isIntersecting; pon(); }, { threshold: 0.3 }).observe($('#comprar'));
+    } else { vistos.forEach(function (el) { el.classList.add('visto'); }); }
+
+    // las hojas en grande
+    var zoom = $('#zoom'), img = $('#zoom-img');
+    $$('[data-grande]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        img.src = b.getAttribute('data-grande'); img.alt = b.querySelector('img').alt;
+        if (zoom.showModal) zoom.showModal(); else window.open(img.src, '_blank');
+        TIENDA.evento('VerHoja', { hoja: b.getAttribute('data-grande') });
+      });
+    });
+    $('#zoom-cerrar').addEventListener('click', function () { zoom.close(); });
+    zoom.addEventListener('click', function (e) { if (e.target === zoom) zoom.close(); });
+  })();
+</script>
+</body>
+</html>

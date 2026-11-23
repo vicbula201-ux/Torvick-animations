@@ -81,10 +81,12 @@ cerveza.jsx, ex.jsx, gta6.jsx,
 vape.jsx, chatarra.jsx           la fórmula del de la marihuana: tema tabú + Tor en un
                                  estado ridículo + cierre de parodia (para compartir)
 identidad.jsx/.html  foto de perfil y portadas de destacadas (PNG en identidad/)
-tienda/           landing de Entrena con Tor para vender los productos digitales
-                  (HTML estático; links de pago y redes en ENLACES, al final del index.html)
-ebooks/           los e-books en A4 (HTML -> PDF): ebook.css, 7-errores.html (guía gratis),
-                  img/ (láminas de los reels); los pagos van en ebooks/privado/ (fuera de git)
+tienda/           la tienda de Entrena con Tor (HTML estático): index.html (la tienda),
+                  7-errores.html (la página de los anuncios, US$1,99), gracias-7-errores.html
+                  (después de pagar); links de pago, precios, redes y píxeles en enlaces.js
+ebooks/           los e-books en A4 (HTML -> PDF): ebook.css, 7-errores.html (la guía de
+                  US$1,99, con su edición regalo), img/ (láminas de los reels); la rutina va
+                  en ebooks/privado/ (fuera de git)
 face-pull.html    redirige a reels.html#face-pull
 largo.html        videos largos de YouTube (16:9): el video con cortes + capas encima
 largo.jsx         window.LARGOS: cámara, texto detrás de la persona, escenas, textos, tarjetas, CTA, sonidos
@@ -756,6 +758,47 @@ viewBox, así las flechas, guías y mancuernas siguen al cuerpo. Músculos:
 
 ## Landing de la tienda — `tienda/`
 
+**La estrategia de ventas** (pedido del autor, noviembre de 2026), en tres pasos:
+
+1. **Regalo** para los seguidores más fieles: la edición regalo de *Los 7 errores*
+   (`7-errores-regalo.pdf`, con dedicatoria y una hoja 13 con 4 preguntas: qué
+   aprendiste, qué te confundió, qué aplicaste, qué necesitas). Sus respuestas mejoran
+   el producto y los textos; un comentario solo se publica con su permiso.
+2. **Producto de entrada, US$1,99** (precio de lanzamiento): la misma guía, vendida con
+   contenido y anuncios que llevan a `tienda/7-errores.html`. Tiene que valer por sí
+   sola (la checklist y el plan de la primera semana son parte de eso).
+3. **Producto siguiente, US$9,99**: la Rutina para principiantes (12 semanas). La guía
+   muestra qué te frena; la rutina dice qué hacer cada día. Se ofrece al final del PDF
+   (hoja 12), en la página de gracias y en el seguimiento por correo (solo a quien
+   aceptó recibirlo).
+
+Reglas de la oferta: **nada de precios tachados, ahorros, fechas ni cupos** que no
+tengan una referencia real (la guía nunca se vendió a otro precio, así que no se tacha
+nada); "precio de lanzamiento" sí. Ya no hay "guía gratis" en ninguna página pública.
+
+**Configuración común: `tienda/enlaces.js`** (lo único que se llena antes de publicar):
+`sitio`, `checkout.errores` y `checkout.rutinas` (links de pago de Hotmart), `precios`
+(lo que dicen los botones, el PDF y Tor), `redes`, `formulario` (herramienta de correo),
+`referidos` y `medicion` (`metaPixel`, `tiktokPixel`, `cloudflare`; vacíos = no se carga
+nada). **`tienda/tienda.js`** lo aplica en las tres páginas: cada `[data-producto]` lleva
+al pago con el origen de la visita (`sck` = `ref-<código>` del referido, o
+`<utm_source>-<utm_campaign>` del anuncio, o el `data-pagina` del `<body>`; más los `utm_*`
+tal cual) — **Hotmart no acepta `_` en `sck`**; `data-sin-link` es a dónde va el botón
+mientras no haya link; `[data-precio]` toma su texto de `precios`; y `TIENDA.evento()`
+manda `ViewContent`, `InitiateCheckout`, `Lead` y eventos propios a los píxeles. La
+compra (`Purchase`) se mide con la integración de píxel de Hotmart, no desde estas
+páginas. Las muestras de `tienda/img/errores/` son hojas reales del PDF de venta: si
+cambia la guía, se regeneran con `node herramientas/ebook.js ebooks/7-errores.html
+--hojas <carpeta>` (y se achican a 760 px de ancho).
+
+**`7-errores.html`** (anuncios): un solo producto, sin menú; promesa, señales que el
+lector reconoce, los 7 errores con lo que aprende de cada uno, hojas reales en grande,
+la semana 1 y la checklist, tres datos con su estudio, la caja de compra (garantía de 7
+días), quién está detrás, preguntas y una barra de compra fija en el celular.
+**`gracias-7-errores.html`** (la página de agradecimiento externa de Hotmart; con
+`?estado=pendiente` para PSE/Efecty): dónde llega la guía, el permiso para el
+seguimiento por correo (casilla obligatoria) y la rutina como paso siguiente.
+
 `tienda/index.html` es una página estática (sin React ni compilación) para el
 link de la bio. En la portada Tor saluda (cuadros `tor-saludo-a/b/c`), pregunta
 el objetivo y el nivel, recomienda una guía y hace un **tour** de 4 pasos por
@@ -764,8 +807,8 @@ esa tarjeta hasta el botón de compra (`PRODUCTOS` en el script; el botón
 (`tienda/video/`, 540x960 sin audio), antes/después (`comp-sin`/`comp-con`),
 el pack con los libros en un carrusel que se arrastra (cada uno con su valor),
 las guías con portadas dibujadas en CSS, **referidos** (cada quien crea su
-link `?ref=código`; el código viaja al checkout de Hotmart como `sck` y el
-cupón de 25 % se manda a mano), el regalo a cambio del correo, la
+link `?ref=código`; el código viaja al checkout de Hotmart como `sck=ref-código` y el
+cupón de 25 % se manda a mano), los consejos por correo (con casilla de permiso), la
 **calculadora** (calorías, proteína, carbohidratos y grasa según peso y
 objetivo, y un plato con porciones de las comidas que elige), quién está
 detrás, la garantía, preguntas y cierre. La palabra "gym" no se usa (pedido
@@ -774,18 +817,18 @@ Archivo Black + Barlow Semi Condensed, rótulos negros con punta, sombras
 duras). Los dibujos de `tienda/img/` son SVG exportados de `TOR.Tor`,
 `NOVIA.Novia` y las piezas de `N`/`P`: si cambia Tor, hay que volver a
 exportarlos. Los cobros van por Hotmart: cada botón toma su link de
-`ENLACES.checkout`; sin link, lleva a la sección de guías. No poner
+`ENLACES.checkout` (en `enlaces.js`); sin link, lleva a su sección. No poner
 testimonios ni cifras de ventas inventadas.
 
-**Modo piloto** (`<body class="piloto">`, el estado actual): el autor prueba
-primero con un solo producto, así que solo se ve la **Rutina para
-principiantes** (bloque destacado `#p-rutinas`, con una página de muestra
-`img/muestra-rutina.jpg`, el equipo que hace falta y el precio) y la guía
-gratis de los 7 errores. El pack y las demás guías siguen en el HTML con la
+**Modo piloto** (`<body class="piloto">`, el estado actual): solo se ven los dos
+pasos: **1, la guía de los 7 errores** (`#p-errores`, US$1,99, con su portada real y
+una hoja de muestra, y "Ver por dentro" a `7-errores.html`) y **2, la Rutina para
+principiantes** (`#p-rutinas`, US$9,99, con `img/muestra-rutina.jpg`, el equipo que
+hace falta y el precio). El pack y las demás guías siguen en el HTML con la
 clase `catalogo` (ocultas); sacar `piloto` del `<body>` las vuelve a mostrar.
-En el piloto, Tor recomienda la rutina a quien empieza y la guía gratis a quien
-ya entrena; los referidos piden seguir a @entrenacontor y dan un cupón de 25 %
-para la rutina o la próxima guía. Los videos van en MP4 y WebM (el script elige
+En el piloto, Tor recomienda la rutina a quien empieza (o primero la guía) y la guía
+de US$1,99 a quien ya entrena; los referidos piden seguir a @entrenacontor y dan un
+cupón de 25 % para la rutina o la próxima guía. Los videos van en MP4 y WebM (el script elige
 el que el navegador reproduce) con un botón de play si no arrancan solos; las
 kcal de la calculadora salen de sumar los macros. Las páginas legales
 (`privacidad.html`, `terminos.html`, `reembolsos.html`, estilo en `legal.css`)
@@ -802,8 +845,15 @@ Las figuras de los ejercicios son **láminas** sacadas de los reels con
 `node herramientas/laminas.js ebooks/img id:Escena:fracción[:nombre]` (solo el
 cuerpo y su máquina, sin rótulos; usar fracciones 0,3 a 0,85, no el final de la
 escena). Los dibujos de Tor salen de `tienda/img/` y de `ebooks/img/eb-*.svg`.
-**El repositorio es público:** los e-books pagos (`rutina-principiantes.html`)
-viven en `ebooks/privado/`, que no va a git; la guía gratis sí.
+**El repositorio es público:** la rutina (`rutina-principiantes.html`) vive en
+`ebooks/privado/`, que no va a git. La guía de los 7 errores sigue en git (era gratis
+y ya está en el historial); si se quiere sacar, moverla a `privado/` y guardar una
+copia fuera del contenedor. **Sus dos ediciones** salen del mismo HTML:
+`node herramientas/ebook.js ebooks/7-errores.html` (venta, la que se sube a Hotmart) y
+`... --edicion regalo` (`7-errores-regalo.pdf`); lo de una sola edición lleva
+`solo-venta` / `solo-regalo`. El botón de la rutina (hoja 12) toma su link y su precio
+de `tienda/enlaces.js` (`sitio` + `#p-rutinas` con `utm_source=pdf`, o el pago de la
+rutina) y el exportador avisa si quedó apuntando a Instagram por falta de link.
 Cada dato lleva su estudio en la hoja y la lista completa al final.
 Los links `<a href="#id">` quedan clicables en el PDF: la rutina (17 hojas) tiene
 un índice que lleva a cada hoja, "Entrena con Tor" arriba de cada hoja vuelve
