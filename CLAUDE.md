@@ -81,6 +81,8 @@ cerveza.jsx, ex.jsx, gta6.jsx,
 vape.jsx, chatarra.jsx           la fórmula del de la marihuana: tema tabú + Tor en un
                                  estado ridículo + cierre de parodia (para compartir)
 identidad.jsx/.html  foto de perfil y portadas de destacadas (PNG en identidad/)
+tor-hoja.jsx/.html   hoja de modelo de Tor 3D (frente, press inclinado 3/4, perfil con bíceps)
+                     en 1920x1080, por acabado; node herramientas/tor-hoja.js -> identidad/
 tienda/           la tienda de Entrena con Tor (HTML estático): index.html (la tienda),
                   7-errores.html (la página de los anuncios, US$1,99), gracias-7-errores.html
                   (después de pagar); links de pago, precios, redes y píxeles en enlaces.js
@@ -412,6 +414,14 @@ de resolución (2160x3840) y se achica, para que los bordes salgan nítidos
 (`TOR3D_SS = 1` en la página vuelve al tamaño simple). Las mancuernas fantasma están
 apagadas (`SIN_FANTASMAS`) y el temblor va en la cámara 3D: correr la imagen con CSS la
 volvía borrosa (pedido del autor: "más nítido").
+
+**Acabados del Tor 3D (prueba, noviembre de 2026):** `window.TOR3D_ACABADO` antes de
+dibujar elige el sombreado: `'plano'` (el de los reels, por defecto), `'cel'` (dibujo 2D
+pro: sombra marcada y un brillo duro en el músculo que trabaja) o `'arcilla'` (3D de
+estudio: sombreado suave, bordes que se oscurecen y brillo de vinilo en el músculo). El
+músculo encendido toma una sombra dorada más cálida en los dos nuevos. `ropa.short:
+'caqui'` es un color de prueba fuera de la paleta de cinco (propuesta para el autor).
+`tor-hoja.html?acabado=cel&short=caqui` arma la hoja de modelo para comparar.
 
 **Correcciones del autor al avatar 3D** (siguen valiendo para todo lo nuevo):
 

@@ -34,7 +34,10 @@
    'abierta' | 'o' | 'ondulada' | 'dientes'; cejas 'enojo' | 'triste' |
    'alzadas'; color { c: 'verde' | 'rojo' | 'amarillo', v }; mejillas; nariz
    'roja'; parpadeo 0..1.
-   Ropa (ropa): { camiseta, mangas, short } con colores de la paleta.
+   Ropa (ropa): { camiseta, mangas, short } con colores de la paleta (y 'caqui' para el short).
+   Acabado (window.TOR3D_ACABADO, antes de dibujar): 'plano' (el de siempre, dos tonos casi
+   planos), 'cel' (dibujo 2D pro: sombra marcada y un brillo duro en el musculo que trabaja) o
+   'arcilla' (3D de estudio: sombreado suave, bordes que se oscurecen y brillo de vinilo).
    Camara: az (0 de frente, 90 de costado, 180 de espaldas), el, dist, y, dx, dz.
    ============================================================ */
 (function (global) {
@@ -60,7 +63,8 @@
     claro: [0xFFE680, 0xEBCB55],
     verde: [GRN, 0x0F7A50],
     blanco: [BLANCO, 0xF0ECE6],
-    negro: [0x2B2623, INK]
+    negro: [0x2B2623, INK],
+    caqui: [0xBCAD86, 0x9F9069]
   };
   function tono(c) {
     return TONOS[c] || (c === true || c === 1 ? TONOS.amarillo : null);
@@ -70,6 +74,12 @@
   function hex3(h) {
     return new global.THREE.Color(h);
   }
+  function modoAcabado() {
+    var a = global.TOR3D_ACABADO;
+    return a === 'cel' ? 1 : a === 'arcilla' ? 2 : 0;
+  }
+  // el sombreado de cada acabado (n en el espacio de la camara: z hacia la camara); sp = brillo del musculo
+  var SOMBREADO = 'uniform float modo; uniform float spec;' + 'vec3 sombrear(vec3 n, vec3 base, vec3 sombra, float sp){ float l = dot(n, luz);' + ' if (modo < 0.5) return mix(sombra, base, smoothstep(-0.22, -0.1, l));' + ' vec3 sm = sp > 0.0 ? mix(sombra, vec3(0.92, 0.55, 0.0), 0.45) : sombra * 0.9;' + ' float s = pow(max(dot(n, normalize(luz + vec3(0.0, 0.0, 1.0))), 0.0), 28.0);' + ' if (modo < 1.5) { vec3 c = mix(sm, base, smoothstep(0.0, 0.06, l)); return mix(c, vec3(1.0, 0.99, 0.9), step(0.5, s) * sp * 0.9); }' + ' float rim = 1.0 - max(n.z, 0.0); vec3 c = mix(sm, base, smoothstep(-0.5, 0.65, l)); c *= 1.0 - 0.1 * rim * rim;' + ' return c + vec3(1.0, 0.97, 0.85) * s * sp * 0.55; }';
   function toon(base, sombra) {
     var THREE = global.THREE;
     return new THREE.ShaderMaterial({
@@ -88,10 +98,16 @@
         },
         luz: {
           value: new THREE.Vector3(-0.55, 0.75, 0.6).normalize()
+        },
+        modo: {
+          value: modoAcabado()
+        },
+        spec: {
+          value: 0
         }
       },
       vertexShader: 'varying vec3 vN; void main(){ vN = normalize(normalMatrix * normal); gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
-      fragmentShader: 'uniform vec3 base; uniform vec3 sombra; uniform float brillo; uniform vec3 colorBrillo; uniform vec3 luz; varying vec3 vN;' + 'void main(){ float l = dot(normalize(vN), luz); float k = smoothstep(-0.22, -0.1, l);' + 'vec3 c = mix(sombra, base, k); c = mix(c, colorBrillo, brillo); gl_FragColor = vec4(c, 1.0); }'
+      fragmentShader: 'uniform vec3 base; uniform vec3 sombra; uniform float brillo; uniform vec3 colorBrillo; uniform vec3 luz; varying vec3 vN;' + SOMBREADO + 'void main(){ vec3 c = sombrear(normalize(vN), base, sombra, spec); c = mix(c, colorBrillo, brillo); gl_FragColor = vec4(c, 1.0); }'
     });
   }
   // el short con los gluteos: la zona de cada gluteo (peso por vertice 'glu') se pinta sola cuando trabaja
@@ -125,10 +141,16 @@
         },
         luz: {
           value: new THREE.Vector3(-0.55, 0.75, 0.6).normalize()
+        },
+        modo: {
+          value: modoAcabado()
+        },
+        spec: {
+          value: 0
         }
       },
       vertexShader: 'attribute float glu; varying vec3 vN; varying float vG; void main(){ vN = normalize(normalMatrix * normal); vG = glu; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
-      fragmentShader: 'uniform vec3 base; uniform vec3 sombra; uniform float brillo; uniform vec3 colorBrillo; uniform vec3 mus; uniform vec3 musS; uniform float on; uniform float brilloMus; uniform vec3 luz; varying vec3 vN; varying float vG;' + 'void main(){ float l = dot(normalize(vN), luz); float k = smoothstep(-0.22, -0.1, l);' + 'float g = on * smoothstep(0.2, 0.26, vG);' + 'vec3 c = mix(mix(sombra, base, k), mix(musS, mus, k), g); c = mix(c, colorBrillo, brillo + brilloMus * g); gl_FragColor = vec4(c, 1.0); }'
+      fragmentShader: 'uniform vec3 base; uniform vec3 sombra; uniform float brillo; uniform vec3 colorBrillo; uniform vec3 mus; uniform vec3 musS; uniform float on; uniform float brilloMus; uniform vec3 luz; varying vec3 vN; varying float vG;' + SOMBREADO + 'void main(){ vec3 n = normalize(vN); float g = on * smoothstep(0.2, 0.26, vG);' + 'vec3 c = mix(sombrear(n, base, sombra, 0.0), sombrear(n, mus, musS, 1.0), g); c = mix(c, colorBrillo, brillo + brilloMus * g); gl_FragColor = vec4(c, 1.0); }'
     });
   }
   function pintar(mat, c, mezcla) {
@@ -441,10 +463,13 @@
     mats.camiseta = toon(GRY, 0xB7AFA2);
     mats.pierna = quien === 'novia' ? mats.short : mats.piel;
     var musculo = function (nombre, obj) {
-      if (!fig.mus[nombre]) fig.mus[nombre] = {
-        mat: toon(YEL, 0xEBBE00),
-        objs: []
-      };
+      if (!fig.mus[nombre]) {
+        fig.mus[nombre] = {
+          mat: toon(YEL, 0xEBBE00),
+          objs: []
+        };
+        fig.mus[nombre].mat.uniforms.spec.value = 1;
+      }
       if (obj) {
         obj.userData.relleno.material = fig.mus[nombre].mat;
         fig.mus[nombre].objs.push(obj);
@@ -1339,6 +1364,7 @@
         var colorDelt = t ? null : ropa.camiseta && ropa.mangas !== false ? ropa.camiseta : null;
         pintar(g.mat, t ? mu[n] : colorDelt || 'blanco');
         g.mat.uniforms.brillo.value = t && mu[n] !== 'rojo' && mu[n] !== 'gris' ? mu.brillo || 0 : 0;
+        g.mat.uniforms.spec.value = t && mu[n] !== 'gris' ? 1 : 0;
         g.objs.forEach(function (o) {
           o.userData.relleno.material = t || colorDelt ? g.mat : fig.mats.piel;
         });

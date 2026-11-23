@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Tor · hoja de modelo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Barlow+Semi+Condensed:wght@500;600;700;800&display=swap" rel="stylesheet">
+<!-- Hoja de modelo de Tor (ver la cabecera de tor-hoja.jsx). ?acabado=plano|cel|arcilla&short=gris|caqui -->
+<script>
+  window.TOR3D_ACABADO = new URLSearchParams(location.search).get('acabado') || 'plano';
+</script>
+<style>
+  html, body { margin: 0; background: #ffffff; }
+  .hoja { width: 1920px; height: 1080px; box-sizing: border-box; padding: 34px 56px 30px; display: flex; flex-direction: column; font-family: 'Barlow Semi Condensed', sans-serif; color: #14110F; overflow: hidden; }
+  header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 4px solid #14110F; padding-bottom: 12px; }
+  h1 { font-family: 'Archivo Black', sans-serif; font-weight: 400; font-size: 64px; line-height: 0.9; margin: 0; }
+  header p { margin: 6px 0 0; font-weight: 700; font-size: 20px; letter-spacing: 0.08em; text-transform: uppercase; }
+  .acabado { text-align: right; }
+  .acabado span { display: block; font-size: 16px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #6a6259; }
+  .acabado b { display: inline-block; background: #14110F; color: #fff; font-weight: 800; font-size: 24px; padding: 6px 30px 6px 14px; clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 50%, calc(100% - 16px) 100%, 0 100%); }
+  .paneles { flex: 1; display: flex; justify-content: space-between; align-items: flex-end; min-height: 0; }
+  .panel { margin: 0; display: flex; flex-direction: column; align-items: center; }
+  .lienzo { position: relative; overflow: hidden; -webkit-mask-image: linear-gradient(to right, transparent 0, #000 14%, #000 86%, transparent 100%); mask-image: linear-gradient(to right, transparent 0, #000 14%, #000 86%, transparent 100%); }
+  figcaption { margin-top: -6px; text-align: center; }
+  figcaption b { display: block; font-family: 'Archivo Black', sans-serif; font-weight: 400; font-size: 26px; }
+  figcaption span { font-weight: 600; font-size: 18px; color: #5a534b; }
+  footer { display: flex; align-items: center; gap: 18px; border-top: 4px solid #14110F; padding-top: 12px; font-weight: 700; font-size: 17px; }
+  .muestra { display: inline-flex; align-items: center; gap: 8px; }
+  .muestra i { width: 26px; height: 26px; border-radius: 50%; border: 3px solid #14110F; }
+  .nota { margin-left: auto; font-weight: 600; color: #5a534b; font-size: 16px; }
+</style>
+</head>
+<body>
+  <div id="raiz"></div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+  <script src="motor.js"></script>
+  <script src="primitivas.js"></script>
+  <script src="cuerpo.js"></script>
+  <script src="perfil.js"></script>
+  <script src="frente.js"></script>
+  <script src="equipo.js"></script>
+  <script src="tor.js"></script>
+  <script src="novia.js"></script>
+  <script src="nutricion.js"></script>
+  <script src="muebles.js"></script>
+  <script src="marca.js"></script>
+  <script src="reel.js"></script>
+  <script src="plantillas.js"></script>
+  <script src="vivo.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.149.0/three.min.js"></script>
+  <script src="tor3d.js"></script>
+  <script src="escena3d.js"></script>
+  <script src="tor-hoja.js"></script>
+</body>
+</html>
