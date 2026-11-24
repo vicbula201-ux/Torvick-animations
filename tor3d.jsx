@@ -764,7 +764,9 @@
       var g = (J.giro || 0) * RAD, pa = (J['pieAng' + L] || 0) * RAD;
       p['pie' + L].position.copy(J['tobillo' + L]).add(v(0, -0.04, 0));
       p['pie' + L].rotation.set(pa, g, 0, 'YXZ');
-      if (f.pesas) { p['pesa' + L].visible = true; pesaEnMano(p['pesa' + L], J, L, f.pesas.I !== undefined ? f.pesas[L] : f.pesas); } else p['pesa' + L].visible = false;
+      // pesas por mano ({ I, D }): la mano sin pesa (null) queda libre, como en el remo serrucho
+      var ag = f.pesas && (f.pesas.I !== undefined || f.pesas.D !== undefined) ? f.pesas[L] : f.pesas;
+      if (ag) { p['pesa' + L].visible = true; pesaEnMano(p['pesa' + L], J, L, ag); } else p['pesa' + L].visible = false;
     });
     // la cola de caballo cuelga con la gravedad
     if (p.cola) {

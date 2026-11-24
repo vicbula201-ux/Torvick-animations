@@ -74,6 +74,8 @@ peptidos-3d.jsx, creatina-3d.jsx,
 calistenia-gym-3d.jsx            rehechos en 3D con el guion como lo grabó Víctor (su voz,
                                  sincronizada); el de calistenia en 3D no lleva la escena
                                  de flexibilidad (no la grabó)
+remo-serrucho-3d.jsx             el remo serrucho en 3D (mismo guion que el fluido): rodilla y
+                                 mano en el banco, una sola mancuerna (pesas { I: null, D })
 novato-avanzado.jsx,
 calistenia-gym.jsx               pantalla dividida: los dos Tors en paralelo
 gluteos.jsx                      con la novia de Tor (público femenino)
@@ -463,7 +465,8 @@ se pasa a su manera de decirlo (así el reparto de la voz encuentra cada oració
   por IK, asi que la profundidad sale sola (sentado, acostado, de rodillas).
 - **Figuras** (`vista.figuras`): `{ quien: 'tor' | 'novia', pose, musc, cara, ropa,
   pesas: 'neutro' | 'prono' | [x, y, z] (el eje de la mancuerna) | { I, D } (una por
-  mano, como el curl alternado), fantasmas, oculto }`. Musculos: pecho, abdomen,
+  mano, como el curl alternado; `null` deja esa mano libre, como en el remo serrucho),
+  fantasmas, oculto }`. Musculos: pecho, abdomen,
   oblicuos, dorsal, romboides, trapecio (atras y la bajada del cuello), lumbar,
   deltoides, biceps, triceps, gluteos, cuadriceps, isquios, gemelos, con
   `true`/'rojo'/'gris'/'claro' y `brillo`. Caras: los ojos, bocas, cejas, color,
