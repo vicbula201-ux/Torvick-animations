@@ -760,7 +760,9 @@
       suela.position.set(0, -0.036, 0.06);
       p['pie' + L].add(suela);
       raiz.add(p['pie' + L]);
-      p['pesa' + L] = mancuerna(m.gris, m.blanco, true);
+      // cada mano con su mancuerna y su color (pesaColor { I, D }) y su tamano (pesaTam { I, D }: 1.4 pesada, 0.7 liviana)
+      fig.mats['disco' + L] = toon(GRY, 0xB7AFA2);
+      p['pesa' + L] = mancuerna(fig.mats['disco' + L], m.blanco, true);
       p['pesa' + L].visible = false;
       raiz.add(p['pesa' + L]);
     });
@@ -908,6 +910,21 @@
     o = c.boca.dientes = grupo();
     punto(o, 0, my - 0.012, 0.04, 0.026);
     punto(o, 0, my - 0.002, 0.032, 0.008, m.blancoPlano);
+    // boca que habla: se abre con la voz (cara.abre 0..1); cerrada es la sonrisa de siempre
+    o = c.boca.habla = grupo();
+    var hb = punto(o, 0, my - 0.012, 0.036, 0.026),
+      hl = punto(o, 0, my - 0.03, 0.018, 0.007, m.rojo);
+    c.abrir = function (k) {
+      var rx = 0.026 + 0.014 * k,
+        ry = 0.004 + 0.026 * k,
+        y = my - 0.004 - ry * 0.85;
+      hb.scale.set(rx, ry, 0.01);
+      hb.position.set(0, y, enCara(0, y) - 0.004);
+      var yl = y - ry * 0.55;
+      hl.visible = k > 0.35;
+      hl.scale.set(rx * 0.55, ry * 0.32, 0.01);
+      hl.position.set(0, yl, enCara(0, yl) - 0.0035);
+    };
     o = c.cejas.enojo = grupo();
     [-1, 1].forEach(function (s) {
       linea(o, [[s * (ex + 0.026), 0.06], [s * (ex - 0.022), 0.044]], 0.0085);
@@ -1312,6 +1329,8 @@
       if (ag) {
         p['pesa' + L].visible = true;
         pesaEnMano(p['pesa' + L], J, L, ag);
+        p['pesa' + L].scale.setScalar(f.pesaTam && f.pesaTam[L] || 1);
+        pintar(fig.mats['disco' + L], f.pesaColor && f.pesaColor[L] || 'gris');
       } else p['pesa' + L].visible = false;
     });
     // la cola de caballo cuelga con la gravedad
@@ -1396,6 +1415,10 @@
       c.ojos[k].visible = k === ojos;
     });
     var boca = cara.boca || 'sonrisa';
+    if (boca === 'habla') {
+      var ab = clamp01(cara.abre || 0);
+      if (ab < 0.07) boca = cara.cerrada || 'sonrisa';else c.abrir(ab);
+    }
     Object.keys(c.boca).forEach(function (k) {
       c.boca[k].visible = k === boca;
     });
@@ -1555,6 +1578,96 @@
       }
     };
   };
+  // bicicleta estatica: { p, giro, pedal (grados) }. Asiento a 0.92, pedalier en (0, 0.36, 0.2) con bielas de 0.17,
+  // manubrio en (0, 1.2, 0.56). TOR3D.bici(pedal) da donde van la cadera, las manos y los pies para pedalear.
+  OBJ.bici = function () {
+    var THREE = global.THREE,
+      m = MOTOR.mat,
+      g = new THREE.Group();
+    var base = caja(0.12, 0.06, 1.05, m.oscuro);
+    base.position.set(0, 0.03, 0.12);
+    g.add(base);
+    [-0.32, 0.56].forEach(function (z) {
+      var pie = caja(0.6, 0.06, 0.1, m.oscuro);
+      pie.position.set(0, 0.03, z);
+      g.add(pie);
+    });
+    var tubo = cilindro(0.045, 0.95, 14, m.gris);
+    g.add(tubo);
+    entre(tubo, v(0, 0.05, -0.28), v(0, 0.86, -0.32));
+    var tubo2 = cilindro(0.045, 1.25, 14, m.gris);
+    g.add(tubo2);
+    entre(tubo2, v(0, 0.05, 0.3), v(0, 1.12, 0.5));
+    var asiento = cojin(0.2, 0.08, 0.32, m.oscuro);
+    asiento.position.set(0, 0.9, -0.3);
+    g.add(asiento);
+    var volante = cilindro(0.26, 0.07, 32, m.amarillo);
+    volante.rotation.z = Math.PI / 2;
+    volante.position.set(0, 0.36, 0.36);
+    g.add(volante);
+    var tapa = cilindro(0.1, 0.09, 24, m.oscuro);
+    tapa.rotation.z = Math.PI / 2;
+    tapa.position.set(0, 0.36, 0.36);
+    g.add(tapa);
+    var manub = cilindro(0.025, 0.52, 12, m.oscuro);
+    manub.rotation.z = Math.PI / 2;
+    manub.position.set(0, 1.18, 0.54);
+    g.add(manub);
+    var pantalla = caja(0.2, 0.14, 0.04, m.oscuro);
+    pantalla.position.set(0, 1.26, 0.5);
+    pantalla.rotation.x = -0.5;
+    g.add(pantalla);
+    var biela = [0, 1].map(function () {
+      var b = cilindro(0.02, 0.17, 10, m.oscuro);
+      g.add(b);
+      return b;
+    });
+    var pedal = [0, 1].map(function () {
+      var pd = caja(0.1, 0.025, 0.06, m.tinta);
+      g.add(pd);
+      return pd;
+    });
+    return {
+      g: g,
+      poner: function (o) {
+        ubicar(g, o);
+        var a = (o.pedal || 0) * RAD;
+        [0, 1].forEach(function (i) {
+          var aa = a + i * Math.PI,
+            s = i ? 1 : -1,
+            c = v(s * 0.1, 0.36, 0.2),
+            q = c.clone().add(v(0, -0.17 * Math.cos(aa), 0.17 * Math.sin(aa)));
+          entre(biela[i], c, q);
+          pedal[i].position.copy(q).add(v(s * 0.04, 0, 0));
+        });
+      }
+    };
+  };
+  // la pose de pedalear (en el marco de la bici sin girar): pedal en grados
+  function bici(pedal, x, z) {
+    var a = (pedal || 0) * RAD,
+      X = x || 0,
+      Z = z || 0,
+      p = {
+        cadera: [X, 0.98, Z - 0.3],
+        tronco: [28, 0, 0],
+        cabeza: [-18, 0, 0],
+        manoI: [X - 0.22, 1.2, Z + 0.5],
+        manoD: [X + 0.22, 1.2, Z + 0.5],
+        codoI: [0.4, -0.6, -0.3],
+        codoD: [0.4, -0.6, -0.3],
+        rodillaI: [0.08, 0.4, 1],
+        rodillaD: [0.08, 0.4, 1],
+        _libre: true
+      };
+    [0, 1].forEach(function (i) {
+      var aa = a + i * Math.PI,
+        s = i ? 1 : -1;
+      p[i ? 'pieD' : 'pieI'] = [X + s * 0.14, 0.36 - 0.17 * Math.cos(aa) + 0.07, Z + 0.2 + 0.17 * Math.sin(aa) - 0.02];
+    });
+    p.pies = [10 + 10 * Math.sin(a), 10 + 10 * Math.sin(a + Math.PI)];
+    return p;
+  }
   OBJ.colchoneta = function () {
     var THREE = global.THREE,
       m = MOTOR.mat,
@@ -2320,6 +2433,303 @@
     return ob;
   }
 
+  /* ---------------- escenario: el gimnasio de Tor (pedido del autor: "que no sea solo un fondo blanco") ----------------
+     vt.escenario = 'gym' (o { tipo: 'gym' }): una sala redonda de 12 paneles alrededor de Tor (radio 5,2), con
+     piso de goma en baldosas, un charco de luz debajo de Tor, paredes oscuras con la franja amarilla, racks de
+     mancuernas de colores, ventanas con luz calida, espejos, arboles de discos y el cartel de neon ENTRENA CON TOR.
+     Solo se ven los paneles que quedan detras de Tor (los que estan del lado de la camara se esconden), asi la
+     camara gira libre a su alrededor sin chocar con nada. Sin escenario, el lienzo sigue blanco como siempre. */
+  var ESC_R = 5.2,
+    ESC_N = 12,
+    ESC_ALTO = 3.6;
+  var ESC_TONOS = {
+    fondo: 0x1B1714,
+    pared: [0x554C42, 0x483F37],
+    zocalo: [0x2B2623, 0x221E1B],
+    piso: '#34302B',
+    baldosa: '#28241F',
+    luz: 'rgba(255,236,190,',
+    marco: [0x2B2623, INK],
+    vidrio: 0xFFE07A,
+    espejo: [0xD9D3C8, 0xC9C3B8]
+  };
+  var ESC_DECO = ['rack', 'ventana', 'discos', 'neon2', 'rack', 'ventana', 'neon', 'rack', 'espejo', 'rack', 'ventana', 'discos'];
+  function texturaPiso() {
+    var THREE = global.THREE,
+      cv = document.createElement('canvas');
+    cv.width = cv.height = 512;
+    var cx = cv.getContext('2d');
+    cx.fillStyle = ESC_TONOS.piso;
+    cx.fillRect(0, 0, 512, 512);
+    cx.strokeStyle = ESC_TONOS.baldosa;
+    cx.lineWidth = 6;
+    for (var i = 0; i <= 4; i++) {
+      cx.beginPath();
+      cx.moveTo(i * 128, 0);
+      cx.lineTo(i * 128, 512);
+      cx.stroke();
+      cx.beginPath();
+      cx.moveTo(0, i * 128);
+      cx.lineTo(512, i * 128);
+      cx.stroke();
+    }
+    var t = new THREE.CanvasTexture(cv);
+    t.wrapS = t.wrapT = THREE.RepeatWrapping;
+    t.repeat.set(ESC_R * 2 / 2, ESC_R * 2 / 2);
+    t.anisotropy = 8;
+    return t;
+  }
+  function texturaLuz() {
+    var THREE = global.THREE,
+      cv = document.createElement('canvas');
+    cv.width = cv.height = 256;
+    var cx = cv.getContext('2d'),
+      gr = cx.createRadialGradient(128, 128, 4, 128, 128, 128);
+    gr.addColorStop(0, ESC_TONOS.luz + '0.42)');
+    gr.addColorStop(0.5, ESC_TONOS.luz + '0.2)');
+    gr.addColorStop(1, ESC_TONOS.luz + '0)');
+    cx.fillStyle = gr;
+    cx.fillRect(0, 0, 256, 256);
+    return new THREE.CanvasTexture(cv);
+  }
+  // el cartel de neon: se redibuja hasta que la fuente este cargada
+  function cartelNeon(lineas, ancho, alto) {
+    var THREE = global.THREE,
+      cv = document.createElement('canvas');
+    cv.width = 1024;
+    cv.height = Math.round(1024 * alto / ancho);
+    var tex = new THREE.CanvasTexture(cv);
+    function pintar() {
+      var cx = cv.getContext('2d'),
+        W = cv.width,
+        H = cv.height;
+      cx.clearRect(0, 0, W, H);
+      cx.fillStyle = '#14110F';
+      cx.fillRect(0, 0, W, H);
+      cx.strokeStyle = '#FFD400';
+      cx.lineWidth = 10;
+      cx.shadowColor = '#FFD400';
+      cx.shadowBlur = 30;
+      cx.strokeRect(26, 26, W - 52, H - 52);
+      var fs = Math.round(H / (lineas.length + 0.9));
+      cx.font = fs + 'px "Archivo Black", sans-serif';
+      cx.textAlign = 'center';
+      cx.textBaseline = 'middle';
+      lineas.forEach(function (l, i) {
+        var y = H / 2 + (i - (lineas.length - 1) / 2) * fs * 1.02;
+        cx.shadowBlur = 40;
+        cx.fillStyle = '#FFD400';
+        cx.fillText(l, W / 2, y);
+        cx.shadowBlur = 0;
+        cx.fillStyle = '#FFF3A6';
+        cx.fillText(l, W / 2, y);
+      });
+      tex.needsUpdate = true;
+    }
+    pintar();
+    var listo = function () {
+      return !global.document.fonts || global.document.fonts.check('40px "Archivo Black"');
+    };
+    return {
+      tex: tex,
+      refrescar: function () {
+        if (!tex.userData.ok && listo()) {
+          pintar();
+          tex.userData.ok = true;
+        }
+      }
+    };
+  }
+  function decoRack(g, m, w) {
+    var THREE = global.THREE,
+      cols = [m.amarillo, m.rojo, m.verde, m.gris, m.blanco];
+    [0.42, 0.86].forEach(function (y, fila) {
+      var est = caja(w * 0.78, 0.05, 0.42, m.oscuro);
+      est.position.set(0, y, 0.3);
+      g.add(est);
+      cols.forEach(function (c, i) {
+        var d = mancuerna(c, m.gris, true);
+        d.rotation.z = Math.PI / 2;
+        d.scale.setScalar(0.95 - 0.12 * fila);
+        d.position.set((i - 2) * w * 0.15, y + 0.12, 0.3);
+        g.add(d);
+      });
+    });
+    [-1, 1].forEach(function (s) {
+      var pa = caja(0.06, 1.0, 0.06, m.oscuro);
+      pa.position.set(s * w * 0.4, 0.5, 0.3);
+      g.add(pa);
+    });
+  }
+  function decoVentana(g, m, w) {
+    var THREE = global.THREE,
+      vid = new THREE.MeshBasicMaterial({
+        color: ESC_TONOS.vidrio
+      });
+    var fw = w * 0.62,
+      fh = 1.55,
+      y0 = 1.55;
+    var marco = caja(fw + 0.12, fh + 0.12, 0.06, m.oscuro);
+    marco.position.set(0, y0 + fh / 2, 0.02);
+    g.add(marco);
+    var panel = new THREE.Mesh(new THREE.PlaneGeometry(fw, fh), vid);
+    panel.position.set(0, y0 + fh / 2, 0.07);
+    g.add(panel);
+    var cruz1 = new THREE.Mesh(new THREE.PlaneGeometry(0.06, fh), m.tinta);
+    cruz1.position.set(0, y0 + fh / 2, 0.08);
+    g.add(cruz1);
+    var cruz2 = new THREE.Mesh(new THREE.PlaneGeometry(fw, 0.06), m.tinta);
+    cruz2.position.set(0, y0 + fh / 2, 0.08);
+    g.add(cruz2);
+  }
+  function decoEspejo(g, m, w) {
+    var THREE = global.THREE;
+    var e = caja(w * 0.7, 2.0, 0.04, toon(ESC_TONOS.espejo[0], ESC_TONOS.espejo[1]));
+    e.position.set(0, 1.25, 0.04);
+    g.add(e);
+    [-0.12, 0.1].forEach(function (dx, i) {
+      var r = new THREE.Mesh(new THREE.PlaneGeometry(0.1 + 0.08 * i, 1.4), m.blancoPlano);
+      r.position.set(dx * w, 1.3, 0.075);
+      r.rotation.z = 0.5;
+      g.add(r);
+    });
+  }
+  function decoDiscos(g, m) {
+    var THREE = global.THREE,
+      poste = cilindro(0.04, 1.3, 12, m.oscuro);
+    poste.position.set(0, 0.65, 0.45);
+    g.add(poste);
+    var base = caja(0.6, 0.06, 0.5, m.oscuro);
+    base.position.set(0, 0.03, 0.45);
+    g.add(base);
+    [[0.42, 0.24, m.oscuro], [0.78, 0.2, m.rojo], [1.08, 0.17, m.amarillo]].forEach(function (d, i) {
+      [-1, 1].forEach(function (s) {
+        var c = cilindro(d[1], 0.06, 28, d[2]);
+        c.rotation.z = Math.PI / 2;
+        c.position.set(s * 0.09, d[0], 0.45);
+        g.add(c);
+      });
+    });
+    var c2 = cilindro(0.26, 0.07, 28, m.verde);
+    c2.rotation.x = Math.PI / 2;
+    c2.position.set(0.75, 0.26, 0.4);
+    c2.rotation.z = 0.15;
+    g.add(c2);
+  }
+  function crearEscenario() {
+    var THREE = global.THREE,
+      m = MOTOR.mat,
+      g = new THREE.Group(),
+      paneles = [];
+    var piso = new THREE.Mesh(new THREE.CircleGeometry(ESC_R + 0.3, 64), new THREE.MeshBasicMaterial({
+      map: texturaPiso()
+    }));
+    piso.rotation.x = -Math.PI / 2;
+    piso.position.y = -0.002;
+    g.add(piso);
+    var luz = new THREE.Mesh(new THREE.PlaneGeometry(3.8, 3.8), new THREE.MeshBasicMaterial({
+      map: texturaLuz(),
+      transparent: true,
+      depthWrite: false
+    }));
+    luz.rotation.x = -Math.PI / 2;
+    luz.position.y = 0.0005;
+    g.add(luz);
+    var pared = toon(ESC_TONOS.pared[0], ESC_TONOS.pared[1]),
+      zocalo = toon(ESC_TONOS.zocalo[0], ESC_TONOS.zocalo[1]);
+    var w = 2 * ESC_R * Math.tan(Math.PI / ESC_N) + 0.02,
+      carteles = [];
+    for (var i = 0; i < ESC_N; i++) {
+      var th = i * 2 * Math.PI / ESC_N,
+        p = new THREE.Group();
+      p.position.set(ESC_R * Math.sin(th), 0, ESC_R * Math.cos(th));
+      p.rotation.y = th + Math.PI; // mira al centro
+      var muro = new THREE.Mesh(new THREE.BoxGeometry(w, ESC_ALTO, 0.12), pared);
+      muro.position.y = ESC_ALTO / 2;
+      p.add(muro);
+      var zo = new THREE.Mesh(new THREE.BoxGeometry(w, 0.95, 0.14), zocalo);
+      zo.position.y = 0.475;
+      p.add(zo);
+      var franja = new THREE.Mesh(new THREE.BoxGeometry(w, 0.14, 0.16), m.amarillo);
+      franja.position.y = 1.02;
+      p.add(franja);
+      var filo = new THREE.Mesh(new THREE.BoxGeometry(w, 0.025, 0.17), m.tinta);
+      filo.position.y = 0.94;
+      p.add(filo);
+      var filo2 = filo.clone();
+      filo2.position.y = 1.1;
+      p.add(filo2);
+      var deco = new THREE.Group();
+      deco.position.z = 0.08;
+      p.add(deco);
+      var tipo = ESC_DECO[i];
+      if (tipo === 'rack') decoRack(deco, m, w);else if (tipo === 'ventana') decoVentana(deco, m, w);else if (tipo === 'espejo') decoEspejo(deco, m, w);else if (tipo === 'discos') {
+        decoDiscos(deco, m);
+        deco.position.x = -0.5;
+      } else if (tipo === 'neon' || tipo === 'neon2') {
+        var grande = tipo === 'neon',
+          cw = grande ? w * 0.74 : w * 0.56,
+          ch = grande ? 1.05 : 0.8;
+        var cn = cartelNeon(grande ? ['ENTRENA', 'CON TOR'] : ['TOR', 'GYM'], cw, ch);
+        carteles.push(cn);
+        var cartel = new THREE.Mesh(new THREE.PlaneGeometry(cw, ch), new THREE.MeshBasicMaterial({
+          map: cn.tex
+        }));
+        cartel.position.set(0, grande ? 2.62 : 2.55, 0.06);
+        deco.add(cartel); // por encima de la cabeza de Tor
+        if (grande) {
+          var banco = caja(1.3, 0.1, 0.4, m.gris);
+          banco.position.set(0, 0.45, 0.35);
+          deco.add(banco);
+          [-0.55, 0.55].forEach(function (x) {
+            var pa = caja(0.06, 0.4, 0.3, m.oscuro);
+            pa.position.set(x, 0.2, 0.35);
+            deco.add(pa);
+          });
+        }
+      }
+      g.add(p);
+      paneles.push({
+        g: p,
+        dir: v(Math.sin(th), 0, Math.cos(th))
+      });
+    }
+    MOTOR.escena.add(g);
+    return {
+      g: g,
+      paneles: paneles,
+      carteles: carteles,
+      luz: luz
+    };
+  }
+  function escenario(vt) {
+    var M = MOTOR,
+      e = vt.escenario;
+    if (!e) {
+      if (M.esc) M.esc.g.visible = false;
+      M.R.setClearColor(0xffffff, 1);
+      return;
+    }
+    if (!M.esc) M.esc = crearEscenario();
+    var E = M.esc;
+    E.g.visible = true;
+    M.R.setClearColor(ESC_TONOS.fondo, 1);
+    E.carteles.forEach(function (c) {
+      c.refrescar();
+    });
+    // los paneles del lado de la camara se esconden (la camara puede quedar "afuera" de la sala)
+    var cam = M.camara.position,
+      d = v(cam.x, 0, cam.z);
+    if (d.length() > 1e-3) d.normalize();
+    E.paneles.forEach(function (p) {
+      p.g.visible = p.dir.dot(d) < 0.3;
+    });
+    // el charco de luz sigue a Tor
+    var c = e && e.luz || [0, 0];
+    E.luz.position.x = c[0];
+    E.luz.position.z = c[1];
+  }
+
   /* ---------------- armar la escena de un cuadro ---------------- */
   function figurasDe(vt) {
     if (vt.figuras) return vt.figuras;
@@ -2542,6 +2952,7 @@
     motor();
     var Js = posar(vt);
     ponerCamara(vt.camara || {});
+    escenario(vt);
     return Js;
   }
   function dibujar(canvas, vt) {
@@ -2633,6 +3044,7 @@
     encuadrar: encuadrar,
     puntosVista: puntosVista,
     cajaEnPantalla: cajaEnPantalla,
+    bici: bici,
     v: v,
     lerpV: function (a, b, k) {
       return [lerp(a[0], b[0], k), lerp(a[1], b[1], k), lerp(a[2], b[2], k)];

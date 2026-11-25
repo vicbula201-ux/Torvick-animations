@@ -38,13 +38,13 @@ const FUENTES = [
   'press-militar.jsx', 'peso-muerto.jsx', 'zancada.jsx', 'abdominal-polea.jsx', 'flexion-pecho.jsx',
   'top3.jsx', 'espalda-top3.jsx', 'pecho-top3.jsx', 'triceps-top3.jsx', 'abdominales-top3.jsx',
   'gluteos-top3.jsx', 'isquios-top3.jsx', 'cuadriceps-top3.jsx',
-  'remo-serrucho.jsx', 'tor3d.jsx', 'escena3d.jsx', 'remo-mancuernas-3d.jsx',
+  'remo-serrucho.jsx', 'tor3d.jsx', 'escena3d.jsx', 'plano.jsx', 'remo-mancuernas-3d.jsx',
   'press-militar-3d.jsx', 'flexiones-3d.jsx', 'zancada-3d.jsx', 'abdominal-polea-3d.jsx',
   'pecho-top3-3d.jsx', 'triceps-top3-3d.jsx', 'abdominales-top3-3d.jsx',
   'gluteos-top3-3d.jsx', 'isquios-top3-3d.jsx', 'cuadriceps-top3-3d.jsx',
   'cerveza-3d.jsx', 'ex-3d.jsx', 'vape-3d.jsx', 'chatarra-3d.jsx', 'novato-avanzado-3d.jsx', 'tabla-nutricional-3d.jsx',
   'plancha-3d.jsx', 'abduccion-3d.jsx', 'curl-mancuernas-3d.jsx', 'peso-muerto-3d.jsx',
-  'peptidos-3d.jsx', 'creatina-3d.jsx', 'calistenia-gym-3d.jsx', 'remo-serrucho-3d.jsx',
+  'peptidos-3d.jsx', 'creatina-3d.jsx', 'calistenia-gym-3d.jsx', 'remo-serrucho-3d.jsx', 'pesado-liviano.jsx', 'fallo.jsx', 'cardio-musculo.jsx', 'maquinas-libre.jsx', 'parciales.jsx',
   'largo.jsx', 'largo-iconos.jsx', 'largo-plantillas.jsx'
 ];
 

@@ -76,6 +76,13 @@ calistenia-gym-3d.jsx            rehechos en 3D con el guion como lo grabó Víc
                                  de flexibilidad (no la grabó)
 remo-serrucho-3d.jsx             el remo serrucho en 3D (mismo guion que el fluido): rodilla y
                                  mano en el banco, una sola mancuerna (pesas { I: null, D })
+plano.jsx                        window.PS: el formato PLANO SECUENCIA (videos de concepto con pregunta,
+                                 un solo plano, Tor que habla, gimnasio detras, subtitulos, tarjetas)
+pesado-liviano.jsx, fallo.jsx,
+cardio-musculo.jsx,
+maquinas-libre.jsx, parciales.jsx  los primeros 5 en plano secuencia (con la voz clonada de Victor)
+voces/<id>.js                    la voz de cada plano secuencia: duraciones, palabras con su tiempo y
+                                 volumen (sin audio; lo genera herramientas/voz.py)
 novato-avanzado.jsx,
 calistenia-gym.jsx               pantalla dividida: los dos Tors en paralelo
 gluteos.jsx                      con la novia de Tor (público femenino)
@@ -103,7 +110,8 @@ compilar.js       regenera los .js desde los .jsx
 prueba-piezas.html  verificación: motor + las 21 piezas + las piezas de B
 herramientas/     grabar.js (exporta MP4 con música y efectos; --voz dobla; --tiempos y
                   --pista graban con una voz ya hecha), sincronizar.py (TU voz grabada:
-                  elige tomas, corta y sincroniza), locutor.py
+                  elige tomas, corta y sincroniza), voz.py (la voz del plano secuencia:
+                  clonada o la tuya, con subtitulos y boca), locutor.py
                   (la voz de Torvick: perfil y líneas), audio.py
                   (sintetiza la música y los efectos), imagenes.js (exporta
                   los PNG de identidad.html) y las de los largos: transcribir.py,
@@ -259,14 +267,16 @@ lienzo. El reel la usa para el guion y para exponer `window.REEL`.
 - No usar librerías de animación: ni GSAP, ni Framer Motion, ni Lottie,
   ni anime.js.
 - No inventar colores fuera de la paleta de cinco.
-- No poner la frase del guion como texto en pantalla.
+- No poner la frase del guion como texto en pantalla (la excepción son los subtítulos palabra
+  por palabra del plano secuencia, pedido del autor a partir de sus referencias).
 - No apilar los elementos verticalmente en las escenas del generador: ese
   formato es 16:9 horizontal (sujeto a la izquierda x 100-620, transición
   al centro x 800-1200, resultado a la derecha x 1300-1800). Los reels de
   ejercicios son la excepción: van en 1080x1920 y ahí la comparación
   mal/bien se apila arriba/abajo.
 - No usar degradados, sombras internas, glassmorphism ni estética futurista
-  (la excepción es el resplandor de `V.Halo` del estilo fluido, pedido del autor).
+  (las excepciones son el resplandor de `V.Halo` del estilo fluido y la luz del gimnasio del
+  plano secuencia: el charco de luz debajo de Tor y la viñeta, pedidos del autor).
 - No usar emoji en el lienzo.
 - No tapar piezas con rectángulos opacos para "recortarlas": eso borra el
   trazo de abajo.
@@ -499,6 +509,50 @@ se pasa a su manera de decirlo (así el reparto de la voz encuentra cada oració
 - En vertical, un cuerpo acostado es ancho: para flexiones, banca o prensa,
   camaras en diagonal (az 40-70) y `dist` 6-8; para que Tor quede mas abajo en
   pantalla se SUBE `y` de la camara.
+
+**Plano secuencia** (`plano.jsx`, `window.PS`; pedido del autor en noviembre de 2026, con
+referencias de reels virales: "sin cambio de escena, casi todo en un solo plano", "más color, más
+vida, que rompa la cuarta pared, más ambiente detrás, no solo fondo blanco"). Videos de concepto
+(no "estás haciendo mal..."): el gancho es una pregunta que abre debate y el cierre pide la opinión
+en los comentarios. `pesado-liviano.jsx` es la referencia. Lo que trae:
+
+- **Un solo plano:** las escenas (una por línea de voz) llevan `continua: true` y `reel.jsx` no hace
+  transición entre ellas; la cámara es UN recorrido para todo el video (`camara: [[[escena,
+  fracción], {az, el, dist, y, dx, dz}], ...]`) con deriva de cámara en mano, y el encuadre
+  automático se calcula sobre todo el video (sin saltos). `libre` deja tramos sin encuadre
+  (el primer plano del gancho); `zona(T, b)` corre a Tor cuando hay una tarjeta arriba.
+- **Los tiempos siguen siendo fracciones:** se escriben `[escena, fracción]` y `b.f(j, x)`, `b.k(T,
+  a, c)` y `b.entre(T, a, c)` los pasan a segundos; así el video se estira con la voz.
+- **El gimnasio de Tor** (`escenario: 'gym'` en TOR3D, por defecto en PS): sala redonda de 12
+  paneles alrededor de Tor (los que quedan del lado de la cámara se esconden), piso de goma, charco
+  de luz debajo de Tor, paredes cálidas oscuras con la franja amarilla, racks de mancuernas de
+  colores, ventanas con luz, espejos, árbol de discos y los neones ENTRENA CON TOR y TOR GYM (por
+  encima de la cabeza). Colores del escenario en `ESC_TONOS` (tonos de la paleta).
+- **Tor vivo:** `PS.depie(T, {x, z, gesto})` (respira, pasa el peso, la mano acompaña lo que dice),
+  `PS.mirarCamara(pose, cam, k)` y `PS.senalar(pose, cam, k, lado)` (cuarta pared), la boca
+  `'habla'` con `abre` (se abre con el volumen de la voz), `PS.Toque` (toca la pantalla: anillos y
+  la grieta del vidrio), `PS.Rebobina` (rebobina el video), el clon que aparece en una nube de tiza,
+  el que cae del cielo. Mancuernas por mano con color y tamaño (`pesaColor`, `pesaTam`), la bici
+  estática (`tipo: 'bici'`, `TOR3D.bici(pedal)`).
+- **Subtítulos** palabra por palabra (abajo, y 1440): cada palabra entra con rebote cuando se dice,
+  la que suena va en amarillo, y `claves` pinta palabras (`{ pesado: 'rojo', liviano: 'verde' }`).
+- **Tarjetas:** `PS.Estudio` (autor, año y qué midió: el dato siempre con su estudio),
+  `PS.Barras`, `PS.Encuesta` (el debate), `PS.Grande`, `PS.Reserva` (repeticiones en reserva),
+  `PS.Tarjeta` + `PS.Etiqueta` para armar otras.
+
+**La voz del plano secuencia** (`herramientas/voz.py`): con la voz clonada de Víctor
+(`python3 herramientas/voz.py <id> --ref ~/.torvick/voz/ref.wav [--grabar]`, Chatterbox
+multilingüe, licencia MIT, con su referencia de ~14 s sacada de sus grabaciones) o con la que
+grabó él (`--pista videos/<id>-voz.wav --tiempos ...`, después de `sincronizar.py`). Genera dos
+candidatas por línea y elige la que whisper entiende completa, corta la cola y acorta las pausas
+largas (la voz no se procesa), arma la pista, cada escena dura su línea + un respiro, y deja
+`voces/<id>.js` (duraciones, palabras con su tiempo para los subtítulos, volumen para la boca; va
+a git, no tiene audio) y `videos/<id>-voz.wav` (fuera de git). `--grabar` llama a `grabar.js
+--tiempos --pista`. La referencia de su voz vive en `~/.torvick/voz/` (fuera de git). Parecido de
+la voz clonada medido con ECAPA: ~0,79 contra 0,89 de su voz real consigo misma (se parece, no es
+idéntica). Al subir un video con la voz clonada, marcarlo como contenido hecho con IA (TikTok e
+Instagram lo piden para el audio realista generado). Necesita Python 3.10-3.13 con torch (CPU),
+chatterbox-tts, transformers, librosa y soundfile.
 
 **Top 3 por músculo** (formato de `biceps-top3.jsx`, ~16 s con la acción y
 el cierre): `TOP3.gancho({ musculo, fig, figura, tomas })` (el músculo

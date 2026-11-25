@@ -165,7 +165,7 @@
     var h = TRANSICION / 2;
     var limites = [], acc = 0;
     escenas.forEach(function (e) { limites.push(acc); acc += e.dur; });
-    var total = acc;
+    var total = acc, durs = escenas.map(function (e) { return e.dur; });
 
     // si cambian las duraciones, los efectos se vuelven a marcar
     var firma = escenas.map(function (e) { return e.nombre + ':' + e.dur; }).join('|');
@@ -179,16 +179,19 @@
     }
 
     var capas = [];
+    // plano secuencia: entre dos escenas 'continua' no hay transicion (la imagen sigue igual)
+    var pegada = function (a, b) { return !!(a && b && a.continua && b.continua); };
     escenas.forEach(function (e, i) {
       var at = limites[i], fin = at + e.dur;
-      var desde = i > 0 ? at - h : at;
-      var hasta = i < n - 1 ? fin + h : fin;
+      var entraPegada = pegada(escenas[i - 1], e), salePegada = pegada(e, escenas[i + 1]);
+      var desde = i > 0 && !entraPegada ? at - h : at;
+      var hasta = i < n - 1 && !salePegada ? fin + h : fin;
       if (T < desde || T >= hasta) return;
       var x = 0, esc = 1, op = 1;
-      if (i > 0 && T < at + h) {
+      if (i > 0 && !entraPegada && T < at + h) {
         var kE = Easing.easeInOutCubic(clamp((T - (at - h)) / (2 * h), 0, 1));
         if (v2) { esc = 1.14 - 0.14 * kE; op = kE; } else x = ANCHO * (1 - kE);
-      } else if (i < n - 1 && T >= fin - h) {
+      } else if (i < n - 1 && !salePegada && T >= fin - h) {
         var kS = Easing.easeInOutCubic(clamp((T - (fin - h)) / (2 * h), 0, 1));
         if (v2) { esc = 1 + 0.2 * kS; op = 1 - kS; } else x = -ANCHO * kS;
       }
@@ -199,7 +202,7 @@
           position: 'absolute', left: 0, top: 0, width: ANCHO, height: ALTO, opacity: op,
           transformOrigin: '50% 45%', transform: tr
         }}>
-          <Esc T={T} at={at} dur={e.dur} />
+          <Esc T={T} at={at} dur={e.dur} i={i} limites={limites} durs={durs} />
         </div>
       );
     });
