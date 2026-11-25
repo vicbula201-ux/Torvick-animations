@@ -194,7 +194,7 @@
       // el tema, arriba, mientras dura la pregunta
       var tit = 1 - b.k(T, [1, 0.85], [2, 0.08]);
       if (tit > 0.01) r.push(<div key="tit" style={{ position: 'absolute', inset: 0, opacity: tit }}><E3.Rot T={T} text="PESADO *VS* LIVIANO" y={262} s={1.15} cuando={b.f(0, 0.04)} /></div>);
-      r.push(<PS.Estudio key="es" T={T} cuando={b.f(2, 0.18)} hasta={b.f(3, 0.15)} autor="Schoenfeld y col., 2017" detalle="Metaanálisis · cargas altas vs. bajas" />);
+      r.push(<PS.Estudio key="es" T={T} cuando={b.f(2, 0.18)} hasta={b.f(2, 0.92)} autor="Schoenfeld y col., 2017" detalle="Metaanálisis · cargas altas vs. bajas" />);
       r.push(<PS.Barras key="b1" T={T} cuando={b.f(4, 0.12)} hasta={b.f(5, 0.02)} titulo="MÚSCULO"
         items={[{ label: 'PESADO', v: 0.82, color: 'rojo', valor: '' }, { label: 'LIVIANO', v: 0.8, color: 'verde', valor: '' }]} />);
       r.push(<PS.Barras key="b2" T={T} cuando={b.f(5, 0.08)} hasta={b.f(6, 0.08)} titulo="FUERZA" sombra="rojo"

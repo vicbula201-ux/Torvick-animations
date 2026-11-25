@@ -511,7 +511,7 @@
         key: "es",
         T: T,
         cuando: b.f(2, 0.18),
-        hasta: b.f(3, 0.15),
+        hasta: b.f(2, 0.92),
         autor: "Schoenfeld y col., 2017",
         detalle: "Metaan\xE1lisis \xB7 cargas altas vs. bajas"
       }));
