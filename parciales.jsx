@@ -138,7 +138,7 @@
       if (b.entre(T, [4, 0.3], [5, 0.05])) {
         // la X a la derecha, arriba, fuera del cuerpo de Tor (la caja del cuerpo se mide en pantalla)
         var xs = ['cabeza', 'cuello', 'cadera', 'rodillaD', 'tobilloD', 'manoD'].map(function (q) { return pr(q)[0]; });
-        r.push(<A.Mal key="x" T={T} cuando={b.f(4, 0.35)} hasta={b.f(5, 0.0)} x={Math.min(920, Math.max.apply(null, xs) + 50)} y={520} s={0.5} />);
+        r.push(<A.Mal key="x" T={T} cuando={b.f(4, 0.35)} hasta={b.f(5, 0.0)} x={Math.min(930, Math.max.apply(null, xs) + 150)} y={430} s={0.5} />);
       }
       r.push(<PS.Tarjeta key="or" T={T} cuando={b.f(5, 0.12)} hasta={b.f(6, 0.02)} y={300} w={780} h={250}>
         <PS.Etiqueta x={30} y={58} text="EN CADA SERIE" />

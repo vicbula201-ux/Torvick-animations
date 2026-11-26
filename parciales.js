@@ -336,8 +336,8 @@
           T: T,
           cuando: b.f(4, 0.35),
           hasta: b.f(5, 0.0),
-          x: Math.min(920, Math.max.apply(null, xs) + 50),
-          y: 520,
+          x: Math.min(930, Math.max.apply(null, xs) + 150),
+          y: 430,
           s: 0.5
         }));
       }
