@@ -327,14 +327,17 @@
         }]
       }));
       if (b.entre(T, [4, 0.3], [5, 0.05])) {
-        var rd = pr('rodillaD'); // la X al lado del tramo rojo, sin tapar a Tor
+        // la X a la derecha, arriba, fuera del cuerpo de Tor (la caja del cuerpo se mide en pantalla)
+        var xs = ['cabeza', 'cuello', 'cadera', 'rodillaD', 'tobilloD', 'manoD'].map(function (q) {
+          return pr(q)[0];
+        });
         r.push(/*#__PURE__*/React.createElement(A.Mal, {
           key: "x",
           T: T,
           cuando: b.f(4, 0.35),
           hasta: b.f(5, 0.0),
-          x: Math.min(900, rd[0] + 140),
-          y: rd[1] - 300,
+          x: Math.min(920, Math.max.apply(null, xs) + 50),
+          y: 520,
           s: 0.5
         }));
       }
