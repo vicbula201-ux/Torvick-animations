@@ -443,11 +443,21 @@
         <V.Camara T={T} at={at} dur={dur} tomas={[[0, { zoom: 1.05, foco: [540, 860] }], [1, { zoom: 1.0, foco: [540, 960] }]]}
           pulsos={toques}>
           <svg width={1080} height={1920} style={{ position: 'absolute', left: 0, top: 0, overflow: 'visible' }}>
-            <V.Sombra c={[470, 1058]} rx={170} />
+            {props.colab ? [<V.Sombra key="s1" c={[304, 1062]} rx={140} />, <V.Sombra key="s2" c={[594, 1062]} rx={140} />] : <V.Sombra c={[470, 1058]} rx={170} />}
           </svg>
-          <A.Pos x={170} y={300} e={M.pop(T, at - 0.6, 0.5)} dy={M.life(T, 3.6, 4) - 16 * aprieta}>
-            <TOR.Tor s={0.5} flex={flex} boca="sonrisa" sinPiso musc={{ bic: 1 }} parpadeo={V.parpadeo(T)} />
-          </A.Pos>
+          {props.colab ? (
+            // colaboracion: Tor y el invitado sacando biceps juntos
+            [<A.Pos key="t" x={40} y={350} e={M.pop(T, at - 0.6, 0.5)} dy={M.life(T, 3.6, 4) - 16 * aprieta}>
+              <TOR.Tor s={0.44} flex={flex} boca="sonrisa" sinPiso musc={{ bic: 1 }} parpadeo={V.parpadeo(T)} />
+            </A.Pos>,
+            <A.Pos key="c" x={330} y={350} e={M.pop(T, at - 0.45, 0.5)} dy={M.life(T, 3.6, 4, 0.5) - 16 * aprieta}>
+              {React.createElement(props.colab.Figura || TOR.Passa, { s: 0.44, flex: flex, boca: 'sonrisa', sinPiso: true, musc: { bic: 1 }, parpadeo: V.parpadeo(T, 0.9) })}
+            </A.Pos>]
+          ) : (
+            <A.Pos x={170} y={300} e={M.pop(T, at - 0.6, 0.5)} dy={M.life(T, 3.6, 4) - 16 * aprieta}>
+              <TOR.Tor s={0.5} flex={flex} boca="sonrisa" sinPiso musc={{ bic: 1 }} parpadeo={V.parpadeo(T)} />
+            </A.Pos>
+          )}
           <A.Pos x={AMIGO[0] - 110} y={AMIGO[1] - 110} e={M.pop(T, f(0.34), 0.42)} dy={M.life(T, 3, 6, 0.6)}
             esc={1 + 0.14 * Math.sin(Math.PI * clamp((T - f(vuelo[1])) / 0.3, 0, 1))}>
             <Amigo llega={llega} />
@@ -488,12 +498,94 @@
       </div>
     );
   }
-  function escenaAccion(op) {
+  function escenaAccion(op, colab) {
     op = op || {};
     return {
       nombre: 'Comenta y comparte', dur: op.dur || 4.5,
       vo: op.vo || '¿Estás de acuerdo? Déjalo en los comentarios, compártelo con un amigo y guarda este video.',
-      C: function (props) { return <EscAccion T={props.T} at={props.at} dur={props.dur} pregunta={op.pregunta} />; }
+      C: function (props) { return <EscAccion T={props.T} at={props.at} dur={props.dur} pregunta={op.pregunta} colab={colab} />; }
+    };
+  }
+
+  /* ---------------- cierre de una colaboracion: Torvick, Entrena con Tor y el invitado ----------------
+     colab = { titulo: ['PASSA', 'TRAINER'], arroba: '@passa_trainer', redes: ['instagram', 'tiktok'], Figura }
+     (la plantilla para todas las colaboraciones: el invitado con su avatar 2D en el circulo, su nombre,
+     sus redes y su arroba; las de Torvick y Tor como siempre) */
+  function EscMarcaColab(props) {
+    var T = props.T, at = props.at, dur = props.dur, co = props.colab;
+    var f = function (v) { return at + dur * v; };
+    var t = clamp((T - at) / dur, 0, 1);
+    var TOR = global.TOR;
+    var entra = function (cuando, desde) {
+      var k = Easing.easeOutBack(clamp((T - cuando) / 0.5, 0, 1));
+      return { opacity: clamp((T - cuando) / 0.2, 0, 1), x: desde * (1 - k) };
+    };
+    var caja = function (e, x, y, dy, hijo, key) {
+      return (
+        <div key={key} style={{
+          position: 'absolute', left: x, top: y, opacity: e.opacity, transformOrigin: '50% 50%',
+          transform: 'translate(' + (e.x || 0).toFixed(1) + 'px,' + dy.toFixed(1) + 'px)'
+        }}>{hijo}</div>
+      );
+    };
+    var sN = 0.48, D = 232, xT = 340;
+    var c1 = entra(at - 0.6, -500), c2 = entra(f(0.12), 500), c3 = entra(f(0.26), -500);
+    var flex = 0.3 + 0.7 * Easing.easeOutBack(clamp((T - f(0.3)) / 0.4, 0, 1));
+    var flex3 = 0.3 + 0.7 * Easing.easeOutBack(clamp((T - f(0.42)) / 0.4, 0, 1));
+    var cta = M.pop(T, f(0.6), 0.45);
+    var zoom = 1 + 0.03 * t;
+    var redes = function (lista, x0, y, desde, fase) {
+      return lista.map(function (r, i) {
+        var e = M.pop(T, desde + i * 0.08, 0.42);
+        return caja(e, x0 + i * 112, y, M.life(T, 2.6, 7, fase + i * 0.33), <Red red={r} s={0.44} />, r + y);
+      });
+    };
+    var arroba = function (e, x, y, txt, fase, key) {
+      return caja(e, x, y, M.life(T, 3.4, 5, fase), (
+        <div style={{ fontFamily: "'Barlow Semi Condensed', sans-serif", fontWeight: 700, fontSize: 46, letterSpacing: 2, color: INK }}>{txt}</div>
+      ), key);
+    };
+    var linea = function (y, op) { return <div style={{ position: 'absolute', left: 90, top: y, width: 900, height: 0, borderTop: '8px dotted ' + GRY, opacity: op }} />; };
+    var avatar = function (Comp, fl, fase) {
+      return (
+        <Circulo d={D} fondo={YEL}>
+          <div style={{ position: 'absolute', left: D / 2 - 600 * 0.25, top: D * 0.55 - 590 * 0.25 }}>
+            {Comp ? React.createElement(Comp, { s: 0.25, flex: fl, boca: 'sonrisa', sinPiso: true, musc: { bic: 1 }, parpadeo: global.V ? global.V.parpadeo(T, fase) : 0 }) : null}
+          </div>
+        </Circulo>
+      );
+    };
+    return (
+      <div style={{ position: 'absolute', inset: 0 }}>
+        <div style={{ position: 'absolute', inset: 0, transformOrigin: '50% 45%', transform: 'scale(' + zoom + ')' }}>
+          {/* Torvick */}
+          {caja(c1, 70, 250, M.life(T, 3.6, 5), (<Circulo d={D}><img src={FOTO} width={D} height={D} style={{ display: 'block' }} alt="" /></Circulo>), 'f1')}
+          {caja(c1, xT, 238, M.life(T, 3.4, 5, 0.2), <Nombre s={sN} p={M.draw(T, f(0.02), dur * 0.2)} />, 'n1')}
+          {redes(REDES, xT + 20, 352, f(0.05), 0)}
+          {arroba(c1, xT + 22, 448, ARROBA, 0.5, 'a1')}
+          {linea(540, c2.opacity)}
+          {/* Entrena con Tor */}
+          {caja(c2, 70, 600, M.life(T, 3.6, 5, 0.4), avatar(TOR && TOR.Tor, flex, 0.7), 'f2')}
+          {caja(c2, xT, 588, M.life(T, 3.4, 5, 0.6), <Nombre s={sN} texto="ENTRENA" p={M.draw(T, f(0.14), dur * 0.16)} />, 'n2')}
+          {caja(c2, xT, 682, M.life(T, 3.4, 5, 0.8), <Nombre s={sN} texto="CON TOR" p={M.draw(T, f(0.2), dur * 0.16)} />, 'n3')}
+          {redes(TOR_REDES, xT + 20, 800, f(0.26), 0.5)}
+          {linea(890, c3.opacity)}
+          {/* el invitado */}
+          {caja(c3, 70, 950, M.life(T, 3.6, 5, 0.9), avatar(co.Figura || (TOR && TOR.Passa), flex3, 1.3), 'f3')}
+          {caja(c3, xT, 938, M.life(T, 3.4, 5, 1.0), <Nombre s={sN} texto={co.titulo[0]} p={M.draw(T, f(0.28), dur * 0.16)} />, 'n4')}
+          {co.titulo[1] ? caja(c3, xT, 1032, M.life(T, 3.4, 5, 1.1), <Nombre s={sN} texto={co.titulo[1]} p={M.draw(T, f(0.34), dur * 0.16)} />, 'n5') : null}
+          {redes(co.redes || ['instagram', 'tiktok'], xT + 20, 1150, f(0.4), 0.9)}
+          {arroba(c3, xT + 270, 1166, co.arroba, 1.2, 'a3')}
+          {caja(cta, (1080 - (16 * 30 + 110) * 1.1) / 2, 1290, M.life(T, 3.4, 5, 0.2), <P.Rotulo text="SÍGUENOS PARA MÁS" s={1.05} />, 'c')}
+        </div>
+      </div>
+    );
+  }
+  function escenaColab(colab) {
+    return {
+      nombre: 'Torvick + Tor + ' + (colab.titulo || []).join(' '), dur: 3.5, marca: true,
+      vo: '¿Quieres ver más videos similares? Sígueme para más contenido.',
+      C: function (props) { return <EscMarcaColab T={props.T} at={props.at} dur={props.dur} colab={colab} />; }
     };
   }
 
@@ -503,6 +595,8 @@
     Esquina2: Esquina2, EscMarca2: EscMarca2,
     // escena de accion (comenta, comparte, guarda): la suma reel.jsx antes del cierre con accion: true
     EscAccion: EscAccion, escenaAccion: escenaAccion, Mano: Mano, Boton: Boton,
+    // colaboraciones: el cierre con las redes de Torvick, Tor y el invitado
+    EscMarcaColab: EscMarcaColab, escenaColab: escenaColab,
     // escena lista para sumar al final de cualquier reel
     escena: {
       nombre: 'Torvick', dur: 3, C: EscMarca, marca: true,

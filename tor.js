@@ -1,4 +1,5 @@
 /* GENERADO por compilar.js desde tor.jsx — no editar a mano. */
+function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
 /* ============================================================
    TOR — window.TOR: el avatar de Torvick (la figura de frente de B.Frente)
    con la pose de doble biceps, que se usa en los videos de nutricion y
@@ -158,8 +159,79 @@
       }
     });
   }
+
+  /* Passa (Passa Trainer, colaborador) en 2D: Tor con su copete, cejas gruesas, musculosa y short negros,
+     guantes y la medalla con la P (como su avatar 3D). Mismos props que Tor. */
+  var PELO = '#2B2623';
+  function Passa(props) {
+    var ropa = {
+      camiseta: PELO,
+      mangas: false,
+      short: C.INK,
+      cuello: C.INK
+    };
+    return /*#__PURE__*/React.createElement(Tor, _extends({}, props, {
+      ropa: ropa,
+      extra: function (g) {
+        var c = g.cabeza,
+          pe = g.pecho;
+        return /*#__PURE__*/React.createElement("g", null, ['izq', 'der'].map(function (l) {
+          var m = g[l].mano;
+          return /*#__PURE__*/React.createElement("circle", {
+            key: l,
+            cx: m[0],
+            cy: m[1],
+            r: 27,
+            fill: PELO,
+            stroke: C.INK,
+            strokeWidth: 10
+          });
+        }), /*#__PURE__*/React.createElement("path", {
+          d: 'M ' + (g.cuello[0] - 42) + ' ' + (g.cuello[1] + 8) + ' L ' + pe[0] + ' ' + (pe[1] - 30) + ' L ' + (g.cuello[0] + 42) + ' ' + (g.cuello[1] + 8),
+          fill: "none",
+          stroke: C.INK,
+          strokeWidth: 7,
+          strokeLinejoin: "round"
+        }), /*#__PURE__*/React.createElement("circle", {
+          cx: pe[0],
+          cy: pe[1],
+          r: 30,
+          fill: C.YEL,
+          stroke: C.INK,
+          strokeWidth: 8
+        }), /*#__PURE__*/React.createElement("text", {
+          x: pe[0],
+          y: pe[1] + 13,
+          textAnchor: "middle",
+          fontFamily: "'Archivo Black', sans-serif",
+          fontSize: 36,
+          fill: C.INK
+        }, "P"), /*#__PURE__*/React.createElement("g", {
+          transform: 'translate(' + c[0] + ' ' + c[1] + ')'
+        }, /*#__PURE__*/React.createElement("path", {
+          d: "M -72 -14 C -78 -70 -42 -102 2 -102 C 40 -102 66 -84 72 -50 C 74 -36 72 -24 70 -14 C 54 -40 26 -50 -6 -48 C -38 -46 -60 -34 -72 -14 Z",
+          fill: PELO,
+          stroke: C.INK,
+          strokeWidth: 12,
+          strokeLinejoin: "round"
+        }), /*#__PURE__*/React.createElement("path", {
+          d: "M -38 -84 C -30 -132 34 -146 66 -104 C 40 -112 10 -108 -8 -88 C -18 -84 -30 -82 -38 -84 Z",
+          fill: PELO,
+          stroke: C.INK,
+          strokeWidth: 11,
+          strokeLinejoin: "round"
+        }), /*#__PURE__*/React.createElement("path", {
+          d: "M -48 -30 L -14 -22 M 14 -22 L 48 -30",
+          stroke: C.INK,
+          strokeWidth: 13,
+          strokeLinecap: "round"
+        })), props.extra ? props.extra(g) : null);
+      }
+    }));
+  }
   global.TOR = {
     pose: pose,
-    Tor: Tor
+    Tor: Tor,
+    Passa: Passa
   };
 })(window);

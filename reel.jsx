@@ -245,10 +245,11 @@
   // escenas propias + el cierre de marca: va SIEMPRE, en todos los videos (pedido del autor)
   // el cierre de marca va al final; def.cierreVo cambia lo que dice la voz ahi (el llamado a seguir)
   function conMarca(def) {
-    var cierre = def.estilo === 2 ? MARCA.escena2 : MARCA.escena;
+    // colaboracion (colabora: { titulo, arroba, redes, Figura }): el invitado tambien en la accion y en el cierre
+    var cierre = def.colabora ? MARCA.escenaColab(def.colabora) : def.estilo === 2 ? MARCA.escena2 : MARCA.escena;
     if (def.cierreVo) cierre = Object.assign({}, cierre, { vo: def.cierreVo });
     // accion: la escena de comenta / comparte / guarda va justo antes del cierre
-    var antes = def.accion ? [MARCA.escenaAccion(def.accion === true ? {} : def.accion)] : [];
+    var antes = def.accion ? [MARCA.escenaAccion(def.accion === true ? {} : def.accion, def.colabora)] : [];
     return def.escenas.concat(antes, [cierre]);
   }
 

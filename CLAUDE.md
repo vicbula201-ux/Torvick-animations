@@ -523,6 +523,9 @@ en los comentarios. `pesado-liviano.jsx` es la referencia. Lo que trae:
   fracción], {az, el, dist, y, dx, dz}], ...]`) con deriva de cámara en mano, y el encuadre
   automático se calcula sobre todo el video (sin saltos). `libre` deja tramos sin encuadre
   (el primer plano del gancho); `zona(T, b)` corre a Tor cuando hay una tarjeta arriba.
+- **Fluido** (pedido del autor): la cámara pasa por las llaves con una curva continua (Hermite, no
+  frena en cada llave) y las poses se funden solas en ~0,25 s cuando cambian de golpe entre
+  escenas (`vistaSuave`: promedia la pose con la de unos instantes antes; `suave: false` lo apaga).
 - **Los tiempos siguen siendo fracciones:** se escriben `[escena, fracción]` y `b.f(j, x)`, `b.k(T,
   a, c)` y `b.entre(T, a, c)` los pasan a segundos; así el video se estira con la voz.
 - **El gimnasio de Tor** (`escenario: 'gym'` en TOR3D, por defecto en PS): sala redonda de 12
@@ -559,8 +562,9 @@ chatterbox-tts, transformers, librosa y soundfile.
 **Colaboraciones con otros creadores** (pedido del autor, noviembre de 2026: llevar gente a Tor
 con creadores del nicho). Cada creador tiene su avatar en el mismo estilo que Tor; el primero es
 **Passa** (`quien: 'passa'` en las figuras de TOR3D): el cuerpo de Tor con el copete y el jopo
-oscuros, barba corta, bigote, cejas gruesas, musculosa y short negros (su ropa por defecto),
-guantes oscuros y la medalla amarilla con la P, como su logo. Su saludo: "¿Qué la Kentucky, mi
+oscuros, cejas gruesas, **sin barba ni bigote** (pedido de Passa), musculosa y short negros (su
+ropa por defecto), guantes oscuros y la medalla amarilla con la P, como su logo; en 2D es
+`TOR.Passa` (el Tor de frente con su pelo, cejas, musculosa, guantes y medalla). Su saludo: "¿Qué la Kentucky, mi
 gente? Aquí les saluda el Passa". `tor-passa.jsx` es la referencia: plano secuencia con dos
 personajes y **dos voces** — cada escena dice quién habla (`habla: 'passa'`), `voz.py` usa la
 referencia de cada uno (`--voces passa=~/.torvick/voz/passa.wav:0.8`, el número es la
@@ -572,6 +576,18 @@ palabra que suena. `PRONUNCIA` en `voz.py` dice cómo se pronuncia lo que se esc
 solo con su permiso**: el video de muestra es un borrador para que el creador vea la idea; se
 publica con su voz clonada solo si él lo aprueba (y marcado como hecho con IA), o se graba con
 las voces reales y se sincroniza.
+
+**La plantilla de las colaboraciones:** `colabora: { titulo: ['PASSA', 'TRAINER'], arroba:
+'@passa_trainer', redes: ['instagram', 'tiktok'], Figura }` en `REELS.registrar` (o en `PS.video`)
+pone al invitado en 2D junto a Tor en la escena de acción (los dos sacando bíceps) y cambia el
+cierre por `MARCA.EscMarcaColab`: tres filas con Torvick (foto, YouTube, Instagram, TikTok y
+@eltorvick), Entrena con Tor (Instagram y TikTok) y el invitado (su avatar 2D, su nombre, sus redes
+y su arroba), y "SÍGUENOS PARA MÁS". `Figura` es el componente 2D del invitado (por defecto
+`TOR.Passa`); para un creador nuevo se hace su avatar 3D (`quien`), su versión 2D y se llena
+`colabora`. Solo los videos de colaboración llevan `colabora`; los demás siguen con su cierre.
+En `tor-passa.jsx` además acompañan lo que se dice: el "¡CÁLLATE!" de la interrupción, un
+marcador TOR : PASSA arriba a la derecha que suma un punto cuando alguien gana un argumento, y
+globos de historieta ("!" de Tor enojado, "¿?" de Passa ofendido).
 
 **Top 3 por músculo** (formato de `biceps-top3.jsx`, ~16 s con la acción y
 el cierre): `TOP3.gancho({ musculo, fig, figura, tomas })` (el músculo

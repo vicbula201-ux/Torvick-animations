@@ -398,22 +398,38 @@
   }
 
   /* ---------------- camara: un solo recorrido para todo el video ---------------- */
+  // la camara pasa por las llaves con una curva continua (Hermite con las pendientes de las vecinas):
+  // no frena en cada llave, solo al principio y al final (pedido del autor: "mas fluida")
   function camaraEn(keys, T, b) {
     var ks = keys.map(function (q) { return [b.de(q[0]), q[1]]; });
-    var base;
+    var base, CAMPOS = ['az', 'el', 'dist', 'y', 'dx', 'dz', 'fov'];
+    var val = function (i, n) {
+      var q = ks[clamp(i, 0, ks.length - 1)][1];
+      if (q[n] != null) return q[n];
+      for (var j = 1; j < ks.length; j++) {
+        var a2 = ks[clamp(i - j, 0, ks.length - 1)][1][n], b2 = ks[clamp(i + j, 0, ks.length - 1)][1][n];
+        if (a2 != null) return a2; if (b2 != null) return b2;
+      }
+      return null;
+    };
+    var tiempo = function (i) { return ks[clamp(i, 0, ks.length - 1)][0]; };
     if (T <= ks[0][0]) base = ks[0][1];
     else if (T >= ks[ks.length - 1][0]) base = ks[ks.length - 1][1];
     else {
       for (var i = 0; i < ks.length - 1; i++) {
-        var a = ks[i], c = ks[i + 1];
-        if (T >= a[0] && T <= c[0]) {
-          var k = Easing.easeInOutSine((T - a[0]) / Math.max(1e-3, c[0] - a[0]));
+        if (T >= ks[i][0] && T <= ks[i + 1][0]) {
+          var t0 = tiempo(i), t1 = tiempo(i + 1), h = Math.max(1e-3, t1 - t0), u = (T - t0) / h;
+          var u2 = u * u, u3 = u2 * u;
+          var h00 = 2 * u3 - 3 * u2 + 1, h10 = u3 - 2 * u2 + u, h01 = -2 * u3 + 3 * u2, h11 = u3 - u2;
           base = {};
-          ['az', 'el', 'dist', 'y', 'dx', 'dz', 'fov'].forEach(function (n) {
-            var va = a[1][n], vb = c[1][n];
-            if (va == null && vb == null) return;
-            if (va == null) va = vb; if (vb == null) vb = va;
-            base[n] = va + (vb - va) * k;
+          CAMPOS.forEach(function (n) {
+            var v0 = val(i, n), v1 = val(i + 1, n);
+            if (v0 == null && v1 == null) return;
+            if (v0 == null) v0 = v1; if (v1 == null) v1 = v0;
+            // pendientes: la de las vecinas (0 en la primera y la ultima llave)
+            var m0 = i === 0 ? 0 : (v1 - val(i - 1, n)) / Math.max(1e-3, t1 - tiempo(i - 1));
+            var m1 = i + 1 === ks.length - 1 ? 0 : (val(i + 2, n) - v0) / Math.max(1e-3, tiempo(i + 2) - t0);
+            base[n] = h00 * v0 + h10 * h * m0 + h01 * v1 + h11 * h * m1;
           });
           break;
         }
@@ -427,6 +443,48 @@
     return r;
   }
 
+  /* ---------------- poses suaves: lo que cambia de golpe entre escenas se funde en ~0,25 s ----------------
+     se promedia la pose de este momento con la de unos instantes antes (pesos que bajan); solo los
+     puntos y angulos de la pose, no la cara ni las mancuernas */
+  var CAMPOS_POSE = ['cadera', 'tronco', 'cabeza', 'manoI', 'manoD', 'pieI', 'pieD', 'codoI', 'codoD', 'rodillaI', 'rodillaD', 'pies'];
+  var ATRAS = [[0.04, 0.85], [0.08, 0.7], [0.12, 0.55], [0.17, 0.38], [0.22, 0.22]];
+  function vistaSuave(def, T, b, cam, ex) {
+    var base = def.vista(T, b, cam, ex) || {};
+    if (def.suave === false || !base.figuras) return base;
+    var acc = base.figuras.map(function (f) { return { w: 1, f: f, suma: {} }; });
+    acc.forEach(function (a) {
+      if (!a.f || !a.f.pose) return;
+      CAMPOS_POSE.forEach(function (n) { var v = a.f.pose[n]; if (Array.isArray(v)) a.suma[n] = v.slice(); });
+      if (a.f.pose.hombros) a.suma.hombros = [a.f.pose.hombros.sube || 0, a.f.pose.hombros.junta || 0];
+    });
+    ATRAS.forEach(function (q) {
+      var Tq = T - q[0]; if (Tq < 0) return;
+      var o = def.vista(Tq, b, cam, ex) || {};
+      (o.figuras || []).forEach(function (f, i) {
+        var a = acc[i]; if (!a || !a.f || !a.f.pose || !f || !f.pose || f.quien !== a.f.quien) return;
+        var usa = false;
+        Object.keys(a.suma).forEach(function (n) {
+          var v = n === 'hombros' ? (f.pose.hombros ? [f.pose.hombros.sube || 0, f.pose.hombros.junta || 0] : [0, 0]) : f.pose[n];
+          if (!Array.isArray(v) || v.length !== a.suma[n].length) return;
+          for (var k = 0; k < v.length; k++) a.suma[n][k] += v[k] * q[1];
+          usa = true;
+        });
+        if (usa) a.w += q[1];
+      });
+    });
+    acc.forEach(function (a) {
+      if (!a.f || !a.f.pose || a.w <= 1) return;
+      var p = Object.assign({}, a.f.pose);
+      Object.keys(a.suma).forEach(function (n) {
+        var v = a.suma[n].map(function (x) { return x / a.w; });
+        if (n === 'hombros') p.hombros = Object.assign({}, a.f.pose.hombros || {}, { sube: v[0], junta: v[1] });
+        else p[n] = v;
+      });
+      a.f.pose = p;
+    });
+    return base;
+  }
+
   /* ---------------- encuadre de todo el video (sin saltos entre escenas) ---------------- */
   function ajusteGlobal(def, b, cache) {
     var key = b.limites.join(',') + '|' + b.durs.join(',');
@@ -434,7 +492,7 @@
     var paso = 0.2, N = Math.ceil(b.total / paso), crudo = [];
     for (var i = 0; i <= N; i++) {
       var T = Math.min(b.total - 1e-3, i * paso), cam = camaraEn(def.camara, T, b);
-      var info = def.vista(T, b, cam) || {}, vt = { figuras: info.figuras, objetos: info.objetos, encuadreExtra: info.encuadreExtra, camara: cam, T: T };
+      var info = vistaSuave(def, T, b, cam) || {}, vt = { figuras: info.figuras, objetos: info.objetos, encuadreExtra: info.encuadreExtra, camara: cam, T: T };
       var P = TOR3D.puntosVista(vt), zona = def.zona ? def.zona(T, b) : ZONA;
       if (!P.length) { crudo.push(null); continue; }
       var c1 = TOR3D.encuadrar(vt, zona, cam, P);
@@ -485,7 +543,7 @@
       (def.golpes || []).forEach(function (g) { var u = (T - b.de(g)) / 0.4; if (u > 0 && u < 1) golpe += (1 - u) * Math.sin(u * 38) * 1.4; });
       var cam = aplicar(cam0, ajusteGlobal(def, b, cache), cache.paso, T);
       cam.az += golpe; cam.el += golpe * 0.5;
-      var info = def.vista(T, b, cam0, { voz: vz, abre: volumen(vz, T), abreDe: function (q) { return volumen(vz, T, q); } }) || {};
+      var info = vistaSuave(def, T, b, cam0, { voz: vz, abre: volumen(vz, T), abreDe: function (q) { return volumen(vz, T, q); } }) || {};
       var vt = { figuras: info.figuras, objetos: info.objetos, escenario: info.escenario || 'gym', camara: cam, T: T };
       var pr = function (q, i) { return TOR3D.proyectar(vt, q, i); };
       var e = M.pop(T, -0.6, 0.5);
@@ -518,7 +576,7 @@
     });
     var accion = def.accion;
     if (accion && vz0 && vz0.durs && vz0.durs.length > def.escenas.length) accion = Object.assign({}, accion, { dur: vz0.durs[def.escenas.length] });
-    global.REELS.registrar({ id: def.id, titulo: def.titulo, estilo: 2, escenas: escenas, accion: accion, cierreVo: def.cierreVo });
+    global.REELS.registrar({ id: def.id, titulo: def.titulo, estilo: 2, escenas: escenas, accion: accion, cierreVo: def.cierreVo, colabora: def.colabora });
   }
 
   global.PS = {

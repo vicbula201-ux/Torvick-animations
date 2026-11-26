@@ -99,6 +99,144 @@
     for (var i = 0; i < ESCENAS.length; i++) if (ESCENAS[i].habla === quien && b.entre(T, [i, 0], [i, 1])) return b.k(T, [i, 0.02], [i, 0.18]) * (1 - b.k(T, [i, 0.85], [i, 1]));
     return 0;
   }
+  // el marcador de la discusion: los puntos que se va llevando cada uno
+  var PUNTOS = [[[4, 0.55], 'tor'], [[6, 0.3], 'passa'], [[9, 0.55], 'passa']];
+  function Marcador(props) {
+    var T = props.T,
+      b = props.b;
+    var e = M.pop(T, b.f(3, 0.02), 0.45),
+      sl = A.sale(T, b.f(11, 0.22));
+    var op = e.opacity * sl.opacity;
+    if (op < 0.01) return null;
+    var cuenta = {
+        tor: 0,
+        passa: 0
+      },
+      golpe = {
+        tor: 0,
+        passa: 0
+      };
+    PUNTOS.forEach(function (q) {
+      var t0 = b.de(q[0]);
+      A.sonido('pop', t0);
+      if (T >= t0) {
+        cuenta[q[1]]++;
+        golpe[q[1]] = Math.max(golpe[q[1]], 1 - clamp((T - t0) / 0.45, 0, 1));
+      }
+    });
+    var dy = M.life(T, 3.2, 4, 0.3);
+    var dig = function (n, x, g, col) {
+      var sc = 1 + 0.45 * Math.sin(Math.PI * g) * (g > 0 ? 1 : 0);
+      return /*#__PURE__*/React.createElement("g", {
+        transform: 'translate(' + x + ' 52) scale(' + sc.toFixed(3) + ')'
+      }, /*#__PURE__*/React.createElement("text", {
+        x: 0,
+        y: 20,
+        textAnchor: "middle",
+        fontFamily: "'Archivo Black', sans-serif",
+        fontSize: 56,
+        fill: g > 0.05 ? col : '#ffffff'
+      }, n));
+    };
+    return /*#__PURE__*/React.createElement("svg", {
+      width: 1080,
+      height: 1920,
+      style: {
+        position: 'absolute',
+        left: 0,
+        top: 0,
+        overflow: 'visible',
+        pointerEvents: 'none'
+      }
+    }, /*#__PURE__*/React.createElement("g", {
+      opacity: op,
+      transform: 'translate(' + (600 + (1 - e.scale) * 60) + ' ' + (128 + dy) + ') scale(' + e.scale.toFixed(3) + ')'
+    }, /*#__PURE__*/React.createElement("rect", {
+      x: 8,
+      y: 8,
+      width: 440,
+      height: 100,
+      rx: 50,
+      fill: C.YEL,
+      stroke: C.INK,
+      strokeWidth: 5
+    }), /*#__PURE__*/React.createElement("rect", {
+      x: 0,
+      y: 0,
+      width: 440,
+      height: 100,
+      rx: 50,
+      fill: C.INK
+    }), /*#__PURE__*/React.createElement("text", {
+      x: 34,
+      y: 64,
+      fontFamily: "'Barlow Semi Condensed', sans-serif",
+      fontWeight: 800,
+      fontSize: 40,
+      fill: C.YEL,
+      letterSpacing: 2
+    }, "TOR"), dig(cuenta.tor, 152, golpe.tor, C.YEL), /*#__PURE__*/React.createElement("text", {
+      x: 204,
+      y: 66,
+      textAnchor: "middle",
+      fontFamily: "'Archivo Black', sans-serif",
+      fontSize: 44,
+      fill: C.GRY
+    }, ":"), dig(cuenta.passa, 256, golpe.passa, C.GRN), /*#__PURE__*/React.createElement("text", {
+      x: 410,
+      y: 64,
+      textAnchor: "end",
+      fontFamily: "'Barlow Semi Condensed', sans-serif",
+      fontWeight: 800,
+      fontSize: 40,
+      fill: C.GRN,
+      letterSpacing: 2
+    }, "PASSA")));
+  }
+  // un signo de historieta encima de la cabeza ("!" de Tor enojado, "¿?" de Passa ofendido)
+  function Signo(props) {
+    var T = props.T,
+      e = M.pop(T, props.cuando, 0.35);
+    if (props.hasta != null) e = A.junta(e, A.sale(T, props.hasta));
+    if (e.opacity < 0.01) return null;
+    var c = props.c,
+      v = M.vibra(T, 30, 3);
+    return /*#__PURE__*/React.createElement("svg", {
+      width: 1080,
+      height: 1920,
+      style: {
+        position: 'absolute',
+        left: 0,
+        top: 0,
+        overflow: 'visible',
+        pointerEvents: 'none'
+      }
+    }, /*#__PURE__*/React.createElement("g", {
+      opacity: e.opacity,
+      transform: 'translate(' + (c[0] + 80 + v).toFixed(1) + ' ' + (c[1] - 160).toFixed(1) + ') scale(' + (1.3 * e.scale).toFixed(3) + ')'
+    }, /*#__PURE__*/React.createElement("circle", {
+      cx: 0,
+      cy: 0,
+      r: 52,
+      fill: "#ffffff",
+      stroke: C.INK,
+      strokeWidth: 8
+    }), /*#__PURE__*/React.createElement("path", {
+      d: "M -18 44 L -34 72 L 2 50 Z",
+      fill: "#ffffff",
+      stroke: C.INK,
+      strokeWidth: 8,
+      strokeLinejoin: "round"
+    }), /*#__PURE__*/React.createElement("text", {
+      x: 0,
+      y: 22,
+      textAnchor: "middle",
+      fontFamily: "'Archivo Black', sans-serif",
+      fontSize: props.texto.length > 1 ? 48 : 62,
+      fill: props.color || C.RED
+    }, props.texto)));
+  }
+
   // un icono 2D (de N) que entra con rebote y se va
   function Icono(props) {
     var T = props.T,
@@ -401,6 +539,40 @@
     },
     encima: function (T, b, pr) {
       var r = [];
+      // ¡CALLATE! (la interrupcion) y los signos de cada uno
+      r.push(/*#__PURE__*/React.createElement(PS.Grande, {
+        key: "ca",
+        T: T,
+        cuando: b.f(1, 0.03),
+        hasta: b.f(1, 0.3),
+        text: "\xA1C\xC1LLATE!",
+        color: "rojo",
+        x: 540 + M.vibra(T, 30, 6),
+        y: 600,
+        px: 150
+      }));
+      if (b.entre(T, [2, 0.0], [3, 0.1])) r.push(/*#__PURE__*/React.createElement(Signo, {
+        key: "s1",
+        T: T,
+        cuando: b.f(2, 0.05),
+        hasta: b.f(2, 0.95),
+        c: pr('cabeza', 0),
+        texto: "!"
+      }));
+      if (b.entre(T, [10, 0.0], [11, 0.1])) r.push(/*#__PURE__*/React.createElement(Signo, {
+        key: "s2",
+        T: T,
+        cuando: b.f(10, 0.05),
+        hasta: b.f(10, 0.95),
+        c: pr('cabeza', 1),
+        texto: "\xBF?",
+        color: C.INK
+      }));
+      r.push(/*#__PURE__*/React.createElement(Marcador, {
+        key: "mc",
+        T: T,
+        b: b
+      }));
       // titulo de la colaboracion
       var tit = b.k(T, [1, 0.15], [1, 0.25]) * (1 - b.k(T, [2, 0.85], [3, 0.05]));
       if (tit > 0.01) r.push(/*#__PURE__*/React.createElement("div", {
@@ -647,6 +819,12 @@
       dur: 4.6,
       pregunta: '¿TOR O PASSA?',
       vo: 'Compártelo con el que todavía compra BCAA, y síguenos a los dos.'
+    },
+    // colaboracion: Passa tambien en la escena de accion (en 2D) y sus redes en el cierre
+    colabora: {
+      titulo: ['PASSA', 'TRAINER'],
+      arroba: '@passa_trainer',
+      redes: ['instagram', 'tiktok']
     },
     cierreVo: 'Sígueme para más contenido.'
   });

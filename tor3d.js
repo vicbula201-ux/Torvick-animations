@@ -439,7 +439,7 @@
       cuello: 0.064
     }
   };
-  TIPOS.passa = TIPOS.tor; // Passa (el Passa Trainer): el cuerpo de Tor, con su pelo, su barba y su ropa
+  TIPOS.passa = TIPOS.tor; // Passa (el Passa Trainer): el cuerpo de Tor, con su pelo, sus cejas y su ropa (sin barba)
   // la clase de figura (cada una con su lista en el motor)
   function clase(q) {
     return q === 'novia' || q === 'passa' ? q : 'tor';
@@ -724,8 +724,8 @@
     }
     var ex2 = D.ojoX;
     if (quien === 'passa') {
-      // Passa: el copete (pelo corto arriba y atras, y el jopo hacia arriba y al costado), la barba corta,
-      // el bigote y las cejas gruesas, como en su logo
+      // Passa: el copete (pelo corto arriba y atras, y el jopo hacia arriba y al costado) y las cejas
+      // gruesas, como en su logo (sin barba ni bigote: lo pidio el)
       var pl = m.pelo;
       var tapa = new THREE.Mesh(new THREE.SphereGeometry(1, 40, 20, 0, Math.PI * 2, 0, Math.PI * 0.33), pl);
       tapa.scale.set(cx + 0.016, cy + 0.024, cz + 0.016);
@@ -743,25 +743,10 @@
       jopo2.position.set(0.045, cy * 0.86, cz * 0.48);
       jopo2.rotation.set(-0.7, 0, -0.35);
       p.cabeza.add(jopo2);
-      // barba: el menton y los costados de la mandibula (debajo de la boca, para que la boca se vea)
-      var barba = new THREE.Mesh(new THREE.SphereGeometry(1, 40, 20, Math.PI * 0.5 - 0.95, 1.9, Math.PI * 0.755, Math.PI * 0.225), pl);
-      barba.scale.set(cx + 0.006, cy + 0.008, cz + 0.006);
-      p.cabeza.add(barba);
+      // (sin barba ni bigote: pedido de Passa) las cejas gruesas, un poco bajadas hacia el centro
       [-1, 1].forEach(function (s) {
-        var pat = new THREE.Mesh(new THREE.SphereGeometry(1, 24, 16, s < 0 ? 0.02 : Math.PI - 0.4, 0.38, Math.PI * 0.58, Math.PI * 0.3), pl); // la barba de los costados
-        pat.scale.set(cx + 0.006, cy + 0.006, cz + 0.006);
-        p.cabeza.add(pat);
-        // cejas gruesas, un poco bajadas hacia el centro (la cara seria del logo)
         p.cabeza.add(trazo([[s * (ex2 + 0.03), 0.06, enCara(s * (ex2 + 0.03), 0.06)], [s * (ex2 - 0.024), 0.05, enCara(s * (ex2 - 0.024), 0.05)]], 0.011));
       });
-      // bigote
-      var bg = [];
-      for (var b = 0; b <= 8; b++) {
-        var xb = -0.034 + 0.068 * b / 8,
-          yb = -0.058 + 0.006 * Math.sin(Math.PI * b / 8);
-        bg.push([xb, yb, enCara(xb, yb)]);
-      }
-      p.cabeza.add(trazo(bg, 0.0095, pl));
     }
     raiz.add(p.cabeza);
 

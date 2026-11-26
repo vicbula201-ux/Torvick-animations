@@ -100,5 +100,37 @@
     );
   }
 
-  global.TOR = { pose: pose, Tor: Tor };
+  /* Passa (Passa Trainer, colaborador) en 2D: Tor con su copete, cejas gruesas, musculosa y short negros,
+     guantes y la medalla con la P (como su avatar 3D). Mismos props que Tor. */
+  var PELO = '#2B2623';
+  function Passa(props) {
+    var ropa = { camiseta: PELO, mangas: false, short: C.INK, cuello: C.INK };
+    return (
+      <Tor {...props} ropa={ropa} extra={function (g) {
+        var c = g.cabeza, pe = g.pecho;
+        return (
+          <g>
+            {/* guantes */}
+            {['izq', 'der'].map(function (l) { var m = g[l].mano; return <circle key={l} cx={m[0]} cy={m[1]} r={27} fill={PELO} stroke={C.INK} strokeWidth={10} />; })}
+            {/* la medalla con su cordon */}
+            <path d={'M ' + (g.cuello[0] - 42) + ' ' + (g.cuello[1] + 8) + ' L ' + pe[0] + ' ' + (pe[1] - 30) + ' L ' + (g.cuello[0] + 42) + ' ' + (g.cuello[1] + 8)}
+              fill="none" stroke={C.INK} strokeWidth={7} strokeLinejoin="round" />
+            <circle cx={pe[0]} cy={pe[1]} r={30} fill={C.YEL} stroke={C.INK} strokeWidth={8} />
+            <text x={pe[0]} y={pe[1] + 13} textAnchor="middle" fontFamily="'Archivo Black', sans-serif" fontSize={36} fill={C.INK}>P</text>
+            {/* el copete y el jopo, y las cejas gruesas */}
+            <g transform={'translate(' + c[0] + ' ' + c[1] + ')'}>
+              <path d="M -72 -14 C -78 -70 -42 -102 2 -102 C 40 -102 66 -84 72 -50 C 74 -36 72 -24 70 -14 C 54 -40 26 -50 -6 -48 C -38 -46 -60 -34 -72 -14 Z"
+                fill={PELO} stroke={C.INK} strokeWidth={12} strokeLinejoin="round" />
+              <path d="M -38 -84 C -30 -132 34 -146 66 -104 C 40 -112 10 -108 -8 -88 C -18 -84 -30 -82 -38 -84 Z"
+                fill={PELO} stroke={C.INK} strokeWidth={11} strokeLinejoin="round" />
+              <path d="M -48 -30 L -14 -22 M 14 -22 L 48 -30" stroke={C.INK} strokeWidth={13} strokeLinecap="round" />
+            </g>
+            {props.extra ? props.extra(g) : null}
+          </g>
+        );
+      }} />
+    );
+  }
+
+  global.TOR = { pose: pose, Tor: Tor, Passa: Passa };
 })(window);
