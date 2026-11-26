@@ -439,6 +439,11 @@
       cuello: 0.064
     }
   };
+  TIPOS.passa = TIPOS.tor; // Passa (el Passa Trainer): el cuerpo de Tor, con su pelo, su barba y su ropa
+  // la clase de figura (cada una con su lista en el motor)
+  function clase(q) {
+    return q === 'novia' || q === 'passa' ? q : 'tor';
+  }
 
   /* ---------------- una figura (Tor o la novia) ---------------- */
   function crearFigura(quien) {
@@ -646,6 +651,33 @@
         p.torso.add(bu);
       });
     }
+    if (quien === 'passa') {
+      // la medalla del profe (la del logo), colgada sobre la musculosa
+      var fz = function (x, y) {
+        return surf(x, y, 1) * (EZ + 0.02) / EZ + 0.016;
+      };
+      var zm = fz(0, 0.44) + 0.012;
+      var med = cilindro(0.05, 0.014, 32, m.amarillo);
+      med.rotation.x = Math.PI / 2;
+      med.position.set(0, 0.44, zm);
+      p.torso.add(med);
+      // la P del Passa, dibujada con trazo sobre la medalla
+      var pP = [[-0.012, 0.418], [-0.012, 0.462], [0.004, 0.462]];
+      for (var a2 = 0; a2 <= 8; a2++) {
+        var an2 = Math.PI / 2 - Math.PI * a2 / 8;
+        pP.push([0.004 + 0.012 * Math.cos(an2), 0.451 + 0.011 * Math.sin(an2)]);
+      }
+      pP.push([-0.012, 0.44]);
+      p.torso.add(trazo(pP.map(function (q) {
+        return [q[0], q[1], zm + 0.009];
+      }), 0.0055));
+      [-1, 1].forEach(function (s) {
+        var cord = cilindro(0.009, 1, 8, m.tinta, 0);
+        cord.userData.largo = 1;
+        p.torso.add(cord);
+        entre(cord, v(s * 0.1, 0.7, fz(s * 0.1, 0.66) + 0.01), v(s * 0.014, 0.492, zm));
+      });
+    }
     p.cuello = capsula(D.cuello, 0.12, mats.piel);
     raiz.add(p.cuello);
 
@@ -690,6 +722,47 @@
       p.colita = new THREE.Mesh(new THREE.TorusGeometry(0.03, 0.012, 8, 20), m.amarillo);
       raiz.add(p.colita);
     }
+    var ex2 = D.ojoX;
+    if (quien === 'passa') {
+      // Passa: el copete (pelo corto arriba y atras, y el jopo hacia arriba y al costado), la barba corta,
+      // el bigote y las cejas gruesas, como en su logo
+      var pl = m.pelo;
+      var tapa = new THREE.Mesh(new THREE.SphereGeometry(1, 40, 20, 0, Math.PI * 2, 0, Math.PI * 0.33), pl);
+      tapa.scale.set(cx + 0.016, cy + 0.024, cz + 0.016);
+      tapa.position.y = 0.008;
+      p.cabeza.add(tapa);
+      // (en SphereGeometry phi 0 = -x, pi/2 = adelante, pi = +x, 3pi/2 = atras)
+      var atras = new THREE.Mesh(new THREE.SphereGeometry(1, 40, 20, Math.PI * 0.98, Math.PI * 1.04, Math.PI * 0.2, Math.PI * 0.38), pl);
+      atras.scale.set(cx + 0.012, cy + 0.012, cz + 0.012);
+      p.cabeza.add(atras);
+      var jopo = elipsoide(0.088, 0.05, 0.072, pl, 0.012);
+      jopo.position.set(-0.012, cy * 0.9, cz * 0.32);
+      jopo.rotation.set(-0.55, 0, 0.18);
+      p.cabeza.add(jopo);
+      var jopo2 = elipsoide(0.06, 0.036, 0.05, pl, 0.01);
+      jopo2.position.set(0.045, cy * 0.86, cz * 0.48);
+      jopo2.rotation.set(-0.7, 0, -0.35);
+      p.cabeza.add(jopo2);
+      // barba: el menton y los costados de la mandibula (debajo de la boca, para que la boca se vea)
+      var barba = new THREE.Mesh(new THREE.SphereGeometry(1, 40, 20, Math.PI * 0.5 - 0.95, 1.9, Math.PI * 0.755, Math.PI * 0.225), pl);
+      barba.scale.set(cx + 0.006, cy + 0.008, cz + 0.006);
+      p.cabeza.add(barba);
+      [-1, 1].forEach(function (s) {
+        var pat = new THREE.Mesh(new THREE.SphereGeometry(1, 24, 16, s < 0 ? 0.02 : Math.PI - 0.4, 0.38, Math.PI * 0.58, Math.PI * 0.3), pl); // la barba de los costados
+        pat.scale.set(cx + 0.006, cy + 0.006, cz + 0.006);
+        p.cabeza.add(pat);
+        // cejas gruesas, un poco bajadas hacia el centro (la cara seria del logo)
+        p.cabeza.add(trazo([[s * (ex2 + 0.03), 0.06, enCara(s * (ex2 + 0.03), 0.06)], [s * (ex2 - 0.024), 0.05, enCara(s * (ex2 - 0.024), 0.05)]], 0.011));
+      });
+      // bigote
+      var bg = [];
+      for (var b = 0; b <= 8; b++) {
+        var xb = -0.034 + 0.068 * b / 8,
+          yb = -0.058 + 0.006 * Math.sin(Math.PI * b / 8);
+        bg.push([xb, yb, enCara(xb, yb)]);
+      }
+      p.cabeza.add(trazo(bg, 0.0095, pl));
+    }
     raiz.add(p.cabeza);
 
     // brazos y piernas
@@ -722,8 +795,8 @@
       raiz.add(p['manga' + L]);
       p['ante' + L] = miembro(D.ante, 0.39, mats.piel);
       raiz.add(p['ante' + L]);
-      p['mano' + L] = elipsoide(D.mano, D.mano * 1.03, D.mano, mats.piel);
-      raiz.add(p['mano' + L]);
+      p['mano' + L] = elipsoide(D.mano, D.mano * 1.03, D.mano, quien === 'passa' ? m.oscuro : mats.piel);
+      raiz.add(p['mano' + L]); // Passa: guantes
       p['muslo' + L] = miembro(D.muslo, 0.43, mats.pierna);
       raiz.add(p['muslo' + L]);
       var rM = radioMiembro(D.muslo, 0.62);
@@ -1030,7 +1103,8 @@
       },
       figuras: {
         tor: [],
-        novia: []
+        novia: [],
+        passa: []
       },
       objetos: {}
     };
@@ -1368,7 +1442,11 @@
       romboides: mu.romboides ? 'claro' : 'gris',
       brillo: mu.brillo
     };
-    var ropa = f.ropa || {};
+    var ropa = f.ropa || (fig.quien === 'passa' ? {
+      camiseta: 'negro',
+      mangas: false,
+      short: 'negro'
+    } : {});
     Object.keys(fig.mus).forEach(function (n) {
       var g = fig.mus[n],
         t = tono(mu[n]);
@@ -2750,19 +2828,20 @@
     var M = MOTOR,
       usadas = {
         tor: 0,
-        novia: 0
+        novia: 0,
+        passa: 0
       },
       Js = [];
     var lista = figurasDe(vt);
     lista.forEach(function (f) {
-      var q = f.quien === 'novia' ? 'novia' : 'tor';
+      var q = clase(f.quien);
       var arr = M.figuras[q];
       if (!arr[usadas[q]]) arr[usadas[q]] = crearFigura(q);
       var fig = arr[usadas[q]++];
       if (f.T == null) f.T = vt.T;
       Js.push(posarFigura(fig, f, f.legado));
     });
-    ['tor', 'novia'].forEach(function (q) {
+    ['tor', 'novia', 'passa'].forEach(function (q) {
       M.figuras[q].forEach(function (fig, i) {
         if (i >= usadas[q]) fig.raiz.visible = false;
       });
@@ -2973,9 +3052,9 @@
       J = Js[i || 0];
     var lista = figurasDe(vt),
       f = lista[i || 0] || {};
-    var fig = MOTOR.figuras[f.quien === 'novia' ? 'novia' : 'tor'][function () {
+    var fig = MOTOR.figuras[clase(f.quien)][function () {
       var n = 0;
-      for (var k = 0; k < (i || 0); k++) if (lista[k].quien === 'novia' === (f.quien === 'novia')) n++;
+      for (var k = 0; k < (i || 0); k++) if (clase(lista[k].quien) === clase(f.quien)) n++;
       return n;
     }()];
     if (Array.isArray(que)) P = v(que[0], que[1], que[2]);else if (que && que.isVector3) P = que.clone();else if (que === 'dorsalI' || que === 'dorsalD' || que === 'romboides' || typeof que === 'string' && que.indexOf('m:') === 0) {

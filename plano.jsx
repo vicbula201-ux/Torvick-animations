@@ -55,17 +55,20 @@
 
   /* ---------------- la voz: volumen (boca) y palabras (subtitulos) ---------------- */
   var ENV_CACHE = {};
-  function envolvente(voz) {
-    if (!voz || !voz.env) return null;
-    if (ENV_CACHE[voz.env.length + ':' + voz.env.slice(0, 32)]) return ENV_CACHE[voz.env.length + ':' + voz.env.slice(0, 32)];
-    var bin = global.atob(voz.env), a = new Float32Array(bin.length);
+  function envolvente(voz, quien) {
+    var env = voz && (quien && voz.envs && voz.envs[quien] != null ? voz.envs[quien] : voz.env);
+    if (!env) return null;
+    var k = env.length + ':' + env.slice(0, 32) + ':' + env.slice(-16);
+    if (ENV_CACHE[k]) return ENV_CACHE[k];
+    var bin = global.atob(env), a = new Float32Array(bin.length);
     for (var i = 0; i < bin.length; i++) a[i] = bin.charCodeAt(i) / 255;
-    ENV_CACHE[voz.env.length + ':' + voz.env.slice(0, 32)] = a;
+    ENV_CACHE[k] = a;
     return a;
   }
-  // volumen de la voz en T (0..1), suavizado para que la boca no tiemble
-  function volumen(voz, T) {
-    var a = envolvente(voz); if (!a) return 0;
+  // volumen de la voz en T (0..1), suavizado para que la boca no tiemble; quien: la voz de ese personaje
+  // (en los videos con dos voces, cada boca se mueve solo con la suya)
+  function volumen(voz, T, quien) {
+    var a = envolvente(voz, quien); if (!a) return 0;
     var fps = voz.fps || 60, x = T * fps, i = Math.floor(x), u = x - i;
     var g = function (k) { return a[clamp(k, 0, a.length - 1)] || 0; };
     return clamp((g(i - 1) * 0.2 + g(i) * (1 - u) * 0.6 + g(i + 1) * u * 0.6 + g(i + 2) * 0.2), 0, 1);
@@ -110,6 +113,9 @@
     for (var i = 0; i < lista.length; i++) if (T >= lista[i].t0 - 0.04 && T < lista[i].t1) { q = lista[i]; break; }
     if (!q) return null;
     var px = 80, esp = 22, claves = props.claves || {};
+    // con dos voces: la palabra que suena toma el color del que habla y arriba va su nombre
+    var hablante = props.hablantes && q.ws[0][4] ? props.hablantes[q.ws[0][4]] : null;
+    var acento = hablante ? COLOR[hablante.color] || C.YEL : C.YEL;
     var ws = q.ws.map(function (w) { var t = String(w[2]).toUpperCase(); return { w: w, t: t, ancho: medir(t, px) * 1.08 + 16 }; });   // con el trazo y la palabra activa mas grande
     // en una o dos filas
     var total = ws.reduce(function (s, w) { return s + w.ancho + esp; }, -esp), filas = [ws];
@@ -127,6 +133,17 @@
     return (
       <svg width={1080} height={1920} style={{ position: 'absolute', left: 0, top: 0, overflow: 'visible', pointerEvents: 'none' }}>
         <g transform={'translate(0 ' + dy.toFixed(1) + ')'}>
+          {hablante ? (function () {
+            var nw = medir(hablante.nombre, 34) + 40, ny = y0 - (filas.length - 1) * alto - px - 26;
+            var e2 = Easing.easeOutBack(clamp((T - q.t0 + 0.04) / 0.25, 0, 1));
+            return (
+              <g transform={'translate(540 ' + ny.toFixed(1) + ') scale(' + e2.toFixed(3) + ')'}>
+                <rect x={-nw / 2} y={-30} width={nw} height={46} rx={23} fill={acento} stroke={C.INK} strokeWidth={5} />
+                <text x={0} y={4} textAnchor="middle" fontFamily={FUENTE} fontWeight={800} fontSize={34} letterSpacing={2}
+                  fill={hablante.color === 'amarillo' ? C.INK : '#ffffff'}>{hablante.nombre}</text>
+              </g>
+            );
+          })() : null}
           {filas.map(function (fila, fi) {
             var ancho = fila.reduce(function (s, w) { return s + w.ancho + esp; }, -esp), x = 540 - ancho / 2;
             var y = y0 + (fi - (filas.length - 1)) * alto;
@@ -136,7 +153,7 @@
               if (u < -0.02) return null;
               var e = Easing.easeOutBack(clamp((u + 0.02) / 0.2, 0, 1));
               var esActiva = activa === w.w, clave = claves[norm(w.t)];
-              var relleno = esActiva ? (clave ? COLOR[clave] : C.YEL) : (clave ? COLOR[clave] : '#ffffff');
+              var relleno = esActiva ? (clave ? COLOR[clave] : acento) : (clave ? COLOR[clave] : '#ffffff');
               var sc = (0.6 + 0.4 * e) * (esActiva ? 1.08 : 1), cx = x0 + w.ancho / 2;
               return (
                 <g key={fi + '-' + wi} transform={'translate(' + cx.toFixed(1) + ' ' + (y + (1 - e) * 18).toFixed(1) + ') scale(' + sc.toFixed(3) + ')'} opacity={clamp(e * 1.5, 0, 1)}>
@@ -468,7 +485,7 @@
       (def.golpes || []).forEach(function (g) { var u = (T - b.de(g)) / 0.4; if (u > 0 && u < 1) golpe += (1 - u) * Math.sin(u * 38) * 1.4; });
       var cam = aplicar(cam0, ajusteGlobal(def, b, cache), cache.paso, T);
       cam.az += golpe; cam.el += golpe * 0.5;
-      var info = def.vista(T, b, cam0, { voz: vz, abre: volumen(vz, T) }) || {};
+      var info = def.vista(T, b, cam0, { voz: vz, abre: volumen(vz, T), abreDe: function (q) { return volumen(vz, T, q); } }) || {};
       var vt = { figuras: info.figuras, objetos: info.objetos, escenario: info.escenario || 'gym', camara: cam, T: T };
       var pr = function (q, i) { return TOR3D.proyectar(vt, q, i); };
       var e = M.pop(T, -0.6, 0.5);
@@ -489,7 +506,7 @@
             {def.lienzo ? def.lienzo(T, b, pr, info) : null}
           </svg>
           {def.encima ? def.encima(T, b, pr, info) : null}
-          <Subtitulos T={T} voz={vz} claves={def.claves} y={def.ySub} />
+          <Subtitulos T={T} voz={vz} claves={def.claves} y={def.ySub} hablantes={def.hablantes} />
           {def.sobre ? def.sobre(T, b, pr, info) : null}
         </div>
       );
@@ -497,7 +514,7 @@
     // las duraciones de la voz (si ya esta preparada) mandan sobre las del archivo
     var vz0 = voz(), escenas = def.escenas.map(function (e, i) {
       var d = vz0 && vz0.durs && vz0.durs.length >= def.escenas.length ? vz0.durs[i] : e.dur;
-      return { nombre: e.nombre, vo: e.vo, dur: d, C: Plano, continua: true };
+      return { nombre: e.nombre, vo: e.vo, habla: e.habla, dur: d, C: Plano, continua: true };
     });
     var accion = def.accion;
     if (accion && vz0 && vz0.durs && vz0.durs.length > def.escenas.length) accion = Object.assign({}, accion, { dur: vz0.durs[def.escenas.length] });

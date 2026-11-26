@@ -298,7 +298,7 @@
       global.REEL = {
         seek: api.seek, setPlaying: api.setPlaying, total: api.total, cues: listaCues,
         estilo: props.estilo || 1, fps: props.estilo === 2 ? 60 : 30,
-        guion: props.escenas.map(function (e) { return { nombre: e.nombre, dur: e.dur, vo: e.vo }; })
+        guion: props.escenas.map(function (e) { return { nombre: e.nombre, dur: e.dur, vo: e.vo, habla: e.habla }; })
       };
     });
     if (props.render) return null;

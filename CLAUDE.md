@@ -83,6 +83,8 @@ cardio-musculo.jsx,
 maquinas-libre.jsx, parciales.jsx  los primeros 5 en plano secuencia (con la voz clonada de Victor)
 voces/<id>.js                    la voz de cada plano secuencia: duraciones, palabras con su tiempo y
                                  volumen (sin audio; lo genera herramientas/voz.py)
+tor-passa.jsx                    colaboración con Passa Trainer (Edgar Martínez, @passa_trainer):
+                                 Tor y Passa discuten sobre los BCAA, dos personajes y dos voces
 novato-avanzado.jsx,
 calistenia-gym.jsx               pantalla dividida: los dos Tors en paralelo
 gluteos.jsx                      con la novia de Tor (público femenino)
@@ -553,6 +555,23 @@ la voz clonada medido con ECAPA: ~0,79 contra 0,89 de su voz real consigo misma 
 idéntica). Al subir un video con la voz clonada, marcarlo como contenido hecho con IA (TikTok e
 Instagram lo piden para el audio realista generado). Necesita Python 3.10-3.13 con torch (CPU),
 chatterbox-tts, transformers, librosa y soundfile.
+
+**Colaboraciones con otros creadores** (pedido del autor, noviembre de 2026: llevar gente a Tor
+con creadores del nicho). Cada creador tiene su avatar en el mismo estilo que Tor; el primero es
+**Passa** (`quien: 'passa'` en las figuras de TOR3D): el cuerpo de Tor con el copete y el jopo
+oscuros, barba corta, bigote, cejas gruesas, musculosa y short negros (su ropa por defecto),
+guantes oscuros y la medalla amarilla con la P, como su logo. Su saludo: "¿Qué la Kentucky, mi
+gente? Aquí les saluda el Passa". `tor-passa.jsx` es la referencia: plano secuencia con dos
+personajes y **dos voces** — cada escena dice quién habla (`habla: 'passa'`), `voz.py` usa la
+referencia de cada uno (`--voces passa=~/.torvick/voz/passa.wav:0.8`, el número es la
+expresividad), guarda el volumen de cada voz por separado (`envs` en `voces/<id>.js`) y la boca de
+cada uno se mueve solo con la suya (`ex.abreDe('passa')` en `vista`); `hablantes: { tor: { nombre,
+color }, passa: {...} }` pone el nombre del que habla arriba de los subtítulos y su color en la
+palabra que suena. `PRONUNCIA` en `voz.py` dice cómo se pronuncia lo que se escribe distinto
+(Kentucky, Passa, BCAA); el subtítulo usa el texto del guion. **La voz clonada de otra persona es
+solo con su permiso**: el video de muestra es un borrador para que el creador vea la idea; se
+publica con su voz clonada solo si él lo aprueba (y marcado como hecho con IA), o se graba con
+las voces reales y se sincroniza.
 
 **Top 3 por músculo** (formato de `biceps-top3.jsx`, ~16 s con la acción y
 el cierre): `TOP3.gancho({ musculo, fig, figura, tomas })` (el músculo

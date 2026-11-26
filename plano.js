@@ -86,18 +86,21 @@
 
   /* ---------------- la voz: volumen (boca) y palabras (subtitulos) ---------------- */
   var ENV_CACHE = {};
-  function envolvente(voz) {
-    if (!voz || !voz.env) return null;
-    if (ENV_CACHE[voz.env.length + ':' + voz.env.slice(0, 32)]) return ENV_CACHE[voz.env.length + ':' + voz.env.slice(0, 32)];
-    var bin = global.atob(voz.env),
+  function envolvente(voz, quien) {
+    var env = voz && (quien && voz.envs && voz.envs[quien] != null ? voz.envs[quien] : voz.env);
+    if (!env) return null;
+    var k = env.length + ':' + env.slice(0, 32) + ':' + env.slice(-16);
+    if (ENV_CACHE[k]) return ENV_CACHE[k];
+    var bin = global.atob(env),
       a = new Float32Array(bin.length);
     for (var i = 0; i < bin.length; i++) a[i] = bin.charCodeAt(i) / 255;
-    ENV_CACHE[voz.env.length + ':' + voz.env.slice(0, 32)] = a;
+    ENV_CACHE[k] = a;
     return a;
   }
-  // volumen de la voz en T (0..1), suavizado para que la boca no tiemble
-  function volumen(voz, T) {
-    var a = envolvente(voz);
+  // volumen de la voz en T (0..1), suavizado para que la boca no tiemble; quien: la voz de ese personaje
+  // (en los videos con dos voces, cada boca se mueve solo con la suya)
+  function volumen(voz, T, quien) {
+    var a = envolvente(voz, quien);
     if (!a) return 0;
     var fps = voz.fps || 60,
       x = T * fps,
@@ -167,6 +170,9 @@
     var px = 80,
       esp = 22,
       claves = props.claves || {};
+    // con dos voces: la palabra que suena toma el color del que habla y arriba va su nombre
+    var hablante = props.hablantes && q.ws[0][4] ? props.hablantes[q.ws[0][4]] : null;
+    var acento = hablante ? COLOR[hablante.color] || C.YEL : C.YEL;
     var ws = q.ws.map(function (w) {
       var t = String(w[2]).toUpperCase();
       return {
@@ -214,7 +220,32 @@
       }
     }, /*#__PURE__*/React.createElement("g", {
       transform: 'translate(0 ' + dy.toFixed(1) + ')'
-    }, filas.map(function (fila, fi) {
+    }, hablante ? function () {
+      var nw = medir(hablante.nombre, 34) + 40,
+        ny = y0 - (filas.length - 1) * alto - px - 26;
+      var e2 = Easing.easeOutBack(clamp((T - q.t0 + 0.04) / 0.25, 0, 1));
+      return /*#__PURE__*/React.createElement("g", {
+        transform: 'translate(540 ' + ny.toFixed(1) + ') scale(' + e2.toFixed(3) + ')'
+      }, /*#__PURE__*/React.createElement("rect", {
+        x: -nw / 2,
+        y: -30,
+        width: nw,
+        height: 46,
+        rx: 23,
+        fill: acento,
+        stroke: C.INK,
+        strokeWidth: 5
+      }), /*#__PURE__*/React.createElement("text", {
+        x: 0,
+        y: 4,
+        textAnchor: "middle",
+        fontFamily: FUENTE,
+        fontWeight: 800,
+        fontSize: 34,
+        letterSpacing: 2,
+        fill: hablante.color === 'amarillo' ? C.INK : '#ffffff'
+      }, hablante.nombre));
+    }() : null, filas.map(function (fila, fi) {
       var ancho = fila.reduce(function (s, w) {
           return s + w.ancho + esp;
         }, -esp),
@@ -228,7 +259,7 @@
         var e = Easing.easeOutBack(clamp((u + 0.02) / 0.2, 0, 1));
         var esActiva = activa === w.w,
           clave = claves[norm(w.t)];
-        var relleno = esActiva ? clave ? COLOR[clave] : C.YEL : clave ? COLOR[clave] : '#ffffff';
+        var relleno = esActiva ? clave ? COLOR[clave] : acento : clave ? COLOR[clave] : '#ffffff';
         var sc = (0.6 + 0.4 * e) * (esActiva ? 1.08 : 1),
           cx = x0 + w.ancho / 2;
         return /*#__PURE__*/React.createElement("g", {
@@ -961,7 +992,10 @@
       cam.el += golpe * 0.5;
       var info = def.vista(T, b, cam0, {
         voz: vz,
-        abre: volumen(vz, T)
+        abre: volumen(vz, T),
+        abreDe: function (q) {
+          return volumen(vz, T, q);
+        }
       }) || {};
       var vt = {
         figuras: info.figuras,
@@ -1025,7 +1059,8 @@
         T: T,
         voz: vz,
         claves: def.claves,
-        y: def.ySub
+        y: def.ySub,
+        hablantes: def.hablantes
       }), def.sobre ? def.sobre(T, b, pr, info) : null);
     }
     // las duraciones de la voz (si ya esta preparada) mandan sobre las del archivo
@@ -1035,6 +1070,7 @@
         return {
           nombre: e.nombre,
           vo: e.vo,
+          habla: e.habla,
           dur: d,
           C: Plano,
           continua: true

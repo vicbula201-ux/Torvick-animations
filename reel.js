@@ -414,7 +414,8 @@
           return {
             nombre: e.nombre,
             dur: e.dur,
-            vo: e.vo
+            vo: e.vo,
+            habla: e.habla
           };
         })
       };

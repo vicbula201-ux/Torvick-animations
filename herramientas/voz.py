@@ -44,6 +44,16 @@ def norm(w):
     return re.sub(r'[^a-z0-9%]', '', w)
 
 
+# como se le dice a la voz clonada lo que se escribe distinto (el subtitulo usa el texto del guion)
+PRONUNCIA = {'Kentucky': 'Kentuqui', 'Passa': 'Pasa', 'BCAAs': 'be ce a a', 'BCAA': 'be ce a a'}
+
+
+def pronunciar(texto):
+    for k, v in PRONUNCIA.items():
+        texto = re.sub(r'\b%s\b' % re.escape(k), v, texto)
+    return texto
+
+
 def palabras_guion(vo):
     return [w for w in re.sub(r'[*_]', '', vo).split() if norm(w)]
 
@@ -146,21 +156,25 @@ def envolvente(y, sr, fps=60):
     return base64.b64encode(q.tobytes()).decode('ascii')
 
 
-def clonar_lineas(g, ref, carpeta, ex, cfg):
+def clonar_lineas(g, refs, carpeta):
+    """refs: { quien: (referencia.wav, exaggeration, cfg) }; cada linea con la voz de quien la dice (habla)"""
     from chatterbox.mtl_tts import ChatterboxMultilingualTTS
     import torch
     torch.set_num_threads(os.cpu_count() or 4)
     modelo = None
     lineas = []
-    huella_ref = hashlib.md5(open(ref, 'rb').read()).hexdigest()[:8]
+    huellas = {q: hashlib.md5(open(r[0], 'rb').read()).hexdigest()[:8] for q, r in refs.items()}
     for i, e in enumerate(g):
-        texto = re.sub(r'[*_]', '', e.get('vo') or '').strip()
+        quien = e.get('habla') or 'tor'
+        if quien not in refs: quien = 'tor'
+        ref, ex, cfg = refs[quien]; huella_ref = huellas[quien]
+        texto = pronunciar(re.sub(r'[*_]', '', e.get('vo') or '').strip())
         if not texto:
             lineas.append(np.zeros(int(0.2 * SR), dtype=np.float32)); continue
         clave = hashlib.md5(('%s|%s|%.2f|%.2f' % (texto, huella_ref, ex, cfg)).encode()).hexdigest()[:10]
         final = os.path.join(carpeta, '%02d-%s.wav' % (i + 1, clave))
         if os.path.exists(final):
-            y, _ = sf.read(final, dtype='float32'); lineas.append(y); print('  linea %d (guardada): %s' % (i + 1, texto)); continue
+            y, _ = sf.read(final, dtype='float32'); lineas.append(y); print('  linea %d (guardada, %s): %s' % (i + 1, quien, texto)); continue
         if modelo is None:
             modelo = ChatterboxMultilingualTTS.from_pretrained(device='cpu')
         mejor = None
@@ -175,7 +189,7 @@ def clonar_lineas(g, ref, carpeta, ex, cfg):
             if pps < 1.6 or pps > 4.8:
                 nota -= 0.25
             sf.write(os.path.join(carpeta, '%02d-%s-cand%d.wav' % (i + 1, clave, intento + 1)), y, modelo.sr)
-            print('  linea %d cand %d: %.2f  (%.1f s) "%s"' % (i + 1, intento + 1, nota, dur, oido.strip()))
+            print('  linea %d cand %d (%s): %.2f  (%.1f s) "%s"' % (i + 1, intento + 1, quien, nota, dur, oido.strip()))
             if mejor is None or nota > mejor[0]:
                 mejor = (nota, y)
             if nota > 0.97:
@@ -212,6 +226,7 @@ def main():
     ap.add_argument('--pista'); ap.add_argument('--tiempos')
     ap.add_argument('--ex', type=float, default=0.7); ap.add_argument('--cfg', type=float, default=0.3)
     ap.add_argument('--grabar', action='store_true')
+    ap.add_argument('--voces', help='otras voces para las lineas con habla: passa=ruta.wav[:exaggeration],...')
     a = ap.parse_args()
     g = guion(a.id)
     carpeta = os.path.join(RAIZ, 'videos', a.id + '-voz'); os.makedirs(carpeta, exist_ok=True)
@@ -227,7 +242,14 @@ def main():
         oidos = [None] * len(durs)
     else:
         print('clonando %d lineas con la referencia %s' % (len(g), a.ref))
-        lineas = clonar_lineas(g, a.ref, carpeta, a.ex, a.cfg)
+        refs = {'tor': (a.ref, a.ex, a.cfg)}
+        for item in (a.voces or '').split(','):
+            if '=' not in item: continue
+            q, r = item.split('=', 1)
+            ex = a.ex
+            if ':' in r and r.rsplit(':', 1)[1].replace('.', '').isdigit(): r, ex = r.rsplit(':', 1)[0], float(r.rsplit(':', 1)[1])
+            refs[q.strip()] = (os.path.expanduser(r.strip()), ex, a.cfg)
+        lineas = clonar_lineas(g, refs, carpeta)
         # la cola: el modelo a veces deja aire o ruido despues de la ultima palabra; se corta donde
         # termina la ultima palabra que oye whisper (mas un respiro) y se apaga en 30 ms
         oidos = []
@@ -256,10 +278,20 @@ def main():
             continue
         oidas = oidos[i] if oidos[i] is not None else transcribir(y, SR)[0]
         for w in alinear(texto, oidas, inicios[i] + desfase[i]):
-            palabras.append(w + [i])
+            palabras.append(w + [i, e.get('habla') or 'tor'])
     salida_wav = os.path.join(RAIZ, 'videos', a.id + '-voz.wav')
     sf.write(salida_wav, pista, SR)
     datos = {'durs': durs, 'fps': 60, 'palabras': palabras, 'env': envolvente(pista, SR)}
+    # con dos voces o mas: el volumen de cada una por separado (cada boca se mueve con la suya)
+    quienes = sorted(set((e.get('habla') or 'tor') for e in g))
+    if len(quienes) > 1:
+        datos['envs'] = {}
+        for q in quienes:
+            solo = np.zeros_like(pista)
+            for i, (e, y) in enumerate(zip(g, lineas)):
+                if (e.get('habla') or 'tor') != q: continue
+                a0 = int((inicios[i] + desfase[i]) * SR); solo[a0:a0 + len(y)] = pista[a0:a0 + len(y)]
+            datos['envs'][q] = envolvente(solo, SR)
     os.makedirs(os.path.join(RAIZ, 'voces'), exist_ok=True)
     js = os.path.join(RAIZ, 'voces', a.id + '.js')
     with open(js, 'w') as f:
