@@ -432,15 +432,21 @@
       }));
       // botar la plata: los billetes vuelan al tacho
       if (b.entre(T, [3, 0], [4, 0.1])) {
+        var TachoAbierto = function (pp) {
+          return /*#__PURE__*/React.createElement(global.MU.Tacho, {
+            s: pp.s,
+            tapa: 1
+          });
+        };
         r.push(/*#__PURE__*/React.createElement(Icono, {
           key: "ta",
           T: T,
-          comp: P.Basurita,
+          comp: TachoAbierto,
           cuando: b.f(3, 0.12),
           hasta: b.f(4, 0.02),
-          x: 720,
-          y: 330,
-          s: 1.5
+          x: 740,
+          y: 300,
+          s: 0.95
         }));
         [0, 1, 2].forEach(function (i) {
           var u = clamp((T - b.f(3, 0.2 + 0.1 * i)) / 0.6, 0, 1);

@@ -178,7 +178,7 @@ def clonar_lineas(g, refs, carpeta):
         if modelo is None:
             modelo = ChatterboxMultilingualTTS.from_pretrained(device='cpu')
         mejor = None
-        for intento in range(2):
+        for intento in range(4):
             w = modelo.generate(texto, language_id='es', audio_prompt_path=ref, exaggeration=ex, cfg_weight=cfg, temperature=0.7)
             y = recortar(w.squeeze(0).numpy().astype(np.float32), modelo.sr)
             _, oido = transcribir(y, modelo.sr)
@@ -192,8 +192,8 @@ def clonar_lineas(g, refs, carpeta):
             print('  linea %d cand %d (%s): %.2f  (%.1f s) "%s"' % (i + 1, intento + 1, quien, nota, dur, oido.strip()))
             if mejor is None or nota > mejor[0]:
                 mejor = (nota, y)
-            if nota > 0.97:
-                break
+            if nota > 0.97 or (intento >= 1 and mejor[0] >= 0.85):
+                break   # hasta 4 intentos solo si las dos primeras salieron mal (palabras inventadas, cola)
         sf.write(final, mejor[1], SR)
         lineas.append(mejor[1])
     return lineas
@@ -262,6 +262,16 @@ def main():
                 print('  linea %d: pausas acortadas %.2f -> %.2f s' % (i + 1, antes, len(y) / SR))
             oidas, _ = transcribir(y, SR)
             if oidas:
+                # se corta despues de la ULTIMA palabra del guion (a veces el modelo inventa palabras al final)
+                ult = [norm(w) for w in palabras_guion(pronunciar(g[i].get('vo') or ''))][-1:]
+                idx = None
+                for j in range(len(oidas) - 1, max(-1, len(oidas) - 7), -1):
+                    o = norm(oidas[j][2])
+                    if ult and o and (o == ult[0] or difflib.SequenceMatcher(None, o, ult[0]).ratio() > 0.7):
+                        idx = j; break
+                if idx is not None and idx < len(oidas) - 1:
+                    print('  linea %d: palabras de mas al final, se cortan: "%s"' % (i + 1, ' '.join(w[2] for w in oidas[idx + 1:])))
+                    oidas = oidas[:idx + 1]
                 fin = oidas[-1][1] + 0.22
                 if len(y) / SR > fin + 0.12:
                     y = y[:int(fin * SR)].copy(); n = int(0.03 * SR); y[-n:] *= np.linspace(1, 0, n)
