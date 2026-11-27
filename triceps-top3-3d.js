@@ -83,7 +83,7 @@
   var ESCENAS = [{
     nombre: 'Gancho',
     dur: 2.6,
-    vo: 'Los 3 mejores ejercicios de tríceps según la ciencia.',
+    vo: 'Top 3 ejercicios de tríceps según la ciencia.',
     C: E3.gancho({
       musculo: 'TRÍCEPS',
       musc: {
@@ -106,7 +106,7 @@
   }, {
     nombre: '1. Sobre la cabeza',
     dur: 2.2,
-    vo: 'Uno: extensión sobre la cabeza, la que más lo hace crecer.',
+    vo: 'Uno. Extensión sobre la cabeza.',
     C: E3.ejercicio({
       n: 1,
       r1: 'SOBRE LA *CABEZA*',
@@ -146,7 +146,7 @@
   }, {
     nombre: '2. Press francés',
     dur: 2.2,
-    vo: 'Dos: press francés, con los codos quietos.',
+    vo: 'Dos, press francés.',
     C: E3.ejercicio({
       n: 2,
       r1: 'PRESS *FRANCÉS*',
@@ -197,7 +197,7 @@
   }, {
     nombre: '3. Extensión en polea',
     dur: 2.2,
-    vo: 'Tres: extensión en polea, estirando bien abajo.',
+    vo: 'Tres, extensión en polea.',
     C: E3.ejercicio({
       n: 3,
       r1: 'EXTENSIÓN EN *POLEA*',
@@ -253,7 +253,7 @@
     escenas: ESCENAS,
     accion: {
       dur: 3.3,
-      vo: '¿Estás de acuerdo? Coméntalo, compártelo y guárdalo.'
+      vo: '¿Estás de acuerdo con este top? Deja tu opinión en los comentarios, guarda el video y compártelo con un amigo.'
     }
   });
 })(window);

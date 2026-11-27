@@ -67,7 +67,7 @@
   var ESCENAS = [{
     nombre: 'Gancho',
     dur: 2.6,
-    vo: 'Los 3 mejores ejercicios de abdominales según la ciencia.',
+    vo: 'Top 3 ejercicios de abdominales según la ciencia.',
     C: E3.gancho({
       musculo: 'ABDOMINALES',
       s1: 1.0,
@@ -82,7 +82,7 @@
   }, {
     nombre: '1. Abdominal en polea',
     dur: 2.2,
-    vo: 'Uno: abdominal en polea, porque le puedes subir el peso.',
+    vo: 'Uno, abdominal en polea.',
     C: E3.ejercicio({
       n: 1,
       r1: 'ABDOMINAL EN *POLEA*',
@@ -124,7 +124,7 @@
   }, {
     nombre: '2. Elevación de piernas',
     dur: 2.2,
-    vo: 'Dos: elevación de piernas colgado, sin balancearte.',
+    vo: 'Dos. Elevación de piernas colgado de la barra.',
     C: E3.ejercicio({
       n: 2,
       r1: 'ELEVACIÓN DE *PIERNAS*',
@@ -170,7 +170,7 @@
   }, {
     nombre: '3. Rueda abdominal',
     dur: 2.2,
-    vo: 'Tres: rueda abdominal, con el abdomen estirado.',
+    vo: 'Tres. Rueda abdominal.',
     C: E3.ejercicio({
       n: 3,
       r1: 'RUEDA *ABDOMINAL*',
@@ -225,7 +225,7 @@
     escenas: ESCENAS,
     accion: {
       dur: 3.3,
-      vo: '¿Estás de acuerdo? Coméntalo, compártelo y guárdalo.'
+      vo: '¿Estás de acuerdo con este top? Deja tu opinión en los comentarios, guarda el video y compártelo con un amigo.'
     }
   });
 })(window);

@@ -59,7 +59,7 @@
   var DORSAL = ['dorsalD'];
 
   var ESCENAS = [
-    { nombre: 'Gancho', dur: 2.6, vo: 'Estás haciendo mal tu remo con mancuerna.',
+    { nombre: 'Gancho', dur: 2.6, vo: 'Estás haciendo mal tu remo serrucho.',
       C: E3.escena({
         tomas: [[0, { az: 48, el: 10, dist: 4.4, y: 0.8 }], [1, { az: 66, el: 12, dist: 5.6, y: 0.8 }]],
         vista: function (T, f) {
@@ -72,7 +72,7 @@
         r1: { text: 'REMO *SERRUCHO*', s: 1.3, cuando: 0.02, tono: 'rojo' }
       }) },
 
-    { nombre: 'Posición', dur: 5, vo: 'Rodilla y mano del mismo lado en el banco, el otro pie en el piso y la espalda neutra.',
+    { nombre: 'Posición', dur: 5, vo: 'Pon tu rodilla y mano del mismo lado en el banco, el otro pie en el piso y la espalda neutra.',
       C: E3.escena({
         tomas: [[0, { az: -58, el: 20, dist: 5.4, y: 0.75 }], [0.46, { az: -48, el: 22, dist: 5.2, y: 0.75 }], [0.461, { az: 58, el: 10, dist: 5.2, y: 0.8 }], [0.7, { az: 76, el: 8, dist: 5.2, y: 0.85 }], [1, { az: 88, el: 8, dist: 5.2, y: 0.85 }]],
         vista: function () { return cuadro(0, 0, 1, { cara: { boca: 'recta' } }); },
@@ -119,7 +119,7 @@
         r2: { text: 'BAJA *LENTO*', s: 1.15, cuando: 0.5 }
       }) },
 
-    { nombre: 'Músculos', dur: 4.5, vo: 'Trabaja el dorsal ancho; ayudan los romboides, el bíceps y el hombro de atrás.',
+    { nombre: 'Músculos', dur: 4.5, vo: 'El músculo principal involucrado es el dorsal ancho, con ayuda de los romboides, el bíceps y el hombro de atrás.',
       C: E3.escena({
         tomas: [[0, { az: 128, el: 38, dist: 4.2, y: 0.9 }], [0.6, { az: 142, el: 40, dist: 4.2, y: 0.9 }], [1, { az: 112, el: 26, dist: 5.2, y: 0.85 }]],
         vista: function (T, f) {
@@ -134,7 +134,7 @@
         r2: { text: '+ ROMBOIDES Y *BÍCEPS*', s: 1.0, cuando: 0.52 }
       }) },
 
-    { nombre: 'Error 1', dur: 4.5, vo: 'Error uno: curvar la espalda. Mantenla neutra todo el ejercicio.',
+    { nombre: 'Error 1', dur: 4.5, vo: 'No curves tu espalda. Siempre mantenla neutra durante todo el recorrido.',
       C: E3.escena({
         tomas: [[0, { az: 86, el: 10, dist: 5.2, y: 0.8 }], [1, { az: 78, el: 10, dist: 5.4, y: 0.8 }]],
         vista: function (T, f) {
@@ -150,7 +150,7 @@
         r2: { text: 'ESPALDA *NEUTRA*', s: 1.1, cuando: 0.52, tono: 'verde' }
       }) },
 
-    { nombre: 'Error 2', dur: 4.5, vo: 'Error dos: dejar quietos los omóplatos. Estira abajo y júntalos arriba.',
+    { nombre: 'Error 2', dur: 4.5, vo: 'No dejes quietos los omóplatos, estíralos hacia abajo y luego júntalos arriba.',
       C: E3.escena({
         tomas: [[0, { az: 150, el: 44, dist: 3.6, y: 0.95 }], [1, { az: 162, el: 46, dist: 3.6, y: 0.95 }]],
         vista: function (T, f) {
@@ -169,7 +169,7 @@
         r2: { text: 'ESTIRA Y *JUNTA*', s: 1.15, cuando: 0.52, tono: 'verde' }
       }) },
 
-    { nombre: 'Cierre', dur: 3, vo: 'Así se hace: espalda neutra y el codo hacia la cadera.',
+    { nombre: 'Cierre', dur: 3, vo: 'Así se hace el remo con mancuerna.',
       C: E3.escena({
         tomas: [[0, { az: 40, el: 12, dist: 5.4, y: 0.8 }], [1, { az: 100, el: 14, dist: 5.6, y: 0.8 }]],
         golpes: [0.4],

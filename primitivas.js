@@ -634,7 +634,16 @@
       h: 200,
       s: props.s == null ? 1 : props.s,
       style: props.style
-    }, /*#__PURE__*/React.createElement("path", {
+    }, props.borde ? /*#__PURE__*/React.createElement("path", {
+      d: "M 28 108 L 86 166 L 192 34",
+      fill: "none",
+      stroke: INK,
+      strokeWidth: 40,
+      strokeLinecap: "round",
+      strokeLinejoin: "round",
+      strokeDasharray: VISTO_LARGO,
+      strokeDashoffset: VISTO_LARGO * (1 - p)
+    }) : null, /*#__PURE__*/React.createElement("path", {
       d: "M 28 108 L 86 166 L 192 34",
       fill: "none",
       stroke: GRN,

@@ -155,7 +155,7 @@
   }, {
     nombre: 'Posición',
     dur: 5.5,
-    vo: 'Apóyate en los antebrazos, con los codos justo debajo de los hombros y los pies juntos.',
+    vo: 'Apoya tus antebrazos en el suelo con los codos justo debajo de los hombros y tus pies manténlos juntos.',
     C: E3.escena({
       tomas: [[0, LADO], [0.16, {
         az: 80,
@@ -300,7 +300,7 @@
   }, {
     nombre: 'Core',
     dur: 4.5,
-    vo: 'Aprieta el abdomen y aguanta: trabajan el recto, los oblicuos y el transverso.',
+    vo: 'Aprieta el abdomen y aguanta todo lo que puedas. El músculo principal involucrado es el recto, con ayuda de los oblicuos y el transverso.',
     C: E3.escena({
       tomas: [[0, {
         az: 70,
@@ -367,7 +367,7 @@
   }, {
     nombre: 'Error 1',
     dur: 4.5,
-    vo: 'Error uno: dejar caer la cadera o subirla. Hombros, cadera y tobillos alineados.',
+    vo: 'No dejes caer tu cadera o la subas mucho. Siempre mantén tus hombros, cadera y tobillos alineados durante el ejercicio.',
     C: E3.escena({
       tomas: [[0, {
         az: 84,
@@ -439,7 +439,7 @@
   }, {
     nombre: 'Error 2',
     dur: 4,
-    vo: 'Error dos: soltar el abdomen. Mantén la tensión todo el tiempo.',
+    vo: 'No dejes de apretar el abdomen. Siempre mantén la tensión todo el tiempo.',
     C: E3.escena({
       tomas: [[0, {
         az: 60,
@@ -516,7 +516,7 @@
   }, {
     nombre: 'Cierre',
     dur: 2.5,
-    vo: 'Así se hace. Calidad antes que tiempo.',
+    vo: 'Así se hacen las planchas.',
     C: E3.escena({
       tomas: [[0, {
         az: 40,
@@ -572,6 +572,7 @@
   }];
   global.REELS.registrar({
     id: 'plancha-3d',
+    escenario: 'parque',
     titulo: 'Plancha (Tor 3D)',
     estilo: 2,
     escenas: ESCENAS,

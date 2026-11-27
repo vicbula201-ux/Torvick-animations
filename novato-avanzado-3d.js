@@ -214,7 +214,7 @@
   var ESCENAS = [{
     nombre: 'Gancho',
     dur: 3.2,
-    vo: 'Novato contra avanzado. ¿Cuál de los dos eres tú?',
+    vo: 'Novato vs avanzado, ¿cuál de los dos eres tú?',
     C: duelo({
       grande: true,
       nov: function (T, f, x) {
@@ -265,7 +265,7 @@
   }, {
     nombre: 'Planificación',
     dur: 3.6,
-    vo: 'El novato improvisa cada día; el avanzado sigue un plan.',
+    vo: 'El novato improvisa cada día, mientras que el avanzado siempre sigue un plan.',
     C: duelo({
       nov: function (T, f, x) {
         return {
@@ -312,7 +312,7 @@
   }, {
     nombre: 'Comida',
     dur: 3.6,
-    vo: 'Uno come lo que haya; el otro come con propósito.',
+    vo: 'El novato come lo que haya disponible. El avanzado come con propósito y con planificación.',
     C: duelo({
       piezas: [{
         C: N.COMIDA.hamburguesa,
@@ -371,7 +371,7 @@
   }, {
     nombre: 'Calorías',
     dur: 3.6,
-    vo: 'El novato no sabe cuánto come; el avanzado cuenta sus calorías.',
+    vo: 'El novato no sabe cuánto come. El avanzado cuenta sus calorías.',
     C: duelo({
       nov: function () {
         return {
@@ -432,7 +432,7 @@
   }, {
     nombre: 'Descanso',
     dur: 3.6,
-    vo: 'Duerme cinco horas contra ocho: el músculo crece al descansar.',
+    vo: 'Por un lado el novato duerme 5 horas y el avanzado duerme 8, porque sabe que el músculo crece al descansar.',
     C: duelo({
       nov: function () {
         return {
@@ -527,7 +527,7 @@
   }, {
     nombre: 'Suplementos',
     dur: 3.6,
-    vo: 'El novato compra de todo; el avanzado, solo lo que funciona.',
+    vo: 'El novato compra de todo, mientras que el avanzado solo compra aquello que le funciona.',
     C: duelo({
       piezas: [{
         C: N.ICONOS.bote,
@@ -624,7 +624,7 @@
   }, {
     nombre: 'Evidencia',
     dur: 4,
-    vo: 'Uno cree los mitos de internet; el otro lee la evidencia científica.',
+    vo: 'El novato cree los mitos de internet, mientras que el avanzado lee la evidencia científica.',
     C: duelo({
       nov: function () {
         return {
@@ -689,7 +689,7 @@
   }, {
     nombre: 'Biomecánica',
     dur: 3.8,
-    vo: 'El avanzado entiende la técnica y sabe qué músculo trabaja.',
+    vo: 'El novato no sabe cómo se hace el ejercicio y lo hace como sea. El avanzado entiende la técnica, la biomecánica y sabe qué músculo se trabaja.',
     C: duelo({
       grande: true,
       nov: function (T, f, x) {
@@ -742,7 +742,7 @@
   }, {
     nombre: 'Peso',
     dur: 3.8,
-    vo: 'Y entrena con el peso adecuado: sin ego y sin miedo.',
+    vo: 'El novato entrena con pesos altos para impresionar. Mientras que el avanzado utiliza el peso adecuado sin ego.',
     C: duelo({
       grande: true,
       nov: function (T, f, x) {
@@ -807,7 +807,7 @@
     accion: {
       dur: 4.2,
       pregunta: '¿CUÁL ERES TÚ?',
-      vo: '¿Cuál eres tú? Coméntalo, compártelo con un amigo y guárdalo.'
+      vo: '¿Cuál de los dos eres tú? ¿Novato o avanzado? Te leo en los comentarios.'
     }
   });
 })(window);

@@ -490,6 +490,8 @@
     var p = clamp(props.p == null ? 1 : props.p, 0, 1);
     return (
       <Svg w={220} h={200} s={props.s == null ? 1 : props.s} style={props.style}>
+        {props.borde ? <path d="M 28 108 L 86 166 L 192 34" fill="none" stroke={INK} strokeWidth={40} strokeLinecap="round" strokeLinejoin="round"
+          strokeDasharray={VISTO_LARGO} strokeDashoffset={VISTO_LARGO * (1 - p)} /> : null}
         <path
           d="M 28 108 L 86 166 L 192 34"
           fill="none" stroke={GRN} strokeWidth={24}

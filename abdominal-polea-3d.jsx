@@ -49,7 +49,7 @@
   var GEN = { az: 62, el: 6, dist: 7.0, y: 1.12, dz: -0.2 };
 
   var ESCENAS = [
-    { nombre: 'Gancho', dur: 2.5, vo: 'Estás haciendo mal tu abdominal en polea.',
+    { nombre: 'Gancho', dur: 2.5, vo: 'Estás haciendo mal tus abdominales en polea.',
       C: E3.escena({
         tomas: [[0, { az: 40, el: 8, dist: 5.2, y: 1.1, dz: 0 }], [1, { az: 58, el: 6, dist: 6.6, y: 1.1, dz: -0.15 }]],
         vista: function (T, f) {
@@ -62,7 +62,7 @@
         r1: { text: 'ABDOMINAL EN *POLEA*', s: 1.05, cuando: 0.02, tono: 'rojo' }
       }) },
 
-    { nombre: 'Posición', dur: 5, vo: 'De espaldas a la polea alta, toma la cuerda a los lados de la cabeza e inclínate un poco desde la cadera.',
+    { nombre: 'Posición', dur: 5, vo: 'Ponte de espaldas a la polea alta, toma la cuerda a los lados de la cabeza, inclínate un poco desde la cadera.',
       C: E3.escena({
         tomas: [[0, { az: 132, el: 10, dist: 7.0, y: 1.3, dz: -0.3 }], [0.48, { az: 116, el: 10, dist: 6.4, y: 1.35, dz: -0.3 }],
           [0.52, { az: 70, el: 6, dist: 5.6, y: 1.05, dz: 0 }], [1, { az: 80, el: 6, dist: 6.0, y: 1.05, dz: 0 }]],
@@ -79,7 +79,7 @@
         r2: { text: 'MANOS A LA *CABEZA*', s: 1.05, cuando: 0.56 }
       }) },
 
-    { nombre: 'Ejecución', dur: 6, vo: 'Flexiona el tronco y lleva los codos hacia las rodillas. Vuelve lento, sin soltar la tensión.',
+    { nombre: 'Ejecución', dur: 6, vo: 'Flexiona el tronco y lleva los codos hacia las rodillas. Vuelve lento sin soltar la tensión.',
       C: E3.escena({
         tomas: [[0, GEN], [0.46, { az: 76, el: 6, dist: 6.6, y: 1.1, dz: -0.15 }], [0.461, { az: 28, el: 4, dist: 5.0, y: 1.0, dz: 0.1 }], [1, { az: 20, el: 4, dist: 5.2, y: 1.0, dz: 0.1 }]],
         vista: function (T, f) {
@@ -103,7 +103,7 @@
         r2: { text: 'VUELVE *LENTO*', s: 1.1, cuando: 0.52 }
       }) },
 
-    { nombre: 'Músculos', dur: 4.5, vo: 'Trabaja el recto abdominal. Ayudan los oblicuos y los flexores de la cadera.',
+    { nombre: 'Músculos', dur: 4.5, vo: 'El músculo principal involucrado es el recto abdominal, con ayuda de los oblicuos y los flexores de la cadera.',
       C: E3.escena({
         tomas: [[0, { az: 24, el: -2, dist: 4.8, y: 1.1, dz: 0.15 }], [0.6, { az: 36, el: -2, dist: 4.8, y: 1.1, dz: 0.15 }], [1, { az: 58, el: 4, dist: 6.2, y: 1.08, dz: 0 }]],
         vista: function (T, f) {
@@ -119,7 +119,7 @@
         r2: { text: '+ *OBLICUOS*', s: 1.1, cuando: 0.54 }
       }) },
 
-    { nombre: 'Error 1', dur: 4.5, vo: 'Error uno: mover la cadera. La cadera queda quieta; lo que se dobla es la columna.',
+    { nombre: 'Error 1', dur: 4.5, vo: 'No muevas la cadera durante el movimiento. Lo único que se dobla es la columna.',
       C: E3.escena({
         tomas: [[0, { az: 84, el: 6, dist: 6.8, y: 1.08, dz: -0.15 }], [1, { az: 90, el: 6, dist: 6.8, y: 1.08, dz: -0.15 }]],
         vista: function (T, f) {
@@ -142,7 +142,7 @@
         r2: { text: 'CADERA *QUIETA*', s: 1.1, cuando: 0.52, tono: 'verde' }
       }) },
 
-    { nombre: 'Error 2', dur: 4.5, vo: 'Error dos: rebotar sin apretar. Contrae fuerte abajo y aguanta un segundo.',
+    { nombre: 'Error 2', dur: 4.5, vo: 'No rebotes sin apretar, contrae fuerte abajo y aguanta un segundo.',
       C: E3.escena({
         tomas: [[0, { az: 48, el: 4, dist: 5.6, y: 1.05, dz: 0 }], [1, { az: 40, el: 4, dist: 5.4, y: 1.05, dz: 0 }]],
         vista: function (T, f) {
@@ -165,7 +165,7 @@
         r2: { text: 'APRIETA Y *AGUANTA*', s: 1.05, cuando: 0.52, tono: 'verde' }
       }) },
 
-    { nombre: 'Cierre', dur: 3, vo: 'Así se hace: cadera quieta y el abdomen bien apretado.',
+    { nombre: 'Cierre', dur: 3, vo: 'Así se hacen los abdominales en polea.',
       C: E3.escena({
         tomas: [[0, { az: 110, el: 8, dist: 6.6, y: 1.15, dz: -0.2 }], [1, { az: 36, el: 6, dist: 6.2, y: 1.08, dz: 0 }]],
         vista: function (T, f) {

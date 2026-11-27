@@ -94,7 +94,7 @@
   var ESCENAS = [{
     nombre: 'Gancho',
     dur: 2.5,
-    vo: 'Estás haciendo mal tu abdominal en polea.',
+    vo: 'Estás haciendo mal tus abdominales en polea.',
     C: E3.escena({
       tomas: [[0, {
         az: 40,
@@ -152,7 +152,7 @@
   }, {
     nombre: 'Posición',
     dur: 5,
-    vo: 'De espaldas a la polea alta, toma la cuerda a los lados de la cabeza e inclínate un poco desde la cadera.',
+    vo: 'Ponte de espaldas a la polea alta, toma la cuerda a los lados de la cabeza, inclínate un poco desde la cadera.',
     C: E3.escena({
       tomas: [[0, {
         az: 132,
@@ -231,7 +231,7 @@
   }, {
     nombre: 'Ejecución',
     dur: 6,
-    vo: 'Flexiona el tronco y lleva los codos hacia las rodillas. Vuelve lento, sin soltar la tensión.',
+    vo: 'Flexiona el tronco y lleva los codos hacia las rodillas. Vuelve lento sin soltar la tensión.',
     C: E3.escena({
       tomas: [[0, GEN], [0.46, {
         az: 76,
@@ -311,7 +311,7 @@
   }, {
     nombre: 'Músculos',
     dur: 4.5,
-    vo: 'Trabaja el recto abdominal. Ayudan los oblicuos y los flexores de la cadera.',
+    vo: 'El músculo principal involucrado es el recto abdominal, con ayuda de los oblicuos y los flexores de la cadera.',
     C: E3.escena({
       tomas: [[0, {
         az: 24,
@@ -369,7 +369,7 @@
   }, {
     nombre: 'Error 1',
     dur: 4.5,
-    vo: 'Error uno: mover la cadera. La cadera queda quieta; lo que se dobla es la columna.',
+    vo: 'No muevas la cadera durante el movimiento. Lo único que se dobla es la columna.',
     C: E3.escena({
       tomas: [[0, {
         az: 84,
@@ -447,7 +447,7 @@
   }, {
     nombre: 'Error 2',
     dur: 4.5,
-    vo: 'Error dos: rebotar sin apretar. Contrae fuerte abajo y aguanta un segundo.',
+    vo: 'No rebotes sin apretar, contrae fuerte abajo y aguanta un segundo.',
     C: E3.escena({
       tomas: [[0, {
         az: 48,
@@ -535,7 +535,7 @@
   }, {
     nombre: 'Cierre',
     dur: 3,
-    vo: 'Así se hace: cadera quieta y el abdomen bien apretado.',
+    vo: 'Así se hacen los abdominales en polea.',
     C: E3.escena({
       tomas: [[0, {
         az: 110,

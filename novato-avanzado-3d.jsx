@@ -89,7 +89,7 @@
   function escalaFig(pr, i) { return Math.abs(pr([0, 2.06, 0])[1] - pr([0, 0, 0])[1]) / 1500; }
 
   var ESCENAS = [
-    { nombre: 'Gancho', dur: 3.2, vo: 'Novato contra avanzado. ¿Cuál de los dos eres tú?',
+    { nombre: 'Gancho', dur: 3.2, vo: 'Novato vs avanzado, ¿cuál de los dos eres tú?',
       C: duelo({
         grande: true,
         nov: function (T, f, x) { return { pose: duda(x), cara: { boca: 'triste', cejas: 'triste' } }; },
@@ -102,7 +102,7 @@
         r2: { text: '*AVANZADO*', x: 560, y: 420, s: 1.05, cuando: 0.16 }
       }) },
 
-    { nombre: 'Planificación', dur: 3.6, vo: 'El novato improvisa cada día; el avanzado sigue un plan.',
+    { nombre: 'Planificación', dur: 3.6, vo: 'El novato improvisa cada día, mientras que el avanzado siempre sigue un plan.',
       C: duelo({
         nov: function (T, f, x) { return { pose: duda(x), cara: { boca: 'triste' } }; },
         piezas: [
@@ -114,7 +114,7 @@
         r1: { text: '*PLANIFICACIÓN*', s: 1.1, cuando: 0.02 }
       }) },
 
-    { nombre: 'Comida', dur: 3.6, vo: 'Uno come lo que haya; el otro come con propósito.',
+    { nombre: 'Comida', dur: 3.6, vo: 'El novato come lo que haya disponible. El avanzado come con propósito y con planificación.',
       C: duelo({
         piezas: [
           { C: N.COMIDA.hamburguesa, s: 0.95, plato: 0.95, x: IZQ - 200, y: 380, cuando: 0.08 },
@@ -128,7 +128,7 @@
         r1: { text: '*COMIDA*', s: 1.2, cuando: 0.02 }
       }) },
 
-    { nombre: 'Calorías', dur: 3.6, vo: 'El novato no sabe cuánto come; el avanzado cuenta sus calorías.',
+    { nombre: 'Calorías', dur: 3.6, vo: 'El novato no sabe cuánto come. El avanzado cuenta sus calorías.',
       C: duelo({
         nov: function () { return { cara: { boca: 'triste' } }; },
         piezas: [
@@ -140,7 +140,7 @@
         r1: { text: '*CALORÍAS*', s: 1.2, cuando: 0.02 }
       }) },
 
-    { nombre: 'Descanso', dur: 3.6, vo: 'Duerme cinco horas contra ocho: el músculo crece al descansar.',
+    { nombre: 'Descanso', dur: 3.6, vo: 'Por un lado el novato duerme 5 horas y el avanzado duerme 8, porque sabe que el músculo crece al descansar.',
       C: duelo({
         nov: function () { return { cara: { boca: 'triste', ojos: 'rojos' } }; },
         lienzo: function (T, f, t, pr) { return <V.Gotas T={T} c={pr('cabeza', 0)} v={1} />; },
@@ -156,7 +156,7 @@
         r2: { text: '5 HORAS VS *8 HORAS*', cuando: 0.4 }
       }) },
 
-    { nombre: 'Suplementos', dur: 3.6, vo: 'El novato compra de todo; el avanzado, solo lo que funciona.',
+    { nombre: 'Suplementos', dur: 3.6, vo: 'El novato compra de todo, mientras que el avanzado solo compra aquello que le funciona.',
       C: duelo({
         piezas: [
           { C: N.ICONOS.bote, s: 0.7, x: 20, y: 380, cuando: 0.04, p: { color: C.RED } },
@@ -174,7 +174,7 @@
         r2: { text: 'CREATINA Y *PROTEÍNA*', cuando: 0.5 }
       }) },
 
-    { nombre: 'Evidencia', dur: 4, vo: 'Uno cree los mitos de internet; el otro lee la evidencia científica.',
+    { nombre: 'Evidencia', dur: 4, vo: 'El novato cree los mitos de internet, mientras que el avanzado lee la evidencia científica.',
       C: duelo({
         nov: function () { return { cara: { boca: 'abierta', ojos: 'grandes' } }; },
         piezas: [
@@ -187,7 +187,7 @@
         r1: { text: 'EVIDENCIA *CIENTÍFICA*', s: 1.0, cuando: 0.02 }
       }) },
 
-    { nombre: 'Biomecánica', dur: 3.8, vo: 'El avanzado entiende la técnica y sabe qué músculo trabaja.',
+    { nombre: 'Biomecánica', dur: 3.8, vo: 'El novato no sabe cómo se hace el ejercicio y lo hace como sea. El avanzado entiende la técnica, la biomecánica y sabe qué músculo se trabaja.',
       C: duelo({
         grande: true,
         nov: function (T, f, x) { var k = V.ida(V.fase(T, f(0.05), f(0.95), 3), 0.25, 0.05); return { pose: curl(x, k, 0.9 * k, 1), pesas: 'neutro', musc: { trapecio: 'rojo' }, cara: { boca: 'dientes', cejas: 'enojo' } }; },
@@ -198,7 +198,7 @@
         r2: { text: 'TÉCNICA VS *IMPULSO*', cuando: 0.42 }
       }) },
 
-    { nombre: 'Peso', dur: 3.8, vo: 'Y entrena con el peso adecuado: sin ego y sin miedo.',
+    { nombre: 'Peso', dur: 3.8, vo: 'El novato entrena con pesos altos para impresionar. Mientras que el avanzado utiliza el peso adecuado sin ego.',
       C: duelo({
         grande: true,
         nov: function (T, f, x) { return { pose: barra(x), cara: { boca: 'dientes', cejas: 'triste' }, musc: { trapecio: 'rojo' } }; },
@@ -216,6 +216,6 @@
 
   global.REELS.registrar({
     id: 'novato-avanzado-3d', titulo: 'Novato vs avanzado (Tor 3D)', estilo: 2, escenas: ESCENAS,
-    accion: { dur: 4.2, pregunta: '¿CUÁL ERES TÚ?', vo: '¿Cuál eres tú? Coméntalo, compártelo con un amigo y guárdalo.' }
+    accion: { dur: 4.2, pregunta: '¿CUÁL ERES TÚ?', vo: '¿Cuál de los dos eres tú? ¿Novato o avanzado? Te leo en los comentarios.' }
   });
 })(window);

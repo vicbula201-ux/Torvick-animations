@@ -41,7 +41,7 @@
   var LADO = { az: 90, el: 6, dist: 6.6, y: 0.95, dz: 0.35 };
 
   var ESCENAS = [
-    { nombre: 'Gancho', dur: 2.5, vo: 'Estás haciendo mal tu zancada.',
+    { nombre: 'Gancho', dur: 2.5, vo: 'Estás haciendo mal tus zancadas con mancuernas.',
       C: E3.escena({
         tomas: [[0, { az: 64, el: 8, dist: 5.0, y: 1.0, dz: 0.4 }], [1, { az: 80, el: 6, dist: 6.4, y: 0.92, dz: 0.4 }]],
         vista: function (T) {
@@ -54,7 +54,7 @@
         r1: { text: '*ZANCADA*', s: 1.25, cuando: 0.02, tono: 'rojo' }
       }) },
 
-    { nombre: 'Posición', dur: 5, vo: 'De pie, con los pies al ancho de los hombros y una mancuerna en cada mano, al lado del cuerpo.',
+    { nombre: 'Posición', dur: 5, vo: 'Ponte de pie con los pies a la anchura de tus hombros y una mancuerna en cada mano al lado del cuerpo.',
       C: E3.escena({
         tomas: [[0, { az: 18, el: 12, dist: 6.6, y: 0.95, dz: 0 }], [0.5, { az: 28, el: 12, dist: 6.4, y: 0.95, dz: 0 }], [0.56, { az: 34, el: 6, dist: 5.6, y: 1.05, dz: 0 }], [1, { az: 44, el: 6, dist: 5.9, y: 1.05, dz: 0 }]],
         vista: function () { return cuadro({}, { cara: { boca: 'sonrisa' } }); },
@@ -71,7 +71,7 @@
         r2: { text: 'MANCUERNAS AL *COSTADO*', s: 0.92, cuando: 0.6 }
       }) },
 
-    { nombre: 'Ejecución', dur: 6, vo: 'Da un paso adelante y baja hasta que el muslo quede paralelo al piso; empuja y vuelve.',
+    { nombre: 'Ejecución', dur: 6, vo: 'Da un paso hacia adelante y baja hasta que el muslo quede paralelo al piso. Empuja y vuelve con control.',
       C: E3.escena({
         tomas: [[0, LADO], [0.5, { az: 72, el: 8, dist: 6.4, y: 0.92, dz: 0.35 }], [0.501, { az: 52, el: 10, dist: 5.6, y: 0.85, dz: 0.4 }], [1, { az: 40, el: 10, dist: 5.8, y: 0.88, dz: 0.4 }]],
         vista: function (T, f) {
@@ -94,7 +94,7 @@
         r2: { text: 'MUSLO *PARALELO*', s: 1.1, cuando: 0.3 }
       }) },
 
-    { nombre: 'Músculos', dur: 4.5, vo: 'Trabajan el cuádriceps y el glúteo, con ayuda de los isquios y los gemelos.',
+    { nombre: 'Músculos', dur: 4.5, vo: 'Los músculos principales involucrados son el cuádriceps y el glúteo, con ayuda de los isquiotibiales y los gemelos.',
       C: E3.escena({
         tomas: [[0, { az: 62, el: 8, dist: 4.8, y: 0.72, dz: 0.45 }], [0.6, { az: 76, el: 8, dist: 4.8, y: 0.72, dz: 0.45 }], [1, { az: 128, el: 10, dist: 6.0, y: 0.8, dz: 0.35 }]],
         vista: function (T, f) {
@@ -111,7 +111,7 @@
         r2: { text: '+ ISQUIOS Y *GEMELOS*', cuando: 0.54 }
       }) },
 
-    { nombre: 'Error 1', dur: 4.5, vo: 'Error uno: perder el equilibrio. Tronco firme y la mirada al frente.',
+    { nombre: 'Error 1', dur: 4.5, vo: 'No pierdas el equilibrio durante el ejercicio. Mantén el tronco neutro y la mirada hacia el frente.',
       C: E3.escena({
         tomas: [[0, { az: 30, el: 6, dist: 6.2, y: 0.95, dz: 0.4 }], [1, { az: 40, el: 6, dist: 6.2, y: 0.95, dz: 0.4 }]],
         vista: function (T, f) {
@@ -127,7 +127,7 @@
         r2: { text: 'TRONCO *FIRME*', s: 1.1, cuando: 0.52, tono: 'verde' }
       }) },
 
-    { nombre: 'Error 2', dur: 4.5, vo: 'Error dos: dejar que la rodilla se vaya hacia adentro. Que apunte hacia tu pie.',
+    { nombre: 'Error 2', dur: 4.5, vo: 'No dejes que tu rodilla se vaya hacia adentro. Siempre haz que tu rodilla apunte hacia tu pie.',
       C: E3.escena({
         tomas: [[0, { az: 6, el: 4, dist: 5.4, y: 0.72, dz: 0.5 }], [1, { az: 12, el: 4, dist: 5.4, y: 0.72, dz: 0.5 }]],
         vista: function (T, f) {
@@ -148,7 +148,7 @@
         r2: { text: 'RODILLA HACIA EL *PIE*', cuando: 0.52, tono: 'verde' }
       }) },
 
-    { nombre: 'Cierre', dur: 3, vo: 'Así se hace: paso firme y el muslo paralelo.',
+    { nombre: 'Cierre', dur: 3, vo: 'Así se hacen las zancadas con mancuernas.',
       C: E3.escena({
         tomas: [[0, { az: 140, el: 8, dist: 6.2, y: 0.9, dz: 0.35 }], [1, { az: 50, el: 8, dist: 6.4, y: 0.92, dz: 0.35 }]],
         vista: function (T, f) {

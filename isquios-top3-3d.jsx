@@ -66,13 +66,13 @@
   }
 
   var ESCENAS = [
-    { nombre: 'Gancho', dur: 2.6, vo: 'Los 3 mejores ejercicios de isquiotibiales según la ciencia.',
+    { nombre: 'Gancho', dur: 2.6, vo: 'Hello, mis amores, estos son los 3 mejores ejercicios de isquiotibiales según la ciencia.',
       C: E3.gancho({
         musculo: 'ISQUIOS', musc: { isquios: true, gluteos: 'claro' }, brillo: ISQ, r: 80,
         tomas: [[0, { az: 196, el: 2, dist: 4.6, y: 0.9 }], [1, { az: 156, el: 4, dist: 6.0, y: 1.0 }]],
         figura: function () { return { quien: 'novia', pose: E3.poseNovia(), cara: { boca: 'sonrisa' } }; }
       }) },
-    { nombre: '1. Curl femoral sentado', dur: 2.2, vo: 'Uno: curl femoral sentado, crece más que acostado.',
+    { nombre: '1. Curl femoral sentado', dur: 2.2, vo: 'Uno, curl femoral sentado.',
       C: E3.ejercicio({
         n: 1, r1: 'CURL FEMORAL *SENTADO*', r2: 'MÁS QUE *ACOSTADO*', brillo: ISQ, r: 75, s1: 0.95,
         tomas: [[0, { az: 82, el: 8, dist: 6.0, y: 0.8, dz: 0.15 }], [1, { az: 64, el: 6, dist: 5.0, y: 0.75, dz: 0.2 }]],
@@ -81,7 +81,7 @@
           return { figuras: [{ quien: 'novia', pose: p, musc: { isquios: true, gemelos: 'gris', brillo: 0.35 * k }, cara: { boca: k > 0.5 ? 'dientes' : 'sonrisa' } }], objetos: curlObjetos(p) };
         }
       }) },
-    { nombre: '2. Peso muerto rumano', dur: 2.2, vo: 'Dos: peso muerto rumano, llevando la cadera atrás.',
+    { nombre: '2. Peso muerto rumano', dur: 2.2, vo: 'Dos, peso muerto rumano.',
       C: E3.ejercicio({
         n: 2, r1: 'PESO MUERTO *RUMANO*', r2: 'CADERA *ATRÁS*', brillo: ISQ, r: 75, s1: 0.98, va: 0.4,
         tomas: [[0, { az: 92, el: 6, dist: 6.6, y: 0.95, dz: 0 }], [1, { az: 120, el: 6, dist: 5.6, y: 0.85, dz: -0.1 }]],
@@ -91,7 +91,7 @@
             objetos: [{ tipo: 'barra', c: barraRumano(p), eje: [1, 0, 0] }] };
         }
       }) },
-    { nombre: '3. Curl nórdico', dur: 2.2, vo: 'Tres: curl nórdico, bajando lento.',
+    { nombre: '3. Curl nórdico', dur: 2.2, vo: 'Tres, curl nórdico.',
       C: E3.ejercicio({
         n: 3, r1: 'CURL *NÓRDICO*', r2: 'BAJA *LENTO*', brillo: ISQ, r: 75, va: 0.3,
         tomas: [[0, { az: 84, el: 8, dist: 6.2, y: 0.55, dz: 0.15 }], [1, { az: 120, el: 8, dist: 5.2, y: 0.5, dz: 0.05 }]],
@@ -104,6 +104,7 @@
 
   global.REELS.registrar({
     id: 'isquios-top3-3d', titulo: 'Top 3 isquios (novia 3D)', estilo: 2, escenas: ESCENAS,
-    accion: { dur: 3.6, pregunta: '¿CUÁL PROBARÁS?', vo: '¿Cuál vas a probar? Coméntalo, compártelo con una amiga y guárdalo.' }
+    accion: { dur: 3.6, pregunta: '¿ESTÁS DE ACUERDO?', vo: '¿Estás de acuerdo con este top? Deja tu opinión en los comentarios, guarda el video y comparte el video con una amiguita.' },
+    cierreVo: '¿Quieres ver más videos similares? Sigue a mi novio Tor para más contenido. Bye.'
   });
 })(window);

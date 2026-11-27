@@ -49,7 +49,7 @@
   var LADO = { az: 56, el: 16, dist: 7.0, y: 0.42, dz: -0.12 };
 
   var ESCENAS = [
-    { nombre: 'Gancho', dur: 2.5, vo: 'Estás haciendo mal tus flexiones de pecho.',
+    { nombre: 'Gancho', dur: 2.5, vo: 'Estás haciendo mal tus flexiones.',
       C: E3.escena({
         tomas: [[0, { az: 38, el: 12, dist: 5.6, y: 0.45, dz: 0 }], [1, { az: 54, el: 14, dist: 6.8, y: 0.42, dz: -0.1 }]],
         vista: function (T, f) {
@@ -62,7 +62,7 @@
         r1: { text: 'FLEXIÓN DE *PECHO*', s: 1.1, cuando: 0.02, tono: 'rojo' }
       }) },
 
-    { nombre: 'Posición', dur: 5, vo: 'Manos un poco más anchas que los hombros y el cuerpo recto, de la cabeza a los talones.',
+    { nombre: 'Posición', dur: 5, vo: 'Mantén tus manos un poco más anchas que los hombros, con el cuerpo recto de la cabeza a los talones.',
       C: E3.escena({
         tomas: [[0, { az: 14, el: 26, dist: 5.4, y: 0.35, dz: 0.15 }], [0.48, { az: 24, el: 26, dist: 5.2, y: 0.35, dz: 0.15 }],
           [0.52, LADO], [1, { az: 66, el: 14, dist: 7.2, y: 0.42, dz: -0.12 }]],
@@ -104,7 +104,7 @@
         r2: { text: 'EMPUJA *FUERTE*', s: 1.1, y: 1380, cuando: 0.52 }
       }) },
 
-    { nombre: 'Músculos', dur: 4.5, vo: 'Trabaja el pectoral mayor; ayudan el hombro de adelante y el tríceps.',
+    { nombre: 'Músculos', dur: 4.5, vo: 'El músculo principal involucrado es el pectoral mayor, con ayuda del hombro de adelante y el tríceps.',
       C: E3.escena({
         tomas: [[0, { az: 20, el: 0, dist: 4.2, y: 0.4, dz: 0.25 }], [0.6, { az: 30, el: 0, dist: 4.1, y: 0.4, dz: 0.25 }], [1, { az: 48, el: 10, dist: 6.2, y: 0.42, dz: 0 }]],
         vista: function (T, f) {
@@ -120,7 +120,7 @@
         r2: { text: '+ HOMBRO Y *TRÍCEPS*', y: 1380, cuando: 0.54 }
       }) },
 
-    { nombre: 'Error 1', dur: 4.5, vo: 'Error uno: bajar a medias. Baja hasta que el pecho casi toque el piso.',
+    { nombre: 'Error 1', dur: 4.5, vo: 'No hagas el recorrido a medias. Baja hasta que el pecho casi toque el piso.',
       C: E3.escena({
         tomas: [[0, { az: 70, el: 10, dist: 7.0, y: 0.42, dz: -0.05 }], [1, { az: 62, el: 12, dist: 6.8, y: 0.42, dz: -0.05 }]],
         vista: function (T, f) {
@@ -141,7 +141,7 @@
         r2: { text: 'RECORRIDO *COMPLETO*', y: 1380, cuando: 0.52, tono: 'verde' }
       }) },
 
-    { nombre: 'Error 2', dur: 4.5, vo: 'Error dos: hundir o subir la cadera. Aprieta el abdomen y mantén el cuerpo en línea.',
+    { nombre: 'Error 2', dur: 4.5, vo: 'No te hundas ni subas mucho la cadera. Siempre aprieta el abdomen y mantén el cuerpo alineado.',
       C: E3.escena({
         tomas: [[0, { az: 84, el: 8, dist: 8.0, y: 0.5, dz: -0.15 }], [1, { az: 90, el: 8, dist: 8.0, y: 0.5, dz: -0.15 }]],
         vista: function (T, f) {
@@ -157,7 +157,7 @@
         r2: { text: 'CUERPO EN *LÍNEA*', s: 1.1, y: 1380, cuando: 0.52, tono: 'verde' }
       }) },
 
-    { nombre: 'Cierre', dur: 3, vo: 'Así se hace: cuerpo recto y recorrido completo.',
+    { nombre: 'Cierre', dur: 3, vo: 'Así se hacen las flexiones.',
       C: E3.escena({
         tomas: [[0, { az: 124, el: 16, dist: 8.2, y: 0.45, dz: -0.2 }], [1, { az: 40, el: 12, dist: 6.6, y: 0.42, dz: 0 }]],
         vista: function (T, f) {
@@ -175,7 +175,7 @@
   ];
 
   global.REELS.registrar({
-    id: 'flexiones-3d', titulo: 'Flexiones de pecho (Tor 3D)', estilo: 2, escenas: ESCENAS,
+    id: 'flexiones-3d', escenario: 'parque', titulo: 'Flexiones de pecho (Tor 3D)', estilo: 2, escenas: ESCENAS,
     accion: { dur: 4.2, pregunta: '¿LO HACÍAS BIEN?', vo: '¿Lo hacías bien? Coméntalo, compártelo con tu compañero de gym y guárdalo.' }
   });
 })(window);

@@ -231,7 +231,7 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
   var ESCENAS = [{
     nombre: 'Gancho',
     dur: 3,
-    vo: 'No llores más por tu ex.',
+    vo: 'Deja de llorar por tu ex.',
     C: E3.escena({
       tomas: [[0, {
         az: 18,
@@ -322,7 +322,7 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
   }, {
     nombre: 'Cortisol',
     dur: 5,
-    vo: 'El despecho te sube el cortisol, duermes peor y comes peor: así se pierde músculo.',
+    vo: 'El despecho te sube el cortisol, duermes peor y comes peor. Por consecuencia, pierdes músculo.',
     C: E3.escena({
       tomas: [[0, {
         az: -12,
@@ -415,8 +415,9 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
   }, {
     nombre: 'Pre-entreno',
     dur: 5,
-    vo: 'Aunque dicen que acordarte de tu ex es el mejor pre-entreno que existe.',
+    vo: 'Algunas personas dicen que acordarte de tu ex es el mejor pre-entreno que existe.',
     C: E3.escena({
+      escenario: 'gym',
       tomas: [[0, {
         az: 20,
         el: 6,
@@ -556,8 +557,9 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
   }, {
     nombre: 'Adictos al gym',
     dur: 4.6,
-    vo: 'Por algo, después de una ruptura, todos se vuelven adictos al gimnasio.',
+    vo: 'Por alguna razón, todos después de una ruptura se vuelven adictos al gimnasio.',
     C: E3.escena({
+      escenario: 'gym',
       tomas: [[0, {
         az: 14,
         el: 6,
@@ -607,8 +609,9 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
   }, {
     nombre: 'Úsalo a tu favor',
     dur: 4.8,
-    vo: 'Úsalo a tu favor: entrena con todo, pero descansa, come bien y duerme.',
+    vo: 'Usa ese dolor a tu favor, entrenando con todo, descansando bien, comiendo bien y durmiendo bien.',
     C: E3.escena({
+      escenario: 'gym',
       tomas: [[0, {
         az: -16,
         el: 6,
@@ -696,7 +699,7 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
   }, {
     nombre: 'A entrenar',
     dur: 5.2,
-    vo: 'Y cuando veas su foto... apaga el celular, y a entrenar.',
+    vo: 'Cuando te acuerdes de él o de ella viendo sus fotos, apaga el celular y ponte a entrenar.',
     C: E3.escena({
       tomas: [[0, {
         az: 16,
@@ -831,13 +834,17 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
   }];
   global.REELS.registrar({
     id: 'ex-3d',
+    escenario: {
+      'tipo': 'casa',
+      'noche': true
+    },
     titulo: 'No llores más por tu ex (Tor 3D)',
     estilo: 2,
     escenas: ESCENAS,
     accion: {
       dur: 4.2,
       pregunta: '¿CONOCES A UN DESPECHADO?',
-      vo: 'Mándaselo a ese amigo despechado, y guarda este video.'
+      vo: 'Mándale este video a ese amigo despechado.'
     }
   });
 })(window);

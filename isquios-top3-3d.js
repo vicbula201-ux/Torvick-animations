@@ -114,7 +114,7 @@
   var ESCENAS = [{
     nombre: 'Gancho',
     dur: 2.6,
-    vo: 'Los 3 mejores ejercicios de isquiotibiales según la ciencia.',
+    vo: 'Hello, mis amores, estos son los 3 mejores ejercicios de isquiotibiales según la ciencia.',
     C: E3.gancho({
       musculo: 'ISQUIOS',
       musc: {
@@ -147,7 +147,7 @@
   }, {
     nombre: '1. Curl femoral sentado',
     dur: 2.2,
-    vo: 'Uno: curl femoral sentado, crece más que acostado.',
+    vo: 'Uno, curl femoral sentado.',
     C: E3.ejercicio({
       n: 1,
       r1: 'CURL FEMORAL *SENTADO*',
@@ -190,7 +190,7 @@
   }, {
     nombre: '2. Peso muerto rumano',
     dur: 2.2,
-    vo: 'Dos: peso muerto rumano, llevando la cadera atrás.',
+    vo: 'Dos, peso muerto rumano.',
     C: E3.ejercicio({
       n: 2,
       r1: 'PESO MUERTO *RUMANO*',
@@ -238,7 +238,7 @@
   }, {
     nombre: '3. Curl nórdico',
     dur: 2.2,
-    vo: 'Tres: curl nórdico, bajando lento.',
+    vo: 'Tres, curl nórdico.',
     C: E3.ejercicio({
       n: 3,
       r1: 'CURL *NÓRDICO*',
@@ -296,8 +296,9 @@
     escenas: ESCENAS,
     accion: {
       dur: 3.6,
-      pregunta: '¿CUÁL PROBARÁS?',
-      vo: '¿Cuál vas a probar? Coméntalo, compártelo con una amiga y guárdalo.'
-    }
+      pregunta: '¿ESTÁS DE ACUERDO?',
+      vo: '¿Estás de acuerdo con este top? Deja tu opinión en los comentarios, guarda el video y comparte el video con una amiguita.'
+    },
+    cierreVo: '¿Quieres ver más videos similares? Sigue a mi novio Tor para más contenido. Bye.'
   });
 })(window);

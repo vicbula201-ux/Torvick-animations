@@ -109,7 +109,7 @@
   var ESCENAS = [{
     nombre: 'Gancho',
     dur: 2.6,
-    vo: 'Estás haciendo mal tu remo con mancuerna.',
+    vo: 'Estás haciendo mal tu remo serrucho.',
     C: E3.escena({
       tomas: [[0, {
         az: 48,
@@ -166,7 +166,7 @@
   }, {
     nombre: 'Posición',
     dur: 5,
-    vo: 'Rodilla y mano del mismo lado en el banco, el otro pie en el piso y la espalda neutra.',
+    vo: 'Pon tu rodilla y mano del mismo lado en el banco, el otro pie en el piso y la espalda neutra.',
     C: E3.escena({
       tomas: [[0, {
         az: -58,
@@ -320,7 +320,7 @@
   }, {
     nombre: 'Músculos',
     dur: 4.5,
-    vo: 'Trabaja el dorsal ancho; ayudan los romboides, el bíceps y el hombro de atrás.',
+    vo: 'El músculo principal involucrado es el dorsal ancho, con ayuda de los romboides, el bíceps y el hombro de atrás.',
     C: E3.escena({
       tomas: [[0, {
         az: 128,
@@ -372,7 +372,7 @@
   }, {
     nombre: 'Error 1',
     dur: 4.5,
-    vo: 'Error uno: curvar la espalda. Mantenla neutra todo el ejercicio.',
+    vo: 'No curves tu espalda. Siempre mantenla neutra durante todo el recorrido.',
     C: E3.escena({
       tomas: [[0, {
         az: 86,
@@ -444,7 +444,7 @@
   }, {
     nombre: 'Error 2',
     dur: 4.5,
-    vo: 'Error dos: dejar quietos los omóplatos. Estira abajo y júntalos arriba.',
+    vo: 'No dejes quietos los omóplatos, estíralos hacia abajo y luego júntalos arriba.',
     C: E3.escena({
       tomas: [[0, {
         az: 150,
@@ -514,7 +514,7 @@
   }, {
     nombre: 'Cierre',
     dur: 3,
-    vo: 'Así se hace: espalda neutra y el codo hacia la cadera.',
+    vo: 'Así se hace el remo con mancuerna.',
     C: E3.escena({
       tomas: [[0, {
         az: 40,

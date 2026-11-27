@@ -66,7 +66,7 @@
         <svg width={W + sh + 4} height={H + sh + 4} style={{ display: 'block', overflow: 'visible' }}>
           <defs><clipPath id={id}><path d={forma(0, 0)} /></clipPath></defs>
           <path d={forma(sh * kS, sh * kS)} fill={acento} opacity={clamp(kS * 1.4, 0, 1)} />
-          <path d={forma(0, 0)} fill={C.INK} />
+          <path d={forma(0, 0)} fill={C.INK} stroke="#ffffff" strokeWidth={3 * s} strokeOpacity={kF} />
           <g clipPath={'url(#' + id + ')'}>
             <text y={H / 2 + px * 0.36 + (1 - kT) * 40} fontFamily="'Barlow Semi Condensed', sans-serif" fontWeight={800}
               fontSize={px} letterSpacing={esp} opacity={kT}>
@@ -307,6 +307,15 @@
     return Object.assign({}, m, { x: x, y: y });
   }
 
+  // escenario de la escena: vista() -> o.escenario -> el del video (REELS.registrar({ escenario })) -> 'gym'
+  // (false = el lienzo blanco de antes)
+  function escenarioDe(o, info, props) {
+    if (global.E3_ESCENARIO) return global.E3_ESCENARIO;   // para probar un escenario en cualquier video
+    if (info.escenario !== undefined) return info.escenario;
+    if (o.escenario !== undefined) return o.escenario;
+    if (props.escenario !== undefined) return props.escenario;
+    return 'gym';
+  }
   function escena(o) {
     var cache = {};
     return function Escena(props) {
@@ -315,6 +324,8 @@
       var t = clamp((T - at) / dur, 0, 1);
       var a0 = armarVista(o, T, f, t), info = a0.info, vt = a0.vt;
       vt.camara = camara(o.tomas, t, T, o.acerca);
+      // el escenario: el de la escena (o.escenario o el que devuelve vista), si no el del video (registrar), si no el gimnasio
+      vt.escenario = escenarioDe(o, info, props);
       var caja = null;
       if (o.encuadre !== false) {
         vt.camara = aplicarAjuste(vt.camara, ajusteEscena(o, at, dur, cache), t);
@@ -349,7 +360,7 @@
             return <A.Mal key={'m' + i} T={T} cuando={f(m.cuando)} hasta={m.hasta == null ? null : f(m.hasta)} x={m.x} y={m.y} s={m.s || 0.5} />;
           })}
           {bien.map(function (b, i) {
-            return <A.Bien key={'b' + i} T={T} cuando={f(b.cuando)} hasta={b.hasta == null ? null : f(b.hasta)} x={b.x} y={b.y} s={b.s || 0.55} fase={i * 0.4} />;
+            return <A.Bien key={'b' + i} T={T} cuando={f(b.cuando)} hasta={b.hasta == null ? null : f(b.hasta)} x={b.x} y={b.y} s={b.s || 0.55} fase={i * 0.4} borde={vt.escenario ? true : undefined} />;
           })}
           {rot(o.r1, 0)}
           {rot(o.r2, 1)}

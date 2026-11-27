@@ -44,7 +44,7 @@ const FUENTES = [
   'gluteos-top3-3d.jsx', 'isquios-top3-3d.jsx', 'cuadriceps-top3-3d.jsx',
   'cerveza-3d.jsx', 'ex-3d.jsx', 'vape-3d.jsx', 'chatarra-3d.jsx', 'novato-avanzado-3d.jsx', 'tabla-nutricional-3d.jsx',
   'plancha-3d.jsx', 'abduccion-3d.jsx', 'curl-mancuernas-3d.jsx', 'peso-muerto-3d.jsx',
-  'peptidos-3d.jsx', 'creatina-3d.jsx', 'calistenia-gym-3d.jsx', 'remo-serrucho-3d.jsx', 'pesado-liviano.jsx', 'fallo.jsx', 'cardio-musculo.jsx', 'maquinas-libre.jsx', 'parciales.jsx', 'tor-passa.jsx',
+  'peptidos-3d.jsx', 'creatina-3d.jsx', 'calistenia-gym-3d.jsx', 'remo-serrucho-3d.jsx', 'fondos-3d.jsx', 'triceps-polea-3d.jsx', 'hierro-3d.jsx', 'grasas-3d.jsx', 'carbohidratos-3d.jsx', 'pesado-liviano.jsx', 'fallo.jsx', 'cardio-musculo.jsx', 'maquinas-libre.jsx', 'parciales.jsx', 'tor-passa.jsx',
   'largo.jsx', 'largo-iconos.jsx', 'largo-plantillas.jsx'
 ];
 

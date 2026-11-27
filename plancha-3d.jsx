@@ -63,7 +63,7 @@
         r1: { text: '*PLANCHA*', s: 1.3, cuando: 0.02, tono: 'rojo' }
       }) },
 
-    { nombre: 'Posición', dur: 5.5, vo: 'Apóyate en los antebrazos, con los codos justo debajo de los hombros y los pies juntos.',
+    { nombre: 'Posición', dur: 5.5, vo: 'Apoya tus antebrazos en el suelo con los codos justo debajo de los hombros y tus pies manténlos juntos.',
       C: E3.escena({
         tomas: [[0, LADO], [0.16, { az: 80, el: 8, dist: 3.2, y: 0.32, dz: 0.35 }], [0.46, { az: 84, el: 8, dist: 3.2, y: 0.32, dz: 0.35 }],
           [0.6, { az: 120, el: 14, dist: 3.4, y: 0.28, dz: -0.8 }], [0.86, { az: 128, el: 14, dist: 3.4, y: 0.28, dz: -0.8 }], [1, LADO]],
@@ -101,7 +101,7 @@
         r2: { text: 'DE CABEZA A *TALONES*', cuando: 0.48 }
       }) },
 
-    { nombre: 'Core', dur: 4.5, vo: 'Aprieta el abdomen y aguanta: trabajan el recto, los oblicuos y el transverso.',
+    { nombre: 'Core', dur: 4.5, vo: 'Aprieta el abdomen y aguanta todo lo que puedas. El músculo principal involucrado es el recto, con ayuda de los oblicuos y el transverso.',
       C: E3.escena({
         tomas: [[0, { az: 70, el: 3, dist: 3.4, y: 0.32, dz: -0.1 }], [0.55, { az: 58, el: 3, dist: 3.4, y: 0.32, dz: -0.1 }], [1, { az: 50, el: 6, dist: 4.4, y: 0.34, dz: -0.15 }]],
         vista: function (T, f) {
@@ -126,7 +126,7 @@
         r2: { text: '+ OBLICUOS Y *TRANSVERSO*', s: 0.95, cuando: 0.5 }
       }) },
 
-    { nombre: 'Error 1', dur: 4.5, vo: 'Error uno: dejar caer la cadera o subirla. Hombros, cadera y tobillos alineados.',
+    { nombre: 'Error 1', dur: 4.5, vo: 'No dejes caer tu cadera o la subas mucho. Siempre mantén tus hombros, cadera y tobillos alineados durante el ejercicio.',
       C: E3.escena({
         tomas: [[0, { az: 84, el: 8, dist: 6.0, y: 0.38, dz: -0.2 }], [1, { az: 76, el: 10, dist: 6.2, y: 0.4, dz: -0.2 }]],
         vista: function (T, f) {
@@ -143,7 +143,7 @@
         r2: { text: 'TODO *ALINEADO*', s: 1.1, cuando: 0.52, tono: 'verde' }
       }) },
 
-    { nombre: 'Error 2', dur: 4, vo: 'Error dos: soltar el abdomen. Mantén la tensión todo el tiempo.',
+    { nombre: 'Error 2', dur: 4, vo: 'No dejes de apretar el abdomen. Siempre mantén la tensión todo el tiempo.',
       C: E3.escena({
         tomas: [[0, { az: 60, el: 4, dist: 5.0, y: 0.34, dz: -0.15 }], [1, { az: 68, el: 8, dist: 5.4, y: 0.36, dz: -0.15 }]],
         vista: function (T, f) {
@@ -163,7 +163,7 @@
         r2: { text: 'SIEMPRE EN *TENSIÓN*', cuando: 0.52, tono: 'verde' }
       }) },
 
-    { nombre: 'Cierre', dur: 2.5, vo: 'Así se hace. Calidad antes que tiempo.',
+    { nombre: 'Cierre', dur: 2.5, vo: 'Así se hacen las planchas.',
       C: E3.escena({
         tomas: [[0, { az: 40, el: 14, dist: 5.6, y: 0.42, dz: -0.15 }], [1, { az: 96, el: 10, dist: 6.2, y: 0.4, dz: -0.2 }]],
         golpes: [0.3],
@@ -176,7 +176,7 @@
   ];
 
   global.REELS.registrar({
-    id: 'plancha-3d', titulo: 'Plancha (Tor 3D)', estilo: 2, escenas: ESCENAS,
+    id: 'plancha-3d', escenario: 'parque', titulo: 'Plancha (Tor 3D)', estilo: 2, escenas: ESCENAS,
     accion: { dur: 3.2, pregunta: '¿QUIERES VER MÁS?', vo: '¿Quieres ver más videos similares?' },
     cierreVo: 'Sígueme para más contenido.'
   });

@@ -147,7 +147,7 @@
     if (props.hasta != null) e = junta(e, sale(props.T, props.hasta));
     return (
       <Pos x={props.x} y={props.y} e={e} dy={M.life(props.T, 2.8, 6, props.fase || 0)}>
-        <P.Visto s={props.s || 0.6} p={M.draw(props.T, props.cuando, 0.4)} />
+        <P.Visto s={props.s || 0.6} p={M.draw(props.T, props.cuando, 0.4)} borde={props.borde} />
       </Pos>
     );
   }
@@ -202,7 +202,7 @@
           position: 'absolute', left: 0, top: 0, width: ANCHO, height: ALTO, opacity: op,
           transformOrigin: '50% 45%', transform: tr
         }}>
-          <Esc T={T} at={at} dur={e.dur} i={i} limites={limites} durs={durs} />
+          <Esc T={T} at={at} dur={e.dur} i={i} limites={limites} durs={durs} escenario={props.escenario} />
         </div>
       );
     });
@@ -370,7 +370,7 @@
           return <Guion api={api} escenas={escenas} durs={durs} setDurs={setDurs}
             defecto={durDefecto(def)} render={modoRender} estilo={def.estilo} />;
         }}>
-        <Reel escenas={escenas} estilo={def.estilo} />
+        <Reel escenas={escenas} estilo={def.estilo} escenario={def.escenario} />
       </global.Stage>
     );
   }

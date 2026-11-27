@@ -65,7 +65,7 @@
   var PAQUETES = [[600, 400], [810, 380], [620, 620], [820, 600]];
 
   var ESCENAS = [
-    { nombre: 'Gancho', dur: 3, vo: 'No fumes más vape.',
+    { nombre: 'Gancho', dur: 3, vo: 'Deja de fumar vape de una puta vez.',
       C: E3.escena({
         tomas: [[0, { az: 20, el: 6, dist: 3.4, y: 1.6 }], [1, { az: 12, el: 5, dist: 6.6, y: 1.2 }]],
         golpes: TOSES,
@@ -86,7 +86,7 @@
         r2: { text: '¡COF, COF!', s: 1.15, cuando: 0.56 }
       }) },
 
-    { nombre: 'No es vapor de agua', dur: 5.6, vo: 'No es vapor de agua: lleva nicotina, metales y partículas que llegan al fondo de tus pulmones.',
+    { nombre: 'No es vapor de agua', dur: 5.6, vo: 'Entiende que el vape no es vapor de agua con sabor. Lleva nicotina, metales y partículas que llegan al fondo de tus pulmones.',
       C: E3.escena({
         tomas: [[0, { az: -10, el: 4, dist: 10.0, y: 2.5, dx: -1.0 }], [1, { az: -4, el: 4, dist: 10.2, y: 2.45, dx: -1.0 }]],
         vista: function (T, f) {
@@ -104,7 +104,7 @@
         r2: { text: '*NICOTINA* Y METALES', s: 1.05, cuando: 0.5 }
       }) },
 
-    { nombre: 'Engancha', dur: 5, vo: 'Y engancha: un solo vape puede traer la nicotina de varias cajetillas de cigarros.',
+    { nombre: 'Engancha', dur: 5, vo: 'El vape puede ser más adictivo que el cigarro. Un solo vape puede traer la nicotina de varias cajetillas de cigarro.',
       C: E3.escena({
         tomas: [[0, { az: 14, el: 4, dist: 9.4, y: 2.2, dx: 0.85 }], [1, { az: 24, el: 4, dist: 9.0, y: 2.2, dx: 0.85 }]],
         vista: function (T, f) {
@@ -126,7 +126,7 @@
         r2: { text: '1 VAPE = *VARIAS CAJETILLAS*', s: 0.88, cuando: 0.5 }
       }) },
 
-    { nombre: 'Tu cuerpo', dur: 4.6, vo: 'Resultado: más tos, el pulso acelerado y menos aire cuando entrenas.',
+    { nombre: 'Tu cuerpo', dur: 4.6, vo: '¿Cuál es el resultado? Más tos, más pulso acelerado y menos aire cuando entrenas.',
       C: E3.escena({
         tomas: [[0, { az: -16, el: 6, dist: 8.6, y: 1.6, dx: 0 }], [1, { az: -6, el: 6, dist: 8.8, y: 1.6, dx: 0 }]],
         golpes: [0.2, 0.5],
@@ -157,7 +157,7 @@
         r2: { text: 'MENOS AIRE AL *ENTRENAR*', s: 0.95, cuando: 0.5 }
       }) },
 
-    { nombre: '¿Mejor que el cigarro?', dur: 5.6, vo: '¿Mejor que el cigarro? Quizá menos tóxico, pero engancha igual o más. Ninguno te conviene.',
+    { nombre: '¿Mejor que el cigarro?', dur: 5.6, vo: '¿El vape es mejor que el cigarro? Quizás sea menos tóxico que el cigarro, pero engancha igual o peor que el cigarro. Simplemente ninguna de las dos te conviene.',
       C: E3.escena({
         tomas: [[0, { az: 6, el: 4, dist: 8.8, y: 2.05 }], [1, { az: 16, el: 4, dist: 8.6, y: 2.05 }]],
         vista: function () { return { figuras: [{ quien: 'tor', pose: hombrosArriba(), cara: { boca: 'ondulada', cejas: 'alzadas' } }] }; },
@@ -176,7 +176,7 @@
         r2: { text: 'NINGUNO ES *SANO*', s: 1.1, cuando: 0.66, tono: 'rojo' }
       }) },
 
-    { nombre: 'Al tacho', dur: 5, vo: 'Así que ya sabes: el vape, a la basura. Tus pulmones te lo van a agradecer.',
+    { nombre: 'Al tacho', dur: 5, vo: 'Así que ya sabes, deja el vape y tíralo a la basura, tus pulmones te lo van a agradecer.',
       C: E3.escena({
         tomas: [[0, { az: -18, el: 8, dist: 7.2, y: 1.2, dx: -0.3 }], [0.56, { az: -12, el: 8, dist: 7.4, y: 1.15, dx: -0.35 }], [1, { az: -4, el: 6, dist: 7.6, y: 1.15, dx: -0.35 }]],
         golpes: [0.52],
@@ -229,7 +229,7 @@
   ];
 
   global.REELS.registrar({
-    id: 'vape-3d', titulo: 'No fumes más vape (Tor 3D)', estilo: 2, escenas: ESCENAS,
-    accion: { dur: 4.2, pregunta: '¿QUIÉN NO SUELTA EL VAPE?', vo: 'Mándaselo al amigo que no suelta el vape, y guarda este video.' }
+    id: 'vape-3d', escenario: 'calle', titulo: 'No fumes más vape (Tor 3D)', estilo: 2, escenas: ESCENAS,
+    accion: { dur: 4.2, pregunta: '¿QUIÉN NO SUELTA EL VAPE?', vo: 'Guarda este video y mándaselo a aquel amigo que sabe que no suelta el vape y no ha podido dejar el vicio.' }
   });
 })(window);

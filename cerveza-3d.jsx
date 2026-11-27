@@ -92,7 +92,7 @@
   for (var i = 0; i < 6; i++) JARRAS.push([50 + (i % 3) * 190, i < 3 ? 360 : 560]);
 
   var ESCENAS = [
-    { nombre: 'Gancho', dur: 2.8, vo: 'Deja de tomar cerveza.',
+    { nombre: 'Gancho', dur: 2.8, vo: 'No tomes más cerveza.',
       C: E3.escena({
         tomas: [[0, { az: 22, el: 10, dist: 3.8, y: 1.6, dx: 0.1 }], [1, { az: 14, el: 5, dist: 6.6, y: 1.3, dx: 0.15 }]],
         vista: function (T, f) {
@@ -114,8 +114,8 @@
         r2: { text: '¡HIP!', s: 1.15, cuando: 0.3 }
       }) },
 
-    { nombre: 'Músculo', dur: 5.2, vo: 'Beber fuerte después de entrenar frena la construcción de músculo: un 24 % menos en un estudio.',
-      C: E3.escena({
+    { nombre: 'Músculo', dur: 5.2, vo: 'Beber fuerte después de entrenar frena la construcción muscular, un 24 % menos según un estudio.',
+      C: E3.escena({ escenario: 'gym',
         tomas: [[0, { az: 12, el: 6, dist: 6.4, y: 1.25 }], [0.5, { az: 24, el: 6, dist: 5.8, y: 1.32 }], [1, { az: 8, el: 4, dist: 6.8, y: 1.15 }]],
         vista: function (T, f) {
           var gris = animate({ from: 0, to: 1, start: f(0.46), end: f(0.62) })(T);
@@ -139,8 +139,8 @@
         r2: { text: '*24 %* MENOS SÍNTESIS', s: 1.0, cuando: 0.58, tono: 'rojo' }
       }) },
 
-    { nombre: 'Sueño', dur: 4.8, vo: 'Te duerme rápido, pero arruina la calidad de tu sueño: amaneces cansado y sin recuperar.',
-      C: E3.escena({
+    { nombre: 'Sueño', dur: 4.8, vo: 'La cerveza te duerme rápido y arruina la calidad de tu sueño. Amaneciendo cansado y sin estar recuperado totalmente.',
+      C: E3.escena({ escenario: {'tipo': 'casa', 'noche': true},
         tomas: [[0, { az: 12, el: 14, dist: 6.6, y: 1.05, dz: -0.35 }], [1, { az: 24, el: 16, dist: 6.0, y: 1.05, dz: -0.4 }]],
         vista: function (T, f) {
           A.sonido('campana', f(0.74));
@@ -166,7 +166,7 @@
         r2: { text: 'AMANECES SIN *RECUPERAR*', s: 0.92, cuando: 0.58 }
       }) },
 
-    { nombre: 'Calorías', dur: 4.8, vo: 'Y son calorías vacías: seis cervezas suman unas 900, como una hamburguesa con papas.',
+    { nombre: 'Calorías', dur: 4.8, vo: 'Las cervezas te aportan solo calorías vacías. Seis cervezas suman unas 900 calorías vacías. Lo equivalente a una hamburguesa con papas.',
       C: E3.escena({
         tomas: [[0, { az: 16, el: 6, dist: 8.2, y: 1.55, dx: 0 }], [1, { az: 26, el: 6, dist: 7.8, y: 1.5, dx: 0 }]],
         vista: function (T, f) {
@@ -199,7 +199,7 @@
         r2: { text: '6 CERVEZAS = *900 KCAL*', s: 0.95, cuando: 0.56 }
       }) },
 
-    { nombre: 'Si te pasas', dur: 3.6, vo: 'Y si te pasas... ya sabes cómo termina la noche.',
+    { nombre: 'Si te pasas', dur: 3.6, vo: '¿Y qué pasa si te pasas de cervezas? Pues ya sabes cómo va a terminar la noche. Muy mal, vomitando.',
       C: E3.escena({
         tomas: [[0, { az: 30, el: 10, dist: 3.8, y: 1.3 }], [0.4, { az: 40, el: 10, dist: 4.6, y: 1.15 }], [1, { az: 46, el: 8, dist: 5.8, y: 1.05 }]],
         golpes: [0.44, 0.7],
@@ -247,7 +247,7 @@
         r2: { text: 'MALA *IDEA*', s: 1.1, cuando: 0.5, tono: 'rojo' }
       }) },
 
-    { nombre: 'La última', dur: 5, vo: 'Y cuando te ofrezcan «la última»... ¡no, gracias! Tu cuerpo te lo va a agradecer.',
+    { nombre: 'La última', dur: 5, vo: 'Y cuando tus amigos te ofrezcan la última cerveza, di no gracias. Tu cuerpo te lo va a agradecer.',
       C: E3.escena({
         tomas: [[0, { az: -14, el: 6, dist: 6.4, y: 1.25, dx: 0.25 }], [0.4, { az: -6, el: 6, dist: 6.6, y: 1.25, dx: 0.2 }], [1, { az: -10, el: 5, dist: 6.2, y: 1.2, dx: 0.05 }]],
         golpes: [0.41],
@@ -297,7 +297,7 @@
   ];
 
   global.REELS.registrar({
-    id: 'cerveza-3d', titulo: 'Deja de tomar cerveza (Tor 3D)', estilo: 2, escenas: ESCENAS,
-    accion: { dur: 4.2, pregunta: '¿A QUIÉN SE LO MANDAS?', vo: 'Mándaselo al amigo que siempre dice «una y ya», y guarda este video.' }
+    id: 'cerveza-3d', escenario: {'tipo': 'calle', 'noche': true}, titulo: 'Deja de tomar cerveza (Tor 3D)', estilo: 2, escenas: ESCENAS,
+    accion: { dur: 4.2, pregunta: '¿A QUIÉN SE LO MANDAS?', vo: 'Mándaselo a aquel amigo borracho que siempre dice una más y nos vamos.' }
   });
 })(window);

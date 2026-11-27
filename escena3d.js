@@ -117,7 +117,10 @@
       opacity: clamp(kS * 1.4, 0, 1)
     }), /*#__PURE__*/React.createElement("path", {
       d: forma(0, 0),
-      fill: C.INK
+      fill: C.INK,
+      stroke: "#ffffff",
+      strokeWidth: 3 * s,
+      strokeOpacity: kF
     }), /*#__PURE__*/React.createElement("g", {
       clipPath: 'url(#' + id + ')'
     }, /*#__PURE__*/React.createElement("text", {
@@ -575,6 +578,16 @@
       y: y
     });
   }
+
+  // escenario de la escena: vista() -> o.escenario -> el del video (REELS.registrar({ escenario })) -> 'gym'
+  // (false = el lienzo blanco de antes)
+  function escenarioDe(o, info, props) {
+    if (global.E3_ESCENARIO) return global.E3_ESCENARIO; // para probar un escenario en cualquier video
+    if (info.escenario !== undefined) return info.escenario;
+    if (o.escenario !== undefined) return o.escenario;
+    if (props.escenario !== undefined) return props.escenario;
+    return 'gym';
+  }
   function escena(o) {
     var cache = {};
     return function Escena(props) {
@@ -589,6 +602,8 @@
         info = a0.info,
         vt = a0.vt;
       vt.camara = camara(o.tomas, t, T, o.acerca);
+      // el escenario: el de la escena (o.escenario o el que devuelve vista), si no el del video (registrar), si no el gimnasio
+      vt.escenario = escenarioDe(o, info, props);
       var caja = null;
       if (o.encuadre !== false) {
         vt.camara = aplicarAjuste(vt.camara, ajusteEscena(o, at, dur, cache), t);
@@ -686,7 +701,8 @@
           x: b.x,
           y: b.y,
           s: b.s || 0.55,
-          fase: i * 0.4
+          fase: i * 0.4,
+          borde: vt.escenario ? true : undefined
         });
       }), rot(o.r1, 0), rot(o.r2, 1), o.sobreRot ? o.sobreRot(T, f, t, pr, info) : null);
     };

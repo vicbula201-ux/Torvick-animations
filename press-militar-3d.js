@@ -141,7 +141,7 @@
   }, {
     nombre: 'Posición',
     dur: 5,
-    vo: 'Siéntate con la espalda recta y apoyada, y una mancuerna en cada mano a la altura de los hombros.',
+    vo: 'Siéntate en el banco con la espalda recta y apoyada y una mancuerna en cada mano a la altura de los hombros.',
     C: E3.escena({
       tomas: [[0, {
         az: 62,
@@ -278,7 +278,7 @@
   }, {
     nombre: 'Músculos',
     dur: 4.5,
-    vo: 'Trabaja el deltoides anterior y lateral; ayudan el pecho, el serrato y el tríceps.',
+    vo: 'El músculo principal involucrado es el deltoides anterior y lateral. Con ayuda del pectoral, el serrato y el tríceps.',
     C: E3.escena({
       tomas: [[0, {
         az: 30,
@@ -333,7 +333,7 @@
   }, {
     nombre: 'Error 1',
     dur: 4.5,
-    vo: 'Error uno: encoger los hombros hacia las orejas. Bájalos y empuja.',
+    vo: 'No encojas los hombros hacia las orejas durante el recorrido. Siempre bájalos y empújalos.',
     C: E3.escena({
       tomas: [[0, {
         az: 16,
@@ -418,7 +418,7 @@
   }, {
     nombre: 'Error 2',
     dur: 4.5,
-    vo: 'Error dos: quedarte a medias. Estira los brazos arriba en cada repetición.',
+    vo: 'Evita quedarte a medias. Siempre estira los brazos hacia arriba en cada repetición.',
     C: E3.escena({
       tomas: [[0, {
         az: -16,
@@ -493,7 +493,7 @@
   }, {
     nombre: 'Cierre',
     dur: 3,
-    vo: 'Así se hace: hombros abajo y el recorrido completo.',
+    vo: 'Así se hace el press militar con mancuernas.',
     C: E3.escena({
       tomas: [[0, {
         az: -30,

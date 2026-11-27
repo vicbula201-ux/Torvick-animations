@@ -115,7 +115,7 @@
   }
 
   var ESCENAS = [
-    { nombre: 'Gancho', dur: 3, vo: 'No llores más por tu ex.',
+    { nombre: 'Gancho', dur: 3, vo: 'Deja de llorar por tu ex.',
       C: E3.escena({
         tomas: [[0, { az: 18, el: 8, dist: 3.6, y: 1.35 }], [1, { az: 10, el: 8, dist: 6.4, y: 1.0 }]],
         vista: function (T) {
@@ -137,7 +137,7 @@
         r2: { text: '¡BUAAA!', s: 1.15, cuando: 0.3 }
       }) },
 
-    { nombre: 'Cortisol', dur: 5, vo: 'El despecho te sube el cortisol, duermes peor y comes peor: así se pierde músculo.',
+    { nombre: 'Cortisol', dur: 5, vo: 'El despecho te sube el cortisol, duermes peor y comes peor. Por consecuencia, pierdes músculo.',
       C: E3.escena({
         tomas: [[0, { az: -12, el: 6, dist: 7.0, y: 1.2, dx: -0.25 }], [1, { az: -4, el: 6, dist: 7.4, y: 1.15, dx: -0.25 }]],
         vista: function (T, f) {
@@ -153,8 +153,8 @@
         r2: { text: 'BAJA EL *MÚSCULO*', s: 1.05, cuando: 0.56, tono: 'rojo' }
       }) },
 
-    { nombre: 'Pre-entreno', dur: 5, vo: 'Aunque dicen que acordarte de tu ex es el mejor pre-entreno que existe.',
-      C: E3.escena({
+    { nombre: 'Pre-entreno', dur: 5, vo: 'Algunas personas dicen que acordarte de tu ex es el mejor pre-entreno que existe.',
+      C: E3.escena({ escenario: 'gym',
         tomas: [[0, { az: 20, el: 6, dist: 3.6, y: 1.55 }], [0.3, { az: 14, el: 6, dist: 3.8, y: 1.55 }], [0.5, { az: 10, el: 4, dist: 7.2, y: 1.3 }], [1, { az: 22, el: 4, dist: 6.8, y: 1.3 }]],
         vista: function (T, f) {
           var rabia = animate({ from: 0, to: 1, start: f(0.2), end: f(0.34) })(T);
@@ -181,8 +181,8 @@
         r2: { text: '¡GRACIAS, *EX*!', s: 1.15, cuando: 0.56 }
       }) },
 
-    { nombre: 'Adictos al gym', dur: 4.6, vo: 'Por algo, después de una ruptura, todos se vuelven adictos al gimnasio.',
-      C: E3.escena({
+    { nombre: 'Adictos al gym', dur: 4.6, vo: 'Por alguna razón, todos después de una ruptura se vuelven adictos al gimnasio.',
+      C: E3.escena({ escenario: 'gym',
         tomas: [[0, { az: 14, el: 6, dist: 8.6, y: 2.05 }], [1, { az: 26, el: 6, dist: 8.2, y: 2.1 }]],
         vista: function (T, f) {
           var k = V.ida(V.fase(T, f(0.36), f(0.98), 3), 0.4, 0.2), entra = T > f(0.3);
@@ -194,8 +194,8 @@
         r2: { text: 'GYM LOS *7 DÍAS*', s: 1.05, cuando: 0.6 }
       }) },
 
-    { nombre: 'Úsalo a tu favor', dur: 4.8, vo: 'Úsalo a tu favor: entrena con todo, pero descansa, come bien y duerme.',
-      C: E3.escena({
+    { nombre: 'Úsalo a tu favor', dur: 4.8, vo: 'Usa ese dolor a tu favor, entrenando con todo, descansando bien, comiendo bien y durmiendo bien.',
+      C: E3.escena({ escenario: 'gym',
         tomas: [[0, { az: -16, el: 6, dist: 6.6, y: 1.25 }], [1, { az: 10, el: 6, dist: 7.0, y: 1.2 }]],
         vista: function (T, f) {
           var fl = 0.3 + 0.7 * Easing.easeOutBack(animate({ from: 0, to: 1, start: f(0.06), end: f(0.3) })(T));
@@ -213,7 +213,7 @@
         r2: { text: 'ENTRENA, COME Y *DUERME*', s: 0.95, cuando: 0.5, tono: 'verde' }
       }) },
 
-    { nombre: 'A entrenar', dur: 5.2, vo: 'Y cuando veas su foto... apaga el celular, y a entrenar.',
+    { nombre: 'A entrenar', dur: 5.2, vo: 'Cuando te acuerdes de él o de ella viendo sus fotos, apaga el celular y ponte a entrenar.',
       C: E3.escena({
         tomas: [[0, { az: 16, el: 8, dist: 4.0, y: 1.3 }], [0.34, { az: 18, el: 8, dist: 4.2, y: 1.3 }], [0.6, { az: 8, el: 6, dist: 7.4, y: 1.1, dx: 0.5 }], [1, { az: 12, el: 6, dist: 7.8, y: 1.1, dx: 0.7 }]],
         vista: function (T, f) {
@@ -257,7 +257,7 @@
   ];
 
   global.REELS.registrar({
-    id: 'ex-3d', titulo: 'No llores más por tu ex (Tor 3D)', estilo: 2, escenas: ESCENAS,
-    accion: { dur: 4.2, pregunta: '¿CONOCES A UN DESPECHADO?', vo: 'Mándaselo a ese amigo despechado, y guarda este video.' }
+    id: 'ex-3d', escenario: {'tipo': 'casa', 'noche': true}, titulo: 'No llores más por tu ex (Tor 3D)', estilo: 2, escenas: ESCENAS,
+    accion: { dur: 4.2, pregunta: '¿CONOCES A UN DESPECHADO?', vo: 'Mándale este video a ese amigo despechado.' }
   });
 })(window);

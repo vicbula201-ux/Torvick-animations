@@ -1,7 +1,7 @@
 /* ============================================================
    TOP 3 PECHO SEGUN LA CIENCIA — TOR EN 3D (mismo guion que pecho-top3.jsx)
    1. Press de banca con mancuernas (recorrido completo: Pallares y cols., 2021).
-   2. Press inclinado a ~30° (pecho alto: Rodriguez-Ridao y cols., 2020).
+   2. Press inclinado a ~30° con barra (pecho alto: Rodriguez-Ridao y cols., 2020; Victor lo grabo "con barra").
    3. Fondos en paralelas con el tronco adelante.
    ============================================================ */
 (function (global) {
@@ -21,11 +21,12 @@
     [-1, 1].forEach(function (s) { lado(p, s, E3.lerp3([s * 0.52, 0.8, -0.16], [s * 0.24, 1.44, -0.18], e), [0.7, 0, -1]); });
     return p;
   }
-  /* 2. inclinado a 30° */
+  /* 2. inclinado a 30° con barra (las manos fijas en la barra, un poco mas anchas que los hombros) */
+  function manoBarra(k) { var e = Easing.easeInOutSine(clamp(k, 0, 1)); return E3.lerp3([0, 1.1, -0.3], [0, 1.68, -0.1], e); }
   function inclinado(k) {
-    var e = Easing.easeInOutSine(clamp(k, 0, 1));
     var p = { cadera: [0, 0.64, 0.09], tronco: [-60, 0, 0], pieI: [-0.32, 0.115, 0.78], pieD: [0.32, 0.115, 0.78], cabeza: [-6, 0, 0] };
-    [-1, 1].forEach(function (s) { lado(p, s, E3.lerp3([s * 0.52, 1.06, -0.36], [s * 0.24, 1.66, -0.12], e), [0.7, 0, -1]); });
+    var c = manoBarra(k);
+    [-1, 1].forEach(function (s) { lado(p, s, [s * 0.42, c[1], c[2]], [0.7, 0, -1]); });
     return p;
   }
   /* 3. fondos: las manos en las barras; k 0 abajo (tronco adelante) .. 1 arriba */
@@ -41,9 +42,9 @@
   }
 
   var ESCENAS = [
-    { nombre: 'Gancho', dur: 2.6, vo: 'Los 3 mejores ejercicios de pecho según la ciencia.',
+    { nombre: 'Gancho', dur: 2.6, vo: 'Top 3 ejercicios de pecho según la ciencia.',
       C: E3.gancho({ musculo: 'PECHO', musc: { pecho: true, deltoides: 'claro' }, brillo: PECHO, flex: 0.75 }) },
-    { nombre: '1. Press de banca', dur: 2.2, vo: 'Uno: press de banca con mancuernas, bajando bien.',
+    { nombre: '1. Press de banca', dur: 2.2, vo: 'Uno, press de banca con mancuernas.',
       C: E3.ejercicio({
         n: 1, r1: 'PRESS DE *BANCA*', r2: 'BAJA HASTA *ESTIRAR*', brillo: PECHO,
         tomas: [[0, { az: 58, el: 18, dist: 6.0, y: 0.75, dz: 0.05 }], [1, { az: 40, el: 22, dist: 4.6, y: 0.8, dz: -0.1 }]],
@@ -52,16 +53,16 @@
             objetos: [{ tipo: 'banco', p: [0, 0, 0], largo: 1.25, alto: 0.45 }] };
         }
       }) },
-    { nombre: '2. Press inclinado', dur: 2.2, vo: 'Dos: press inclinado, para la parte alta del pecho.',
+    { nombre: '2. Press inclinado', dur: 2.2, vo: 'Dos. Press inclinado con barra.',
       C: E3.ejercicio({
         n: 2, r1: 'PRESS *INCLINADO*', r2: 'PECHO *ALTO*', brillo: PECHO,
         tomas: [[0, { az: 62, el: 12, dist: 6.2, y: 0.95, dz: -0.05 }], [1, { az: 44, el: 14, dist: 4.8, y: 1.05, dz: -0.15 }]],
         vista: function (T, f, k, kEn) {
-          return { figuras: [{ quien: 'tor', pose: inclinado(k), pesas: 'prono', fantasmas: E3.fantasmas(inclinado, kEn, k), musc: { pecho: true, deltoides: 'claro', triceps: 'gris', brillo: 0.3 * k }, cara: { boca: k > 0.5 ? 'dientes' : 'sonrisa' } }],
-            objetos: [{ tipo: 'banco', p: [0, 0, 0.2], largo: 0.45, alto: 0.45, respaldo: { ang: 30, largo: 1.15 } }] };
+          return { figuras: [{ quien: 'tor', pose: inclinado(k), fantasmas: E3.fantasmas(inclinado, kEn, k), musc: { pecho: true, deltoides: 'claro', triceps: 'gris', brillo: 0.3 * k }, cara: { boca: k > 0.5 ? 'dientes' : 'sonrisa' } }],
+            objetos: [{ tipo: 'banco', p: [0, 0, 0.2], largo: 0.45, alto: 0.45, respaldo: { ang: 30, largo: 1.15 } }, { tipo: 'barra', c: manoBarra(k), eje: [1, 0, 0] }] };
         }
       }) },
-    { nombre: '3. Fondos', dur: 2.2, vo: 'Tres: fondos en paralelas, con el pecho adelante.',
+    { nombre: '3. Fondos', dur: 2.2, vo: 'Tres. Fondos en paralelas.',
       C: E3.ejercicio({
         n: 3, r1: '*FONDOS*', r2: 'PECHO *ADELANTE*', brillo: PECHO,
         tomas: [[0, { az: 48, el: 4, dist: 7.8, y: 1.45, dz: 0 }], [1, { az: 34, el: 2, dist: 6.4, y: 1.62, dz: 0 }]],
@@ -74,6 +75,6 @@
 
   global.REELS.registrar({
     id: 'pecho-top3-3d', titulo: 'Top 3 pecho (Tor 3D)', estilo: 2, escenas: ESCENAS,
-    accion: { dur: 3.3, vo: '¿Estás de acuerdo? Coméntalo, compártelo y guárdalo.' }
+    accion: { dur: 3.3, vo: '¿Estás de acuerdo con este top? Deja tu opinión en los comentarios, guarda el video y compártelo con un amigo.' }
   });
 })(window);

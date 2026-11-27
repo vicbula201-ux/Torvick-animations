@@ -2,7 +2,7 @@
 /* ============================================================
    TOP 3 PECHO SEGUN LA CIENCIA — TOR EN 3D (mismo guion que pecho-top3.jsx)
    1. Press de banca con mancuernas (recorrido completo: Pallares y cols., 2021).
-   2. Press inclinado a ~30° (pecho alto: Rodriguez-Ridao y cols., 2020).
+   2. Press inclinado a ~30° con barra (pecho alto: Rodriguez-Ridao y cols., 2020; Victor lo grabo "con barra").
    3. Fondos en paralelas con el tronco adelante.
    ============================================================ */
 (function (global) {
@@ -33,9 +33,12 @@
     });
     return p;
   }
-  /* 2. inclinado a 30° */
-  function inclinado(k) {
+  /* 2. inclinado a 30° con barra (las manos fijas en la barra, un poco mas anchas que los hombros) */
+  function manoBarra(k) {
     var e = Easing.easeInOutSine(clamp(k, 0, 1));
+    return E3.lerp3([0, 1.1, -0.3], [0, 1.68, -0.1], e);
+  }
+  function inclinado(k) {
     var p = {
       cadera: [0, 0.64, 0.09],
       tronco: [-60, 0, 0],
@@ -43,8 +46,9 @@
       pieD: [0.32, 0.115, 0.78],
       cabeza: [-6, 0, 0]
     };
+    var c = manoBarra(k);
     [-1, 1].forEach(function (s) {
-      lado(p, s, E3.lerp3([s * 0.52, 1.06, -0.36], [s * 0.24, 1.66, -0.12], e), [0.7, 0, -1]);
+      lado(p, s, [s * 0.42, c[1], c[2]], [0.7, 0, -1]);
     });
     return p;
   }
@@ -70,7 +74,7 @@
   var ESCENAS = [{
     nombre: 'Gancho',
     dur: 2.6,
-    vo: 'Los 3 mejores ejercicios de pecho según la ciencia.',
+    vo: 'Top 3 ejercicios de pecho según la ciencia.',
     C: E3.gancho({
       musculo: 'PECHO',
       musc: {
@@ -83,7 +87,7 @@
   }, {
     nombre: '1. Press de banca',
     dur: 2.2,
-    vo: 'Uno: press de banca con mancuernas, bajando bien.',
+    vo: 'Uno, press de banca con mancuernas.',
     C: E3.ejercicio({
       n: 1,
       r1: 'PRESS DE *BANCA*',
@@ -131,7 +135,7 @@
   }, {
     nombre: '2. Press inclinado',
     dur: 2.2,
-    vo: 'Dos: press inclinado, para la parte alta del pecho.',
+    vo: 'Dos. Press inclinado con barra.',
     C: E3.ejercicio({
       n: 2,
       r1: 'PRESS *INCLINADO*',
@@ -155,7 +159,6 @@
           figuras: [{
             quien: 'tor',
             pose: inclinado(k),
-            pesas: 'prono',
             fantasmas: E3.fantasmas(inclinado, kEn, k),
             musc: {
               pecho: true,
@@ -176,6 +179,10 @@
               ang: 30,
               largo: 1.15
             }
+          }, {
+            tipo: 'barra',
+            c: manoBarra(k),
+            eje: [1, 0, 0]
           }]
         };
       }
@@ -183,7 +190,7 @@
   }, {
     nombre: '3. Fondos',
     dur: 2.2,
-    vo: 'Tres: fondos en paralelas, con el pecho adelante.',
+    vo: 'Tres. Fondos en paralelas.',
     C: E3.ejercicio({
       n: 3,
       r1: '*FONDOS*',
@@ -234,7 +241,7 @@
     escenas: ESCENAS,
     accion: {
       dur: 3.3,
-      vo: '¿Estás de acuerdo? Coméntalo, compártelo y guárdalo.'
+      vo: '¿Estás de acuerdo con este top? Deja tu opinión en los comentarios, guarda el video y compártelo con un amigo.'
     }
   });
 })(window);

@@ -72,7 +72,7 @@
   var ESCENAS = [{
     nombre: 'Gancho',
     dur: 2.5,
-    vo: 'Estás haciendo mal tu zancada.',
+    vo: 'Estás haciendo mal tus zancadas con mancuernas.',
     C: E3.escena({
       tomas: [[0, {
         az: 64,
@@ -132,7 +132,7 @@
   }, {
     nombre: 'Posición',
     dur: 5,
-    vo: 'De pie, con los pies al ancho de los hombros y una mancuerna en cada mano, al lado del cuerpo.',
+    vo: 'Ponte de pie con los pies a la anchura de tus hombros y una mancuerna en cada mano al lado del cuerpo.',
     C: E3.escena({
       tomas: [[0, {
         az: 18,
@@ -224,7 +224,7 @@
   }, {
     nombre: 'Ejecución',
     dur: 6,
-    vo: 'Da un paso adelante y baja hasta que el muslo quede paralelo al piso; empuja y vuelve.',
+    vo: 'Da un paso hacia adelante y baja hasta que el muslo quede paralelo al piso. Empuja y vuelve con control.',
     C: E3.escena({
       tomas: [[0, LADO], [0.5, {
         az: 72,
@@ -300,7 +300,7 @@
   }, {
     nombre: 'Músculos',
     dur: 4.5,
-    vo: 'Trabajan el cuádriceps y el glúteo, con ayuda de los isquios y los gemelos.',
+    vo: 'Los músculos principales involucrados son el cuádriceps y el glúteo, con ayuda de los isquiotibiales y los gemelos.',
     C: E3.escena({
       tomas: [[0, {
         az: 62,
@@ -362,7 +362,7 @@
   }, {
     nombre: 'Error 1',
     dur: 4.5,
-    vo: 'Error uno: perder el equilibrio. Tronco firme y la mirada al frente.',
+    vo: 'No pierdas el equilibrio durante el ejercicio. Mantén el tronco neutro y la mirada hacia el frente.',
     C: E3.escena({
       tomas: [[0, {
         az: 30,
@@ -442,7 +442,7 @@
   }, {
     nombre: 'Error 2',
     dur: 4.5,
-    vo: 'Error dos: dejar que la rodilla se vaya hacia adentro. Que apunte hacia tu pie.',
+    vo: 'No dejes que tu rodilla se vaya hacia adentro. Siempre haz que tu rodilla apunte hacia tu pie.',
     C: E3.escena({
       tomas: [[0, {
         az: 6,
@@ -528,7 +528,7 @@
   }, {
     nombre: 'Cierre',
     dur: 3,
-    vo: 'Así se hace: paso firme y el muslo paralelo.',
+    vo: 'Así se hacen las zancadas con mancuernas.',
     C: E3.escena({
       tomas: [[0, {
         az: 140,

@@ -49,10 +49,10 @@
   }
 
   var ESCENAS = [
-    { nombre: 'Gancho', dur: 2.6, vo: 'Los 3 mejores ejercicios de tríceps según la ciencia.',
+    { nombre: 'Gancho', dur: 2.6, vo: 'Top 3 ejercicios de tríceps según la ciencia.',
       C: E3.gancho({ musculo: 'TRÍCEPS', musc: { triceps: true }, brillo: TRI, r: 80,
         tomas: [[0, { az: 200, el: -4, dist: 4.4, y: 1.5 }], [1, { az: 166, el: -6, dist: 6.2, y: 1.25 }]] }) },
-    { nombre: '1. Sobre la cabeza', dur: 2.2, vo: 'Uno: extensión sobre la cabeza, la que más lo hace crecer.',
+    { nombre: '1. Sobre la cabeza', dur: 2.2, vo: 'Uno. Extensión sobre la cabeza.',
       C: E3.ejercicio({
         n: 1, r1: 'SOBRE LA *CABEZA*', r2: 'TRÍCEPS *ESTIRADO*', brillo: TRI, r: 75,
         tomas: [[0, { az: 70, el: 4, dist: 6.8, y: 1.3, dz: -0.1 }], [1, { az: 58, el: 2, dist: 5.4, y: 1.5, dz: 0 }]],
@@ -60,7 +60,7 @@
           return { figuras: [{ quien: 'tor', pose: sobre(k), musc: { triceps: true, brillo: 0.3 * k }, cara: { boca: k > 0.5 ? 'dientes' : 'sonrisa' } }], objetos: [poleaSobre(k)] };
         }
       }) },
-    { nombre: '2. Press francés', dur: 2.2, vo: 'Dos: press francés, con los codos quietos.',
+    { nombre: '2. Press francés', dur: 2.2, vo: 'Dos, press francés.',
       C: E3.ejercicio({
         n: 2, r1: 'PRESS *FRANCÉS*', r2: 'CODOS *QUIETOS*', brillo: TRI, r: 75,
         tomas: [[0, { az: 64, el: 16, dist: 6.0, y: 0.8, dz: 0 }], [1, { az: 48, el: 18, dist: 4.6, y: 0.95, dz: -0.2 }]],
@@ -70,7 +70,7 @@
             objetos: [{ tipo: 'banco', p: [0, 0, 0], largo: 1.25, alto: 0.45 }, { tipo: 'ez', c: m, eje: [1, 0, 0] }] };
         }
       }) },
-    { nombre: '3. Extensión en polea', dur: 2.2, vo: 'Tres: extensión en polea, estirando bien abajo.',
+    { nombre: '3. Extensión en polea', dur: 2.2, vo: 'Tres, extensión en polea.',
       C: E3.ejercicio({
         n: 3, r1: 'EXTENSIÓN EN *POLEA*', r2: 'ESTIRA *ABAJO*', brillo: TRI, r: 75, s1: 1.0,
         tomas: [[0, { az: 64, el: 6, dist: 6.6, y: 1.2, dz: 0.2 }], [1, { az: 48, el: 4, dist: 5.2, y: 1.25, dz: 0.2 }]],
@@ -84,6 +84,6 @@
 
   global.REELS.registrar({
     id: 'triceps-top3-3d', titulo: 'Top 3 tríceps (Tor 3D)', estilo: 2, escenas: ESCENAS,
-    accion: { dur: 3.3, vo: '¿Estás de acuerdo? Coméntalo, compártelo y guárdalo.' }
+    accion: { dur: 3.3, vo: '¿Estás de acuerdo con este top? Deja tu opinión en los comentarios, guarda el video y compártelo con un amigo.' }
   });
 })(window);

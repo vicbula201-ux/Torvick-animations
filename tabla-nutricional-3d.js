@@ -350,7 +350,7 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
   var ESCENAS = [{
     nombre: 'Gancho',
     dur: 3,
-    vo: 'Estás leyendo mal la tabla nutricional.',
+    vo: 'Cómo leer correctamente la tabla nutricional.',
     C: E3.escena({
       ocupa: [OCUPA_TABLA],
       tomas: [[0, {
@@ -408,7 +408,7 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
   }, {
     nombre: 'La porción',
     dur: 5.4,
-    vo: 'Primero, la porción: todos los números son por porción, y el paquete puede traer varias.',
+    vo: 'Primero lee la porción. Todos los números son por porción y el paquete puede traer varias.',
     C: E3.escena({
       ocupa: [OCUPA_TABLA],
       tomas: [[0, CAM], [1, CAM2]],
@@ -457,7 +457,7 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
   }, {
     nombre: 'Calorías y proteína',
     dur: 5,
-    vo: 'Después, las calorías y la proteína: la que te llena y te ayuda a construir músculo.',
+    vo: 'Después están las calorías y las proteínas, la que te llena y la que te ayuda a construir músculo.',
     C: E3.escena({
       ocupa: [OCUPA_TABLA],
       tomas: [[0, CAM2], [1, CAM]],
@@ -513,7 +513,7 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
   }, {
     nombre: 'Azúcares',
     dur: 5.2,
-    vo: 'Ojo con los azúcares añadidos: la OMS recomienda menos de 50 gramos al día.',
+    vo: 'Ten cuidado con los azúcares añadidos. La OMS recomienda menos de 50 gramos al día.',
     C: E3.escena({
       ocupa: [OCUPA_TABLA],
       tomas: [[0, CAM], [1, CAM2]],
@@ -589,7 +589,7 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
   }, {
     nombre: 'Sodio',
     dur: 4.6,
-    vo: 'Y el sodio: menos de 2000 miligramos al día, y aquí una porción ya trae 800.',
+    vo: 'Y el sodio, menos de dos mil miligramos al día. Y aquí una porción ya trae 800.',
     C: E3.escena({
       ocupa: [OCUPA_TABLA],
       tomas: [[0, CAM2], [1, CAM]],
@@ -659,7 +659,7 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
   }, {
     nombre: 'Ingredientes y sellos',
     dur: 5.4,
-    vo: 'Los ingredientes van de mayor a menor: si el azúcar va primero, déjalo. Y fíjate en los sellos negros.',
+    vo: 'Los ingredientes van de mayor a menor. Del que más tiene al que menos tiene. Por ejemplo, si el azúcar va primero, simplemente déjalo a un lado. Y fíjate también en aquellos sellos negros que indican los excesos.',
     C: E3.escena({
       tomas: [[0, {
         az: 8,
@@ -740,7 +740,7 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
   }, {
     nombre: 'Cierre',
     dur: 4.6,
-    vo: 'Así que la próxima vez, lee la etiqueta antes de echarla al carrito.',
+    vo: 'Así que la próxima vez, lee bien la etiqueta nutricional antes de echarla al carrito.',
     C: E3.escena({
       tomas: [[0, CAM], [1, {
         az: -8,
@@ -826,6 +826,7 @@ function _extends() { return _extends = Object.assign ? Object.assign.bind() : f
   }];
   global.REELS.registrar({
     id: 'tabla-nutricional-3d',
+    escenario: 'super',
     titulo: 'Tabla nutricional (Tor 3D)',
     estilo: 2,
     escenas: ESCENAS,

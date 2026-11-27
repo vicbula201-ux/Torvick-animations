@@ -51,7 +51,7 @@
         r1: { text: 'PRESS *MILITAR*', s: 1.15, cuando: 0.02, tono: 'rojo' }
       }) },
 
-    { nombre: 'Posición', dur: 5, vo: 'Siéntate con la espalda recta y apoyada, y una mancuerna en cada mano a la altura de los hombros.',
+    { nombre: 'Posición', dur: 5, vo: 'Siéntate en el banco con la espalda recta y apoyada y una mancuerna en cada mano a la altura de los hombros.',
       C: E3.escena({
         tomas: [[0, { az: 62, el: 6, dist: 6.4, y: 1.08 }], [0.5, { az: 50, el: 6, dist: 6.0, y: 1.1 }], [0.56, { az: 22, el: 8, dist: 4.8, y: 1.3 }], [1, { az: 12, el: 8, dist: 5.2, y: 1.28 }]],
         vista: function () { return cuadro(0, 0, { cara: { boca: 'sonrisa' } }); },
@@ -89,7 +89,7 @@
         r2: { text: 'BAJA *CONTROLADO*', cuando: 0.52 }
       }) },
 
-    { nombre: 'Músculos', dur: 4.5, vo: 'Trabaja el deltoides anterior y lateral; ayudan el pecho, el serrato y el tríceps.',
+    { nombre: 'Músculos', dur: 4.5, vo: 'El músculo principal involucrado es el deltoides anterior y lateral. Con ayuda del pectoral, el serrato y el tríceps.',
       C: E3.escena({
         tomas: [[0, { az: 30, el: 10, dist: 3.4, y: 1.42 }], [0.6, { az: 42, el: 10, dist: 3.3, y: 1.42 }], [1, { az: 24, el: 7, dist: 5.4, y: 1.25 }]],
         vista: function (T, f) {
@@ -105,7 +105,7 @@
         r2: { text: '+ PECHO Y *TRÍCEPS*', cuando: 0.54 }
       }) },
 
-    { nombre: 'Error 1', dur: 4.5, vo: 'Error uno: encoger los hombros hacia las orejas. Bájalos y empuja.',
+    { nombre: 'Error 1', dur: 4.5, vo: 'No encojas los hombros hacia las orejas durante el recorrido. Siempre bájalos y empújalos.',
       C: E3.escena({
         tomas: [[0, { az: 16, el: 8, dist: 4.4, y: 1.38 }], [1, { az: 26, el: 8, dist: 4.6, y: 1.36 }]],
         vista: function (T, f) {
@@ -130,7 +130,7 @@
         r2: { text: 'HOMBROS *ABAJO*', s: 1.1, cuando: 0.52, tono: 'verde' }
       }) },
 
-    { nombre: 'Error 2', dur: 4.5, vo: 'Error dos: quedarte a medias. Estira los brazos arriba en cada repetición.',
+    { nombre: 'Error 2', dur: 4.5, vo: 'Evita quedarte a medias. Siempre estira los brazos hacia arriba en cada repetición.',
       C: E3.escena({
         tomas: [[0, { az: -16, el: 6, dist: 6.2, y: 1.3 }], [1, { az: -26, el: 7, dist: 6.0, y: 1.32 }]],
         vista: function (T, f) {
@@ -153,7 +153,7 @@
         r2: { text: 'ESTIRA *ARRIBA*', s: 1.1, cuando: 0.52, tono: 'verde' }
       }) },
 
-    { nombre: 'Cierre', dur: 3, vo: 'Así se hace: hombros abajo y el recorrido completo.',
+    { nombre: 'Cierre', dur: 3, vo: 'Así se hace el press militar con mancuernas.',
       C: E3.escena({
         tomas: [[0, { az: -30, el: 6, dist: 6.0, y: 1.2 }], [1, { az: 40, el: 8, dist: 6.4, y: 1.15 }]],
         vista: function (T, f) {

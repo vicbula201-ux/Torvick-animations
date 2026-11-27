@@ -101,7 +101,7 @@
   var ESCENAS = [{
     nombre: 'Gancho',
     dur: 2.5,
-    vo: 'Estás haciendo mal tus flexiones de pecho.',
+    vo: 'Estás haciendo mal tus flexiones.',
     C: E3.escena({
       tomas: [[0, {
         az: 38,
@@ -159,7 +159,7 @@
   }, {
     nombre: 'Posición',
     dur: 5,
-    vo: 'Manos un poco más anchas que los hombros y el cuerpo recto, de la cabeza a los talones.',
+    vo: 'Mantén tus manos un poco más anchas que los hombros, con el cuerpo recto de la cabeza a los talones.',
     C: E3.escena({
       tomas: [[0, {
         az: 14,
@@ -310,7 +310,7 @@
   }, {
     nombre: 'Músculos',
     dur: 4.5,
-    vo: 'Trabaja el pectoral mayor; ayudan el hombro de adelante y el tríceps.',
+    vo: 'El músculo principal involucrado es el pectoral mayor, con ayuda del hombro de adelante y el tríceps.',
     C: E3.escena({
       tomas: [[0, {
         az: 20,
@@ -369,7 +369,7 @@
   }, {
     nombre: 'Error 1',
     dur: 4.5,
-    vo: 'Error uno: bajar a medias. Baja hasta que el pecho casi toque el piso.',
+    vo: 'No hagas el recorrido a medias. Baja hasta que el pecho casi toque el piso.',
     C: E3.escena({
       tomas: [[0, {
         az: 70,
@@ -449,7 +449,7 @@
   }, {
     nombre: 'Error 2',
     dur: 4.5,
-    vo: 'Error dos: hundir o subir la cadera. Aprieta el abdomen y mantén el cuerpo en línea.',
+    vo: 'No te hundas ni subas mucho la cadera. Siempre aprieta el abdomen y mantén el cuerpo alineado.',
     C: E3.escena({
       tomas: [[0, {
         az: 84,
@@ -519,7 +519,7 @@
   }, {
     nombre: 'Cierre',
     dur: 3,
-    vo: 'Así se hace: cuerpo recto y recorrido completo.',
+    vo: 'Así se hacen las flexiones.',
     C: E3.escena({
       tomas: [[0, {
         az: 124,
@@ -577,6 +577,7 @@
   }];
   global.REELS.registrar({
     id: 'flexiones-3d',
+    escenario: 'parque',
     titulo: 'Flexiones de pecho (Tor 3D)',
     estilo: 2,
     escenas: ESCENAS,

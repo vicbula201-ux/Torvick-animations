@@ -2496,12 +2496,19 @@
     return ob;
   }
 
-  /* ---------------- escenario: el gimnasio de Tor (pedido del autor: "que no sea solo un fondo blanco") ----------------
-     vt.escenario = 'gym' (o { tipo: 'gym' }): una sala redonda de 12 paneles alrededor de Tor (radio 5,2), con
-     piso de goma en baldosas, un charco de luz debajo de Tor, paredes oscuras con la franja amarilla, racks de
-     mancuernas de colores, ventanas con luz calida, espejos, arboles de discos y el cartel de neon ENTRENA CON TOR.
-     Solo se ven los paneles que quedan detras de Tor (los que estan del lado de la camara se esconden), asi la
-     camara gira libre a su alrededor sin chocar con nada. Sin escenario, el lienzo sigue blanco como siempre. */
+  /* ---------------- escenarios (pedido del autor: "que no sea solo un fondo blanco"; y despues: "dependiendo del
+     ejercicio y de lo que estemos hablando, en un escenario u otro, la gran mayoria en el gimnasio") ----------------
+     vt.escenario = 'gym' | 'parque' | 'super' | 'casa' | 'cocina' | 'calle', o { tipo, noche, luz: [x, z] }.
+       gym     el gimnasio de Tor: sala redonda de 12 paneles (radio 5,2), piso de goma en baldosas, charco de luz,
+               paredes oscuras con la franja amarilla, racks de mancuernas, ventanas, espejos, discos y los neones
+       parque  pasto, el piso de goma de la zona de calistenia debajo de Tor, arboles, arbustos, bancos, faroles,
+               barras de calistenia, colinas y nubes (de noche, la luna)
+       super   el supermercado: estantes con productos de colores, neveras con luz, cajones de frutas y carteles
+       casa    la sala: ventana, cuadros, biblioteca, lampara, planta, tele y puerta (de noche, la ventana oscura)
+       cocina  muebles con meson, estufa, lavaplatos con ventana y alacena; piso de damero
+       calle   una plaza rodeada de fachadas con ventanas, el bar con su neon, tiendas con toldo y faroles
+     Los elementos del lado de la camara se esconden, asi la camara gira libre alrededor de Tor sin chocar con nada.
+     Sin escenario (false), el lienzo sigue blanco como siempre. Los tonos salen de la paleta (mas claros u oscuros). */
   var ESC_R = 5.2,
     ESC_N = 12,
     ESC_ALTO = 3.6;
@@ -2517,76 +2524,155 @@
     espejo: [0xD9D3C8, 0xC9C3B8]
   };
   var ESC_DECO = ['rack', 'ventana', 'discos', 'neon2', 'rack', 'ventana', 'neon', 'rack', 'espejo', 'rack', 'ventana', 'discos'];
-  function texturaPiso() {
+  // pseudoazar fijo (los estantes y las ventanas salen siempre iguales)
+  function azar(i) {
+    var x = Math.sin(i * 127.1 + 311.7) * 43758.5453;
+    return x - Math.floor(x);
+  }
+  function texturaCanvas(w, h, pintar, rep) {
     var THREE = global.THREE,
       cv = document.createElement('canvas');
-    cv.width = cv.height = 512;
-    var cx = cv.getContext('2d');
-    cx.fillStyle = ESC_TONOS.piso;
-    cx.fillRect(0, 0, 512, 512);
-    cx.strokeStyle = ESC_TONOS.baldosa;
-    cx.lineWidth = 6;
-    for (var i = 0; i <= 4; i++) {
-      cx.beginPath();
-      cx.moveTo(i * 128, 0);
-      cx.lineTo(i * 128, 512);
-      cx.stroke();
-      cx.beginPath();
-      cx.moveTo(0, i * 128);
-      cx.lineTo(512, i * 128);
-      cx.stroke();
-    }
+    cv.width = w;
+    cv.height = h;
+    pintar(cv.getContext('2d'), w, h);
     var t = new THREE.CanvasTexture(cv);
     t.wrapS = t.wrapT = THREE.RepeatWrapping;
-    t.repeat.set(ESC_R * 2 / 2, ESC_R * 2 / 2);
+    if (rep) t.repeat.set(rep[0], rep[1]);
     t.anisotropy = 8;
     return t;
   }
-  function texturaLuz() {
+  function texBaldosas(fondo, linea, n, rep, grosor) {
+    return texturaCanvas(512, 512, function (cx) {
+      cx.fillStyle = fondo;
+      cx.fillRect(0, 0, 512, 512);
+      cx.strokeStyle = linea;
+      cx.lineWidth = grosor || 6;
+      var p = 512 / n;
+      for (var i = 0; i <= n; i++) {
+        cx.beginPath();
+        cx.moveTo(i * p, 0);
+        cx.lineTo(i * p, 512);
+        cx.stroke();
+        cx.beginPath();
+        cx.moveTo(0, i * p);
+        cx.lineTo(512, i * p);
+        cx.stroke();
+      }
+    }, rep);
+  }
+  function texTablas(fondo, linea, rep) {
+    return texturaCanvas(512, 512, function (cx) {
+      cx.fillStyle = fondo;
+      cx.fillRect(0, 0, 512, 512);
+      cx.strokeStyle = linea;
+      cx.lineWidth = 5;
+      for (var j = 0; j < 8; j++) {
+        var y = j * 64;
+        cx.beginPath();
+        cx.moveTo(0, y);
+        cx.lineTo(512, y);
+        cx.stroke();
+        var x = j % 2 * 160 + 90;
+        cx.beginPath();
+        cx.moveTo(x, y);
+        cx.lineTo(x, y + 64);
+        cx.stroke();
+        cx.beginPath();
+        cx.moveTo(x + 256, y);
+        cx.lineTo(x + 256, y + 64);
+        cx.stroke();
+      }
+    }, rep);
+  }
+  function texDamero(a, b, rep) {
+    return texturaCanvas(512, 512, function (cx) {
+      for (var i = 0; i < 8; i++) for (var j = 0; j < 8; j++) {
+        cx.fillStyle = (i + j) % 2 ? a : b;
+        cx.fillRect(i * 64, j * 64, 64, 64);
+      }
+    }, rep);
+  }
+  function texPasto(a, b, rep) {
+    return texturaCanvas(512, 512, function (cx) {
+      for (var i = 0; i < 8; i++) {
+        cx.fillStyle = i % 2 ? a : b;
+        cx.fillRect(0, i * 64, 512, 64);
+      }
+      cx.strokeStyle = 'rgba(15,122,80,0.55)';
+      cx.lineWidth = 3;
+      for (var k = 0; k < 90; k++) {
+        var x = azar(k) * 512,
+          y = azar(k + 500) * 512;
+        cx.beginPath();
+        cx.moveTo(x, y);
+        cx.lineTo(x + 4, y - 12);
+        cx.stroke();
+      }
+    }, rep);
+  }
+  function texturaPiso() {
+    return texBaldosas(ESC_TONOS.piso, ESC_TONOS.baldosa, 4, [ESC_R, ESC_R]);
+  }
+  function texturaLuz(luz, a) {
     var THREE = global.THREE,
       cv = document.createElement('canvas');
     cv.width = cv.height = 256;
     var cx = cv.getContext('2d'),
-      gr = cx.createRadialGradient(128, 128, 4, 128, 128, 128);
-    gr.addColorStop(0, ESC_TONOS.luz + '0.42)');
-    gr.addColorStop(0.5, ESC_TONOS.luz + '0.2)');
-    gr.addColorStop(1, ESC_TONOS.luz + '0)');
+      gr = cx.createRadialGradient(128, 128, 4, 128, 128, 128),
+      k = a == null ? 1 : a;
+    luz = luz || ESC_TONOS.luz;
+    gr.addColorStop(0, luz + 0.42 * k + ')');
+    gr.addColorStop(0.5, luz + 0.2 * k + ')');
+    gr.addColorStop(1, luz + '0)');
     cx.fillStyle = gr;
     cx.fillRect(0, 0, 256, 256);
     return new THREE.CanvasTexture(cv);
   }
-  // el cartel de neon: se redibuja hasta que la fuente este cargada
-  function cartelNeon(lineas, ancho, alto) {
+  // un cartel con letras: neon (letras que brillan sobre negro) o pintado (letras sobre un color)
+  function cartelNeon(lineas, ancho, alto, op) {
+    op = op || {};
     var THREE = global.THREE,
       cv = document.createElement('canvas');
     cv.width = 1024;
     cv.height = Math.round(1024 * alto / ancho);
-    var tex = new THREE.CanvasTexture(cv);
+    var tex = new THREE.CanvasTexture(cv),
+      col = op.color || '#FFD400',
+      claro = op.claro || '#FFF3A6';
     function pintar() {
       var cx = cv.getContext('2d'),
         W = cv.width,
         H = cv.height;
       cx.clearRect(0, 0, W, H);
-      cx.fillStyle = '#14110F';
+      cx.fillStyle = op.fondo || '#14110F';
       cx.fillRect(0, 0, W, H);
-      cx.strokeStyle = '#FFD400';
-      cx.lineWidth = 10;
-      cx.shadowColor = '#FFD400';
-      cx.shadowBlur = 30;
-      cx.strokeRect(26, 26, W - 52, H - 52);
       var fs = Math.round(H / (lineas.length + 0.9));
       cx.font = fs + 'px "Archivo Black", sans-serif';
       cx.textAlign = 'center';
       cx.textBaseline = 'middle';
-      lineas.forEach(function (l, i) {
-        var y = H / 2 + (i - (lineas.length - 1) / 2) * fs * 1.02;
-        cx.shadowBlur = 40;
-        cx.fillStyle = '#FFD400';
-        cx.fillText(l, W / 2, y);
-        cx.shadowBlur = 0;
-        cx.fillStyle = '#FFF3A6';
-        cx.fillText(l, W / 2, y);
-      });
+      if (op.pintado) {
+        cx.strokeStyle = '#14110F';
+        cx.lineWidth = 16;
+        cx.strokeRect(8, 8, W - 16, H - 16);
+        lineas.forEach(function (l, i) {
+          cx.fillStyle = col;
+          cx.fillText(l, W / 2, H / 2 + (i - (lineas.length - 1) / 2) * fs * 1.02);
+        });
+      } else {
+        cx.strokeStyle = col;
+        cx.lineWidth = 10;
+        cx.shadowColor = col;
+        cx.shadowBlur = 30;
+        cx.strokeRect(26, 26, W - 52, H - 52);
+        lineas.forEach(function (l, i) {
+          var y = H / 2 + (i - (lineas.length - 1) / 2) * fs * 1.02;
+          cx.shadowBlur = 40;
+          cx.fillStyle = col;
+          cx.fillText(l, W / 2, y);
+          cx.shadowBlur = 0;
+          cx.fillStyle = claro;
+          cx.fillText(l, W / 2, y);
+        });
+      }
       tex.needsUpdate = true;
     }
     pintar();
@@ -2603,9 +2689,39 @@
       }
     };
   }
-  function decoRack(g, m, w) {
+  function placaCartel(g, carteles, lineas, w, h, x, y, z, op) {
     var THREE = global.THREE,
-      cols = [m.amarillo, m.rojo, m.verde, m.gris, m.blanco];
+      cn = cartelNeon(lineas, w, h, op);
+    carteles.push(cn);
+    var pl = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({
+      map: cn.tex
+    }));
+    pl.position.set(x, y, z);
+    g.add(pl);
+    return pl;
+  }
+  function plano(w, h, mat, x, y, z) {
+    var p = new global.THREE.Mesh(new global.THREE.PlaneGeometry(w, h), mat);
+    p.position.set(x, y, z);
+    return p;
+  }
+  var TONOS_ESC = {}; // materiales de los escenarios (se crean una vez)
+  function tonoEsc(a, b) {
+    var k = a + '|' + b;
+    if (!TONOS_ESC[k]) TONOS_ESC[k] = toon(a, b);
+    return TONOS_ESC[k];
+  }
+  function plana(c) {
+    var k = 'p' + c;
+    if (!TONOS_ESC[k]) TONOS_ESC[k] = new global.THREE.MeshBasicMaterial({
+      color: c
+    });
+    return TONOS_ESC[k];
+  }
+
+  /* --- gimnasio --- */
+  function decoRack(g, m, w) {
+    var cols = [m.amarillo, m.rojo, m.verde, m.gris, m.blanco];
     [0.42, 0.86].forEach(function (y, fila) {
       var est = caja(w * 0.78, 0.05, 0.42, m.oscuro);
       est.position.set(0, y, 0.3);
@@ -2624,48 +2740,48 @@
       g.add(pa);
     });
   }
-  function decoVentana(g, m, w) {
+  function decoVentana(g, m, w, cfg) {
     var THREE = global.THREE,
-      vid = new THREE.MeshBasicMaterial({
-        color: ESC_TONOS.vidrio
-      });
+      noche = cfg && cfg.noche,
+      vid = plana(noche ? 0x2B2623 : cfg && cfg.vidrio || ESC_TONOS.vidrio);
     var fw = w * 0.62,
       fh = 1.55,
       y0 = 1.55;
-    var marco = caja(fw + 0.12, fh + 0.12, 0.06, m.oscuro);
+    var marco = caja(fw + 0.12, fh + 0.12, 0.06, cfg && cfg.marco || m.oscuro);
     marco.position.set(0, y0 + fh / 2, 0.02);
     g.add(marco);
-    var panel = new THREE.Mesh(new THREE.PlaneGeometry(fw, fh), vid);
-    panel.position.set(0, y0 + fh / 2, 0.07);
-    g.add(panel);
-    var cruz1 = new THREE.Mesh(new THREE.PlaneGeometry(0.06, fh), m.tinta);
-    cruz1.position.set(0, y0 + fh / 2, 0.08);
-    g.add(cruz1);
-    var cruz2 = new THREE.Mesh(new THREE.PlaneGeometry(fw, 0.06), m.tinta);
-    cruz2.position.set(0, y0 + fh / 2, 0.08);
-    g.add(cruz2);
+    g.add(plano(fw, fh, vid, 0, y0 + fh / 2, 0.07));
+    if (noche) {
+      var luna = new THREE.Mesh(new THREE.CircleGeometry(0.16, 32), plana(0xFFF3A6));
+      luna.position.set(fw * 0.22, y0 + fh * 0.7, 0.075);
+      g.add(luna);
+    }
+    g.add(plano(0.06, fh, m.tinta, 0, y0 + fh / 2, 0.08));
+    g.add(plano(fw, 0.06, m.tinta, 0, y0 + fh / 2, 0.08));
+    if (cfg && cfg.cortinas) [-1, 1].forEach(function (s) {
+      var c = caja(0.32, fh + 0.3, 0.06, cfg.cortinas);
+      c.position.set(s * (fw / 2 + 0.1), y0 + fh / 2 - 0.05, 0.14);
+      g.add(c);
+    });
   }
   function decoEspejo(g, m, w) {
-    var THREE = global.THREE;
-    var e = caja(w * 0.7, 2.0, 0.04, toon(ESC_TONOS.espejo[0], ESC_TONOS.espejo[1]));
+    var e = caja(w * 0.7, 2.0, 0.04, tonoEsc(ESC_TONOS.espejo[0], ESC_TONOS.espejo[1]));
     e.position.set(0, 1.25, 0.04);
     g.add(e);
     [-0.12, 0.1].forEach(function (dx, i) {
-      var r = new THREE.Mesh(new THREE.PlaneGeometry(0.1 + 0.08 * i, 1.4), m.blancoPlano);
-      r.position.set(dx * w, 1.3, 0.075);
+      var r = plano(0.1 + 0.08 * i, 1.4, m.blancoPlano, dx * w, 1.3, 0.075);
       r.rotation.z = 0.5;
       g.add(r);
     });
   }
   function decoDiscos(g, m) {
-    var THREE = global.THREE,
-      poste = cilindro(0.04, 1.3, 12, m.oscuro);
+    var poste = cilindro(0.04, 1.3, 12, m.oscuro);
     poste.position.set(0, 0.65, 0.45);
     g.add(poste);
     var base = caja(0.6, 0.06, 0.5, m.oscuro);
     base.position.set(0, 0.03, 0.45);
     g.add(base);
-    [[0.42, 0.24, m.oscuro], [0.78, 0.2, m.rojo], [1.08, 0.17, m.amarillo]].forEach(function (d, i) {
+    [[0.42, 0.24, m.oscuro], [0.78, 0.2, m.rojo], [1.08, 0.17, m.amarillo]].forEach(function (d) {
       [-1, 1].forEach(function (s) {
         var c = cilindro(d[1], 0.06, 28, d[2]);
         c.rotation.z = Math.PI / 2;
@@ -2678,114 +2794,781 @@
     c2.position.set(0.75, 0.26, 0.4);
     c2.rotation.z = 0.15;
     g.add(c2);
+    g.position.x = -0.5;
   }
-  function crearEscenario() {
+  function decoNeon(grande) {
+    return function (g, m, w, cfg, carteles) {
+      var cw = grande ? w * 0.74 : w * 0.56,
+        ch = grande ? 1.05 : 0.8;
+      placaCartel(g, carteles, grande ? ['ENTRENA', 'CON TOR'] : ['TOR', 'GYM'], cw, ch, 0, grande ? 2.62 : 2.55, 0.06); // por encima de la cabeza
+      if (grande) {
+        var banco = caja(1.3, 0.1, 0.4, m.gris);
+        banco.position.set(0, 0.45, 0.35);
+        g.add(banco);
+        [-0.55, 0.55].forEach(function (x) {
+          var pa = caja(0.06, 0.4, 0.3, m.oscuro);
+          pa.position.set(x, 0.2, 0.35);
+          g.add(pa);
+        });
+      }
+    };
+  }
+
+  /* --- supermercado --- */
+  function producto(g, m, i, x, y, z) {
+    var r = azar(i),
+      cols = [m.amarillo, m.rojo, m.verde, m.blanco, m.rojo, m.amarillo, m.verde, m.gris];
+    var c = cols[Math.floor(azar(i + 7) * cols.length)];
+    if (r < 0.45) {
+      // caja con su etiqueta blanca
+      var h = 0.26 + 0.12 * azar(i + 3),
+        w = 0.17 + 0.05 * azar(i + 4);
+      var b = caja(w, h, 0.12, c, 0.008);
+      b.position.set(x, y + h / 2, z);
+      g.add(b);
+      g.add(plano(w * 0.7, h * 0.3, c === m.blanco ? m.tinta : m.blancoPlano, x, y + h * 0.55, z + 0.067));
+    } else if (r < 0.75) {
+      // botella con tapa
+      var hb = 0.3 + 0.08 * azar(i + 5);
+      var bo = cilindro(0.05, hb, 16, c, 0.008);
+      bo.position.set(x, y + hb / 2, z);
+      g.add(bo);
+      var tapa = cilindro(0.025, 0.06, 12, m.oscuro, 0.006);
+      tapa.position.set(x, y + hb + 0.03, z);
+      g.add(tapa);
+    } else {
+      // latas
+      for (var k = 0; k < 2; k++) {
+        var la = cilindro(0.045, 0.12, 16, c, 0.007);
+        la.position.set(x - 0.05 + k * 0.1, y + 0.06, z);
+        g.add(la);
+      }
+    }
+  }
+  function decoEstante(g, m, w, cfg, carteles, idx) {
+    var ancho = w * 0.9,
+      n = 6;
+    var fondo = caja(ancho, 2.1, 0.06, m.blanco);
+    fondo.position.set(0, 1.05, 0.06);
+    g.add(fondo);
+    [-1, 1].forEach(function (s) {
+      var la = caja(0.05, 2.1, 0.5, m.gris);
+      la.position.set(s * ancho / 2, 1.05, 0.3);
+      g.add(la);
+    });
+    [0.12, 0.62, 1.12, 1.62].forEach(function (y, f) {
+      var tabla = caja(ancho, 0.04, 0.5, m.gris, 0.008);
+      tabla.position.set(0, y, 0.3);
+      g.add(tabla);
+      var precio = plano(ancho, 0.05, m.amarillo, 0, y - 0.005, 0.56);
+      g.add(precio);
+      for (var k = 0; k < n; k++) producto(g, m, idx * 97 + f * 13 + k, (k - (n - 1) / 2) * ancho / n, y + 0.02, 0.32);
+    });
+  }
+  function decoNeveraSuper(g, m, w) {
+    var ancho = w * 0.86;
+    var atras = caja(ancho, 2.2, 0.06, m.blanco);
+    atras.position.set(0, 1.1, 0.03);
+    g.add(atras);
+    [-1, 1].forEach(function (s) {
+      var la = caja(0.08, 2.2, 0.6, m.blanco);
+      la.position.set(s * ancho / 2, 1.1, 0.3);
+      g.add(la);
+    });
+    [0.06, 2.14].forEach(function (y) {
+      var tb = caja(ancho, 0.12, 0.6, m.blanco);
+      tb.position.set(0, y, 0.3);
+      g.add(tb);
+    });
+    g.add(plano(ancho - 0.1, 2.0, plana(0xFFF3A6), 0, 1.1, 0.07));
+    var vidrio = plano(ancho - 0.1, 1.95, luzMat(0xFFFFFF, 0.16), 0, 1.1, 0.6);
+    g.add(vidrio);
+    [0, 1].forEach(function (k) {
+      var x = (k - 0.5) * ancho / 2;
+      for (var f2 = 0; f2 < 4; f2++) {
+        var rej = caja(ancho / 2 - 0.1, 0.025, 0.5, m.gris, 0.005);
+        rej.position.set(x, 0.28 + f2 * 0.42, 0.32);
+        g.add(rej);
+      }
+      for (var f = 0; f < 4; f++) for (var b = 0; b < 4; b++) {
+        var c = [m.rojo, m.verde, m.amarillo, m.blanco][(f + b + k) % 4];
+        var bo = cilindro(0.045, 0.26, 12, c, 0.007);
+        bo.position.set(x + (b - 1.5) * 0.24, 0.42 + f * 0.42, 0.34);
+        g.add(bo);
+      }
+      var tirador = caja(0.03, 0.5, 0.04, m.gris, 0.006);
+      tirador.position.set(x + (k ? -1 : 1) * (ancho / 4 - 0.1), 1.15, 0.64);
+      g.add(tirador);
+    });
+    var marco = caja(0.05, 1.85, 0.05, m.gris, 0.006);
+    marco.position.set(0, 1.1, 0.625);
+    g.add(marco);
+  }
+  function decoFrutas(g, m, w) {
+    [[-0.6, m.rojo], [0, m.amarillo], [0.6, m.verde]].forEach(function (q, i) {
+      var cajon = caja(0.5, 0.3, 0.42, tonoEsc(0xC9A57A, 0xA88660));
+      cajon.position.set(q[0], 0.55, 0.4);
+      cajon.rotation.x = -0.18;
+      g.add(cajon);
+      var pata = caja(0.5, 0.4, 0.4, m.oscuro);
+      pata.position.set(q[0], 0.2, 0.42);
+      g.add(pata);
+      for (var k = 0; k < 5; k++) {
+        var fr = elipsoide(0.075, 0.07, 0.075, q[1], 0.01);
+        fr.position.set(q[0] - 0.15 + k % 3 * 0.15, 0.74 + Math.floor(k / 3) * 0.05, 0.36 + k % 2 * 0.1);
+        g.add(fr);
+      }
+    });
+    var cartel = caja(w * 0.7, 0.36, 0.04, m.verde);
+    cartel.position.set(0, 1.55, 0.1);
+    g.add(cartel);
+  }
+  function decoCartelSuper(textos) {
+    return function (g, m, w, cfg, carteles, idx) {
+      decoEstante(g, m, w, cfg, carteles, idx);
+      placaCartel(g, carteles, [textos[idx % textos.length]], 1.6, 0.42, 0, 2.75, 0.32, {
+        pintado: true,
+        fondo: '#FFD400',
+        color: '#14110F'
+      });
+      [-0.6, 0.6].forEach(function (x) {
+        var hilo = caja(0.012, 0.5, 0.012, m.tinta, 0);
+        hilo.position.set(x, 3.2, 0.32);
+        g.add(hilo);
+      });
+    };
+  }
+
+  /* --- casa y cocina --- */
+  function decoCuadro(g, m, w, cfg, c, idx) {
+    var marco = caja(0.95, 0.75, 0.05, m.oscuro);
+    marco.position.set(0, 1.85, 0.03);
+    g.add(marco);
+    g.add(plano(0.8, 0.6, m.blancoPlano, 0, 1.85, 0.06));
+    var sol = new global.THREE.Mesh(new global.THREE.CircleGeometry(0.09, 24), idx % 2 ? plana(RED) : plana(YEL));
+    sol.position.set(0.2, 1.97, 0.065);
+    g.add(sol);
+    var cerro = new global.THREE.Mesh(new global.THREE.CircleGeometry(0.3, 24, 0, Math.PI), plana(GRN));
+    cerro.position.set(-0.12, 1.56, 0.066);
+    g.add(cerro);
+    if (idx % 3 === 0) {
+      var m2 = caja(0.5, 0.62, 0.05, m.oscuro);
+      m2.position.set(0.85, 1.65, 0.03);
+      g.add(m2);
+      g.add(plano(0.38, 0.5, plana(YEL), 0.85, 1.65, 0.06));
+    }
+  }
+  function decoRepisa(g, m, w) {
+    var madera = tonoEsc(0x8A7560, 0x6E5C4A);
+    var fondo = caja(1.5, 2.0, 0.05, tonoEsc(0x6E5C4A, 0x584A3C));
+    fondo.position.set(0, 1.0, 0.03);
+    g.add(fondo);
+    [-0.75, 0.75].forEach(function (x) {
+      var la = caja(0.06, 2.0, 0.38, madera);
+      la.position.set(x, 1.0, 0.2);
+      g.add(la);
+    });
+    [0.03, 0.5, 1.0, 1.5, 1.97].forEach(function (y) {
+      var tb = caja(1.5, 0.05, 0.38, madera);
+      tb.position.set(0, y, 0.2);
+      g.add(tb);
+    });
+    [0.5, 1.0, 1.5].forEach(function (y, f) {
+      for (var k = 0; k < 7; k++) {
+        if (azar(f * 9 + k) < 0.18) continue;
+        var h = 0.26 + 0.12 * azar(k + f * 3),
+          lib = caja(0.11, h, 0.26, [m.rojo, m.amarillo, m.verde, m.blanco, m.gris][(k + f) % 5], 0.006);
+        lib.position.set(-0.55 + k * 0.18, y + 0.025 + h / 2, 0.2);
+        lib.rotation.z = k === 5 ? 0.25 : 0;
+        g.add(lib);
+      }
+    });
+  }
+  function decoLampara(g, m, w, cfg) {
+    var pie = cilindro(0.025, 1.5, 10, m.oscuro);
+    pie.position.set(0.5, 0.75, 0.4);
+    g.add(pie);
+    var base = cilindro(0.16, 0.04, 20, m.oscuro);
+    base.position.set(0.5, 0.02, 0.4);
+    g.add(base);
+    var pant = new global.THREE.Mesh(new global.THREE.CylinderGeometry(0.16, 0.26, 0.32, 24), m.amarillo);
+    pant.position.set(0.5, 1.6, 0.4);
+    g.add(pant);
+    var pantB = new global.THREE.Mesh(new global.THREE.CylinderGeometry(0.175, 0.275, 0.34, 24), MOTOR.mat.borde);
+    pantB.position.set(0.5, 1.6, 0.4);
+    g.add(pantB);
+    if (cfg && cfg.noche) {
+      var luz = new global.THREE.Mesh(new global.THREE.ConeGeometry(0.9, 1.5, 32, 1, true), luzMat(YEL, 0.1));
+      luz.position.set(0.5, 0.75, 0.4);
+      g.add(luz);
+    }
+    decoPlanta(g, m, w, cfg, null, 0, -0.6);
+  }
+  function decoPlanta(g, m, w, cfg, c, idx, x) {
+    x = x == null ? 0 : x;
+    var mac = new global.THREE.Mesh(new global.THREE.CylinderGeometry(0.2, 0.15, 0.4, 24), m.rojo);
+    mac.position.set(x, 0.2, 0.45);
+    g.add(mac);
+    var macB = new global.THREE.Mesh(new global.THREE.CylinderGeometry(0.215, 0.165, 0.42, 24), MOTOR.mat.borde);
+    macB.position.set(x, 0.2, 0.45);
+    g.add(macB);
+    [[0, 0.75, 0.24], [-0.15, 0.6, 0.18], [0.16, 0.62, 0.18], [0.02, 0.98, 0.16]].forEach(function (q) {
+      var h = elipsoide(q[2], q[2] * 1.15, q[2], m.verde, 0.012);
+      h.position.set(x + q[0], q[1], 0.45);
+      g.add(h);
+    });
+  }
+  function decoTele(g, m, w, cfg) {
+    var mueble = caja(1.5, 0.5, 0.42, tonoEsc(0x8A7560, 0x6E5C4A));
+    mueble.position.set(0, 0.25, 0.25);
+    g.add(mueble);
+    var tv = caja(1.25, 0.72, 0.06, m.oscuro);
+    tv.position.set(0, 1.2, 0.2);
+    g.add(tv);
+    g.add(plano(1.13, 0.6, plana(cfg && cfg.noche ? 0x483F37 : INK), 0, 1.2, 0.235));
+    var brillo = plano(0.08, 0.5, plana(0x554C42), -0.3, 1.22, 0.24);
+    brillo.rotation.z = 0.5;
+    g.add(brillo);
+  }
+  function decoPuerta(g, m, w) {
+    var marco = caja(1.02, 2.2, 0.06, m.oscuro);
+    marco.position.set(0, 1.1, 0.03);
+    g.add(marco);
+    var hoja = caja(0.9, 2.1, 0.05, tonoEsc(0xA88660, 0x8A7560));
+    hoja.position.set(0, 1.05, 0.07);
+    g.add(hoja);
+    var pomo = elipsoide(0.04, 0.04, 0.04, m.amarillo, 0.008);
+    pomo.position.set(0.33, 1.05, 0.12);
+    g.add(pomo);
+  }
+  function decoMueble(g, m, w, cfg, c, idx, sinArriba) {
+    var ancho = w * 0.98,
+      madera = cfg.mueble || m.blanco;
+    var bajo = caja(ancho, 0.86, 0.6, madera);
+    bajo.position.set(0, 0.43, 0.32);
+    g.add(bajo);
+    var meson = caja(ancho + 0.04, 0.06, 0.66, m.gris, 0.008);
+    meson.position.set(0, 0.89, 0.34);
+    g.add(meson);
+    for (var k = 0; k < 3; k++) {
+      var x = (k - 1) * ancho / 3;
+      g.add(plano(ancho / 3 - 0.08, 0.7, plana(0xE8E2D6), x, 0.43, 0.625));
+      var tir = caja(0.16, 0.025, 0.03, m.oscuro, 0.005);
+      tir.position.set(x, 0.72, 0.64);
+      g.add(tir);
+    }
+    if (!sinArriba) {
+      var arriba = caja(ancho, 0.7, 0.36, madera);
+      arriba.position.set(0, 2.25, 0.2);
+      g.add(arriba);
+    }
+    var azul = caja(ancho, 0.95, 0.02, cfg.azulejo || m.blanco, 0);
+    azul.position.set(0, 1.38, 0.06);
+    g.add(azul);
+    if (idx % 3 === 1) {
+      // la estufa con su olla
+      var est = caja(0.7, 0.04, 0.5, m.oscuro, 0.006);
+      est.position.set(0, 0.94, 0.34);
+      g.add(est);
+      var olla = cilindro(0.16, 0.18, 20, m.rojo);
+      olla.position.set(-0.15, 1.05, 0.34);
+      g.add(olla);
+      var sarten = cilindro(0.14, 0.04, 20, m.oscuro);
+      sarten.position.set(0.18, 0.98, 0.34);
+      g.add(sarten);
+    } else if (idx % 3 === 2) {
+      // frutero y frascos
+      [m.rojo, m.amarillo, m.verde].forEach(function (c2, k2) {
+        var fr = elipsoide(0.08, 0.075, 0.08, c2, 0.01);
+        fr.position.set(-0.35 + k2 * 0.14, 1.0, 0.36);
+        g.add(fr);
+      });
+      [0, 1].forEach(function (k2) {
+        var fra = cilindro(0.07, 0.2, 16, m.blanco, 0.008);
+        fra.position.set(0.25 + k2 * 0.18, 1.02, 0.3);
+        g.add(fra);
+        var ta = cilindro(0.075, 0.04, 16, m.amarillo, 0.006);
+        ta.position.set(0.25 + k2 * 0.18, 1.14, 0.3);
+        g.add(ta);
+      });
+    }
+  }
+  function decoLavaplatos(g, m, w, cfg) {
+    decoMueble(g, m, w, cfg, null, 0, true);
+    var pileta = caja(0.6, 0.03, 0.4, m.gris, 0.006);
+    pileta.position.set(0, 0.93, 0.34);
+    g.add(pileta);
+    var grifo = cilindro(0.025, 0.3, 10, m.gris, 0.006);
+    grifo.position.set(0, 1.07, 0.18);
+    g.add(grifo);
+    var vg = new global.THREE.Group();
+    vg.position.set(0, -0.15, 0);
+    g.add(vg);
+    decoVentana(vg, m, w * 0.7, cfg);
+  }
+
+  /* --- parque y calle (afuera) --- */
+  function decoArbol(g, m, w, cfg, c, idx) {
+    var tronco = cilindro(0.13, 1.6, 14, tonoEsc(0x7A6450, 0x5E4C3C));
+    tronco.position.y = 0.8;
+    g.add(tronco);
+    var v1 = tonoEsc(GRN, 0x0F7A50),
+      v2 = tonoEsc(0x0F7A50, 0x0B5C3C),
+      k = 0.85 + 0.35 * azar(idx);
+    [[0, 2.2, 0.95, v1], [-0.55, 1.85, 0.62, v2], [0.6, 1.95, 0.66, v1], [0.1, 2.85, 0.7, v2]].forEach(function (q) {
+      var h = elipsoide(q[2] * k, q[2] * k * 0.92, q[2] * k, q[3], 0.025);
+      h.position.set(q[0] * k, q[1] * k, 0);
+      g.add(h);
+    });
+  }
+  function decoArbusto(g, m, w, cfg, c, idx) {
+    var v1 = tonoEsc(GRN, 0x0F7A50);
+    [[-0.4, 0.35, 0.42], [0.1, 0.42, 0.5], [0.55, 0.32, 0.38]].forEach(function (q, i) {
+      var h = elipsoide(q[2], q[2] * 0.85, q[2] * 0.9, i === 1 ? v1 : tonoEsc(0x0F7A50, 0x0B5C3C), 0.02);
+      h.position.set(q[0], q[1], 0);
+      g.add(h);
+    });
+    if (idx % 2) [[-0.3, 0.6], [0.3, 0.75]].forEach(function (q) {
+      var fl = elipsoide(0.06, 0.06, 0.06, idx % 4 === 1 ? m.amarillo : m.rojo, 0.008);
+      fl.position.set(q[0], q[1], 0.3);
+      g.add(fl);
+    });
+  }
+  function decoBancoParque(g, m) {
+    var madera = tonoEsc(0xC9A57A, 0xA88660);
+    [0.45, 0.56].forEach(function (y, i) {
+      var t = caja(1.6, 0.05, 0.16, madera);
+      t.position.set(0, y - 0.0, 0.1 + i * 0.18 - 0.05);
+      g.add(t);
+    });
+    var resp = caja(1.6, 0.32, 0.05, madera);
+    resp.position.set(0, 0.82, -0.04);
+    g.add(resp);
+    [-0.65, 0.65].forEach(function (x) {
+      var p = caja(0.06, 0.48, 0.4, m.oscuro);
+      p.position.set(x, 0.24, 0.08);
+      g.add(p);
+    });
+  }
+  function decoFarola(g, m, w, cfg) {
+    var poste = cilindro(0.05, 3.1, 14, m.oscuro);
+    poste.position.y = 1.55;
+    g.add(poste);
+    var base = cilindro(0.12, 0.2, 14, m.oscuro);
+    base.position.y = 0.1;
+    g.add(base);
+    var lamp = elipsoide(0.2, 0.26, 0.2, cfg && cfg.noche ? m.amarillo : m.blanco, 0.02);
+    lamp.position.y = 3.25;
+    g.add(lamp);
+    var sombrero = new global.THREE.Mesh(new global.THREE.ConeGeometry(0.28, 0.2, 20), m.oscuro);
+    sombrero.position.y = 3.55;
+    g.add(sombrero);
+    if (cfg && cfg.noche) {
+      var cono = new global.THREE.Mesh(new global.THREE.ConeGeometry(1.3, 3.2, 32, 1, true), luzMat(YEL, 0.12));
+      cono.position.y = 1.62;
+      g.add(cono);
+    }
+  }
+  function decoBarras(g, m) {
+    // barra fija y paralelas de calistenia
+    [-0.8, 0.8].forEach(function (x) {
+      var p = cilindro(0.05, 2.4, 12, m.oscuro);
+      p.position.set(x, 1.2, -0.2);
+      g.add(p);
+    });
+    var fija = cilindro(0.03, 1.7, 12, m.gris);
+    fija.rotation.z = Math.PI / 2;
+    fija.position.set(0, 2.3, -0.2);
+    g.add(fija);
+    [-0.28, 0.28].forEach(function (x) {
+      var b = cilindro(0.03, 1.5, 12, m.amarillo);
+      b.rotation.x = Math.PI / 2;
+      b.position.set(x + 1.6, 1.15, 0.3);
+      g.add(b);
+      [-0.6, 0.6].forEach(function (z) {
+        var p = cilindro(0.04, 1.15, 12, m.oscuro);
+        p.position.set(x + 1.6, 0.575, 0.3 + z);
+        g.add(p);
+      });
+    });
+  }
+  function decoTachoParque(g, m) {
+    var t = cilindro(0.22, 0.75, 20, m.verde);
+    t.position.y = 0.375;
+    g.add(t);
+    var bo = cilindro(0.24, 0.05, 20, m.oscuro);
+    bo.position.y = 0.77;
+    g.add(bo);
+  }
+  // fachada de la calle: muro de un color, ventanas (encendidas de noche), puerta o vidriera, cornisa
+  var FACHADAS = [[0x8C5A4E, 0x704539], [0x6E6255, 0x574C41], [0xA8936E, 0x8C7856], [0x5E6B5C, 0x4A5548], [0x8A7560, 0x6E5C4A]];
+  var FACHADAS_DIA = [[0xE8A79F, 0xD08B82], [0xEDE3CF, 0xD8CBB2], [0xF2D27A, 0xE0BC5E], [0xA9D8BF, 0x8CC3A6], [0xD9D3C8, 0xC2BBAE]];
+  function decoFachada(tipo) {
+    return function (g, m, w, cfg, carteles, idx) {
+      var noche = cfg.noche,
+        tonos = (noche ? FACHADAS : FACHADAS_DIA)[idx % 5],
+        alto = 6.2;
+      var muro = new global.THREE.Mesh(new global.THREE.BoxGeometry(w + 0.02, alto, 0.14), tonoEsc(tonos[0], tonos[1]));
+      muro.position.y = alto / 2;
+      g.add(muro);
+      var corn = caja(w + 0.02, 0.18, 0.3, m.oscuro, 0.01);
+      corn.position.set(0, alto - 0.1, 0.08);
+      g.add(corn);
+      var faja = caja(w + 0.02, 0.1, 0.22, m.oscuro, 0.008);
+      faja.position.set(0, 3.05, 0.06);
+      g.add(faja);
+      [0, 1].forEach(function (piso) {
+        [-0.62, 0.62].forEach(function (x, k) {
+          var y = 3.85 + piso * 1.35,
+            on = noche ? azar(idx * 7 + piso * 3 + k) < 0.62 : false;
+          var marco = caja(0.72, 0.95, 0.06, m.oscuro, 0.008);
+          marco.position.set(x, y, 0.08);
+          g.add(marco);
+          g.add(plano(0.6, 0.83, plana(on ? 0xFFE07A : noche ? 0x2B2623 : 0xC9C3B8), x, y, 0.115));
+          g.add(plano(0.04, 0.83, m.tinta, x, y, 0.12));
+        });
+      });
+      if (tipo === 'bar') {
+        var puerta = caja(1.0, 2.1, 0.06, m.oscuro);
+        puerta.position.set(-0.55, 1.05, 0.09);
+        g.add(puerta);
+        g.add(plano(0.8, 1.2, plana(noche ? 0xFFE07A : 0x8A7560), -0.55, 1.35, 0.125));
+        placaCartel(g, carteles, ['BAR'], 1.0, 0.5, 0.65, 2.45, 0.2, {
+          color: '#E03A2F',
+          claro: '#FFD4CF'
+        });
+        toldo(g, m, w, 2.05, m.rojo);
+      } else if (tipo === 'tienda') {
+        var vid = caja(w * 0.8, 1.6, 0.06, m.oscuro);
+        vid.position.set(0, 1.15, 0.09);
+        g.add(vid);
+        g.add(plano(w * 0.8 - 0.14, 1.46, plana(noche ? 0xFFF3A6 : 0xE8E2D6), 0, 1.15, 0.125));
+        [-0.5, 0, 0.5].forEach(function (x, k) {
+          var pr = caja(0.24, 0.32, 0.12, [m.rojo, m.verde, m.amarillo][k]);
+          pr.position.set(x, 0.62, 0.2);
+          g.add(pr);
+        });
+        toldo(g, m, w, 2.15, idx % 2 ? m.verde : m.amarillo);
+      } else {
+        var pu = caja(0.95, 2.1, 0.06, tonoEsc(0x483F37, 0x2B2623));
+        pu.position.set(0.2, 1.05, 0.09);
+        g.add(pu);
+        var esc = caja(1.3, 0.12, 0.4, m.gris, 0.01);
+        esc.position.set(0.2, 0.06, 0.3);
+        g.add(esc);
+        var pomo = elipsoide(0.035, 0.035, 0.035, m.amarillo, 0.008);
+        pomo.position.set(0.5, 1.05, 0.14);
+        g.add(pomo);
+      }
+    };
+  }
+  function toldo(g, m, w, y, color) {
+    var n = 7,
+      ancho = w * 0.92;
+    for (var k = 0; k < n; k++) {
+      var t = caja(ancho / n, 0.04, 0.75, k % 2 ? m.blanco : color, 0.006);
+      t.position.set(-ancho / 2 + (k + 0.5) * ancho / n, y + 0.2, 0.45);
+      t.rotation.x = 0.38;
+      g.add(t);
+    }
+  }
+  var DECO = {
+    rack: decoRack,
+    ventana: decoVentana,
+    espejo: decoEspejo,
+    discos: decoDiscos,
+    neon: decoNeon(true),
+    neon2: decoNeon(false),
+    estante: decoEstante,
+    neveraSuper: decoNeveraSuper,
+    frutas: decoFrutas,
+    cartelSuper: decoCartelSuper(['OFERTAS', 'LACTEOS', 'PROTEINA', 'BEBIDAS', 'PASILLO 4', 'SNACKS']),
+    cuadro: decoCuadro,
+    repisa: decoRepisa,
+    lampara: decoLampara,
+    planta: decoPlanta,
+    tele: decoTele,
+    puerta: decoPuerta,
+    mueble: decoMueble,
+    lavaplatos: decoLavaplatos,
+    arbol: decoArbol,
+    arbusto: decoArbusto,
+    bancoParque: decoBancoParque,
+    farola: decoFarola,
+    barras: decoBarras,
+    tachoParque: decoTachoParque,
+    edificio: decoFachada('edificio'),
+    bar: decoFachada('bar'),
+    tienda: decoFachada('tienda')
+  };
+  // la configuracion de cada escenario
+  function cfgEscenario(tipo, noche) {
+    var m = MOTOR.mat;
+    if (tipo === 'super') return {
+      fondo: 0xEFEAE0,
+      pared: [0xF4F0E8, 0xE2DCD0],
+      zocalo: [GRY, 0xB7AFA2],
+      zocaloAlto: 0.12,
+      franja: m.verde,
+      franjaY: 3.25,
+      piso: texBaldosas('#E8E2D6', '#D2CABD', 3, [ESC_R * 1.5, ESC_R * 1.5], 5),
+      luz: 'rgba(255,255,255,',
+      luzA: 0.9,
+      deco: ['estante', 'neveraSuper', 'cartelSuper', 'frutas', 'estante', 'cartelSuper', 'neveraSuper', 'estante', 'frutas', 'cartelSuper', 'estante', 'neveraSuper']
+    };
+    if (tipo === 'casa') return {
+      noche: noche,
+      fondo: noche ? 0x1B1714 : 0x2B2623,
+      pared: noche ? [0x8C7F6B, 0x766A58] : [0xEDE3CF, 0xD8CBB2],
+      zocalo: [0x8A7560, 0x6E5C4A],
+      zocaloAlto: 0.16,
+      piso: texTablas(noche ? '#6E5C4A' : '#9C8168', noche ? '#584A3C' : '#86705A', [ESC_R, ESC_R]),
+      luz: 'rgba(255,236,190,',
+      luzA: noche ? 0.8 : 0.5,
+      alfombra: m.rojo,
+      cortinas: m.amarillo,
+      vidrio: 0xFFF3A6,
+      deco: ['ventana', 'cuadro', 'repisa', 'lampara', 'tele', 'cuadro', 'ventana', 'planta', 'puerta', 'cuadro', 'repisa', 'lampara']
+    };
+    if (tipo === 'cocina') return {
+      noche: noche,
+      fondo: noche ? 0x1B1714 : 0x2B2623,
+      pared: noche ? [0x7A7062, 0x645B4F] : [0xF2EEE6, 0xDDD6CA],
+      zocalo: null,
+      piso: texDamero(noche ? '#8C857A' : '#E8E2D6', noche ? '#6E675C' : '#C9C3B8', [ESC_R * 1.2, ESC_R * 1.2]),
+      luz: 'rgba(255,236,190,',
+      luzA: noche ? 0.9 : 0.5,
+      mueble: noche ? tonoEsc(0xC9C3B8, 0xA8A196) : m.blanco,
+      azulejo: noche ? tonoEsc(0x9C958A, 0x857E73) : tonoEsc(0xF2D27A, 0xE0BC5E),
+      vidrio: 0xFFF3A6,
+      deco: ['mueble', 'mueble', 'lavaplatos', 'mueble', 'mueble', 'mueble', 'puerta', 'mueble', 'mueble', 'lavaplatos', 'mueble', 'mueble']
+    };
+    if (tipo === 'parque') return {
+      afuera: true,
+      noche: noche,
+      fondo: noche ? 0x1B1714 : 0xF6EFDC,
+      cielo: !noche,
+      radio: 26,
+      piso: texPasto(noche ? '#2F6B4C' : '#5CB487', noche ? '#296043' : '#52AB7D', [14, 14]),
+      pad: {
+        r: 2.3,
+        color: noche ? '#3B362F' : '#B7AFA2',
+        linea: noche ? '#2B2623' : '#A39B8E'
+      },
+      items: [['arbol', 160, 7.5], ['arbusto', 132, 5.6], ['barras', 105, 6.2], ['arbol', 75, 8.5], ['farola', 55, 5.5], ['arbusto', 30, 6.2], ['arbol', 8, 9], ['bancoParque', 335, 5.4], ['arbol', 305, 8], ['arbusto', 280, 5.8], ['tachoParque', 260, 5.2], ['arbol', 235, 7.2], ['farola', 212, 5.6], ['bancoParque', 190, 5.5], ['arbol', 185, 10.5], ['arbol', 125, 11], ['arbol', 250, 11.5], ['arbol', 40, 11], ['arbol', 320, 11]]
+    };
+    if (tipo === 'calle') return {
+      afuera: true,
+      noche: noche,
+      fondo: noche ? 0x1B1714 : 0xF3EEE4,
+      cielo: !noche,
+      radio: 7,
+      piso: texBaldosas(noche ? '#4A443D' : '#C9C3B8', noche ? '#3B362F' : '#B0A89B', 4, [6, 6], 6),
+      fachadas: ['edificio', 'bar', 'edificio', 'tienda', 'edificio', 'edificio', 'tienda', 'edificio', 'bar', 'edificio', 'tienda', 'edificio'],
+      items: [['farola', 150, 4.6], ['farola', 30, 4.6], ['farola', 270, 4.6], ['tachoParque', 205, 4.8], ['arbusto', 95, 5.0], ['arbusto', 330, 5.0]]
+    };
+    return {
+      fondo: ESC_TONOS.fondo,
+      pared: ESC_TONOS.pared,
+      zocalo: ESC_TONOS.zocalo,
+      franja: m.amarillo,
+      franjaY: 1.02,
+      piso: texturaPiso(),
+      deco: ESC_DECO
+    };
+  }
+  function crearEscenario(tipo, noche) {
     var THREE = global.THREE,
       m = MOTOR.mat,
       g = new THREE.Group(),
-      paneles = [];
-    var piso = new THREE.Mesh(new THREE.CircleGeometry(ESC_R + 0.3, 64), new THREE.MeshBasicMaterial({
-      map: texturaPiso()
+      paneles = [],
+      carteles = [];
+    var cfg = cfgEscenario(tipo, noche),
+      R = cfg.afuera ? cfg.radio : ESC_R + 0.3;
+    var piso = new THREE.Mesh(new THREE.CircleGeometry(R, 72), new THREE.MeshBasicMaterial({
+      map: cfg.piso
     }));
     piso.rotation.x = -Math.PI / 2;
-    piso.position.y = -0.002;
+    piso.position.y = -0.003;
     g.add(piso);
+    if (cfg.pad) {
+      // el piso de goma de la zona de calistenia
+      var pad = new THREE.Mesh(new THREE.CircleGeometry(cfg.pad.r, 64), new THREE.MeshBasicMaterial({
+        map: texBaldosas(cfg.pad.color, cfg.pad.linea, 4, [2, 2], 7)
+      }));
+      pad.rotation.x = -Math.PI / 2;
+      pad.position.y = -0.0015;
+      g.add(pad);
+      var aro = new THREE.Mesh(new THREE.RingGeometry(cfg.pad.r, cfg.pad.r + 0.08, 64), m.tinta);
+      aro.rotation.x = -Math.PI / 2;
+      aro.position.y = -0.001;
+      g.add(aro);
+    }
+    if (cfg.alfombra) {
+      var alf = new THREE.Mesh(new THREE.CircleGeometry(1.9, 64), plana(0xC24A3F));
+      alf.rotation.x = -Math.PI / 2;
+      alf.position.y = -0.0018;
+      g.add(alf);
+      var alf2 = new THREE.Mesh(new THREE.RingGeometry(1.55, 1.68, 64), plana(YEL));
+      alf2.rotation.x = -Math.PI / 2;
+      alf2.position.y = -0.0016;
+      g.add(alf2);
+    }
     var luz = new THREE.Mesh(new THREE.PlaneGeometry(3.8, 3.8), new THREE.MeshBasicMaterial({
-      map: texturaLuz(),
+      map: texturaLuz(cfg.luz, cfg.luzA),
       transparent: true,
       depthWrite: false
     }));
     luz.rotation.x = -Math.PI / 2;
     luz.position.y = 0.0005;
+    luz.visible = !!cfg.luz || !cfg.afuera;
     g.add(luz);
-    var pared = toon(ESC_TONOS.pared[0], ESC_TONOS.pared[1]),
-      zocalo = toon(ESC_TONOS.zocalo[0], ESC_TONOS.zocalo[1]);
-    var w = 2 * ESC_R * Math.tan(Math.PI / ESC_N) + 0.02,
-      carteles = [];
-    for (var i = 0; i < ESC_N; i++) {
-      var th = i * 2 * Math.PI / ESC_N,
-        p = new THREE.Group();
-      p.position.set(ESC_R * Math.sin(th), 0, ESC_R * Math.cos(th));
-      p.rotation.y = th + Math.PI; // mira al centro
-      var muro = new THREE.Mesh(new THREE.BoxGeometry(w, ESC_ALTO, 0.12), pared);
-      muro.position.y = ESC_ALTO / 2;
-      p.add(muro);
-      var zo = new THREE.Mesh(new THREE.BoxGeometry(w, 0.95, 0.14), zocalo);
-      zo.position.y = 0.475;
-      p.add(zo);
-      var franja = new THREE.Mesh(new THREE.BoxGeometry(w, 0.14, 0.16), m.amarillo);
-      franja.position.y = 1.02;
-      p.add(franja);
-      var filo = new THREE.Mesh(new THREE.BoxGeometry(w, 0.025, 0.17), m.tinta);
-      filo.position.y = 0.94;
-      p.add(filo);
-      var filo2 = filo.clone();
-      filo2.position.y = 1.1;
-      p.add(filo2);
-      var deco = new THREE.Group();
-      deco.position.z = 0.08;
-      p.add(deco);
-      var tipo = ESC_DECO[i];
-      if (tipo === 'rack') decoRack(deco, m, w);else if (tipo === 'ventana') decoVentana(deco, m, w);else if (tipo === 'espejo') decoEspejo(deco, m, w);else if (tipo === 'discos') {
-        decoDiscos(deco, m);
-        deco.position.x = -0.5;
-      } else if (tipo === 'neon' || tipo === 'neon2') {
-        var grande = tipo === 'neon',
-          cw = grande ? w * 0.74 : w * 0.56,
-          ch = grande ? 1.05 : 0.8;
-        var cn = cartelNeon(grande ? ['ENTRENA', 'CON TOR'] : ['TOR', 'GYM'], cw, ch);
-        carteles.push(cn);
-        var cartel = new THREE.Mesh(new THREE.PlaneGeometry(cw, ch), new THREE.MeshBasicMaterial({
-          map: cn.tex
-        }));
-        cartel.position.set(0, grande ? 2.62 : 2.55, 0.06);
-        deco.add(cartel); // por encima de la cabeza de Tor
-        if (grande) {
-          var banco = caja(1.3, 0.1, 0.4, m.gris);
-          banco.position.set(0, 0.45, 0.35);
-          deco.add(banco);
-          [-0.55, 0.55].forEach(function (x) {
-            var pa = caja(0.06, 0.4, 0.3, m.oscuro);
-            pa.position.set(x, 0.2, 0.35);
-            deco.add(pa);
+    var w = 2 * ESC_R * Math.tan(Math.PI / ESC_N) + 0.02;
+    if (!cfg.afuera) {
+      var pared = tonoEsc(cfg.pared[0], cfg.pared[1]),
+        zocalo = cfg.zocalo ? tonoEsc(cfg.zocalo[0], cfg.zocalo[1]) : null,
+        za = cfg.zocaloAlto || 0.95;
+      for (var i = 0; i < ESC_N; i++) {
+        var th = i * 2 * Math.PI / ESC_N,
+          p = new THREE.Group();
+        p.position.set(ESC_R * Math.sin(th), 0, ESC_R * Math.cos(th));
+        p.rotation.y = th + Math.PI; // mira al centro
+        var muro = new THREE.Mesh(new THREE.BoxGeometry(w, ESC_ALTO, 0.12), pared);
+        muro.position.y = ESC_ALTO / 2;
+        p.add(muro);
+        if (zocalo) {
+          var zo = new THREE.Mesh(new THREE.BoxGeometry(w, za, 0.14), zocalo);
+          zo.position.y = za / 2;
+          p.add(zo);
+        }
+        if (cfg.franja) {
+          var fy = cfg.franjaY || 1.02;
+          var franja = new THREE.Mesh(new THREE.BoxGeometry(w, 0.14, 0.16), cfg.franja);
+          franja.position.y = fy;
+          p.add(franja);
+          var filo = new THREE.Mesh(new THREE.BoxGeometry(w, 0.025, 0.17), m.tinta);
+          filo.position.y = fy - 0.08;
+          p.add(filo);
+          var filo2 = filo.clone();
+          filo2.position.y = fy + 0.08;
+          p.add(filo2);
+        }
+        var deco = new THREE.Group();
+        deco.position.z = 0.08;
+        p.add(deco);
+        var fn = DECO[cfg.deco[i]];
+        if (fn) fn(deco, m, w, cfg, carteles, i);
+        g.add(p);
+        paneles.push({
+          g: p,
+          dir: v(Math.sin(th), 0, Math.cos(th))
+        });
+      }
+    } else {
+      if (cfg.fachadas) {
+        // la plaza: fachadas alrededor (radio 6,6)
+        var Rf = 6.6,
+          wf = 2 * Rf * Math.tan(Math.PI / ESC_N) + 0.02;
+        cfg.fachadas.forEach(function (t, i) {
+          var th = i * 2 * Math.PI / ESC_N,
+            p = new THREE.Group();
+          p.position.set(Rf * Math.sin(th), 0, Rf * Math.cos(th));
+          p.rotation.y = th + Math.PI;
+          DECO[t](p, m, wf, cfg, carteles, i);
+          g.add(p);
+          paneles.push({
+            g: p,
+            dir: v(Math.sin(th), 0, Math.cos(th))
           });
+        });
+      }
+      cfg.items.forEach(function (it, i) {
+        var th = it[1] * RAD,
+          p = new THREE.Group();
+        p.position.set(it[2] * Math.sin(th), 0, it[2] * Math.cos(th));
+        p.rotation.y = th + Math.PI;
+        DECO[it[0]](p, m, w, cfg, carteles, i);
+        g.add(p);
+        paneles.push({
+          g: p,
+          dir: v(Math.sin(th), 0, Math.cos(th)),
+          lejos: it[2] > 10
+        });
+      });
+      // el horizonte: colinas (parque), nubes y sol o luna
+      if (tipo === 'parque') for (var k = 0; k < 9; k++) {
+        var a = k * 40 * RAD,
+          col = elipsoide(7 + 3 * azar(k), 2.4 + 1.4 * azar(k + 9), 4, tonoEsc(noche ? 0x245A3F : 0x8FCBA8, noche ? 0x1E4C35 : 0x7DBA97), 0);
+        col.position.set(24 * Math.sin(a), -0.6, 24 * Math.cos(a));
+        col.rotation.y = a;
+        g.add(col);
+      }
+      for (var n = 0; n < 6; n++) {
+        var an = (n * 60 + 20) * RAD;
+        if (noche) {
+          var luna = new THREE.Mesh(new THREE.CircleGeometry(n === 0 ? 1.1 : 0.06, 24), plana(0xFFF3A6));
+          luna.position.set(30 * Math.sin(an), n === 0 ? 12 : 9 + 5 * azar(n), 30 * Math.cos(an));
+          luna.lookAt(0, 1, 0);
+          g.add(luna);
+        } else {
+          var nube = new THREE.Group();
+          [[-1.2, 0, 1.1], [0, 0.4, 1.5], [1.3, 0.05, 1.0]].forEach(function (q) {
+            var e = elipsoide(q[2], q[2] * 0.62, q[2] * 0.7, m.blanco, 0.06);
+            e.position.set(q[0], q[1], 0);
+            nube.add(e);
+          });
+          nube.position.set(28 * Math.sin(an), 9 + 3 * azar(n + 3), 28 * Math.cos(an));
+          nube.lookAt(0, 9, 0);
+          g.add(nube);
         }
       }
-      g.add(p);
-      paneles.push({
-        g: p,
-        dir: v(Math.sin(th), 0, Math.cos(th))
-      });
+      if (!noche) {
+        var sol = new THREE.Mesh(new THREE.CircleGeometry(1.5, 32), plana(YEL));
+        sol.position.set(-20, 14, -20);
+        sol.lookAt(0, 1, 0);
+        g.add(sol);
+      }
     }
     MOTOR.escena.add(g);
     return {
       g: g,
       paneles: paneles,
       carteles: carteles,
-      luz: luz
+      luz: luz,
+      fondo: cfg.fondo
     };
   }
   function escenario(vt) {
     var M = MOTOR,
       e = vt.escenario;
+    M.escs = M.escs || {};
+    var apagar = function () {
+      Object.keys(M.escs).forEach(function (k) {
+        M.escs[k].g.visible = false;
+      });
+    };
     if (!e) {
-      if (M.esc) M.esc.g.visible = false;
+      apagar();
       M.R.setClearColor(0xffffff, 1);
       return;
     }
-    if (!M.esc) M.esc = crearEscenario();
-    var E = M.esc;
+    var tipo = typeof e === 'string' ? e : e.tipo || 'gym',
+      noche = !!(e && e.noche);
+    var key = tipo + (noche ? '-noche' : '');
+    if (!M.escs[key]) M.escs[key] = crearEscenario(tipo, noche);
+    apagar();
+    var E = M.escs[key];
     E.g.visible = true;
-    M.R.setClearColor(ESC_TONOS.fondo, 1);
+    M.R.setClearColor(E.fondo, 1);
     E.carteles.forEach(function (c) {
       c.refrescar();
     });
-    // los paneles del lado de la camara se esconden (la camara puede quedar "afuera" de la sala)
+    // lo que queda del lado de la camara se esconde (la camara puede quedar "afuera" de la sala)
     var cam = M.camara.position,
       d = v(cam.x, 0, cam.z);
     if (d.length() > 1e-3) d.normalize();
     E.paneles.forEach(function (p) {
-      p.g.visible = p.dir.dot(d) < 0.3;
+      p.g.visible = p.lejos ? p.dir.dot(d) < 0.6 : p.dir.dot(d) < 0.3;
     });
     // el charco de luz sigue a Tor
     var c = e && e.luz || [0, 0];

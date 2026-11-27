@@ -173,7 +173,7 @@
   var ESCENAS = [{
     nombre: 'Gancho',
     dur: 2.8,
-    vo: 'Deja de tomar cerveza.',
+    vo: 'No tomes más cerveza.',
     C: E3.escena({
       tomas: [[0, {
         az: 22,
@@ -249,8 +249,9 @@
   }, {
     nombre: 'Músculo',
     dur: 5.2,
-    vo: 'Beber fuerte después de entrenar frena la construcción de músculo: un 24 % menos en un estudio.',
+    vo: 'Beber fuerte después de entrenar frena la construcción muscular, un 24 % menos según un estudio.',
     C: E3.escena({
+      escenario: 'gym',
       tomas: [[0, {
         az: 12,
         el: 6,
@@ -357,8 +358,12 @@
   }, {
     nombre: 'Sueño',
     dur: 4.8,
-    vo: 'Te duerme rápido, pero arruina la calidad de tu sueño: amaneces cansado y sin recuperar.',
+    vo: 'La cerveza te duerme rápido y arruina la calidad de tu sueño. Amaneciendo cansado y sin estar recuperado totalmente.',
     C: E3.escena({
+      escenario: {
+        'tipo': 'casa',
+        'noche': true
+      },
       tomas: [[0, {
         az: 12,
         el: 14,
@@ -469,7 +474,7 @@
   }, {
     nombre: 'Calorías',
     dur: 4.8,
-    vo: 'Y son calorías vacías: seis cervezas suman unas 900, como una hamburguesa con papas.',
+    vo: 'Las cervezas te aportan solo calorías vacías. Seis cervezas suman unas 900 calorías vacías. Lo equivalente a una hamburguesa con papas.',
     C: E3.escena({
       tomas: [[0, {
         az: 16,
@@ -562,7 +567,7 @@
   }, {
     nombre: 'Si te pasas',
     dur: 3.6,
-    vo: 'Y si te pasas... ya sabes cómo termina la noche.',
+    vo: '¿Y qué pasa si te pasas de cervezas? Pues ya sabes cómo va a terminar la noche. Muy mal, vomitando.',
     C: E3.escena({
       tomas: [[0, {
         az: 30,
@@ -694,7 +699,7 @@
   }, {
     nombre: 'La última',
     dur: 5,
-    vo: 'Y cuando te ofrezcan «la última»... ¡no, gracias! Tu cuerpo te lo va a agradecer.',
+    vo: 'Y cuando tus amigos te ofrezcan la última cerveza, di no gracias. Tu cuerpo te lo va a agradecer.',
     C: E3.escena({
       tomas: [[0, {
         az: -14,
@@ -849,13 +854,17 @@
   }];
   global.REELS.registrar({
     id: 'cerveza-3d',
+    escenario: {
+      'tipo': 'calle',
+      'noche': true
+    },
     titulo: 'Deja de tomar cerveza (Tor 3D)',
     estilo: 2,
     escenas: ESCENAS,
     accion: {
       dur: 4.2,
       pregunta: '¿A QUIÉN SE LO MANDAS?',
-      vo: 'Mándaselo al amigo que siempre dice «una y ya», y guarda este video.'
+      vo: 'Mándaselo a aquel amigo borracho que siempre dice una más y nos vamos.'
     }
   });
 })(window);

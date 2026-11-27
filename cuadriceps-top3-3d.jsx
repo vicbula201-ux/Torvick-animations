@@ -60,13 +60,13 @@
   }
 
   var ESCENAS = [
-    { nombre: 'Gancho', dur: 2.6, vo: 'Los 3 mejores ejercicios de cuádriceps según la ciencia.',
+    { nombre: 'Gancho', dur: 2.6, vo: 'Hello, mis amores, estos son los top 3 ejercicios de cuádriceps según la ciencia.',
       C: E3.gancho({
         musculo: 'CUÁDRICEPS', s1: 1.05, musc: { cuadriceps: true }, brillo: CUAD, r: 85,
         tomas: [[0, { az: 18, el: 2, dist: 4.6, y: 0.9 }], [1, { az: 22, el: 4, dist: 6.0, y: 1.0 }]],
         figura: function () { return { quien: 'novia', pose: E3.poseNovia(), cara: { boca: 'sonrisa' } }; }
       }) },
-    { nombre: '1. Sentadilla en máquina', dur: 2.2, vo: 'Uno: sentadilla en máquina, bajando bien.',
+    { nombre: '1. Sentadilla en máquina', dur: 2.2, vo: 'Uno. Sentadilla en máquina.',
       C: E3.ejercicio({
         n: 1, r1: 'SENTADILLA EN *MÁQUINA*', r2: 'BIEN *ABAJO*', brillo: CUAD, r: 80, s1: 0.95,
         tomas: [[0, { az: 30, el: 6, dist: 7.0, y: 1.1, dz: 0 }], [1, { az: 22, el: 4, dist: 5.8, y: 0.95, dz: 0 }]],
@@ -76,7 +76,7 @@
             objetos: [{ tipo: 'smith', p: [0, 0, p._z], barra: p._barra }] };
         }
       }) },
-    { nombre: '2. Extensión de piernas', dur: 2.2, vo: 'Dos: extensión de piernas, la que trabaja el recto femoral.',
+    { nombre: '2. Extensión de piernas', dur: 2.2, vo: 'Dos. Extensión de piernas.',
       C: E3.ejercicio({
         n: 2, r1: 'EXTENSIÓN DE *PIERNAS*', r2: 'RECTO *FEMORAL*', brillo: CUAD, r: 80, s1: 0.95,
         tomas: [[0, { az: 70, el: 8, dist: 6.0, y: 0.8, dz: 0.2 }], [1, { az: 52, el: 6, dist: 5.0, y: 0.75, dz: 0.25 }]],
@@ -85,7 +85,7 @@
           return { figuras: [{ quien: 'novia', pose: p, musc: { cuadriceps: true, brillo: 0.35 * k }, cara: { boca: k > 0.5 ? 'dientes' : 'sonrisa' } }], objetos: extObjetos(p) };
         }
       }) },
-    { nombre: '3. Prensa', dur: 2.2, vo: 'Tres: prensa, sin despegar la cadera.',
+    { nombre: '3. Prensa', dur: 2.2, vo: 'Tres. Prensa de piernas.',
       C: E3.ejercicio({
         n: 3, r1: '*PRENSA*', r2: 'CADERA *PEGADA*', brillo: CUAD, r: 80,
         tomas: [[0, { az: 84, el: 10, dist: 7.6, y: 0.75, dz: 0.3 }], [1, { az: 66, el: 10, dist: 6.4, y: 0.72, dz: 0.3 }]],
@@ -99,6 +99,7 @@
 
   global.REELS.registrar({
     id: 'cuadriceps-top3-3d', titulo: 'Top 3 cuádriceps (novia 3D)', estilo: 2, escenas: ESCENAS,
-    accion: { dur: 3.6, pregunta: '¿CUÁL PROBARÁS?', vo: '¿Cuál vas a probar? Coméntalo, compártelo con una amiga y guárdalo.' }
+    accion: { dur: 3.6, pregunta: '¿ESTÁS DE ACUERDO?', vo: '¿Estás de acuerdo con este top? Deja tu opinión en los comentarios, guarda el video y comparte el video con una amiguita.' },
+    cierreVo: '¿Quieres ver más videos similares? Sigue a mi novio Tor para más contenido. Bye.'
   });
 })(window);

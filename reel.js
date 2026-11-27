@@ -197,7 +197,8 @@
       dy: M.life(props.T, 2.8, 6, props.fase || 0)
     }, /*#__PURE__*/React.createElement(P.Visto, {
       s: props.s || 0.6,
-      p: M.draw(props.T, props.cuando, 0.4)
+      p: M.draw(props.T, props.cuando, 0.4),
+      borde: props.borde
     }));
   }
 
@@ -287,7 +288,8 @@
         dur: e.dur,
         i: i,
         limites: limites,
-        durs: durs
+        durs: durs,
+        escenario: props.escenario
       })));
     });
 
@@ -517,7 +519,8 @@
       }
     }, /*#__PURE__*/React.createElement(Reel, {
       escenas: escenas,
-      estilo: def.estilo
+      estilo: def.estilo,
+      escenario: def.escenario
     }));
   }
 

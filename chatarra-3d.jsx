@@ -118,6 +118,26 @@
     return p;
   }
 
+  var ESCENA_SUENO = [
+    { nombre: 'Es sueño', dur: 5.6, vo: 'Y a las 2 de la mañana no es hambre: es sueño. Dormir poco dispara los antojos.',
+      C: E3.escena({
+        zona: [44, 650, 1036, 1452],   // arriba de la cabeza giran los antojos
+        tomas: [[0, { az: 12, el: 4, dist: 7.0, y: 1.45 }], [1, { az: 22, el: 4, dist: 7.6, y: 1.45 }]],
+        vista: function (T, f) {
+          var bost = Math.max(pulso(T, f(0.1), 1.4), pulso(T, f(0.62), 1.4));
+          return { figuras: [{ quien: 'tor', pose: depie({ manoI: E3.lerp3([-0.34, 0.83, 0.08], [-0.04, 1.5, 0.28], bost), codoI: [0.8, -1, 0], cabeza: [10 * bost, 0, 0] }), cara: { ojos: 'rojos', boca: bost > 0.2 ? 'abierta' : 'o' } }] };
+        },
+        lienzo: function (T, f, t, pr) { return antojos(pr('cabeza'), T, animate({ from: 0, to: 1, start: f(0.36), end: f(0.5) })(T)); },
+        piezas: [
+          { C: MU.Despertador, s: 0.85, x: 40, y: 1080, p: function (T) { return { T: T, hora: 2 }; } },
+          { C: N.ICONOS.bateria, s: 0.95, x: 830, y: 1080, cuando: 0.2, p: { p: 0.1 } },
+          { C: N.ICONOS.luna, s: 0.7, x: 60, y: 400, cuando: 0.1 }
+        ],
+        r1: { text: 'NO ES HAMBRE: ES *SUEÑO*', s: 0.95, cuando: 0.04 },
+        r2: { text: 'DORMIR POCO = *MÁS ANTOJOS*', s: 0.88, cuando: 0.54, tono: 'rojo' }
+      }) }
+  ];
+
   var ESCENAS = [
     { nombre: 'Gancho', dur: 3, vo: 'No comas comida chatarra.',
       C: E3.escena({
@@ -146,7 +166,7 @@
         r2: { text: 'SON LAS *2 AM*', s: 1.1, cuando: 0.5 }
       }) },
 
-    { nombre: 'Comes de más', dur: 5.6, vo: 'Muchas calorías y poca saciedad: los ultraprocesados te hacen comer unas 500 calorías de más al día.',
+    { nombre: 'Comes de más', dur: 5.6, vo: 'La comida chatarra te da muchas calorías y poca saciedad. Por ejemplo, los ultraprocesados te hacen comer en promedio unas 500 calorías de más al día.',
       C: E3.escena({
         tomas: [[0, { az: 18, el: 4, dist: 7.0, y: 1.25, dx: -0.3 }], [1, { az: 8, el: 4, dist: 7.4, y: 1.2, dx: -0.3 }]],
         vista: function (T, f) {
@@ -167,25 +187,8 @@
         r2: { text: '*+500* CALORÍAS AL DÍA', s: 1.0, cuando: 0.56 }
       }) },
 
-    { nombre: 'Es sueño', dur: 5.6, vo: 'Y a las 2 de la mañana no es hambre: es sueño. Dormir poco dispara los antojos.',
-      C: E3.escena({
-        zona: [44, 650, 1036, 1452],   // arriba de la cabeza giran los antojos
-        tomas: [[0, { az: 12, el: 4, dist: 7.0, y: 1.45 }], [1, { az: 22, el: 4, dist: 7.6, y: 1.45 }]],
-        vista: function (T, f) {
-          var bost = Math.max(pulso(T, f(0.1), 1.4), pulso(T, f(0.62), 1.4));
-          return { figuras: [{ quien: 'tor', pose: depie({ manoI: E3.lerp3([-0.34, 0.83, 0.08], [-0.04, 1.5, 0.28], bost), codoI: [0.8, -1, 0], cabeza: [10 * bost, 0, 0] }), cara: { ojos: 'rojos', boca: bost > 0.2 ? 'abierta' : 'o' } }] };
-        },
-        lienzo: function (T, f, t, pr) { return antojos(pr('cabeza'), T, animate({ from: 0, to: 1, start: f(0.36), end: f(0.5) })(T)); },
-        piezas: [
-          { C: MU.Despertador, s: 0.85, x: 40, y: 1080, p: function (T) { return { T: T, hora: 2 }; } },
-          { C: N.ICONOS.bateria, s: 0.95, x: 830, y: 1080, cuando: 0.2, p: { p: 0.1 } },
-          { C: N.ICONOS.luna, s: 0.7, x: 60, y: 400, cuando: 0.1 }
-        ],
-        r1: { text: 'NO ES HAMBRE: ES *SUEÑO*', s: 0.95, cuando: 0.04 },
-        r2: { text: 'DORMIR POCO = *MÁS ANTOJOS*', s: 0.88, cuando: 0.54, tono: 'rojo' }
-      }) },
-
-    { nombre: 'Regla 80/20', dur: 5.6, vo: '¿Prohibirla? No. La regla es 80/20: casi todo comida real, y un gusto de vez en cuando.',
+    // ('Es sueño' no va: Victor no la grabo; la escena sigue en ESCENA_SUENO por si se graba)
+    { nombre: 'Regla 80/20', dur: 5.6, vo: '¿Deberías prohibir la comida chatarra? No, pero lo que sí debes cambiar es la proporción. Un 80-20. Casi todo lo que comas debe ser comida de verdad, un 80 %, y un gusto de vez en cuando, el 20 %.',
       C: E3.escena({
         tomas: [[0, { az: 10, el: 4, dist: 9.4, y: 2.3 }], [1, { az: 20, el: 4, dist: 9.0, y: 2.3 }]],
         vista: function (T, f) {
@@ -210,8 +213,8 @@
         r2: { text: 'UN GUSTO DE *VEZ EN CUANDO*', s: 0.88, cuando: 0.6, tono: 'verde' }
       }) },
 
-    { nombre: 'Muévete', dur: 5, vo: 'Y muévete, pero ojo: una hamburguesa con papas equivale a más de una hora corriendo.',
-      C: E3.escena({
+    { nombre: 'Muévete', dur: 5, vo: 'Siempre muévete y haz ejercicio físico. Porque recuerda, una hamburguesa con papas equivale a más de una hora corriendo.',
+      C: E3.escena({ escenario: 'parque',
         tomas: [[0, { az: 90, el: 4, dist: 7.4, y: 1.5 }], [1, { az: 84, el: 4, dist: 7.8, y: 1.55 }]],
         vista: function (T, f) { return { figuras: [{ quien: 'tor', oculto: T < f(0.2), pose: corre(T), musc: { cuadriceps: true, gemelos: 'claro' }, cara: { boca: 'abierta', cejas: 'triste' } }] }; },
         lienzo: function (T, f, t, pr) {
@@ -237,7 +240,7 @@
         r2: { text: 'MÁS DE *1 HORA* CORRIENDO', s: 0.92, cuando: 0.56 }
       }) },
 
-    { nombre: 'A dormir', dur: 5, vo: 'Disfrútala de vez en cuando... pero no a las 2 de la mañana. ¡A dormir!',
+    { nombre: 'A dormir', dur: 5, vo: 'Puedes comer comida chatarra, pero de vez en cuando y de cuando en vez. Ah, y no lo hagas a las dos de la mañana después de una fiesta.',
       C: E3.escena({
         tomas: [[0, { az: 14, el: 6, dist: 7.6, y: 1.2, dx: 0.35 }], [0.4, { az: 8, el: 6, dist: 7.8, y: 1.2, dx: 0.2 }], [1, { az: 4, el: 6, dist: 8.2, y: 1.2, dx: -0.2 }]],
         golpes: [0.34],
@@ -274,7 +277,7 @@
   ];
 
   global.REELS.registrar({
-    id: 'chatarra-3d', titulo: 'No comas comida chatarra (Tor 3D)', estilo: 2, escenas: ESCENAS,
-    accion: { dur: 4.2, pregunta: '¿QUIÉN ASALTA LA NEVERA?', vo: 'Mándaselo al que dice que está a dieta, y guarda este video.' }
+    id: 'chatarra-3d', escenario: {'tipo': 'cocina', 'noche': true}, titulo: 'No comas comida chatarra (Tor 3D)', estilo: 2, escenas: ESCENAS,
+    accion: { dur: 4.2, pregunta: '¿QUIÉN ASALTA LA NEVERA?', vo: 'Mándale este video a ese amigo que siempre dice estar en dieta.' }
   });
 })(window);

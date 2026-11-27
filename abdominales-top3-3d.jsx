@@ -43,9 +43,9 @@
   }
 
   var ESCENAS = [
-    { nombre: 'Gancho', dur: 2.6, vo: 'Los 3 mejores ejercicios de abdominales según la ciencia.',
+    { nombre: 'Gancho', dur: 2.6, vo: 'Top 3 ejercicios de abdominales según la ciencia.',
       C: E3.gancho({ musculo: 'ABDOMINALES', s1: 1.0, musc: { abdomen: true, oblicuos: 'claro' }, brillo: ABD, r: 120, flex: 0.6 }) },
-    { nombre: '1. Abdominal en polea', dur: 2.2, vo: 'Uno: abdominal en polea, porque le puedes subir el peso.',
+    { nombre: '1. Abdominal en polea', dur: 2.2, vo: 'Uno, abdominal en polea.',
       C: E3.ejercicio({
         n: 1, r1: 'ABDOMINAL EN *POLEA*', r2: 'CON *PESO*', brillo: ABD, r: 100, s1: 1.0,
         tomas: [[0, { az: 60, el: 6, dist: 6.8, y: 1.15, dz: -0.15 }], [1, { az: 42, el: 4, dist: 5.4, y: 1.1, dz: 0 }]],
@@ -54,7 +54,7 @@
             objetos: [PZ.abdominalPolea.polea(k, 0)] };
         }
       }) },
-    { nombre: '2. Elevación de piernas', dur: 2.2, vo: 'Dos: elevación de piernas colgado, sin balancearte.',
+    { nombre: '2. Elevación de piernas', dur: 2.2, vo: 'Dos. Elevación de piernas colgado de la barra.',
       C: E3.ejercicio({
         n: 2, r1: 'ELEVACIÓN DE *PIERNAS*', r2: 'SIN *BALANCEO*', brillo: ABD, r: 100, s1: 0.95,
         tomas: [[0, { az: 72, el: 2, dist: 8.2, y: 1.5, dz: 0.1 }], [1, { az: 56, el: 0, dist: 7.2, y: 1.45, dz: 0.2 }]],
@@ -63,7 +63,7 @@
             objetos: [{ tipo: 'barraFija', p: [0, 0, 0], alto: 2.62 }] };
         }
       }) },
-    { nombre: '3. Rueda abdominal', dur: 2.2, vo: 'Tres: rueda abdominal, con el abdomen estirado.',
+    { nombre: '3. Rueda abdominal', dur: 2.2, vo: 'Tres. Rueda abdominal.',
       C: E3.ejercicio({
         n: 3, r1: 'RUEDA *ABDOMINAL*', r2: 'ABDOMEN *ESTIRADO*', brillo: ABD, r: 100,
         tomas: [[0, { az: 74, el: 12, dist: 7.0, y: 0.5, dz: 0.55 }], [1, { az: 52, el: 8, dist: 5.6, y: 0.45, dz: 0.6 }]],
@@ -77,6 +77,6 @@
 
   global.REELS.registrar({
     id: 'abdominales-top3-3d', titulo: 'Top 3 abdominales (Tor 3D)', estilo: 2, escenas: ESCENAS,
-    accion: { dur: 3.3, vo: '¿Estás de acuerdo? Coméntalo, compártelo y guárdalo.' }
+    accion: { dur: 3.3, vo: '¿Estás de acuerdo con este top? Deja tu opinión en los comentarios, guarda el video y compártelo con un amigo.' }
   });
 })(window);

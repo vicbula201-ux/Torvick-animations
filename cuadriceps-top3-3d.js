@@ -111,7 +111,7 @@
   var ESCENAS = [{
     nombre: 'Gancho',
     dur: 2.6,
-    vo: 'Los 3 mejores ejercicios de cuádriceps según la ciencia.',
+    vo: 'Hello, mis amores, estos son los top 3 ejercicios de cuádriceps según la ciencia.',
     C: E3.gancho({
       musculo: 'CUÁDRICEPS',
       s1: 1.05,
@@ -144,7 +144,7 @@
   }, {
     nombre: '1. Sentadilla en máquina',
     dur: 2.2,
-    vo: 'Uno: sentadilla en máquina, bajando bien.',
+    vo: 'Uno. Sentadilla en máquina.',
     C: E3.ejercicio({
       n: 1,
       r1: 'SENTADILLA EN *MÁQUINA*',
@@ -191,7 +191,7 @@
   }, {
     nombre: '2. Extensión de piernas',
     dur: 2.2,
-    vo: 'Dos: extensión de piernas, la que trabaja el recto femoral.',
+    vo: 'Dos. Extensión de piernas.',
     C: E3.ejercicio({
       n: 2,
       r1: 'EXTENSIÓN DE *PIERNAS*',
@@ -233,7 +233,7 @@
   }, {
     nombre: '3. Prensa',
     dur: 2.2,
-    vo: 'Tres: prensa, sin despegar la cadera.',
+    vo: 'Tres. Prensa de piernas.',
     C: E3.ejercicio({
       n: 3,
       r1: '*PRENSA*',
@@ -285,8 +285,9 @@
     escenas: ESCENAS,
     accion: {
       dur: 3.6,
-      pregunta: '¿CUÁL PROBARÁS?',
-      vo: '¿Cuál vas a probar? Coméntalo, compártelo con una amiga y guárdalo.'
-    }
+      pregunta: '¿ESTÁS DE ACUERDO?',
+      vo: '¿Estás de acuerdo con este top? Deja tu opinión en los comentarios, guarda el video y comparte el video con una amiguita.'
+    },
+    cierreVo: '¿Quieres ver más videos similares? Sigue a mi novio Tor para más contenido. Bye.'
   });
 })(window);

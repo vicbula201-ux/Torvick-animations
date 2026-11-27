@@ -7,6 +7,8 @@ sincronizar.py — pone TU voz (grabada por escenas, con varias tomas) sobre un 
       --transcripcion t.json   usa esa transcripcion (si no, la hace transcribir.py y la guarda)
       --elegir 3=2,5=1         en la escena 3 usa la toma 2, en la 5 la toma 1 (ver <id>-voz.txt)
       --plan                   solo elige y corta: no graba el video (para revisar rapido)
+      --quitar 110.9-113.4     lo que se dijo en esos segundos del audio no entra en ninguna toma
+                               (un pedazo suelto pegado a la toma buena: "...hacia tu pie | no dejes...")
 
 Que hace:
   1. Transcribe el audio con tiempos por palabra (herramientas/transcribir.py, en tu compu).
@@ -52,8 +54,14 @@ def sin_tildes(s):
     return ''.join(c for c in unicodedata.normalize('NFD', s) if unicodedata.category(c) != 'Mn')
 
 
+NUMEROS = {'0': 'cero', '1': 'uno', '2': 'dos', '3': 'tres', '4': 'cuatro', '5': 'cinco', '6': 'seis', '7': 'siete',
+           '8': 'ocho', '9': 'nueve', '10': 'diez'}
+
+
 def norm(p):
-    return re.sub(r'[^a-z0-9]', '', sin_tildes(p.lower()))
+    t = re.sub(r'[^a-z0-9]', '', sin_tildes(p.lower()))
+    # el reconocedor escribe "2." donde dijiste "dos": se comparan como la misma palabra
+    return NUMEROS.get(t, t)
 
 
 def tokens(texto):
@@ -92,7 +100,11 @@ def parecidas(a, b):
 
 
 def igual(a, b):
-    return parecidas(a, b) or (min(len(a), len(b)) >= 4 and parecidas(fon(a), fon(b)))
+    if parecidas(a, b) or (min(len(a), len(b)) >= 4 and parecidas(fon(a), fon(b))):
+        return True
+    # palabras pegadas por el reconocedor ("pre-banca" -> "prebanca" contiene "banca")
+    corta, larga = (a, b) if len(a) <= len(b) else (b, a)
+    return len(corta) >= 5 and corta in larga
 
 
 def peso(t):
@@ -209,6 +221,9 @@ def repartir(W, escenas):
     NEG = -1e18
     emis = np.zeros((N, S))
     for i, w in enumerate(W):
+        if w.get('fuera'):
+            emis[i, :] = -50.0
+            continue
         for k in range(S):
             c = peso(w['t'])
             # lo que no esta en el guion resta poco: cambiaste las palabras, no la idea
@@ -276,6 +291,9 @@ def tomas_de(W, etiquetas, k, vocs=None):
         if cur is None:
             cur = []
         # palabras descartadas en medio de la toma (sin pausa) son parte de lo que dijiste
+        if cur and any(W[x].get('fuera') for x in range(cur[-1] + 1, i)):
+            tomas.append(cur)
+            cur = []
         if cur:
             cur.extend(range(cur[-1] + 1, i))
         cur.append(i)
@@ -294,9 +312,9 @@ def tomas_de(W, etiquetas, k, vocs=None):
     out = []
     for t in tomas:
         a, b = t[0], t[-1]
-        while not corte(a) and etiquetas[a - 1] == -1 and not ajena(a - 1) and t[0] - a < 8:
+        while not corte(a) and etiquetas[a - 1] == -1 and not ajena(a - 1) and not W[a - 1].get('fuera') and t[0] - a < 8:
             a -= 1
-        while not corte(b + 1) and b + 1 < len(W) and etiquetas[b + 1] == -1 and not ajena(b + 1) and b - t[-1] < 4:
+        while not corte(b + 1) and b + 1 < len(W) and etiquetas[b + 1] == -1 and not ajena(b + 1) and not W[b + 1].get('fuera') and b - t[-1] < 4:
             b += 1
         out.append(list(range(a, t[0])) + t + list(range(t[-1] + 1, b + 1)))
     return out
@@ -315,10 +333,18 @@ def partir_reinicios(W, idx):
     while j < len(t) - 2:
         # un reinicio repite el COMIENZO de una oracion ("los musculos principales... los musculos...");
         # sin puntuacion en la transcripcion no se sabe donde empiezan, y vale cualquier lugar
-        hay = any(all(igual(t[i + q], t[j + q]) for q in range(3)) and sum(peso(t[j + q]) for q in range(3)) >= 1.5
-                  and (not puntuada or inicio(i))
-                  for i in range(cortes[-1], j))
+        # sin puntuacion no se sabe donde empieza cada oracion: hace falta repetir mas ("que tu rodilla"
+        # se repite dentro de una misma frase bien dicha)
+        previos = [i for i in range(cortes[-1], j)
+                   if all(igual(t[i + q], t[j + q]) for q in range(3)) and sum(peso(t[j + q]) for q in range(3)) >= (1.5 if puntuada else 2.0)
+                   and (not puntuada or inicio(i))]
+        hay = bool(previos)
         if hay:
+            # lo que empezaste y dejaste ("...anterior y lateral, con ayuda del pectoral, el cerracto. Con ayuda
+            # del pectoral, el serrato y el triceps"): el intento abandonado queda aparte del resto de la toma
+            i0 = previos[-1]
+            if i0 > cortes[-1] and re.search(r'[.?!,;:]$', W[idx[i0] - 1]['p']):
+                cortes.append(i0)
             c = j
             while c - 1 > cortes[-1] and not re.search(r'[.?!]$', W[idx[c - 1]]['p']) and j - c < 8:
                 c -= 1
@@ -331,14 +357,60 @@ def partir_reinicios(W, idx):
         else:
             j += 1
     cortes.append(len(idx))
+    # otro intento con otras palabras ("los tres mejores ejercicios de pecho segun la ciencia. top tres
+    # ejercicios de pecho segun la ciencia."): dos oraciones seguidas que dicen casi lo mismo
+    fin_oracion = [q + 1 for q in range(len(idx) - 1) if re.search(r'[.?!]$', W[idx[q]]['p'])]
+    def contenido(a, b):
+        return set(raiz(x) for x in t[a:b] if peso(x) >= 1)
+    extra = []
+    for q in fin_oracion:
+        a0 = max([c for c in cortes + extra if c < q] + [0])
+        a0 = max([a0] + [r for r in fin_oracion if r < q])
+        sig = [r for r in fin_oracion if r > q] + [len(idx)]
+        b0 = sig[0]
+        # "Tres." solo no alcanza: el intento sigue en la oracion siguiente ("Tres. Curl nordico")
+        if len(contenido(q, b0)) < 2 and len(sig) > 1:
+            b0 = sig[1]
+        A, B = contenido(a0, q), contenido(q, b0)
+        comun = sum(1 for x in B if any(igual(x, y) for y in A))
+        if len(A) >= 2 and len(B) >= 2 and comun >= 0.6 * max(len(A), len(B)) and q not in cortes:
+            extra.append(q)
+    cortes = sorted(set(cortes + extra))
     return [(idx[a:b], n > 0) for n, (a, b) in enumerate(zip(cortes[:-1], cortes[1:])) if b > a]
+
+
+def recortar_bordes(W, idx, voc):
+    """saca al principio y al final de una toma las oraciones cortas que no son de la escena: el "No."
+    de una correccion ("No. Dos, press inclinado con barra") o el "1." que anuncia la escena siguiente"""
+    def oraciones(ix):
+        out, cur = [], []
+        for i in ix:
+            cur.append(i)
+            if re.search(r'[.?!]$', W[i]['p']):
+                out.append(cur)
+                cur = []
+        if cur:
+            out.append(cur)
+        return out
+    def ajena(o):
+        return len(o) <= 2 and not any(igual(W[i]['t'], v) for i in o for v in voc)
+    fr = oraciones(idx)
+    # al final, un intento que volviste a empezar y dejaste ("...hacia adelante. Sujetate de los brazos, no,")
+    if len(fr) > 1 and not re.search(r'[.?!]$', W[fr[-1][-1]]['p']) and igual(W[fr[-1][0]]['t'], W[fr[0][0]]['t']) and peso(W[fr[0][0]]['t']) >= 1:
+        fr = fr[:-1]
+    while len(fr) > 1 and ajena(fr[0]):
+        fr = fr[1:]
+    while len(fr) > 1 and ajena(fr[-1]):
+        fr = fr[:-1]
+    return [i for o in fr for i in o]
 
 
 def evaluar(W, idx, escena, vocab_total, cuenta):
     texto = ' '.join(W[i]['p'] for i in idx)
     t = [W[i]['t'] for i in idx]
     ult = t[-1] if t else ''
-    cortada = ult in STOP or bool(re.search(r'(\.\.\.|…)\s*$', texto))
+    # termina en una palabra que no cierra ("con", "del"...) sin punto final: se corto ("¿...eres tu?" no)
+    cortada = (ult in STOP and not re.search(r'[.?!]\s*$', texto)) or bool(re.search(r'(\.\.\.|…)\s*$', texto))
     trabada = '...' in texto[:-3] or '…' in texto[:-1]
     dudosas = []
     for x in t:
@@ -360,10 +432,16 @@ def elegir(tomas, P):
     def limpia(tm):
         return not tm['ev']['cortada'] and not tm['ev']['trabada']
 
+    def mejor_despues(tm, q):
+        # otra toma, grabada despues, que dice mejor la parte q
+        return any(t2['ini'] > tm['ini'] and t2['ev']['cub'][q] > tm['ev']['cub'][q] + 0.15 for t2 in tomas)
+
     def racha(tm, p):
         # partes seguidas que la toma dice, y en el mismo orden que el guion
         n = 0
         while p + n < max(P, 1) and cubre(tm, p + n) and (n == 0 or tm['ev']['centro'][p + n] > tm['ev']['centro'][p + n - 1]):
+            if n > 0 and P and mejor_despues(tm, p + n):
+                break
             n += 1
         return n
 
@@ -385,7 +463,8 @@ def elegir(tomas, P):
         # entre las que dicen (casi) todo lo de esa parte, la ultima: la que te quedo bien
         tope = max(tm['ev']['cub'][p] for tm in pool)
         pool = [tm for tm in pool if tm['ev']['cub'][p] >= tope - 0.3]
-        mejor = max(pool, key=lambda tm: (racha(tm, p), tm['ini']))
+        # a igual racha y comienzo, la mas corta: la oracion sola, sin lo que se va a tomar de otra toma
+        mejor = max(pool, key=lambda tm: (racha(tm, p), tm['ini'], -len(tm['idx'])))
         elegidas.append(mejor)
         p += max(1, racha(mejor, p))
     return elegidas
@@ -443,6 +522,7 @@ def main():
     ap.add_argument('--transcripcion')
     ap.add_argument('--elegir', default='')
     ap.add_argument('--plan', action='store_true')
+    ap.add_argument('--quitar', default='')
     a = ap.parse_args()
     salida = os.path.abspath(a.carpeta)
     trabajo = os.path.join(salida, a.id + '-voz')
@@ -463,6 +543,11 @@ def main():
         t = norm(w['p'])
         if t:
             W.append({'p': w['p'].strip(), 't': t, 'ini': float(w['ini']), 'fin': float(w['fin'])})
+    for tramo in filter(None, a.quitar.split(',')):
+        q0, q1 = (float(x) for x in tramo.split('-'))
+        for w in W:
+            if w['ini'] >= q0 - 0.05 and w['fin'] <= q1 + 0.05:
+                w['fuera'] = True
     cuenta = {}
     for w in W:
         cuenta[w['t']] = cuenta.get(w['t'], 0) + 1
@@ -485,9 +570,10 @@ def main():
     for k, e in enumerate(escenas):
         tomas = []
         for idx in tomas_de(W, etiquetas, k, [e['voc'] for e in escenas]):
-            for idx2, rein in partir_reinicios(W, idx):
+            for crudo, rein in partir_reinicios(W, idx):
+                idx2 = recortar_bordes(W, crudo, tokens(e['vo']))
                 ev = evaluar(W, idx2, e, None, cuenta)
-                tomas.append({'idx': idx2, 'ini': W[idx2[0]]['ini'], 'fin': W[idx2[-1]]['fin'], 'recortada': rein, 'ev': ev})
+                tomas.append({'idx': idx2, 'crudo': crudo, 'ini': W[idx2[0]]['ini'], 'fin': W[idx2[-1]]['fin'], 'recortada': rein, 'ev': ev})
                 # cada oracion de la toma tambien puede ir sola (si dijo las partes en otro orden)
                 frases, cur = [], []
                 for i in idx2:
@@ -502,6 +588,11 @@ def main():
                         if sum(peso(W[i]['t']) for i in fr) >= 2:
                             tomas.append({'idx': fr, 'ini': W[fr[0]]['ini'], 'fin': W[fr[-1]]['fin'], 'recortada': True, 'frase': True,
                                           'ev': evaluar(W, fr, e, None, cuenta)})
+                    # y sus comienzos (las primeras oraciones): si lo ultimo se toma de un intento posterior
+                    for m in range(2, len(frases)):
+                        fr = [i for q in frases[:m] for i in q]
+                        tomas.append({'idx': fr, 'ini': W[fr[0]]['ini'], 'fin': W[fr[-1]]['fin'], 'recortada': True, 'frase': True, 'oculta': True,
+                                      'ev': evaluar(W, fr, e, None, cuenta)})
         tomas_por.append(tomas)
     # lo que quedo sin escena (por ejemplo, la accion grabada despues del cierre): si se parece
     # claramente a una escena, entra como otra toma suya
@@ -529,6 +620,32 @@ def main():
             if notas and notas[0][0] >= 0.6 and (len(notas) < 2 or notas[0][0] - notas[1][0] >= 0.2):
                 _, k, ev = notas[0]
                 tomas_por[k].append({'idx': idx2, 'ini': W[idx2[0]]['ini'], 'fin': W[idx2[-1]]['fin'], 'recortada': rein, 'ev': ev})
+    # una toma que quedo en otra escena (volviste a grabar "uno, dos, tres" de nuevo, fuera de orden):
+    # si dice claramente lo de otra escena y no lo de la suya, se pasa a esa escena
+    def cub_principal(ev, e):
+        cs = [c for c, p in zip(ev['cub'], e['partes']) if not all(x in NUMEROS.values() for x in p['t'])]
+        return sum(cs) / len(cs) if cs else 0.0
+    for k in range(len(escenas)):
+        quedan = []
+        for tm in tomas_por[k]:
+            if tm.get('frase') or not escenas[k]['partes'] or 'crudo' not in tm:
+                quedan.append(tm)
+                continue
+            propia, mejor = cub_principal(tm['ev'], escenas[k]), None
+            for j, e2 in enumerate(escenas):
+                if j == k or not e2['partes']:
+                    continue
+                ix = recortar_bordes(W, tm['crudo'], tokens(e2['vo']))
+                ev2 = evaluar(W, ix, e2, None, cuenta)
+                c2 = cub_principal(ev2, e2)
+                if c2 >= 0.6 and c2 - propia >= 0.3 and (mejor is None or c2 > mejor[0]):
+                    mejor = (c2, j, ix, ev2)
+            if mejor:
+                _, j, ix, ev2 = mejor
+                tomas_por[j].append(dict(tm, idx=ix, ini=W[ix[0]]['ini'], fin=W[ix[-1]]['fin'], ev=ev2))
+            else:
+                quedan.append(tm)
+        tomas_por[k] = quedan
     plan = []
     for k, e in enumerate(escenas):
         tomas = sorted(tomas_por[k], key=lambda tm: tm['ini'])
@@ -595,6 +712,8 @@ def main():
         if not q['tomas']:
             lin.append('   (sin voz: no encontre esta linea en la grabacion)')
         for n, tm in enumerate(q['tomas']):
+            if tm.get('oculta') and tm not in q['elegidas']:
+                continue
             ev = tm['ev']
             marca = '>>' if tm in q['elegidas'] else '  '
             notas = []

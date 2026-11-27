@@ -152,7 +152,7 @@
   function marca(T, f, a, b) { return animate({ from: 0, to: 1, start: f(a), end: f(b), ease: Easing.easeOutCubic })(T); }
 
   var ESCENAS = [
-    { nombre: 'Gancho', dur: 3, vo: 'Estás leyendo mal la tabla nutricional.',
+    { nombre: 'Gancho', dur: 3, vo: 'Cómo leer correctamente la tabla nutricional.',
       C: E3.escena({
         ocupa: [OCUPA_TABLA],
         tomas: [[0, { az: 20, el: 6, dist: 5.0, y: 1.45, dx: 0.4 }], [1, CAM]],
@@ -166,7 +166,7 @@
         r2: { text: '¿LA LEES *BIEN*?', s: 1.1, cuando: 0.4 }
       }) },
 
-    { nombre: 'La porción', dur: 5.4, vo: 'Primero, la porción: todos los números son por porción, y el paquete puede traer varias.',
+    { nombre: 'La porción', dur: 5.4, vo: 'Primero lee la porción. Todos los números son por porción y el paquete puede traer varias.',
       C: E3.escena({
         ocupa: [OCUPA_TABLA],
         tomas: [[0, CAM], [1, CAM2]],
@@ -179,7 +179,7 @@
         r2: { text: '1 PAQUETE = *4 PORCIONES*', s: 0.92, cuando: 0.5 }
       }) },
 
-    { nombre: 'Calorías y proteína', dur: 5, vo: 'Después, las calorías y la proteína: la que te llena y te ayuda a construir músculo.',
+    { nombre: 'Calorías y proteína', dur: 5, vo: 'Después están las calorías y las proteínas, la que te llena y la que te ayuda a construir músculo.',
       C: E3.escena({
         ocupa: [OCUPA_TABLA],
         tomas: [[0, CAM2], [1, CAM]],
@@ -194,7 +194,7 @@
         r2: { text: 'LA PROTEÍNA *TE LLENA*', s: 1.0, cuando: 0.5, tono: 'verde' }
       }) },
 
-    { nombre: 'Azúcares', dur: 5.2, vo: 'Ojo con los azúcares añadidos: la OMS recomienda menos de 50 gramos al día.',
+    { nombre: 'Azúcares', dur: 5.2, vo: 'Ten cuidado con los azúcares añadidos. La OMS recomienda menos de 50 gramos al día.',
       C: E3.escena({
         ocupa: [OCUPA_TABLA],
         tomas: [[0, CAM], [1, CAM2]],
@@ -211,7 +211,7 @@
         r2: { text: 'MENOS DE *50 G* AL DÍA', s: 1.0, cuando: 0.5 }
       }) },
 
-    { nombre: 'Sodio', dur: 4.6, vo: 'Y el sodio: menos de 2000 miligramos al día, y aquí una porción ya trae 800.',
+    { nombre: 'Sodio', dur: 4.6, vo: 'Y el sodio, menos de dos mil miligramos al día. Y aquí una porción ya trae 800.',
       C: E3.escena({
         ocupa: [OCUPA_TABLA],
         tomas: [[0, CAM2], [1, CAM]],
@@ -226,7 +226,7 @@
         r2: { text: 'MENOS DE *2000 MG* AL DÍA', s: 0.95, cuando: 0.46 }
       }) },
 
-    { nombre: 'Ingredientes y sellos', dur: 5.4, vo: 'Los ingredientes van de mayor a menor: si el azúcar va primero, déjalo. Y fíjate en los sellos negros.',
+    { nombre: 'Ingredientes y sellos', dur: 5.4, vo: 'Los ingredientes van de mayor a menor. Del que más tiene al que menos tiene. Por ejemplo, si el azúcar va primero, simplemente déjalo a un lado. Y fíjate también en aquellos sellos negros que indican los excesos.',
       C: E3.escena({
         tomas: [[0, { az: 8, el: 4, dist: 9.6, y: 2.2, dx: 0 }], [1, { az: 18, el: 4, dist: 9.2, y: 2.2, dx: 0 }]],
         vista: function (T, f) {
@@ -248,7 +248,7 @@
         r2: { text: 'OJO CON LOS *SELLOS*', s: 1.05, cuando: 0.54, tono: 'rojo' }
       }) },
 
-    { nombre: 'Cierre', dur: 4.6, vo: 'Así que la próxima vez, lee la etiqueta antes de echarla al carrito.',
+    { nombre: 'Cierre', dur: 4.6, vo: 'Así que la próxima vez, lee bien la etiqueta nutricional antes de echarla al carrito.',
       C: E3.escena({
         tomas: [[0, CAM], [1, { az: -8, el: 4, dist: 7.4, y: 1.2, dx: 0 }]],
         golpes: [0.3],
@@ -274,7 +274,7 @@
   ];
 
   global.REELS.registrar({
-    id: 'tabla-nutricional-3d', titulo: 'Tabla nutricional (Tor 3D)', estilo: 2, escenas: ESCENAS,
+    id: 'tabla-nutricional-3d', escenario: 'super', titulo: 'Tabla nutricional (Tor 3D)', estilo: 2, escenas: ESCENAS,
     accion: { dur: 4.2, pregunta: '¿LA LEÍAS BIEN?', vo: '¿La leías bien? Coméntalo, compártelo y guárdalo.' }
   });
 })(window);

@@ -155,7 +155,7 @@
   var ESCENAS = [{
     nombre: 'Gancho',
     dur: 3,
-    vo: 'No fumes más vape.',
+    vo: 'Deja de fumar vape de una puta vez.',
     C: E3.escena({
       tomas: [[0, {
         az: 20,
@@ -235,7 +235,7 @@
   }, {
     nombre: 'No es vapor de agua',
     dur: 5.6,
-    vo: 'No es vapor de agua: lleva nicotina, metales y partículas que llegan al fondo de tus pulmones.',
+    vo: 'Entiende que el vape no es vapor de agua con sabor. Lleva nicotina, metales y partículas que llegan al fondo de tus pulmones.',
     C: E3.escena({
       tomas: [[0, {
         az: -10,
@@ -327,7 +327,7 @@
   }, {
     nombre: 'Engancha',
     dur: 5,
-    vo: 'Y engancha: un solo vape puede traer la nicotina de varias cajetillas de cigarros.',
+    vo: 'El vape puede ser más adictivo que el cigarro. Un solo vape puede traer la nicotina de varias cajetillas de cigarro.',
     C: E3.escena({
       tomas: [[0, {
         az: 14,
@@ -400,7 +400,7 @@
   }, {
     nombre: 'Tu cuerpo',
     dur: 4.6,
-    vo: 'Resultado: más tos, el pulso acelerado y menos aire cuando entrenas.',
+    vo: '¿Cuál es el resultado? Más tos, más pulso acelerado y menos aire cuando entrenas.',
     C: E3.escena({
       tomas: [[0, {
         az: -16,
@@ -521,7 +521,7 @@
   }, {
     nombre: '¿Mejor que el cigarro?',
     dur: 5.6,
-    vo: '¿Mejor que el cigarro? Quizá menos tóxico, pero engancha igual o más. Ninguno te conviene.',
+    vo: '¿El vape es mejor que el cigarro? Quizás sea menos tóxico que el cigarro, pero engancha igual o peor que el cigarro. Simplemente ninguna de las dos te conviene.',
     C: E3.escena({
       tomas: [[0, {
         az: 6,
@@ -601,7 +601,7 @@
   }, {
     nombre: 'Al tacho',
     dur: 5,
-    vo: 'Así que ya sabes: el vape, a la basura. Tus pulmones te lo van a agradecer.',
+    vo: 'Así que ya sabes, deja el vape y tíralo a la basura, tus pulmones te lo van a agradecer.',
     C: E3.escena({
       tomas: [[0, {
         az: -18,
@@ -748,13 +748,14 @@
   }];
   global.REELS.registrar({
     id: 'vape-3d',
+    escenario: 'calle',
     titulo: 'No fumes más vape (Tor 3D)',
     estilo: 2,
     escenas: ESCENAS,
     accion: {
       dur: 4.2,
       pregunta: '¿QUIÉN NO SUELTA EL VAPE?',
-      vo: 'Mándaselo al amigo que no suelta el vape, y guarda este video.'
+      vo: 'Guarda este video y mándaselo a aquel amigo que sabe que no suelta el vape y no ha podido dejar el vicio.'
     }
   });
 })(window);
