@@ -1741,7 +1741,10 @@
   }
   function crearEscenario(tipo, noche) {
     var THREE = global.THREE, m = MOTOR.mat, g = new THREE.Group(), paneles = [], carteles = [];
-    var cfg = cfgEscenario(tipo, noche), R = cfg.afuera ? cfg.radio : ESC_R + 0.3;
+    // adentro, el piso sigue mas alla de las paredes: con la camara lejos (afuera de la sala) se veia el fondo
+    // oscuro abajo del cuadro; las baldosas mantienen su tamano
+    var cfg = cfgEscenario(tipo, noche), R = cfg.afuera ? cfg.radio : 16;
+    if (!cfg.afuera) cfg.piso.repeat.multiplyScalar(R / (ESC_R + 0.3));
     var piso = new THREE.Mesh(new THREE.CircleGeometry(R, 72), new THREE.MeshBasicMaterial({ map: cfg.piso }));
     piso.rotation.x = -Math.PI / 2; piso.position.y = -0.003; g.add(piso);
     if (cfg.pad) {   // el piso de goma de la zona de calistenia
