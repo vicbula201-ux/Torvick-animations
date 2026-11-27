@@ -392,6 +392,38 @@
     }, extra || {});
   }
 
+  /* ---------------- Tor que explica (videos de nutricion y de temas) ----------------
+     E3.charla({ gesto, lado, flex, musc, cara, piezas, lienzo, encima, mal, bien, r1, r2, tomas, zona })
+     gesto: 'explica' (la mano acompana lo que dice), 'senala' (apunta a las piezas de la derecha),
+     'duda' (se rasca la cabeza: la pregunta del gancho), 'cansado', 'flex' (con flex 0..1);
+     gesto, flex, musc y cara pueden ser funciones (T, f). lado 'izq': Tor a la izquierda y las piezas a la derecha. */
+  function poseCharla(T, gesto, k) {
+    if (gesto === 'flex') return poseFlex(k == null ? 1 : k);
+    var p = { cadera: [0, 1.0, 0], pieI: [-0.2, 0.115, 0.03], pieD: [0.2, 0.115, 0.03] };
+    var osc = Math.sin(T * 2.6);
+    p.manoI = [-0.34, 0.86 + 0.02 * Math.sin(T * 1.7), 0.1];
+    if (gesto === 'duda') { p.manoD = [0.2, 1.9, 0.1]; p.codoD = [1, 0.2, 0.3]; p.cabeza = [4, -6, 10]; }
+    else if (gesto === 'senala') { p.manoD = [0.84, 1.44 + 0.02 * osc, 0.3]; p.codoD = [0.3, -1, 0]; p.cabeza = [2, 16, 0]; p.tronco = [0, 8, 0]; }
+    else if (gesto === 'cansado') { p.cadera = [0, 0.96, -0.02]; p.tronco = [18, 0, 0]; p.cabeza = [-16, 0, 0]; p.manoI = [-0.3, 0.66, 0.3]; p.manoD = [0.3, 0.66, 0.3]; }
+    else { p.manoD = [0.38, 1.16 + 0.06 * osc, 0.36]; p.codoD = [0.6, -1, 0]; p.cabeza = [2, 4 * Math.sin(T * 0.9), 0]; }
+    return p;
+  }
+  function charla(o) {
+    var val = function (v, T, f) { return typeof v === 'function' ? v(T, f) : v; };
+    return escena({
+      escenario: o.escenario, acerca: o.acerca,
+      tomas: o.tomas || [[0, { az: 16, el: 5, dist: 5.6, y: 1.12 }], [1, { az: 6, el: 4, dist: 6.2, y: 1.1 }]],
+      vista: function (T, f) {
+        var g = val(o.gesto, T, f) || 'explica';
+        var r = { figuras: [{ quien: 'tor', pose: poseCharla(T, g, val(o.flex, T, f)), musc: val(o.musc, T, f), cara: val(o.cara, T, f) || { boca: 'sonrisa' } }] };
+        if (val(o.vibra, T, f)) r.vibra = true;
+        return r;
+      },
+      zona: o.zona || (o.lado === 'izq' ? [30, 370, 520, 1480] : undefined),
+      piezas: o.piezas, ocupa: o.ocupa, lienzo: o.lienzo, encima: o.encima, sobreRot: o.sobreRot, mal: o.mal, bien: o.bien, golpes: o.golpes, r1: o.r1, r2: o.r2
+    });
+  }
+
   /* ---------------- formato top 3 ---------------- */
   function cuenta(n, x, y, cuando) {
     return function (T, f) {
@@ -458,6 +490,6 @@
   global.E3 = {
     escena: escena, Rot: Rot, rep: rep, camara: camara, Flecha: Flecha, Guia: Guia, brilla: brilla, contador: contador,
     suma: suma, arr: arr, lerp3: lerp3, medio: medio,
-    poseFlex: poseFlex, poseNovia: poseNovia, cuenta: cuenta, gancho: gancho, ejercicio: ejercicio, fantasmas: fantasmas
+    poseFlex: poseFlex, poseNovia: poseNovia, charla: charla, poseCharla: poseCharla, cuenta: cuenta, gancho: gancho, ejercicio: ejercicio, fantasmas: fantasmas
   };
 })(window);

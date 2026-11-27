@@ -42,14 +42,14 @@
   function boca(abre, otra) { return abre != null ? { boca: 'habla', abre: abre, cerrada: otra || 'sonrisa' } : { boca: otra || 'sonrisa' }; }
 
   var ESCENAS = [
-    { nombre: 'Gancho', dur: 3.4, vo: '¿Pesas pesadas o livianas? ¿Con cuál creces más?' },
-    { nombre: 'Debate', dur: 4.6, vo: 'Unos dicen que solo creces con peso pesado. Otros, que con livianas y muchas repeticiones.' },
-    { nombre: 'Estudio', dur: 3.8, vo: 'Un análisis juntó los estudios que compararon las dos formas.' },
-    { nombre: 'Al fallo', dur: 3.4, vo: 'En esos estudios, todos entrenaban hasta el fallo.' },
-    { nombre: 'Resultado', dur: 3.6, vo: '¿El resultado? El músculo creció casi igual con las dos.' },
-    { nombre: 'Fuerza', dur: 2.8, vo: 'Pero con pesado ganaron más fuerza.' },
-    { nombre: 'La clave', dur: 4.2, vo: 'Así que la clave no es el peso: es llegar cerca del fallo en cada serie.' },
-    { nombre: 'Debate final', dur: 4.2, vo: '¿Y tú, eres de pesado o de liviano? Te leo en los comentarios.' }
+    { nombre: 'Gancho', dur: 3.4, vo: 'Pesas pesadas o livianas, ¿con cuál creces más?' },
+    { nombre: 'Debate', dur: 4.6, vo: 'Unos dicen que solo creces con peso pesado, otros que con livianas y muchas repeticiones.' },
+    { nombre: 'Estudio', dur: 3.8, vo: 'Un análisis juntó a los estudios que compararon las dos formas.' },
+    { nombre: 'Al fallo', dur: 3.4, vo: 'En esos estudios todos entrenaban hasta el fallo.' },
+    { nombre: 'Resultado', dur: 3.6, vo: '¿El resultado? El músculo creció casi igual con los dos.' },
+    { nombre: 'Fuerza', dur: 2.8, vo: 'Pero con peso pesado ganaron más fuerza.' },
+    { nombre: 'La clave', dur: 4.2, vo: 'Así que la clave no es el peso, es llegar cerca del fallo en cada serie.' },
+    { nombre: 'Debate final', dur: 4.2, vo: '¿Y tú? ¿Eres de peso pesado o de liviano? Te leo en los comentarios.' }
   ];
 
   PS.video({
@@ -208,7 +208,7 @@
       var c = pr('manoI', 1);
       return <svg width={1080} height={1920} style={{ position: 'absolute', left: 0, top: 0, overflow: 'visible' }}><PS.Toque T={T} cuando={b.f(7, 0.72)} x={c[0]} y={c[1]} /></svg>;
     },
-    accion: { dur: 4.2, pregunta: '¿PESADO O LIVIANO?', vo: 'Compártelo con tu compañero de entreno y guárdalo para tu próximo entreno.' },
-    cierreVo: 'Sígueme para más contenido.'
+    accion: { dur: 4.2, pregunta: '¿PESADO O LIVIANO?', vo: '' },
+    cierreVo: '¿Quieres ver más videos similares? Sígueme para más contenido.'
   });
 })(window);

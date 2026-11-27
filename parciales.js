@@ -112,15 +112,15 @@
   }, {
     nombre: 'Lo de siempre',
     dur: 3.2,
-    vo: 'Siempre te dijeron que hagas el recorrido completo.'
+    vo: 'Seguramente te han dicho que siempre hagas el recorrido completo.'
   }, {
     nombre: 'Estudio',
     dur: 5.4,
-    vo: 'Pero un estudio probó hacer solo la mitad, en la parte donde el músculo está estirado.'
+    vo: 'Pero un estudio probó hacer solo la mitad en la parte donde el músculo está estirado.'
   }, {
     nombre: 'Resultado',
     dur: 3.8,
-    vo: 'Y el músculo creció igual que con el recorrido completo.'
+    vo: 'Y el resultado fue impactante. El músculo creció igual que con el recorrido completo.'
   }, {
     nombre: 'Las de arriba',
     dur: 4.8,
@@ -128,11 +128,11 @@
   }, {
     nombre: 'El consejo',
     dur: 5.6,
-    vo: 'Así que el recorrido completo es la base, y las medias estiradas, un extra al final de la serie.'
+    vo: 'El consejo es que el recorrido completo es la base de un ejercicio correcto y las medias estiradas un extra al final de la serie.'
   }, {
     nombre: 'Debate final',
     dur: 4.0,
-    vo: '¿Tú haces medias repeticiones? Te leo en los comentarios.'
+    vo: 'Y tú, ¿haces medias repeticiones? Te leo en los comentarios.'
   }];
   // que hace la pierna en cada momento: [k0, k1, color] del tramo y la k actual
   function plan(T, b) {
@@ -441,8 +441,8 @@
     accion: {
       dur: 4.2,
       pregunta: '¿HACES MEDIAS?',
-      vo: 'Compártelo con tu compañero de entreno y guárdalo para tu próximo día de pierna.'
+      vo: ''
     },
-    cierreVo: 'Sígueme para más contenido.'
+    cierreVo: '¿Quieres ver más videos similares? Sígueme para más contenido.'
   });
 })(window);

@@ -51,11 +51,11 @@
   var ESCENAS = [{
     nombre: 'Gancho',
     dur: 3.6,
-    vo: '¿Máquinas o peso libre? ¿Con cuál creces más?'
+    vo: 'Máquinas o peso libre, ¿cuál de los dos es mejor?'
   }, {
     nombre: 'Debate',
     dur: 5.0,
-    vo: 'Unos dicen que las máquinas son para principiantes. Otros, que el peso libre es peligroso.'
+    vo: 'Unos dicen que las máquinas son para principiantes. Otros que el peso libre es peligroso.'
   }, {
     nombre: 'Estudio',
     dur: 4.2,
@@ -63,19 +63,19 @@
   }, {
     nombre: 'Resultado',
     dur: 2.6,
-    vo: 'Para crecer, dieron lo mismo.'
+    vo: 'Para crecer dieron exactamente lo mismo.'
   }, {
     nombre: 'La fuerza',
     dur: 5.4,
-    vo: 'Pero la fuerza se gana en lo que entrenas: si entrenas en máquina, eres más fuerte en la máquina.'
+    vo: 'Pero la fuerza se gana en lo que entrenas. Si entrenas en máquina, eres más fuerte en la máquina.'
   }, {
     nombre: 'El consejo',
     dur: 3.2,
-    vo: 'Así que elige el que te deje progresar sin dolor.'
+    vo: 'Así que mi consejo, elige aquel que te deje progresar sin dolor.'
   }, {
     nombre: 'Debate final',
     dur: 4.2,
-    vo: '¿Equipo máquinas o equipo peso libre? Te leo en los comentarios.'
+    vo: 'Y tú, ¿eres más de máquinas o de peso libre? Te leo en los comentarios.'
   }];
   PS.video({
     id: 'maquinas-libre',
@@ -489,8 +489,8 @@
     accion: {
       dur: 4.2,
       pregunta: '¿MÁQUINAS O PESO LIBRE?',
-      vo: 'Compártelo con tu compañero de entreno y guárdalo para tu próximo entreno.'
+      vo: ''
     },
-    cierreVo: 'Sígueme para más contenido.'
+    cierreVo: '¿Quieres ver más videos similares? Sígueme para más contenido.'
   });
 })(window);

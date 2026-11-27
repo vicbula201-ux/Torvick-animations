@@ -47,11 +47,11 @@
   }, {
     nombre: 'Lo ideal',
     dur: 4.2,
-    vo: 'Lo ideal: termina la serie cuando te queden una a tres repeticiones.'
+    vo: 'Lo ideal es que termines la serie cuando te queden de una a tres repeticiones.'
   }, {
     nombre: 'Debate final',
     dur: 4.2,
-    vo: '¿Y tú, llegas al fallo en cada serie? Te leo en los comentarios.'
+    vo: '¿Y tú? ¿Llegas al fallo en cada serie? Te leo en los comentarios.'
   }];
 
   // la serie al fallo (escena 1): 3 repeticiones buenas y la cuarta que no sale
@@ -454,8 +454,8 @@
     accion: {
       dur: 4.2,
       pregunta: '¿AL FALLO O CERCA?',
-      vo: 'Compártelo con tu compañero de entreno y guárdalo para tu próximo entreno.'
+      vo: ''
     },
-    cierreVo: 'Sígueme para más contenido.'
+    cierreVo: '¿Quieres ver más videos similares? Sígueme para más contenido.'
   });
 })(window);

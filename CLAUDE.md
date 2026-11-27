@@ -76,6 +76,12 @@ calistenia-gym-3d.jsx            rehechos en 3D con el guion como lo grabó Víc
                                  de flexibilidad (no la grabó)
 remo-serrucho-3d.jsx             el remo serrucho en 3D (mismo guion que el fluido): rodilla y
                                  mano en el banco, una sola mancuerna (pesas { I: null, D })
+fondos-3d.jsx (parque),
+triceps-polea-3d.jsx,
+hierro-3d.jsx (cocina),
+grasas-3d.jsx (super),
+carbohidratos-3d.jsx             los que faltaban en 3D, armados con el guion como lo grabo Victor
+                                 (noviembre de 2026: 27 audios, todos con su voz sincronizada)
 plano.jsx                        window.PS: el formato PLANO SECUENCIA (videos de concepto con pregunta,
                                  un solo plano, Tor que habla, gimnasio detras, subtitulos, tarjetas)
 pesado-liviano.jsx, fallo.jsx,
@@ -528,6 +534,21 @@ en los comentarios. `pesado-liviano.jsx` es la referencia. Lo que trae:
   escenas (`vistaSuave`: promedia la pose con la de unos instantes antes; `suave: false` lo apaga).
 - **Los tiempos siguen siendo fracciones:** se escriben `[escena, fracción]` y `b.f(j, x)`, `b.k(T,
   a, c)` y `b.entre(T, a, c)` los pasan a segundos; así el video se estira con la voz.
+- **Los escenarios** (pedido del autor: "dependiendo del ejercicio y lo que estemos hablando, en un
+  escenario u otro, la gran mayoría en el gimnasio"): `'gym'` (por defecto en PS y en `E3.escena`),
+  `'parque'` (pasto, el piso de goma de la calistenia, árboles, bancos, faroles, barras, colinas y
+  nubes: flexiones, fondos, plancha), `'super'` (estantes con productos, neveras con luz, frutas y
+  carteles: tabla nutricional, grasas), `'casa'` (la sala: ventana, cuadros, biblioteca, lámpara,
+  tele y la alfombra), `'cocina'` (muebles con mesón, estufa, lavaplatos y piso de damero: hierro;
+  de noche, chatarra) y `'calle'` (una plaza rodeada de fachadas, el bar con su neón, tiendas con
+  toldo y faroles: cerveza de noche, vape de día); `{ tipo, noche: true }` oscurece (ventanas
+  encendidas, luna). Se elige por video (`REELS.registrar({ escenario })`) o por escena
+  (`E3.escena({ escenario })`, como la cama de la cerveza en la casa o el pre-entreno del ex en el
+  gimnasio); `false` vuelve al lienzo blanco. `window.E3_ESCENARIO` lo fuerza para probar. Sobre un
+  escenario el rótulo lleva un borde blanco fino y el visto un borde negro. `E3.charla({ gesto,
+  lado: 'izq', piezas, ... })` arma una escena con Tor que explica ('explica', 'senala', 'duda',
+  'cansado', 'flex') y las piezas 2D a la derecha (`hierro-3d.jsx`, `grasas-3d.jsx`,
+  `carbohidratos-3d.jsx`).
 - **El gimnasio de Tor** (`escenario: 'gym'` en TOR3D, por defecto en PS): sala redonda de 12
   paneles alrededor de Tor (los que quedan del lado de la cámara se esconden), piso de goma, charco
   de luz debajo de Tor, paredes cálidas oscuras con la franja amarilla, racks de mancuernas de
@@ -751,6 +772,20 @@ las tomas no empiezan ni terminan en medio de una oración, pero tampoco se esti
 palabras de otra escena; y una línea que Víctor grabó fuera de orden (la acción después
 del cierre, por ejemplo) se rescata si se parece claramente a una sola escena. Antes de
 grabar el video conviene correr `--plan` y leer `<id>-voz.txt`.
+
+Lo que aprendió con la tanda de 27 audios (noviembre de 2026): el número dicho aparte cuenta
+("2." es "dos"; "Dos." ... "Press inclinado con barra" es una sola línea), las palabras que el
+reconocedor pega se encuentran ("pre-banca" tiene "banca"), un segundo intento con otras palabras
+se separa ("Los tres mejores... Top tres ejercicios..."), se sacan el "No." de una corrección y el
+"1." que anuncia la escena siguiente, una toma grabada fuera de orden (repetiste "uno, dos, tres"
+de nuevo) pasa a su escena, el intento abandonado ("...con ayuda del pectoral, el cerracto. Con
+ayuda del pectoral, el serrato y el tríceps") queda aparte, y si una parte se dice mejor en una
+toma posterior se usa solo el comienzo de la otra (sin repetir). `--quitar 110.9-113.4` deja
+afuera lo dicho en esos segundos (un pedazo suelto pegado a la toma buena) y `--elegir 7=1`
+sigue sirviendo para cambiar una toma. Si el reconocedor estira una palabra sobre varios
+segundos de otra toma (pasó en carbohidratos), se vuelve a transcribir ese tramo y se corrige el
+JSON de la transcripción. Las escenas que Víctor no grabó quedan fuera del `-3d` (la del sueño en
+`chatarra-3d.jsx`); la acción sin voz queda muda (con sus sonidos).
 
 
 **Formato corto:** 30 a 35 s *con* el cierre

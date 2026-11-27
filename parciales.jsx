@@ -65,12 +65,12 @@
 
   var ESCENAS = [
     { nombre: 'Gancho', dur: 3.0, vo: '¿Las medias repeticiones sirven para algo?' },
-    { nombre: 'Lo de siempre', dur: 3.2, vo: 'Siempre te dijeron que hagas el recorrido completo.' },
-    { nombre: 'Estudio', dur: 5.4, vo: 'Pero un estudio probó hacer solo la mitad, en la parte donde el músculo está estirado.' },
-    { nombre: 'Resultado', dur: 3.8, vo: 'Y el músculo creció igual que con el recorrido completo.' },
+    { nombre: 'Lo de siempre', dur: 3.2, vo: 'Seguramente te han dicho que siempre hagas el recorrido completo.' },
+    { nombre: 'Estudio', dur: 5.4, vo: 'Pero un estudio probó hacer solo la mitad en la parte donde el músculo está estirado.' },
+    { nombre: 'Resultado', dur: 3.8, vo: 'Y el resultado fue impactante. El músculo creció igual que con el recorrido completo.' },
     { nombre: 'Las de arriba', dur: 4.8, vo: 'Las medias de arriba, donde el músculo está corto, son las que menos sirven.' },
-    { nombre: 'El consejo', dur: 5.6, vo: 'Así que el recorrido completo es la base, y las medias estiradas, un extra al final de la serie.' },
-    { nombre: 'Debate final', dur: 4.0, vo: '¿Tú haces medias repeticiones? Te leo en los comentarios.' }
+    { nombre: 'El consejo', dur: 5.6, vo: 'El consejo es que el recorrido completo es la base de un ejercicio correcto y las medias estiradas un extra al final de la serie.' },
+    { nombre: 'Debate final', dur: 4.0, vo: 'Y tú, ¿haces medias repeticiones? Te leo en los comentarios.' }
   ];
   // que hace la pierna en cada momento: [k0, k1, color] del tramo y la k actual
   function plan(T, b) {
@@ -159,7 +159,7 @@
       var c = pr('manoD');
       return <svg width={1080} height={1920} style={{ position: 'absolute', left: 0, top: 0, overflow: 'visible' }}><PS.Toque T={T} cuando={b.f(6, 0.7)} x={c[0]} y={c[1]} /></svg>;
     },
-    accion: { dur: 4.2, pregunta: '¿HACES MEDIAS?', vo: 'Compártelo con tu compañero de entreno y guárdalo para tu próximo día de pierna.' },
-    cierreVo: 'Sígueme para más contenido.'
+    accion: { dur: 4.2, pregunta: '¿HACES MEDIAS?', vo: '' },
+    cierreVo: '¿Quieres ver más videos similares? Sígueme para más contenido.'
   });
 })(window);

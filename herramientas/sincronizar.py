@@ -583,13 +583,14 @@ def main():
                         cur = []
                 if cur:
                     frases.append(cur)
-                if len(frases) > 1 and len(e['partes']) > 1:
+                if len(frases) > 1:
+                    # (con una sola parte tambien: "La grasa esta llevando a... Las grasas te ayudan a producir...")
                     for fr in frases:
                         if sum(peso(W[i]['t']) for i in fr) >= 2:
                             tomas.append({'idx': fr, 'ini': W[fr[0]]['ini'], 'fin': W[fr[-1]]['fin'], 'recortada': True, 'frase': True,
                                           'ev': evaluar(W, fr, e, None, cuenta)})
                     # y sus comienzos (las primeras oraciones): si lo ultimo se toma de un intento posterior
-                    for m in range(2, len(frases)):
+                    for m in (range(2, len(frases)) if len(e['partes']) > 1 else []):
                         fr = [i for q in frases[:m] for i in q]
                         tomas.append({'idx': fr, 'ini': W[fr[0]]['ini'], 'fin': W[fr[-1]]['fin'], 'recortada': True, 'frase': True, 'oculta': True,
                                       'ev': evaluar(W, fr, e, None, cuenta)})

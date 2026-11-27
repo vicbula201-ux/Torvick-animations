@@ -26,8 +26,8 @@
     { nombre: 'Estudio', dur: 4.2, vo: 'Pero un análisis de 2023 comparó entrenar al fallo con quedarse cerca.' },
     { nombre: 'Resultado', dur: 2.6, vo: 'Y el músculo creció casi igual.' },
     { nombre: 'Cansancio', dur: 4.6, vo: 'Pero ir al fallo siempre te cansa mucho más y te deja peor para la siguiente serie.' },
-    { nombre: 'Lo ideal', dur: 4.2, vo: 'Lo ideal: termina la serie cuando te queden una a tres repeticiones.' },
-    { nombre: 'Debate final', dur: 4.2, vo: '¿Y tú, llegas al fallo en cada serie? Te leo en los comentarios.' }
+    { nombre: 'Lo ideal', dur: 4.2, vo: 'Lo ideal es que termines la serie cuando te queden de una a tres repeticiones.' },
+    { nombre: 'Debate final', dur: 4.2, vo: '¿Y tú? ¿Llegas al fallo en cada serie? Te leo en los comentarios.' }
   ];
 
   // la serie al fallo (escena 1): 3 repeticiones buenas y la cuarta que no sale
@@ -153,7 +153,7 @@
       }
       return <div style={{ position: 'absolute', inset: 0 }}>{r}</div>;
     },
-    accion: { dur: 4.2, pregunta: '¿AL FALLO O CERCA?', vo: 'Compártelo con tu compañero de entreno y guárdalo para tu próximo entreno.' },
-    cierreVo: 'Sígueme para más contenido.'
+    accion: { dur: 4.2, pregunta: '¿AL FALLO O CERCA?', vo: '' },
+    cierreVo: '¿Quieres ver más videos similares? Sígueme para más contenido.'
   });
 })(window);

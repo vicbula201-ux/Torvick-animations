@@ -28,7 +28,7 @@
   var ESCENAS = [{
     nombre: 'Gancho',
     dur: 2.6,
-    vo: '¿El cardio te quita músculo?'
+    vo: '¿Es cierto que el cardio te quita músculo?'
   }, {
     nombre: 'El miedo',
     dur: 5.2,
@@ -36,11 +36,11 @@
   }, {
     nombre: 'Estudio',
     dur: 4.0,
-    vo: 'Un análisis de 2022 juntó los estudios que mezclaron cardio y pesas.'
+    vo: 'Un análisis de 2022 juntó a los estudios de aquellos que mezclaron cardio y pesas.'
   }, {
     nombre: 'Resultado',
     dur: 3.4,
-    vo: 'Y no encontró menos músculo ni menos fuerza máxima.'
+    vo: 'Y no se encontró menos músculo ni menos fuerza.'
   }, {
     nombre: 'La potencia',
     dur: 6.0,
@@ -48,11 +48,11 @@
   }, {
     nombre: 'El consejo',
     dur: 3.6,
-    vo: 'Si los haces el mismo día, primero lo que más te importa.'
+    vo: 'Si haces los dos el mismo día, primero haz el que más te importa.'
   }, {
     nombre: 'Debate final',
     dur: 4.2,
-    vo: '¿Y tú, haces cardio o le tienes miedo? Te leo en los comentarios.'
+    vo: '¿Y tú? ¿Haces cardio o le tienes miedo? Te leo en los comentarios.'
   }];
   function mezcla(a, c, k) {
     var r = {};
@@ -443,8 +443,8 @@
     accion: {
       dur: 4.2,
       pregunta: '¿CARDIO SÍ O NO?',
-      vo: 'Compártelo con quien le tiene miedo al cardio y guárdalo para tu próximo entreno.'
+      vo: ''
     },
-    cierreVo: 'Sígueme para más contenido.'
+    cierreVo: '¿Quieres ver más videos similares? Sígueme para más contenido.'
   });
 })(window);
