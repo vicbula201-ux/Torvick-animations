@@ -85,16 +85,24 @@
   }
 
   /* ---------------- la voz: volumen (boca) y palabras (subtitulos) ---------------- */
-  var ENV_CACHE = {};
+  // (se guarda en la voz misma, por quien: antes la clave era el largo y las puntas del texto, y las
+  // envolventes de Tor y de Passa, que empiezan y terminan en silencio, salian iguales: las dos bocas
+  // se movian con las dos voces)
   function envolvente(voz, quien) {
-    var env = voz && (quien && voz.envs && voz.envs[quien] != null ? voz.envs[quien] : voz.env);
+    if (!voz) return null;
+    var q = quien && voz.envs && voz.envs[quien] != null ? quien : '_';
+    var env = q === '_' ? voz.env : voz.envs[q];
     if (!env) return null;
-    var k = env.length + ':' + env.slice(0, 32) + ':' + env.slice(-16);
-    if (ENV_CACHE[k]) return ENV_CACHE[k];
+    voz.__env = voz.__env || {};
+    var c = voz.__env[q];
+    if (c && c.src === env) return c.a;
     var bin = global.atob(env),
       a = new Float32Array(bin.length);
     for (var i = 0; i < bin.length; i++) a[i] = bin.charCodeAt(i) / 255;
-    ENV_CACHE[k] = a;
+    voz.__env[q] = {
+      src: env,
+      a: a
+    };
     return a;
   }
   // volumen de la voz en T (0..1), suavizado para que la boca no tiemble; quien: la voz de ese personaje
@@ -892,7 +900,7 @@
      se promedia la pose de este momento con la de unos instantes antes (pesos que bajan); solo los
      puntos y angulos de la pose, no la cara ni las mancuernas */
   var CAMPOS_POSE = ['cadera', 'tronco', 'cabeza', 'manoI', 'manoD', 'pieI', 'pieD', 'codoI', 'codoD', 'rodillaI', 'rodillaD', 'pies'];
-  var ATRAS = [[0.04, 0.85], [0.08, 0.7], [0.12, 0.55], [0.17, 0.38], [0.22, 0.22]];
+  var ATRAS = [[0.04, 0.9], [0.08, 0.78], [0.13, 0.64], [0.19, 0.5], [0.26, 0.36], [0.34, 0.22], [0.42, 0.1]];
   function vistaSuave(def, T, b, cam, ex) {
     var base = def.vista(T, b, cam, ex) || {};
     if (def.suave === false || !base.figuras) return base;

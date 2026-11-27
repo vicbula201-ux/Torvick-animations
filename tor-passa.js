@@ -30,8 +30,8 @@
   var Easing = global.Easing,
     clamp = global.clamp;
   var C = P.C;
-  var XT = -0.45,
-    XP = 0.45; // Tor a la izquierda, Passa a la derecha
+  var XT = -0.7,
+    XP = 0.7; // Tor a la izquierda, Passa a la derecha (separados: los brazos no se cruzan)
   var ZONA_TARJETA = [70, 640, 1010, 1330];
   var ESCENAS = [{
     nombre: 'Tor empieza',
@@ -49,10 +49,10 @@
     dur: 1.8,
     vo: 'Oye, este es mi video...'
   }, {
-    nombre: 'Botar la plata',
+    nombre: 'Alto rendimiento',
     habla: 'passa',
-    dur: 3.6,
-    vo: 'Mira, comprar BCAA es botar la plata. Eso es pura moda.'
+    dur: 5.5,
+    vo: 'Mira, ¿acaso eres atleta de alto rendimiento? Los BCAA le sirven más a atletas con un gasto calórico enorme, no a alguien que solo va a un gimnasio normal.'
   }, {
     nombre: 'La leucina',
     habla: 'tor',
@@ -61,8 +61,8 @@
   }, {
     nombre: 'En la comida',
     habla: 'passa',
-    dur: 3.8,
-    vo: 'Sí, pero ya viene en la carne, el huevo y cualquier proteína.'
+    dur: 8,
+    vo: 'Sí, pero ya viene en la carne, el huevo y cualquier proteína. Ahora, si eres deportista de alto rendimiento o haces deportes exigentes como el ciclismo o el running, pueden ser una buena opción para ayudar a proteger tu masa muscular.'
   }, {
     nombre: 'El estudio',
     habla: 'tor',
@@ -71,8 +71,8 @@
   }, {
     nombre: 'Placebo',
     habla: 'passa',
-    dur: 3.8,
-    vo: '¿Ves? Más tampoco es mejor. Lo que sientes es puro efecto placebo.'
+    dur: 4.5,
+    vo: '¿Ves? Si ya comes bien, más no es mejor. Lo que sientes puede ser más placebo que otra cosa.'
   }, {
     nombre: 'Creatina',
     habla: 'passa',
@@ -96,7 +96,7 @@
   }];
   // escena en la que habla cada uno (para los gestos)
   function habla(b, T, quien) {
-    for (var i = 0; i < ESCENAS.length; i++) if (ESCENAS[i].habla === quien && b.entre(T, [i, 0], [i, 1])) return b.k(T, [i, 0.02], [i, 0.18]) * (1 - b.k(T, [i, 0.85], [i, 1]));
+    for (var i = 0; i < ESCENAS.length; i++) if (ESCENAS[i].habla === quien && b.entre(T, [i, 0], [i, 1])) return b.k(T, [i, 0.03], [i, 0.28], Easing.easeInOutSine) * (1 - b.k(T, [i, 0.8], [i, 1], Easing.easeInOutSine));
     return 0;
   }
   // el marcador de la discusion: los puntos que se va llevando cada uno
@@ -283,9 +283,10 @@
     },
     claves: {
       bcaa: 'rojo',
-      plata: 'rojo',
-      moda: 'rojo',
+      rendimiento: 'amarillo',
       leucina: 'amarillo',
+      ciclismo: 'verde',
+      running: 'verde',
       creatina: 'verde',
       placebo: 'rojo',
       razon: 'verde'
@@ -379,7 +380,7 @@
       var t = PS.depie(T, {
           x: xt,
           gesto: habla(b, T, 'tor'),
-          lado: 1
+          lado: -1
         }),
         caraT = PS.boca(abreT),
         musT = null,
@@ -602,42 +603,45 @@
         y: 380,
         s: 0.95
       }));
-      // botar la plata: los billetes vuelan al tacho
-      if (b.entre(T, [3, 0], [4, 0.1])) {
-        var TachoAbierto = function (pp) {
-          return /*#__PURE__*/React.createElement(global.MU.Tacho, {
-            s: pp.s,
-            tapa: 1
-          });
-        };
-        r.push(/*#__PURE__*/React.createElement(Icono, {
-          key: "ta",
-          T: T,
-          comp: TachoAbierto,
-          cuando: b.f(3, 0.12),
-          hasta: b.f(4, 0.02),
-          x: 740,
-          y: 300,
-          s: 0.95
-        }));
-        [0, 1, 2].forEach(function (i) {
-          var u = clamp((T - b.f(3, 0.2 + 0.1 * i)) / 0.6, 0, 1);
-          if (u <= 0 || u >= 1) return;
-          var x = 240 + (820 - 240) * u,
-            y = 560 - 300 * Math.sin(Math.PI * u) - 60 * u;
-          r.push(/*#__PURE__*/React.createElement(A.Pos, {
-            key: 'bi' + i,
-            x: x - 110,
-            y: y - 80,
-            e: {
-              opacity: 1 - u * 0.2,
-              scale: 1 - 0.45 * u
-            }
-          }, /*#__PURE__*/React.createElement(N.ICONOS.billete, {
-            s: 0.9
-          })));
-        });
-      }
+      // alto rendimiento: a quien le sirven mas los BCAA
+      r.push(/*#__PURE__*/React.createElement(PS.Tarjeta, {
+        key: "ar",
+        T: T,
+        cuando: b.f(3, 0.12),
+        hasta: b.f(4, 0.02),
+        y: 290,
+        w: 760,
+        h: 250
+      }, /*#__PURE__*/React.createElement(PS.Etiqueta, {
+        x: 30,
+        y: 58,
+        text: "ATLETA DE ALTO RENDIMIENTO",
+        fondo: C.YEL,
+        color: C.INK
+      }), /*#__PURE__*/React.createElement("text", {
+        x: 30,
+        y: 136,
+        fontFamily: "'Barlow Semi Condensed', sans-serif",
+        fontWeight: 800,
+        fontSize: 46,
+        fill: C.INK
+      }, "GASTO CAL\xD3RICO ENORME"), /*#__PURE__*/React.createElement("text", {
+        x: 30,
+        y: 210,
+        fontFamily: "'Barlow Semi Condensed', sans-serif",
+        fontWeight: 800,
+        fontSize: 46,
+        fill: C.GRY
+      }, "GIMNASIO NORMAL: NO TANTO")));
+      if (b.entre(T, [3, 0.3], [4, 0.05])) r.push(/*#__PURE__*/React.createElement(A.Bien, {
+        key: "arb",
+        T: T,
+        cuando: b.f(3, 0.34),
+        hasta: b.f(4, 0.02),
+        x: 830,
+        y: 300,
+        s: 0.5
+      }));
       // la leucina
       r.push(/*#__PURE__*/React.createElement(PS.Tarjeta, {
         key: "le",
@@ -662,19 +666,55 @@
         fill: C.INK
       }, "ACTIVA LA S\xCDNTESIS")));
       // ya viene en la comida
-      [['carne', 0.12], ['huevo', 0.3], ['pollo', 0.48]].forEach(function (q, i) {
+      [['carne', 0.06], ['huevo', 0.14], ['pollo', 0.22]].forEach(function (q, i) {
         r.push(/*#__PURE__*/React.createElement(Icono, {
           key: 'co' + i,
           T: T,
           comp: N.COMIDA[q[0]],
           cuando: b.f(5, q[1]),
-          hasta: b.f(6, 0.02),
+          hasta: b.f(5, 0.4),
           x: 140 + 280 * i,
           y: 330,
           s: 0.85,
           fase: i * 0.5
         }));
       });
+      // deportistas de alto rendimiento y de resistencia: ahi si pueden ayudar
+      r.push(/*#__PURE__*/React.createElement(PS.Tarjeta, {
+        key: "ci",
+        T: T,
+        cuando: b.f(5, 0.44),
+        hasta: b.f(6, 0.02),
+        y: 290,
+        w: 760,
+        h: 250
+      }, /*#__PURE__*/React.createElement(PS.Etiqueta, {
+        x: 30,
+        y: 58,
+        text: "CICLISMO",
+        fondo: C.GRN,
+        color: "#ffffff"
+      }), /*#__PURE__*/React.createElement(PS.Etiqueta, {
+        x: 300,
+        y: 58,
+        text: "RUNNING",
+        fondo: C.GRN,
+        color: "#ffffff"
+      }), /*#__PURE__*/React.createElement("text", {
+        x: 30,
+        y: 136,
+        fontFamily: "'Barlow Semi Condensed', sans-serif",
+        fontWeight: 800,
+        fontSize: 46,
+        fill: C.INK
+      }, "DEPORTES MUY EXIGENTES"), /*#__PURE__*/React.createElement("text", {
+        x: 30,
+        y: 210,
+        fontFamily: "'Barlow Semi Condensed', sans-serif",
+        fontWeight: 800,
+        fontSize: 46,
+        fill: C.GRN
+      }, "AYUDAN A CUIDAR EL M\xDASCULO")));
       r.push(/*#__PURE__*/React.createElement(PS.Estudio, {
         key: "es",
         T: T,
@@ -788,25 +828,6 @@
         fontSize: 32,
         fill: C.YEL
       }, "@passa_trainer \xB7 entrenador personal"))));
-      if (b.entre(T, [11, 0.6], [12, 0])) {
-        var c = pr('manoI', 1);
-        r.push(/*#__PURE__*/React.createElement("svg", {
-          key: "tq",
-          width: 1080,
-          height: 1920,
-          style: {
-            position: 'absolute',
-            left: 0,
-            top: 0,
-            overflow: 'visible'
-          }
-        }, /*#__PURE__*/React.createElement(PS.Toque, {
-          T: T,
-          cuando: b.f(11, 0.7),
-          x: c[0],
-          y: c[1]
-        })));
-      }
       A.sonido('golpe', b.f(1, 0.12)); // el aterrizaje de Passa
       return /*#__PURE__*/React.createElement("div", {
         style: {
@@ -818,7 +839,7 @@
     accion: {
       dur: 4.6,
       pregunta: '¿TOR O PASSA?',
-      vo: 'Compártelo con el que todavía compra BCAA, y síguenos a los dos.'
+      vo: 'Compártelo con tu compañero de entreno, y síguenos a los dos.'
     },
     // colaboracion: Passa tambien en la escena de accion (en 2D) y sus redes en el cierre
     colabora: {

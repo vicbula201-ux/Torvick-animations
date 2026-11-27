@@ -23,18 +23,18 @@
   var Easing = global.Easing, clamp = global.clamp;
   var C = P.C;
 
-  var XT = -0.45, XP = 0.45;                    // Tor a la izquierda, Passa a la derecha
+  var XT = -0.7, XP = 0.7;                      // Tor a la izquierda, Passa a la derecha (separados: los brazos no se cruzan)
   var ZONA_TARJETA = [70, 640, 1010, 1330];
 
   var ESCENAS = [
     { nombre: 'Tor empieza', habla: 'tor', dur: 3.6, vo: '¿Los BCAA te ayudan a ganar músculo? Hoy te voy a explicar...' },
     { nombre: 'Passa interrumpe', habla: 'passa', dur: 5.0, vo: '¡Cállate, Tor, que aquí hablo yo! ¿Qué la Kentucky, mi gente? Aquí les saluda el Passa.' },
     { nombre: 'Tor se queja', habla: 'tor', dur: 1.8, vo: 'Oye, este es mi video...' },
-    { nombre: 'Botar la plata', habla: 'passa', dur: 3.6, vo: 'Mira, comprar BCAA es botar la plata. Eso es pura moda.' },
+    { nombre: 'Alto rendimiento', habla: 'passa', dur: 5.5, vo: 'Mira, ¿acaso eres atleta de alto rendimiento? Los BCAA le sirven más a atletas con un gasto calórico enorme, no a alguien que solo va a un gimnasio normal.' },
     { nombre: 'La leucina', habla: 'tor', dur: 3.6, vo: 'Tampoco tanto: la leucina sí activa la síntesis de músculo.' },
-    { nombre: 'En la comida', habla: 'passa', dur: 3.8, vo: 'Sí, pero ya viene en la carne, el huevo y cualquier proteína.' },
+    { nombre: 'En la comida', habla: 'passa', dur: 8, vo: 'Sí, pero ya viene en la carne, el huevo y cualquier proteína. Ahora, si eres deportista de alto rendimiento o haces deportes exigentes como el ciclismo o el running, pueden ser una buena opción para ayudar a proteger tu masa muscular.' },
     { nombre: 'El estudio', habla: 'tor', dur: 5.0, vo: 'En eso tiene razón: si ya comes suficiente proteína, los BCAA no te hacen crecer más.' },
-    { nombre: 'Placebo', habla: 'passa', dur: 3.8, vo: '¿Ves? Más tampoco es mejor. Lo que sientes es puro efecto placebo.' },
+    { nombre: 'Placebo', habla: 'passa', dur: 4.5, vo: '¿Ves? Si ya comes bien, más no es mejor. Lo que sientes puede ser más placebo que otra cosa.' },
     { nombre: 'Creatina', habla: 'passa', dur: 4.0, vo: 'Mejor gástate esas ochenta lucas en creatina. ¡Pare de contar historias!' },
     { nombre: 'Por una vez', habla: 'tor', dur: 2.2, vo: 'Por una vez, el Passa tiene razón.' },
     { nombre: '¿Cómo que por una vez?', habla: 'passa', dur: 1.8, vo: '¿Cómo que por una vez?' },
@@ -42,7 +42,7 @@
   ];
   // escena en la que habla cada uno (para los gestos)
   function habla(b, T, quien) {
-    for (var i = 0; i < ESCENAS.length; i++) if (ESCENAS[i].habla === quien && b.entre(T, [i, 0], [i, 1])) return b.k(T, [i, 0.02], [i, 0.18]) * (1 - b.k(T, [i, 0.85], [i, 1]));
+    for (var i = 0; i < ESCENAS.length; i++) if (ESCENAS[i].habla === quien && b.entre(T, [i, 0], [i, 1])) return b.k(T, [i, 0.03], [i, 0.28], Easing.easeInOutSine) * (1 - b.k(T, [i, 0.8], [i, 1], Easing.easeInOutSine));
     return 0;
   }
   // el marcador de la discusion: los puntos que se va llevando cada uno
@@ -116,7 +116,7 @@
     id: 'tor-passa', titulo: 'Tor x Passa: ¿los BCAA sirven? (colaboración)',
     escenas: ESCENAS,
     hablantes: { tor: { nombre: 'TOR', color: 'amarillo' }, passa: { nombre: 'PASSA', color: 'verde' } },
-    claves: { bcaa: 'rojo', plata: 'rojo', moda: 'rojo', leucina: 'amarillo', creatina: 'verde', placebo: 'rojo', razon: 'verde' },
+    claves: { bcaa: 'rojo', rendimiento: 'amarillo', leucina: 'amarillo', ciclismo: 'verde', running: 'verde', creatina: 'verde', placebo: 'rojo', razon: 'verde' },
     camara: [
       [[0, 0], { az: 6, el: 4, dist: 3.4, y: 1.45, dx: 0 }],
       [[0, 0.9], { az: 0, el: 4, dist: 3.6, y: 1.42, dx: 0 }],
@@ -143,7 +143,7 @@
       // ---- Tor: empieza solo en el medio; Passa lo empuja a la izquierda
       var empuje = b.k(T, [1, 0.08], [1, 0.24], Easing.easeOutCubic);
       var xt = XT * empuje;
-      var t = PS.depie(T, { x: xt, gesto: habla(b, T, 'tor'), lado: 1 }), caraT = PS.boca(abreT), musT = null, miraT = 0.9;
+      var t = PS.depie(T, { x: xt, gesto: habla(b, T, 'tor'), lado: -1 }), caraT = PS.boca(abreT), musT = null, miraT = 0.9;
       if (T < b.f(1, 0)) caraT.cejas = 'alzadas';
       else if (T < b.f(2, 0)) {
         // lo empujan: trastabilla y mira a Passa con la boca abierta
@@ -220,26 +220,29 @@
       if (tit > 0.01) r.push(<div key="tit" style={{ position: 'absolute', inset: 0, opacity: tit }}><E3.Rot T={T} text="TOR *×* PASSA" y={262} s={1.2} cuando={b.f(1, 0.15)} /></div>);
       // el bote de BCAA (el tema)
       r.push(<Icono key="bc" T={T} comp={N.ICONOS.bote} color={C.RED} texto="BCAA" cuando={b.f(0, 0.12)} hasta={b.f(1, 0.1)} x={720} y={380} s={0.95} />);
-      // botar la plata: los billetes vuelan al tacho
-      if (b.entre(T, [3, 0], [4, 0.1])) {
-        var TachoAbierto = function (pp) { return <global.MU.Tacho s={pp.s} tapa={1} />; };
-        r.push(<Icono key="ta" T={T} comp={TachoAbierto} cuando={b.f(3, 0.12)} hasta={b.f(4, 0.02)} x={740} y={300} s={0.95} />);
-        [0, 1, 2].forEach(function (i) {
-          var u = clamp((T - b.f(3, 0.2 + 0.1 * i)) / 0.6, 0, 1);
-          if (u <= 0 || u >= 1) return;
-          var x = 240 + (820 - 240) * u, y = 560 - 300 * Math.sin(Math.PI * u) - 60 * u;
-          r.push(<A.Pos key={'bi' + i} x={x - 110} y={y - 80} e={{ opacity: 1 - u * 0.2, scale: 1 - 0.45 * u }}><N.ICONOS.billete s={0.9} /></A.Pos>);
-        });
-      }
+      // alto rendimiento: a quien le sirven mas los BCAA
+      r.push(<PS.Tarjeta key="ar" T={T} cuando={b.f(3, 0.12)} hasta={b.f(4, 0.02)} y={290} w={760} h={250}>
+        <PS.Etiqueta x={30} y={58} text="ATLETA DE ALTO RENDIMIENTO" fondo={C.YEL} color={C.INK} />
+        <text x={30} y={136} fontFamily="'Barlow Semi Condensed', sans-serif" fontWeight={800} fontSize={46} fill={C.INK}>GASTO CALÓRICO ENORME</text>
+        <text x={30} y={210} fontFamily="'Barlow Semi Condensed', sans-serif" fontWeight={800} fontSize={46} fill={C.GRY}>GIMNASIO NORMAL: NO TANTO</text>
+      </PS.Tarjeta>);
+      if (b.entre(T, [3, 0.3], [4, 0.05])) r.push(<A.Bien key="arb" T={T} cuando={b.f(3, 0.34)} hasta={b.f(4, 0.02)} x={830} y={300} s={0.5} />);
       // la leucina
       r.push(<PS.Tarjeta key="le" T={T} cuando={b.f(4, 0.15)} hasta={b.f(5, 0.0)} y={300} w={640} h={170}>
         <PS.Etiqueta x={30} y={58} text="LEUCINA" fondo={C.YEL} color={C.INK} />
         <text x={30} y={140} fontFamily="'Barlow Semi Condensed', sans-serif" fontWeight={800} fontSize={50} fill={C.INK}>ACTIVA LA SÍNTESIS</text>
       </PS.Tarjeta>);
       // ya viene en la comida
-      [['carne', 0.12], ['huevo', 0.3], ['pollo', 0.48]].forEach(function (q, i) {
-        r.push(<Icono key={'co' + i} T={T} comp={N.COMIDA[q[0]]} cuando={b.f(5, q[1])} hasta={b.f(6, 0.02)} x={140 + 280 * i} y={330} s={0.85} fase={i * 0.5} />);
+      [['carne', 0.06], ['huevo', 0.14], ['pollo', 0.22]].forEach(function (q, i) {
+        r.push(<Icono key={'co' + i} T={T} comp={N.COMIDA[q[0]]} cuando={b.f(5, q[1])} hasta={b.f(5, 0.4)} x={140 + 280 * i} y={330} s={0.85} fase={i * 0.5} />);
       });
+      // deportistas de alto rendimiento y de resistencia: ahi si pueden ayudar
+      r.push(<PS.Tarjeta key="ci" T={T} cuando={b.f(5, 0.44)} hasta={b.f(6, 0.02)} y={290} w={760} h={250}>
+        <PS.Etiqueta x={30} y={58} text="CICLISMO" fondo={C.GRN} color="#ffffff" />
+        <PS.Etiqueta x={300} y={58} text="RUNNING" fondo={C.GRN} color="#ffffff" />
+        <text x={30} y={136} fontFamily="'Barlow Semi Condensed', sans-serif" fontWeight={800} fontSize={46} fill={C.INK}>DEPORTES MUY EXIGENTES</text>
+        <text x={30} y={210} fontFamily="'Barlow Semi Condensed', sans-serif" fontWeight={800} fontSize={46} fill={C.GRN}>AYUDAN A CUIDAR EL MÚSCULO</text>
+      </PS.Tarjeta>);
       r.push(<PS.Estudio key="es" T={T} cuando={b.f(6, 0.12)} hasta={b.f(7, 0.02)} autor="Plotkin y col., 2021" detalle="Revisión · BCAA y leucina" />);
       // placebo y creatina
       r.push(<Icono key="pl" T={T} comp={N.ICONOS.capsula} color={C.GRY} texto="PLACEBO" cuando={b.f(7, 0.45)} hasta={b.f(8, 0.05)} x={420} y={300} s={0.9} />);
@@ -264,14 +267,10 @@
           </g>
         </svg>
       );
-      if (b.entre(T, [11, 0.6], [12, 0])) {
-        var c = pr('manoI', 1);
-        r.push(<svg key="tq" width={1080} height={1920} style={{ position: 'absolute', left: 0, top: 0, overflow: 'visible' }}><PS.Toque T={T} cuando={b.f(11, 0.7)} x={c[0]} y={c[1]} /></svg>);
-      }
       A.sonido('golpe', b.f(1, 0.12));   // el aterrizaje de Passa
       return <div style={{ position: 'absolute', inset: 0 }}>{r}</div>;
     },
-    accion: { dur: 4.6, pregunta: '¿TOR O PASSA?', vo: 'Compártelo con el que todavía compra BCAA, y síguenos a los dos.' },
+    accion: { dur: 4.6, pregunta: '¿TOR O PASSA?', vo: 'Compártelo con tu compañero de entreno, y síguenos a los dos.' },
     // colaboracion: Passa tambien en la escena de accion (en 2D) y sus redes en el cierre
     colabora: { titulo: ['PASSA', 'TRAINER'], arroba: '@passa_trainer', redes: ['instagram', 'tiktok'] },
     cierreVo: 'Sígueme para más contenido.'
