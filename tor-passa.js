@@ -631,7 +631,7 @@
         fontFamily: "'Barlow Semi Condensed', sans-serif",
         fontWeight: 800,
         fontSize: 46,
-        fill: C.GRY
+        fill: C.RED
       }, "GIMNASIO NORMAL: NO TANTO")));
       if (b.entre(T, [3, 0.3], [4, 0.05])) r.push(/*#__PURE__*/React.createElement(A.Bien, {
         key: "arb",

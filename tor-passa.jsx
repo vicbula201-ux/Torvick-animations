@@ -224,7 +224,7 @@
       r.push(<PS.Tarjeta key="ar" T={T} cuando={b.f(3, 0.12)} hasta={b.f(4, 0.02)} y={290} w={760} h={250}>
         <PS.Etiqueta x={30} y={58} text="ATLETA DE ALTO RENDIMIENTO" fondo={C.YEL} color={C.INK} />
         <text x={30} y={136} fontFamily="'Barlow Semi Condensed', sans-serif" fontWeight={800} fontSize={46} fill={C.INK}>GASTO CALÓRICO ENORME</text>
-        <text x={30} y={210} fontFamily="'Barlow Semi Condensed', sans-serif" fontWeight={800} fontSize={46} fill={C.GRY}>GIMNASIO NORMAL: NO TANTO</text>
+        <text x={30} y={210} fontFamily="'Barlow Semi Condensed', sans-serif" fontWeight={800} fontSize={46} fill={C.RED}>GIMNASIO NORMAL: NO TANTO</text>
       </PS.Tarjeta>);
       if (b.entre(T, [3, 0.3], [4, 0.05])) r.push(<A.Bien key="arb" T={T} cuando={b.f(3, 0.34)} hasta={b.f(4, 0.02)} x={830} y={300} s={0.5} />);
       // la leucina
