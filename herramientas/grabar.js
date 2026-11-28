@@ -113,22 +113,54 @@ function fmtT(s) {
   const fps = await p.evaluate(() => window.REEL.fps || 30);
   const n = Math.round(total * fps);
 
+  // por tramos de 10 s: si la maquina se reinicia a mitad de la grabacion, la misma orden sigue
+  // desde el ultimo tramo terminado (cada tramo guarda tambien los efectos que marco)
   const mudo = path.join(salida, id + '.mudo.mp4');
-  const ff = spawn('ffmpeg', ['-y', '-loglevel', 'error', '-f', 'image2pipe', '-framerate', String(fps),
-    '-i', '-', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '16', '-preset', 'slow', '-tune', 'animation', mudo],
-  { stdio: ['pipe', 'inherit', 'inherit'] });
-  for (let i = 0; i < n; i++) {
-    await p.evaluate((t) => window.REEL.seek(t), i / fps);
-    await p.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
-    const buf = await p.screenshot({ clip: { x: 0, y: 0, width: 1080, height: 1920 }, type: 'png' });
-    if (!ff.stdin.write(buf)) await new Promise(r => ff.stdin.once('drain', r));
-    if (i % 300 === 0) console.log(id, 'cuadro', i, '/', n);
+  const dirTrozos = path.join(salida, id + '.trozos');
+  const firma = JSON.stringify({ n, fps, total, tiempos, pista, durs });
+  const fFirma = path.join(dirTrozos, 'firma.json');
+  if (fs.existsSync(dirTrozos) && (!fs.existsSync(fFirma) || fs.readFileSync(fFirma, 'utf8') !== firma)) {
+    fs.rmSync(dirTrozos, { recursive: true, force: true });
   }
-  ff.stdin.end();
-  await new Promise(r => ff.on('close', r));
-
-  // los efectos se marcan mientras se dibuja cada escena: se leen al final
-  const cues = await p.evaluate(() => window.REEL.cues());
+  fs.mkdirSync(dirTrozos, { recursive: true });
+  fs.writeFileSync(fFirma, firma);
+  const TROZO = fps * 10;
+  const trozos = [];
+  for (let c = 0; c * TROZO < n; c++) {
+    const nom = path.join(dirTrozos, String(c).padStart(4, '0'));
+    trozos.push(nom);
+    if (fs.existsSync(nom + '.mp4') && fs.existsSync(nom + '.cues.json')) continue;
+    if (c === 0 || !fs.existsSync(path.join(dirTrozos, String(c - 1).padStart(4, '0') + '.mp4'))) {
+      console.log(id, 'grabando desde el cuadro', c * TROZO, '/', n);
+    }
+    const parcial = nom + '.parcial.mp4';
+    const ff = spawn('ffmpeg', ['-y', '-loglevel', 'error', '-f', 'image2pipe', '-framerate', String(fps),
+      '-i', '-', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '16', '-preset', 'slow', '-tune', 'animation', parcial],
+    { stdio: ['pipe', 'inherit', 'inherit'] });
+    for (let i = c * TROZO; i < Math.min(n, (c + 1) * TROZO); i++) {
+      await p.evaluate((t) => window.REEL.seek(t), i / fps);
+      await p.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
+      const buf = await p.screenshot({ clip: { x: 0, y: 0, width: 1080, height: 1920 }, type: 'png' });
+      if (!ff.stdin.write(buf)) await new Promise(r => ff.stdin.once('drain', r));
+      if (i % 300 === 0) console.log(id, 'cuadro', i, '/', n);
+    }
+    ff.stdin.end();
+    await new Promise(r => ff.on('close', r));
+    // los efectos se marcan mientras se dibuja cada escena
+    fs.writeFileSync(nom + '.cues.json', JSON.stringify(await p.evaluate(() => window.REEL.cues())));
+    fs.renameSync(parcial, nom + '.mp4');
+  }
+  const fLista = path.join(dirTrozos, 'lista.txt');
+  fs.writeFileSync(fLista, trozos.map(t => "file '" + t + ".mp4'").join('\n') + '\n');
+  execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-f', 'concat', '-safe', '0', '-i', fLista, '-c', 'copy', mudo], { stdio: 'inherit' });
+  const vistos = {}, cues = [];
+  for (const t of trozos) {
+    for (const c of JSON.parse(fs.readFileSync(t + '.cues.json', 'utf8'))) {
+      const k = c.tipo + '@' + c.t;
+      if (!vistos[k]) { vistos[k] = true; cues.push(c); }
+    }
+  }
+  cues.sort((x, y) => x.t - y.t);
   const guion = await p.evaluate(() => window.REEL.guion);
   await b.close();
 
@@ -174,5 +206,6 @@ function fmtT(s) {
   }
   fs.unlinkSync(mudo);
   fs.unlinkSync(fCuesTodos);
+  fs.rmSync(dirTrozos, { recursive: true, force: true });
   console.log('listo:', variantes.map(v => path.join(salida, v[0])).join(', '), '·', total.toFixed(1), 's ·', fps, 'fps');
 })().catch(e => { console.error(e); process.exit(1); });

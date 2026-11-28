@@ -856,7 +856,9 @@ automatizado. Eso hace la herramienta de escritorio:
 node herramientas/grabar.js <id> [carpeta]   # por defecto ./videos (ignorada por git)
 ```
 
-Deja `<id>.mp4` (video + los sonidos de las X y los vistos, sin música,
+Graba por tramos de 10 s en `<carpeta>/<id>.trozos/` (cada tramo con los efectos que marcó): si
+la máquina se reinicia a mitad de la grabación, la misma orden sigue desde el último tramo
+terminado (cambiar los tiempos o la pista empieza de cero). Deja `<id>.mp4` (video + los sonidos de las X y los vistos, sin música,
 listo para ponerle la voz), `<id>-guion.txt` (cada línea de voz con su
 tramo de tiempo) y `<id>-cues.json`. Con `--con-musica` deja además
 `<id>-con-musica.mp4` con la música original sintetizada por
