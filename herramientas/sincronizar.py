@@ -7,6 +7,10 @@ sincronizar.py — pone TU voz (grabada por escenas, con varias tomas) sobre un 
       --transcripcion t.json   usa esa transcripcion (si no, la hace transcribir.py y la guarda)
       --elegir 3=2,5=1         en la escena 3 usa la toma 2, en la 5 la toma 1 (ver <id>-voz.txt)
       --plan                   solo elige y corta: no graba el video (para revisar rapido)
+      --solo passa             solo las escenas de quien habla (habla: 'passa'); las otras quedan sin voz
+                               (un video con dos voces grabadas por separado: ver herramientas/dialogo.py)
+      --clips carpeta          deja la toma elegida de cada escena en carpeta/NN.wav (sin la ganancia) y en
+                               carpeta/clips.json lo que dice cada una, palabra por palabra con su tiempo
       --quitar 110.9-113.4     lo que se dijo en esos segundos del audio no entra en ninguna toma
                                (un pedazo suelto pegado a la toma buena: "...hacia tu pie | no dejes...")
 
@@ -184,7 +188,9 @@ class Sonido:
         return max(limite, f / 100 - 0.04)
 
     def fin(self, ini_ultima, fin_asr, limite):
-        """donde termina de verdad el sonido: 120 ms seguidos por debajo del umbral"""
+        """donde termina de verdad el sonido: 120 ms seguidos por debajo del umbral. Si la voz vuelve
+        enseguida (antes de 0,3 s y antes de la palabra que sigue), era una pausa dentro de la frase: el
+        reconocedor ubico la ultima palabra antes de tiempo ("...por una | vez?") y cortar ahi se la comia"""
         f = self.fr(ini_ultima + 0.12)
         tope = self.fr(min(limite, ini_ultima + 2.4))
         quietos = 0
@@ -192,7 +198,16 @@ class Sonido:
             if self.db[f] < self.umbral - 3:
                 quietos += 1
                 if quietos >= 12:
-                    return min(limite, (f - 11) / 100 + 0.08)
+                    # vuelve la voz: 150 ms seguidos con sonido y fuerte (no un clic, una respiracion ni
+                    # un "mm" suelto: esos duran menos)
+                    g, vuelve = f + 1, self.fr(min(limite - 0.1, f / 100 + 0.3))
+                    while g < vuelve and not (g + 15 <= len(self.db) and min(self.db[g:g + 15]) > self.umbral + 6
+                                              and max(self.db[g:g + 15]) > self.voz - 20):
+                        g += 1
+                    if g >= vuelve:
+                        return min(limite, (f - 11) / 100 + 0.08)
+                    f, quietos = g, 0
+                    tope = self.fr(min(limite, max(f / 100 + 1.2, ini_ultima + 2.4)))
             else:
                 quietos = 0
             f += 1
@@ -478,15 +493,23 @@ def tramos_de_toma(W, idx, son, todos_idx):
     prev_fin = max([W[i]['fin'] for i in range(0, a) if i not in dentro] or [0.0])
     sig_ini = min([W[i]['ini'] for i in range(b + 1, len(W)) if i not in dentro] or [len(son.x) / SR])
     ini = son.inicio(W[a]['ini'], prev_fin + 0.02, W[a]['fin'])
-    fin = son.fin(W[b]['ini'], W[b]['fin'], sig_ini - 0.03)
     tramos, t0 = [], ini
+    # donde empieza de verdad cada palabra: el reconocedor a veces la ubica antes de que suene
+    # ("Bueno," marcado 0,4 s antes); el fin se busca desde ahi, si no la palabra se daba por
+    # terminada antes de empezar y el corte se la comia
+    empieza = ini
     for x, y in zip(idx[:-1], idx[1:]):
-        g0 = son.fin(W[x]['ini'], W[x]['fin'], W[y]['ini'])
+        g0 = son.fin(max(W[x]['ini'], empieza), W[x]['fin'], W[y]['ini'])
         g1 = son.inicio(W[y]['ini'], g0, W[y]['fin'])
         if g1 - g0 > PAUSA_MAX:
             tramos.append([t0, g0 + PAUSA_MAX / 2])
             t0 = g1 - PAUSA_MAX / 2
-    tramos.append([t0, fin])
+        # (si ahi no suena nada, el reconocedor la puso tarde: vale su tiempo, no se empuja el fin al silencio)
+        empieza = g1 if son.db[son.fr(g1 + 0.05)] > son.umbral + 4 else W[y]['ini']
+    # la ultima palabra tambien termina contando desde donde de verdad empieza
+    fin = son.fin(max(W[b]['ini'], empieza), W[b]['fin'], sig_ini - 0.03)
+    tramos.append([t0, max(fin, t0 + 0.2)])
+    tramos = [q for q in tramos if q[1] - q[0] > 0.02]
     return tramos
 
 
@@ -523,6 +546,8 @@ def main():
     ap.add_argument('--elegir', default='')
     ap.add_argument('--plan', action='store_true')
     ap.add_argument('--quitar', default='')
+    ap.add_argument('--solo', default='')
+    ap.add_argument('--clips', default='')
     a = ap.parse_args()
     salida = os.path.abspath(a.carpeta)
     trabajo = os.path.join(salida, a.id + '-voz')
@@ -555,6 +580,8 @@ def main():
     escenas = []
     for e in guion:
         vo = e.get('vo') or ''
+        if a.solo and (e.get('habla') or 'tor') != a.solo:
+            vo = ''
         partes = partes_de(vo)
         voc = sorted(set(t for p in partes for t in p['t']))
         escenas.append({'nombre': e['nombre'], 'dur': e['dur'], 'vo': vo, 'partes': partes, 'voc': voc})
@@ -660,15 +687,26 @@ def main():
     x = son.x
     piezas, t, limites = [], 0.05, [0.0]
     for k, q in enumerate(plan):
-        trozos = []
+        trozos, dichas, largo = [], [], 0.0
         for n, tm in enumerate(q['elegidas']):
             tramos = tramos_de_toma(W, tm['idx'], son, None)
             for u, v in tramos:
                 trozos.append(cortar(x, u, v))
+                # las palabras de este tramo, en el tiempo de la toma (para los subtitulos); la que el
+                # reconocedor ubica en un hueco que se corto (antes de que suene) va al tramo mas cercano
+                for i in tm['idx']:
+                    m = (W[i]['ini'] + W[i]['fin']) / 2
+                    cerca = min(tramos, key=lambda q: 0 if q[0] <= m <= q[1] else min(abs(m - q[0]), abs(m - q[1])))
+                    if cerca == [u, v]:
+                        a0 = min(max(W[i]['ini'], u), v - 0.05)
+                        dichas.append([round(largo + a0 - u, 3), round(largo + max(a0 + 0.05, min(v, W[i]['fin'])) - u, 3), W[i]['p']])
+                largo += len(trozos[-1]) / SR
             if n < len(q['elegidas']) - 1:
                 trozos.append(np.zeros(int(RESPIRO_PARTES * SR)))
+                largo += len(trozos[-1]) / SR
         clip = np.concatenate(trozos) if trozos else np.zeros(0)
         q['clip'] = clip
+        q['dichas'] = dichas
         q['t'] = t
         dur_voz = len(clip) / SR
         ultima = k == len(plan) - 1
@@ -683,6 +721,15 @@ def main():
         t = limites[-1] + 0.06
     total = limites[-1]
     durs = [round(limites[i + 1] - limites[i], 3) for i in range(len(plan))]
+    if a.clips:
+        os.makedirs(a.clips, exist_ok=True)
+        info = {}
+        for k, q in enumerate(plan):
+            if len(q['clip']):
+                escribir_wav(os.path.join(a.clips, '%02d.wav' % (k + 1)), q['clip'])
+                info[k + 1] = {'texto': ' / '.join(tm['ev']['texto'] for tm in q['elegidas']), 'dur': len(q['clip']) / SR,
+                               'palabras': q['dichas']}
+        json.dump(info, open(os.path.join(a.clips, 'clips.json'), 'w'), ensure_ascii=False, indent=1)
     pista = np.zeros(int(np.ceil((total + 0.1) * SR)), dtype=np.float32)
     for t0, clip in piezas:
         i = int(round(t0 * SR))

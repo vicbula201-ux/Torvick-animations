@@ -27,18 +27,18 @@
   var ZONA_TARJETA = [70, 640, 1010, 1330];
 
   var ESCENAS = [
-    { nombre: 'Tor empieza', habla: 'tor', dur: 3.6, vo: '¿Los BCAA te ayudan a ganar músculo? Hoy te voy a explicar...' },
-    { nombre: 'Passa interrumpe', habla: 'passa', dur: 5.0, vo: '¡Cállate, Tor, que aquí hablo yo! ¿Qué la Kentucky, mi gente? Aquí les saluda el Passa.' },
-    { nombre: 'Tor se queja', habla: 'tor', dur: 1.8, vo: 'Oye, este es mi video...' },
-    { nombre: 'Alto rendimiento', habla: 'passa', dur: 5.5, vo: 'Mira, ¿acaso eres atleta de alto rendimiento? Los BCAA le sirven más a atletas con un gasto calórico enorme, no a alguien que solo va a un gimnasio normal.' },
-    { nombre: 'La leucina', habla: 'tor', dur: 3.6, vo: 'Tampoco tanto: la leucina sí activa la síntesis de músculo.' },
-    { nombre: 'En la comida', habla: 'passa', dur: 8, vo: 'Sí, pero ya viene en la carne, el huevo y cualquier proteína. Ahora, si eres deportista de alto rendimiento o haces deportes exigentes como el ciclismo o el running, pueden ser una buena opción para ayudar a proteger tu masa muscular.' },
-    { nombre: 'El estudio', habla: 'tor', dur: 5.0, vo: 'En eso tiene razón: si ya comes suficiente proteína, los BCAA no te hacen crecer más.' },
-    { nombre: 'Placebo', habla: 'passa', dur: 4.5, vo: '¿Ves? Si ya comes bien, más no es mejor. Lo que sientes puede ser más placebo que otra cosa.' },
-    { nombre: 'Creatina', habla: 'passa', dur: 4.0, vo: 'Mejor gástate esas ochenta lucas en creatina. ¡Pare de contar historias!' },
-    { nombre: 'Por una vez', habla: 'tor', dur: 2.2, vo: 'Por una vez, el Passa tiene razón.' },
-    { nombre: '¿Cómo que por una vez?', habla: 'passa', dur: 1.8, vo: '¿Cómo que por una vez?' },
-    { nombre: 'Debate final', habla: 'tor', dur: 4.0, vo: '¿Quién ganó, Tor o el Passa? Te leemos en los comentarios.' }
+    { nombre: 'Tor empieza', habla: 'tor', dur: 3.6, vo: '¿Los BCAA te ayudan a ganar músculo? En este video te voy a explicar...' },
+    { nombre: 'Passa interrumpe', habla: 'passa', dur: 5.0, vo: '¡Qué la Kentucky, mi gente! Aquí los saluda el Passa.' },
+    { nombre: 'Tor se queja', habla: 'tor', dur: 1.8, vo: 'Oye, Passa, este es mi video.' },
+    { nombre: 'Alto rendimiento', habla: 'passa', dur: 5.5, vo: 'Ven acá, ven acá, ¿aquí estás hablando tú? ¿Tú acaso eres algún atleta de alto rendimiento? Los BCAA solo sirven para atletas con un gasto calórico enorme. No alguien que solo va a un gimnasio con objetivos, pues, los más básicos del mundo, ya.' },
+    { nombre: 'La leucina', habla: 'tor', dur: 3.6, vo: 'Bueno, tampoco es para tanto. La leucina sí activa la síntesis de músculo.' },
+    { nombre: 'En la comida', habla: 'passa', dur: 8, vo: 'Sí, pero ya vienen en la carne, los huevos y los encuentras en cualquier tipo de proteína como tal. Ahora, si eres un deportista de alto rendimiento, haces deportes de alta intensidad y bien exigentes, como lo es el ciclismo, el running, entre otros, puede ser una buena opción para ayudar a proteger la base de tu masa muscular.' },
+    { nombre: 'El estudio', habla: 'tor', dur: 5.0, vo: 'En esto el Passa tiene razón: si ya comes suficiente proteína, los BCAA no te ayudan a crecer más músculo.' },
+    { nombre: 'Placebo', habla: 'passa', dur: 4.5, vo: 'Además, si ya estás consumiendo buenas proteínas y ya estás comiendo bien en tu dieta por normativa general, ya eso de andar consumiendo BCAA ya sería simplemente un efecto placebo.' },
+    { nombre: 'Creatina', habla: 'passa', dur: 4.0, vo: 'Mejor coge y gástate esos 80K en una creatina, que sí te va a dar un mejor aporte a tu rendimiento en el gimnasio.' },
+    { nombre: 'Por una vez', habla: 'tor', dur: 2.2, vo: 'Bueno, por una vez el Passa tiene razón.' },
+    { nombre: '¿Cómo que por una vez?', habla: 'passa', dur: 1.8, vo: 'Ven acá, ¿cómo así que por una vez? ¡Che! Trátame en serio, compadre.' },
+    { nombre: 'Debate final', habla: 'tor', dur: 4.0, vo: 'Para ti, ¿quién ganó esta vez? ¿Tor o el Passa? Te leemos en los comentarios.' }
   ];
   // escena en la que habla cada uno (para los gestos)
   function habla(b, T, quien) {
@@ -116,7 +116,7 @@
     id: 'tor-passa', titulo: 'Tor x Passa: ¿los BCAA sirven? (colaboración)',
     escenas: ESCENAS,
     hablantes: { tor: { nombre: 'TOR', color: 'amarillo' }, passa: { nombre: 'PASSA', color: 'verde' } },
-    claves: { bcaa: 'rojo', rendimiento: 'amarillo', leucina: 'amarillo', ciclismo: 'verde', running: 'verde', creatina: 'verde', placebo: 'rojo', razon: 'verde' },
+    claves: { kentucky: 'amarillo', bcaa: 'rojo', rendimiento: 'amarillo', leucina: 'amarillo', ciclismo: 'verde', running: 'verde', creatina: 'verde', placebo: 'rojo', razon: 'verde' },
     camara: [
       [[0, 0], { az: 6, el: 4, dist: 3.4, y: 1.45, dx: 0 }],
       [[0, 0.9], { az: 0, el: 4, dist: 3.6, y: 1.42, dx: 0 }],
@@ -211,7 +211,7 @@
     encima: function (T, b, pr) {
       var r = [];
       // ¡CALLATE! (la interrupcion) y los signos de cada uno
-      r.push(<PS.Grande key="ca" T={T} cuando={b.f(1, 0.03)} hasta={b.f(1, 0.3)} text="¡CÁLLATE!" color="rojo" x={540 + M.vibra(T, 30, 6)} y={600} px={150} />);
+      r.push(<PS.Grande key="ca" T={T} cuando={b.f(1, 0.03)} hasta={b.f(1, 0.3)} text="¡KENTUCKY!" color="amarillo" x={540 + M.vibra(T, 30, 6)} y={600} px={140} />);
       if (b.entre(T, [2, 0.0], [3, 0.1])) r.push(<Signo key="s1" T={T} cuando={b.f(2, 0.05)} hasta={b.f(2, 0.95)} c={pr('cabeza', 0)} texto="!" />);
       if (b.entre(T, [10, 0.0], [11, 0.1])) r.push(<Signo key="s2" T={T} cuando={b.f(10, 0.05)} hasta={b.f(10, 0.95)} c={pr('cabeza', 1)} texto="¿?" color={C.INK} />);
       r.push(<Marcador key="mc" T={T} b={b} />);
@@ -270,9 +270,9 @@
       A.sonido('golpe', b.f(1, 0.12));   // el aterrizaje de Passa
       return <div style={{ position: 'absolute', inset: 0 }}>{r}</div>;
     },
-    accion: { dur: 4.6, pregunta: '¿TOR O PASSA?', vo: 'Compártelo con tu compañero de entreno, y síguenos a los dos.' },
+    accion: { dur: 4.6, pregunta: '¿TOR O PASSA?', habla: 'passa', vo: 'Sígueme a mí y al Tor a través de nuestras redes sociales y, ajá, pues, voten por mí, pues.' },
     // colaboracion: Passa tambien en la escena de accion (en 2D) y sus redes en el cierre
     colabora: { titulo: ['PASSA', 'TRAINER'], arroba: '@passa_trainer', redes: ['instagram', 'tiktok'] },
-    cierreVo: 'Sígueme para más contenido.'
+    cierreVo: '¿Quieres ver más videos similares? Sígueme para más contenido.'
   });
 })(window);

@@ -37,62 +37,62 @@
     nombre: 'Tor empieza',
     habla: 'tor',
     dur: 3.6,
-    vo: '¿Los BCAA te ayudan a ganar músculo? Hoy te voy a explicar...'
+    vo: '¿Los BCAA te ayudan a ganar músculo? En este video te voy a explicar...'
   }, {
     nombre: 'Passa interrumpe',
     habla: 'passa',
     dur: 5.0,
-    vo: '¡Cállate, Tor, que aquí hablo yo! ¿Qué la Kentucky, mi gente? Aquí les saluda el Passa.'
+    vo: '¡Qué la Kentucky, mi gente! Aquí los saluda el Passa.'
   }, {
     nombre: 'Tor se queja',
     habla: 'tor',
     dur: 1.8,
-    vo: 'Oye, este es mi video...'
+    vo: 'Oye, Passa, este es mi video.'
   }, {
     nombre: 'Alto rendimiento',
     habla: 'passa',
     dur: 5.5,
-    vo: 'Mira, ¿acaso eres atleta de alto rendimiento? Los BCAA le sirven más a atletas con un gasto calórico enorme, no a alguien que solo va a un gimnasio normal.'
+    vo: 'Ven acá, ven acá, ¿aquí estás hablando tú? ¿Tú acaso eres algún atleta de alto rendimiento? Los BCAA solo sirven para atletas con un gasto calórico enorme. No alguien que solo va a un gimnasio con objetivos, pues, los más básicos del mundo, ya.'
   }, {
     nombre: 'La leucina',
     habla: 'tor',
     dur: 3.6,
-    vo: 'Tampoco tanto: la leucina sí activa la síntesis de músculo.'
+    vo: 'Bueno, tampoco es para tanto. La leucina sí activa la síntesis de músculo.'
   }, {
     nombre: 'En la comida',
     habla: 'passa',
     dur: 8,
-    vo: 'Sí, pero ya viene en la carne, el huevo y cualquier proteína. Ahora, si eres deportista de alto rendimiento o haces deportes exigentes como el ciclismo o el running, pueden ser una buena opción para ayudar a proteger tu masa muscular.'
+    vo: 'Sí, pero ya vienen en la carne, los huevos y los encuentras en cualquier tipo de proteína como tal. Ahora, si eres un deportista de alto rendimiento, haces deportes de alta intensidad y bien exigentes, como lo es el ciclismo, el running, entre otros, puede ser una buena opción para ayudar a proteger la base de tu masa muscular.'
   }, {
     nombre: 'El estudio',
     habla: 'tor',
     dur: 5.0,
-    vo: 'En eso tiene razón: si ya comes suficiente proteína, los BCAA no te hacen crecer más.'
+    vo: 'En esto el Passa tiene razón: si ya comes suficiente proteína, los BCAA no te ayudan a crecer más músculo.'
   }, {
     nombre: 'Placebo',
     habla: 'passa',
     dur: 4.5,
-    vo: '¿Ves? Si ya comes bien, más no es mejor. Lo que sientes puede ser más placebo que otra cosa.'
+    vo: 'Además, si ya estás consumiendo buenas proteínas y ya estás comiendo bien en tu dieta por normativa general, ya eso de andar consumiendo BCAA ya sería simplemente un efecto placebo.'
   }, {
     nombre: 'Creatina',
     habla: 'passa',
     dur: 4.0,
-    vo: 'Mejor gástate esas ochenta lucas en creatina. ¡Pare de contar historias!'
+    vo: 'Mejor coge y gástate esos 80K en una creatina, que sí te va a dar un mejor aporte a tu rendimiento en el gimnasio.'
   }, {
     nombre: 'Por una vez',
     habla: 'tor',
     dur: 2.2,
-    vo: 'Por una vez, el Passa tiene razón.'
+    vo: 'Bueno, por una vez el Passa tiene razón.'
   }, {
     nombre: '¿Cómo que por una vez?',
     habla: 'passa',
     dur: 1.8,
-    vo: '¿Cómo que por una vez?'
+    vo: 'Ven acá, ¿cómo así que por una vez? ¡Che! Trátame en serio, compadre.'
   }, {
     nombre: 'Debate final',
     habla: 'tor',
     dur: 4.0,
-    vo: '¿Quién ganó, Tor o el Passa? Te leemos en los comentarios.'
+    vo: 'Para ti, ¿quién ganó esta vez? ¿Tor o el Passa? Te leemos en los comentarios.'
   }];
   // escena en la que habla cada uno (para los gestos)
   function habla(b, T, quien) {
@@ -282,6 +282,7 @@
       }
     },
     claves: {
+      kentucky: 'amarillo',
       bcaa: 'rojo',
       rendimiento: 'amarillo',
       leucina: 'amarillo',
@@ -546,11 +547,11 @@
         T: T,
         cuando: b.f(1, 0.03),
         hasta: b.f(1, 0.3),
-        text: "\xA1C\xC1LLATE!",
-        color: "rojo",
+        text: "\xA1KENTUCKY!",
+        color: "amarillo",
         x: 540 + M.vibra(T, 30, 6),
         y: 600,
-        px: 150
+        px: 140
       }));
       if (b.entre(T, [2, 0.0], [3, 0.1])) r.push(/*#__PURE__*/React.createElement(Signo, {
         key: "s1",
@@ -839,7 +840,8 @@
     accion: {
       dur: 4.6,
       pregunta: '¿TOR O PASSA?',
-      vo: 'Compártelo con tu compañero de entreno, y síguenos a los dos.'
+      habla: 'passa',
+      vo: 'Sígueme a mí y al Tor a través de nuestras redes sociales y, ajá, pues, voten por mí, pues.'
     },
     // colaboracion: Passa tambien en la escena de accion (en 2D) y sus redes en el cierre
     colabora: {
@@ -847,6 +849,6 @@
       arroba: '@passa_trainer',
       redes: ['instagram', 'tiktok']
     },
-    cierreVo: 'Sígueme para más contenido.'
+    cierreVo: '¿Quieres ver más videos similares? Sígueme para más contenido.'
   });
 })(window);

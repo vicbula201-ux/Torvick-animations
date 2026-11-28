@@ -501,7 +501,7 @@
   function escenaAccion(op, colab) {
     op = op || {};
     return {
-      nombre: 'Comenta y comparte', dur: op.dur || 4.5,
+      nombre: 'Comenta y comparte', dur: op.dur || 4.5, habla: op.habla,
       vo: op.vo || '¿Estás de acuerdo? Déjalo en los comentarios, compártelo con un amigo y guarda este video.',
       C: function (props) { return <EscAccion T={props.T} at={props.at} dur={props.dur} pregunta={op.pregunta} colab={colab} />; }
     };

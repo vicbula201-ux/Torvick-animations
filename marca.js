@@ -956,6 +956,7 @@
     return {
       nombre: 'Comenta y comparte',
       dur: op.dur || 4.5,
+      habla: op.habla,
       vo: op.vo || '¿Estás de acuerdo? Déjalo en los comentarios, compártelo con un amigo y guarda este video.',
       C: function (props) {
         return /*#__PURE__*/React.createElement(EscAccion, {

@@ -7,6 +7,8 @@ La voz de un video del plano secuencia (plano.jsx): pista, subtitulos y boca.
 
   # con la voz que grabo Victor (sincronizar.py ya dejo la pista y los tiempos):
   python3 herramientas/voz.py <id> --pista videos/<id>-voz.wav --tiempos 3.1,4.2,... [--grabar]
+  # dos voces reales (dialogo.py): las palabras con el tiempo de cada grabacion, mas precisas
+  python3 herramientas/voz.py <id> --pista videos/<id>-voz.wav --tiempos ... --oidas videos/<id>-voz.palabras.json
 
 Deja:
   voces/<id>.js         window.VOCES[id] = { durs, fps, palabras: [[t0, t1, texto, linea]], env }
@@ -224,6 +226,7 @@ def main():
     ap.add_argument('id')
     ap.add_argument('--ref', default=os.path.expanduser('~/.torvick/voz/ref.wav'))
     ap.add_argument('--pista'); ap.add_argument('--tiempos')
+    ap.add_argument('--oidas', help='con --pista: las palabras de cada escena con su tiempo (el .palabras.json de dialogo.py)')
     ap.add_argument('--ex', type=float, default=0.7); ap.add_argument('--cfg', type=float, default=0.3)
     ap.add_argument('--grabar', action='store_true')
     ap.add_argument('--voces', help='otras voces para las lineas con habla: passa=ruta.wav[:exaggeration],...')
@@ -240,6 +243,11 @@ def main():
         lineas = [pista[int(inicios[i] * SR):int((inicios[i] + durs[i]) * SR)] for i in range(len(durs))]
         desfase = [0.0] * len(durs)
         oidos = [None] * len(durs)
+        if a.oidas:
+            # los tiempos de la transcripcion de cada grabacion: mas precisos que volver a oir la pista
+            for k, ws in json.load(open(a.oidas)).items():
+                if int(k) < len(oidos) and ws:
+                    oidos[int(k)] = [(float(w[0]), float(w[1]), w[2]) for w in ws]
     else:
         print('clonando %d lineas con la referencia %s' % (len(g), a.ref))
         refs = {'tor': (a.ref, a.ex, a.cfg)}

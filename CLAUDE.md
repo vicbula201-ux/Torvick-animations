@@ -118,7 +118,8 @@ compilar.js       regenera los .js desde los .jsx
 prueba-piezas.html  verificación: motor + las 21 piezas + las piezas de B
 herramientas/     grabar.js (exporta MP4 con música y efectos; --voz dobla; --tiempos y
                   --pista graban con una voz ya hecha), sincronizar.py (TU voz grabada:
-                  elige tomas, corta y sincroniza), voz.py (la voz del plano secuencia:
+                  elige tomas, corta y sincroniza), dialogo.py (dos voces grabadas por
+                  separado en una colaboración), voz.py (la voz del plano secuencia:
                   clonada o la tuya, con subtitulos y boca), locutor.py
                   (la voz de Torvick: perfil y líneas), audio.py
                   (sintetiza la música y los efectos), imagenes.js (exporta
@@ -597,6 +598,34 @@ palabra que suena. `PRONUNCIA` en `voz.py` dice cómo se pronuncia lo que se esc
 solo con su permiso**: el video de muestra es un borrador para que el creador vea la idea; se
 publica con su voz clonada solo si él lo aprueba (y marcado como hecho con IA), o se graba con
 las voces reales y se sincroniza.
+
+**Las voces reales de una colaboración** (`tor-passa.jsx` ya va así, noviembre de 2026): cada uno
+graba sus líneas por separado y en cualquier orden (Edgar mandó además un audio releyendo una parte:
+se pega dentro del suyo donde va). Tres pasos:
+
+```
+python3 herramientas/sincronizar.py tor-passa tor.m4a   out-tor   --plan --solo tor   --clips clips-tor
+python3 herramientas/sincronizar.py tor-passa passa.wav out-passa --plan --solo passa --clips clips-passa
+python3 herramientas/dialogo.py tor-passa guion.json tor=clips-tor passa=clips-passa --salida videos/tor-passa-voz.wav
+python3 herramientas/voz.py tor-passa --pista videos/tor-passa-voz.wav --tiempos <los de dialogo.py> \
+        --oidas videos/tor-passa-voz.palabras.json
+```
+
+`--solo` deja en blanco las líneas del otro (cada grabación busca solo las suyas) y `--clips` guarda
+la toma elegida de cada escena con sus palabras y su tiempo; `guion.json` es el de `grabar.js
+<id> --solo-guion` (dice quién habla). `dialogo.py` lleva cada voz a -19 dBFS (una sola ganancia
+por persona, la voz no se toca), pone cada toma en su escena con un respiro corto y un fundido de
+12 ms en las puntas, y avisa si una toma empieza o termina con sonido fuerte (palabra cortada).
+`--oidas` le pasa a `voz.py` los tiempos de cada palabra de la transcripción original: con ruido de
+fondo whisper no oye todo y los subtítulos se adelantaban. **El `vo` de cada escena es lo que dice
+de verdad** (los subtítulos son literales): si no se entiende una frase, se transcribe ese tramo
+solo y se compara con otro reconocedor (`voz.py` usa whisper de transformers; `transcribir.py`,
+parakeet + whisper de sherpa); "¿Cómo así que...?" se oía "con lo así que". Si el reconocedor
+corre una palabra (la ubica antes de que suene, o la estira sobre un silencio), se corrige su
+tiempo en el JSON de la transcripción y se vuelve a cortar: así se recuperaron el "Bueno," de Tor y
+el "vez? ¡Che!" de Passa. Antes de grabar conviene transcribir la pista armada y comparar escena por
+escena con el guion. Lo que uno no grabó a propósito (Víctor no leyó "compártele este video a un
+amigo que consume BCAA") no va en el `vo`, pero la escena de acción sigue con su animación.
 
 **La plantilla de las colaboraciones:** `colabora: { titulo: ['PASSA', 'TRAINER'], arroba:
 '@passa_trainer', redes: ['instagram', 'tiktok'], Figura }` en `REELS.registrar` (o en `PS.video`)
